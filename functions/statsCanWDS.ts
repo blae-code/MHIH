@@ -37,14 +37,14 @@ Deno.serve(async (req) => {
       }).slice(0, 30).map(cube => ({
         pid: cube.productId,
         title: cube.cubeTitleEn || cube.cubeTitle || `Table ${cube.productId}`,
-        subject: cube.subjectCode || cube.subjectId || "",
+        subject: Array.isArray(cube.subjectCode) ? cube.subjectCode.join(", ") : (cube.subjectCode || ""),
         frequency: cube.frequencyCode,
         start_period: cube.cubeStartDate,
         end_period: cube.cubeEndDate,
         url: `https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=${cube.productId}`,
       }));
 
-      return Response.json({ success: true, count: filtered.length, cubes: filtered, _sample_keys: all.length > 0 ? Object.keys(all[0]) : [] });
+      return Response.json({ success: true, count: filtered.length, cubes: filtered });
     }
 
     // ── Get cube metadata ───────────────────────────────────────────────────
