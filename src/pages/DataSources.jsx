@@ -21,6 +21,7 @@ export default function DataSources() {
   const [scheduleFor, setScheduleFor] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [showCatalogue, setShowCatalogue] = useState(false);
+  const [showOpenGov, setShowOpenGov] = useState(false);
   const [failedCount, setFailedCount] = useState(0);
 
   const load = () => {
