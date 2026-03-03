@@ -258,6 +258,18 @@ export default function DataSources() {
         />
       )}
 
+      {/* Health Canada CNF browser */}
+      {showCNF && (
+        <HealthCanadaCNFBrowser
+          onClose={() => setShowCNF(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from Health Canada CNF: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* Health Canada DPD browser */}
       {showDPD && (
         <HealthCanadaDPDBrowser
