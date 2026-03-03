@@ -27,6 +27,7 @@ export default function DataSources() {
   const [showOpenGov, setShowOpenGov] = useState(false);
   const [showStatsCanWDS, setShowStatsCanWDS] = useState(false);
   const [showHealthInfobase, setShowHealthInfobase] = useState(false);
+  const [showDPD, setShowDPD] = useState(false);
   const [failedCount, setFailedCount] = useState(0);
 
   const load = () => {
