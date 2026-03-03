@@ -49,30 +49,30 @@
  */
 import AIInsights from './pages/AIInsights';
 import Admin from './pages/Admin';
+import AgentCenter from './pages/AgentCenter';
 import Dashboard from './pages/Dashboard';
+import DataQuality from './pages/DataQuality';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
 import Export from './pages/Export';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
-import DataQuality from './pages/DataQuality';
-import AgentCenter from './pages/AgentCenter';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIInsights": AIInsights,
     "Admin": Admin,
+    "AgentCenter": AgentCenter,
     "Dashboard": Dashboard,
+    "DataQuality": DataQuality,
     "DataRepository": DataRepository,
     "DataSources": DataSources,
     "Export": Export,
     "Settings": Settings,
     "Team": Team,
     "Visualizations": Visualizations,
-    "DataQuality": DataQuality,
-    "AgentCenter": AgentCenter,
 }
 
 export const pagesConfig = {
