@@ -155,14 +155,25 @@ export default function DataSources() {
                   </a>
                 )}
                 <div className="flex items-center justify-between pt-1 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    {src.last_synced ? `Synced ${new Date(src.last_synced).toLocaleDateString("en-CA")}` : "Never synced"}
+                  <div className="space-y-0.5">
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      {src.last_synced ? `Synced ${new Date(src.last_synced).toLocaleDateString("en-CA")}` : "Never synced"}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={9} style={{ color: "var(--text-muted)" }} />
+                      <span className="text-xs" style={{ color: src.sync_frequency && src.sync_frequency !== "manual" ? "var(--accent-primary)" : "var(--text-muted)" }}>
+                        {src.sync_frequency || "manual"}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => handleSync(src)}
+                    <button onClick={() => handleSync(src)} disabled={syncing === src.id}
                       className="activity-icon" style={{ width: 26, height: 26 }}
                       title="Sync now">
                       <RefreshCw size={12} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
+                    </button>
+                    <button onClick={() => setScheduleFor(src)} className="activity-icon" style={{ width: 26, height: 26 }} title="Set sync schedule">
+                      <CalendarClock size={12} style={{ color: "var(--accent-primary)" }} />
                     </button>
                     <button onClick={() => startEdit(src)} className="activity-icon" style={{ width: 26, height: 26 }}>
                       <Edit2 size={12} />
