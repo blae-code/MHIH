@@ -211,7 +211,7 @@ export default function HealthCanadaDPDBrowser({ onClose, onImport }) {
 
               <div className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>
                 {(results.results || []).slice(0, 100).map((item) => {
-                  const code = item.DRUG_CODE;
+                  const code = item.drug_code || item.DRUG_CODE;
                   const isOpen = expanded === code;
                   const det = detail[code];
                   const isDetailLoading = detailLoading === code;
