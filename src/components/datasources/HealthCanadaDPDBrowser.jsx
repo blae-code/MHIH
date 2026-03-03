@@ -75,19 +75,22 @@ export default function HealthCanadaDPDBrowser({ onClose, onImport }) {
   };
 
   const handleImport = async (item) => {
-    const key = item.DRUG_CODE;
+    const drug_code = item.drug_code || item.DRUG_CODE;
+    const key = drug_code;
+    const ingredient = item.ingredient_name || item.INGREDIENT;
+    const brand = item.brand_name || item.BRAND_NAME;
     const sourceData = {
-      name: `DPD — ${item.BRAND_NAME || item.INGREDIENT} (${item.DRUG_CODE})`,
+      name: `DPD — ${brand || ingredient} (${drug_code})`,
       type: "api",
-      url: `https://health-products.canada.ca/dpd-bdpp/info.do?lang=en&code=${item.DRUG_CODE}`,
-      description: `Health Canada Drug Product Database entry. Brand: ${item.BRAND_NAME || "N/A"}, Ingredient: ${item.INGREDIENT || "N/A"}, Class: ${item.CLASS || "N/A"}`,
+      url: `https://health-products.canada.ca/dpd-bdpp/info.do?lang=en&code=${drug_code}`,
+      description: `Health Canada Drug Product Database entry. Brand: ${brand || "N/A"}, Ingredient: ${ingredient || "N/A"}, Strength: ${item.strength || "N/A"} ${item.strength_unit || ""}`,
       category: "other",
       sync_frequency: "manual",
       status: "active",
       metadata: {
-        drug_code: item.DRUG_CODE,
-        brand_name: item.BRAND_NAME,
-        ingredient: item.INGREDIENT,
+        drug_code,
+        brand_name: brand,
+        ingredient,
         source: "health_canada_dpd",
       },
     };
