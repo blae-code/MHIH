@@ -153,6 +153,9 @@ export default function Dashboard() {
         </div>
       </div>
     ),
+    disparity_explorer: isVisible("disparity_explorer") && (
+      <DisparityExplorer key="disparity_explorer" metrics={metrics} />
+    ),
     weekly_reports: isVisible("weekly_reports") && <WeeklyReports key="weekly_reports" />,
     pinned_metrics: isVisible("pinned_metrics") && (
       <PinnedMetrics key="pinned_metrics" pinnedIds={pinnedIds} onUnpin={handleUnpin} />
