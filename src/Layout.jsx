@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { icon: Brain, label: "AI Insights", page: "AIInsights", section: "main" },
   { icon: BookOpen, label: "Data Sources", page: "DataSources", section: "data" },
   { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", section: "data" },
+  { icon: Bot, label: "AI Agents", page: "AgentCenter", section: "data" },
   { icon: FileDown, label: "Export", page: "Export", section: "data" },
   { icon: Users, label: "Team", page: "Team", adminOnly: true, section: "admin" },
   { icon: Shield, label: "Admin", page: "Admin", adminOnly: true, section: "admin" },
