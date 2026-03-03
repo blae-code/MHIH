@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       if (!pid || !coordinate) return Response.json({ error: "pid and coordinate required" }, { status: 400 });
 
       const res = await fetch(
-        `https://www150.statcan.gc.ca/t1/tbl1/en/dtbl/getDataFromCubePidCoordAndLatestNPeriods/${pid}/${coordinate}/${n_periods}`,
+        `${WDS_REST}/getDataFromCubePidCoordAndLatestNPeriods/${pid}/${coordinate}/${n_periods}`,
         { headers: { Accept: "application/json" } }
       );
       if (!res.ok) throw new Error(`WDS getDataFromCubePidCoordAndLatestNPeriods failed: ${res.status}`);
