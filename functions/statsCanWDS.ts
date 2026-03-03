@@ -28,13 +28,16 @@ Deno.serve(async (req) => {
       const q = query.toLowerCase().trim();
       const filtered = all.filter(cube => {
         if (!q) return true;
-        const title = (cube.cubeTitleEn || cube.cubeTitle || "").toLowerCase();
-        const subject = (cube.subjectEn || cube.subject || "").toLowerCase();
-        return title.includes(q) || subject.includes(q);
+        // cubeTitleEn is the main field in Lite, also check all string fields
+        const searchStr = Object.values(cube)
+          .filter(v => typeof v === "string")
+          .join(" ")
+          .toLowerCase();
+        return searchStr.includes(q);
       }).slice(0, 30).map(cube => ({
         pid: cube.productId,
-        title: cube.cubeTitleEn || cube.cubeTitle,
-        subject: cube.subjectEn || cube.subject,
+        title: cube.cubeTitleEn || cube.cubeTitle || `Table ${cube.productId}`,
+        subject: cube.subjectCode || cube.subjectId || "",
         frequency: cube.frequencyCode,
         start_period: cube.cubeStartDate,
         end_period: cube.cubeEndDate,
