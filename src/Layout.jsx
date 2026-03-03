@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Database, LineChart, Brain, Settings, Users,
   Search, Bell, ChevronRight, Activity, AlertCircle, CheckCircle,
   Info, X, Zap, FileDown, Upload, BookOpen, Shield, HelpCircle,
-  FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck
+  FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot
 } from "lucide-react";
 
 export const AppContext = createContext({});
