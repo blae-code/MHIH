@@ -83,11 +83,11 @@ h1, h2, h3, h4, h5, h6,
 ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-default); }
 
-/* Selection */
-::selection { background: var(--accent-muted); color: var(--accent-text); }
+/* Selection — MNBC yellow highlight */
+::selection { background: #3a2e00; color: var(--mnbc-yellow); }
 
-/* Focus ring */
-:focus-visible { outline: 1px solid var(--accent-primary); outline-offset: 1px; }
+/* Focus ring — MNBC yellow */
+:focus-visible { outline: 1px solid var(--mnbc-yellow); outline-offset: 1px; }
 
 /* Typography */
 .text-accent { color: var(--accent-primary); }
