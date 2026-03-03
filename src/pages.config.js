@@ -51,6 +51,11 @@ import Dashboard from './pages/Dashboard';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
 import AIInsights from './pages/AIInsights';
+import Visualizations from './pages/Visualizations';
+import Export from './pages/Export';
+import Team from './pages/Team';
+import Admin from './pages/Admin';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +64,11 @@ export const PAGES = {
     "DataRepository": DataRepository,
     "DataSources": DataSources,
     "AIInsights": AIInsights,
+    "Visualizations": Visualizations,
+    "Export": Export,
+    "Team": Team,
+    "Admin": Admin,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
