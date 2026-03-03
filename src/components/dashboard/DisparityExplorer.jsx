@@ -4,7 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, ReferenceLine, Legend
 } from "recharts";
-import { BarChart2, TrendingUp, Grid3X3, X, ChevronDown, Check, Filter } from "lucide-react";
+import { BarChart2, TrendingUp, Grid3X3, X, ChevronDown, Check, Filter, Download } from "lucide-react";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#f85149", "#a78bfa", "#d29922", "#38bdf8"];
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
