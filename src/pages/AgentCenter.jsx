@@ -114,7 +114,7 @@ export default function AgentCenter() {
           AI Agent Command Center
         </h2>
         <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-          Five background agents continuously monitor, analyze, and improve your health data.
+          Six background agents continuously monitor, analyze, forecast, and improve your health data.
         </p>
       </div>
 
