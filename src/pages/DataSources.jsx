@@ -99,11 +99,24 @@ export default function DataSources() {
           <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Data Sources</h2>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>Manage connections to Stats Canada, FNHA, BC Health, and other repositories</p>
         </div>
-        <button onClick={() => { setEditing(null); setShowForm(true); }}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-          style={{ background: "var(--accent-primary)", color: "#000" }}>
-          <Plus size={12} /> Add Source
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowLogs(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
+            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: failedCount > 0 ? "var(--color-error)" : "var(--text-secondary)" }}>
+            <ScrollText size={12} />
+            Sync Logs
+            {failedCount > 0 && (
+              <span className="px-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-error)", color: "#fff" }}>
+                {failedCount}
+              </span>
+            )}
+          </button>
+          <button onClick={() => { setEditing(null); setShowForm(true); }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
+            style={{ background: "var(--accent-primary)", color: "#000" }}>
+            <Plus size={12} /> Add Source
+          </button>
+        </div>
       </div>
 
       {/* Source cards */}
