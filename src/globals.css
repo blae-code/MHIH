@@ -62,10 +62,20 @@ html, body, #root {
   overflow: hidden;
   background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Sofia Sans as per MNBC Brand Identity Style Guide */
+  font-family: 'Sofia Sans', 'Aptos', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.5;
 }
+
+/* MNBC heading style — Sofia Sans Extra Condensed Bold */
+h1, h2, h3, h4, h5, h6,
+.mnbc-heading {
+  font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
 
 /* Scrollbars */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
