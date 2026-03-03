@@ -6,10 +6,11 @@ export const DEFAULT_WIDGETS = [
   { id: "stat_cards", label: "Stat Cards", description: "Total metrics, sources, insights counts" },
   { id: "year_trend", label: "Metrics by Year Chart", description: "Area chart of metric volume over time" },
   { id: "category_pie", label: "Category Distribution", description: "Pie chart + legend of metric categories" },
+  { id: "disparity_explorer", label: "Health Disparity Explorer", description: "Bar, scatter, trend & heatmap charts with filters" },
   { id: "weekly_reports", label: "Weekly Summary Reports", description: "AI-generated stakeholder reports" },
+  { id: "pinned_metrics", label: "Pinned Metrics", description: "Your manually pinned health metrics" },
   { id: "data_sources", label: "Data Sources", description: "Live status of connected data sources" },
   { id: "ai_insights", label: "Recent AI Insights", description: "Latest AI-generated analysis cards" },
-  { id: "pinned_metrics", label: "Pinned Metrics", description: "Your manually pinned health metrics" },
 ];
 
 export default function DashboardCustomizer({ widgets, onWidgetsChange, onClose }) {

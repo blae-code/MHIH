@@ -6,6 +6,7 @@ import { Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity, SlidersHo
 import WeeklyReports from "../components/dashboard/WeeklyReports";
 import PinnedMetrics from "../components/dashboard/PinnedMetrics";
 import DashboardCustomizer, { DEFAULT_WIDGETS } from "../components/dashboard/DashboardCustomizer";
+import DisparityExplorer from "../components/dashboard/DisparityExplorer";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREF_KEY = "mhip_dashboard_prefs";
