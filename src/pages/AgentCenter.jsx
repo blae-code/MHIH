@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import {
   Bot, Zap, RefreshCw, CheckCircle, AlertCircle, Clock,
-  TrendingUp, ShieldCheck, FileText, GitCompare, Search, ChevronDown, ChevronRight
+  TrendingUp, ShieldCheck, FileText, GitCompare, Search, ChevronDown, ChevronRight, Telescope
 } from "lucide-react";
 
 const AGENTS = [
