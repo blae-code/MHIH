@@ -138,7 +138,7 @@ h1, h2, h3, h4, h5, h6,
 }
 .nav-item:hover { color: var(--text-primary); background: var(--bg-hover); }
 .nav-item.active { color: var(--text-primary); background: var(--bg-hover); }
-.nav-item.active span.nav-label { color: var(--accent-primary); }
+.nav-item.active span.nav-label { color: var(--mnbc-yellow); }
 
 /* Status badge */
 .status-dot {
