@@ -47,28 +47,30 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AIInsights from './pages/AIInsights';
+import Admin from './pages/Admin';
 import Dashboard from './pages/Dashboard';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
-import AIInsights from './pages/AIInsights';
-import Visualizations from './pages/Visualizations';
 import Export from './pages/Export';
-import Team from './pages/Team';
-import Admin from './pages/Admin';
 import Settings from './pages/Settings';
+import Team from './pages/Team';
+import Visualizations from './pages/Visualizations';
+import DataQuality from './pages/DataQuality';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AIInsights": AIInsights,
+    "Admin": Admin,
     "Dashboard": Dashboard,
     "DataRepository": DataRepository,
     "DataSources": DataSources,
-    "AIInsights": AIInsights,
-    "Visualizations": Visualizations,
     "Export": Export,
-    "Team": Team,
-    "Admin": Admin,
     "Settings": Settings,
+    "Team": Team,
+    "Visualizations": Visualizations,
+    "DataQuality": DataQuality,
 }
 
 export const pagesConfig = {
