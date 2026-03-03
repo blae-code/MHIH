@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       if (!pid) return Response.json({ error: "pid required" }, { status: 400 });
 
       const res = await fetch(
-        `https://www150.statcan.gc.ca/t1/tbl1/en/dtbl/getCubeMetadata/${pid}`,
+        `${WDS_REST}/getCubeMetadata/${pid}`,
         { headers: { Accept: "application/json" } }
       );
       if (!res.ok) throw new Error(`WDS getCubeMetadata failed: ${res.status}`);
