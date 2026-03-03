@@ -2,35 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* MNBC Brand Fonts — Sofia Sans from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sofia+Sans+Extra+Condensed:wght@700;800&display=swap');
+
 :root {
-  /* Core background palette */
-  --bg-base: #0d1117;
-  --bg-surface: #161b22;
-  --bg-elevated: #1c2128;
-  --bg-overlay: #22272e;
-  --bg-hover: #2d333b;
+  /* ── MNBC Primary Colour Palette ── */
+  --mnbc-blue: #043673;
+  --mnbc-red: #B9262D;
+  --mnbc-yellow: #FEDD00;
+
+  /* ── MNBC Secondary (Natural) Palette ── */
+  --mnbc-fog: #D1E3E8;
+  --mnbc-northern-lights: #306369;
+  --mnbc-brush: #F2E3D1;
+  --mnbc-cedar: #CD7236;
+
+  /* ── Core background palette (dark interface, MNBC-aligned) ── */
+  --bg-base: #06112a;          /* deep MNBC blue-black */
+  --bg-surface: #0a1e42;       /* dark navy */
+  --bg-elevated: #0f2754;      /* mid navy */
+  --bg-overlay: #163169;       /* lighter navy */
+  --bg-hover: #1c3d7a;         /* hover state */
 
   /* Borders */
-  --border-subtle: #30363d;
-  --border-default: #444c56;
-  --border-emphasis: #768390;
+  --border-subtle: #1e3d6e;
+  --border-default: #2d5499;
+  --border-emphasis: #4a78c4;
 
   /* Text */
-  --text-primary: #cdd9e5;
-  --text-secondary: #8b949e;
-  --text-muted: #545d68;
+  --text-primary: #edf2f7;
+  --text-secondary: #a8bed8;
+  --text-muted: #5d7fa8;
 
-  /* Accent — amber/gold (Métis sash colour, no pink/purple) */
-  --accent-primary: #e6a817;
-  --accent-hover: #f0b429;
-  --accent-muted: #2d2208;
-  --accent-text: #e6a817;
+  /* Accent — MNBC Yellow (primary brand accent) */
+  --accent-primary: #FEDD00;
+  --accent-hover: #ffe933;
+  --accent-muted: #2a2600;
+  --accent-text: #FEDD00;
 
   /* Semantic colours */
   --color-success: #2ea043;
-  --color-warning: #d29922;
-  --color-error: #f85149;
-  --color-info: #58a6ff;
+  --color-warning: #CD7236;
+  --color-error: #B9262D;
+  --color-info: #306369;
 
   /* Panel widths */
   --panel-left: 240px;
