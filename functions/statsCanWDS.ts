@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
         url: `https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=${cube.productId}`,
       }));
 
-      return Response.json({ success: true, count: filtered.length, cubes: filtered });
+      return Response.json({ success: true, count: filtered.length, cubes: filtered, _sample_keys: all.length > 0 ? Object.keys(all[0]) : [] });
     }
 
     // ── Get cube metadata ───────────────────────────────────────────────────
