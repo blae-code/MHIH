@@ -20,18 +20,21 @@ Deno.serve(async (req) => {
       });
 
       if (!res.ok) throw new Error(`WDS getAllCubesListLite failed: ${res.status}`);
-      const all = await res.json();
+      const raw = await res.json();
+
+      // WDS wraps results in { status, object } envelope
+      const all = Array.isArray(raw) ? raw : (raw?.object || []);
 
       const q = query.toLowerCase().trim();
-      const filtered = (all || []).filter(cube => {
+      const filtered = all.filter(cube => {
         if (!q) return true;
-        const title = (cube.cubeTitleEn || "").toLowerCase();
-        const subject = (cube.subjectEn || "").toLowerCase();
+        const title = (cube.cubeTitleEn || cube.cubeTitle || "").toLowerCase();
+        const subject = (cube.subjectEn || cube.subject || "").toLowerCase();
         return title.includes(q) || subject.includes(q);
       }).slice(0, 30).map(cube => ({
         pid: cube.productId,
-        title: cube.cubeTitleEn,
-        subject: cube.subjectEn,
+        title: cube.cubeTitleEn || cube.cubeTitle,
+        subject: cube.subjectEn || cube.subject,
         frequency: cube.frequencyCode,
         start_period: cube.cubeStartDate,
         end_period: cube.cubeEndDate,
