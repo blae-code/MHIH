@@ -8,6 +8,7 @@ import BCDataCatalogueBrowser from "@/components/datasources/BCDataCatalogueBrow
 import OpenGovCanadaBrowser from "@/components/datasources/OpenGovCanadaBrowser";
 import StatsCanWDSBrowser from "@/components/datasources/StatsCanWDSBrowser";
 import HealthInfobaseBrowser from "@/components/datasources/HealthInfobaseBrowser";
+import HealthCanadaDPDBrowser from "@/components/datasources/HealthCanadaDPDBrowser";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
