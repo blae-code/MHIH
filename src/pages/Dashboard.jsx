@@ -153,6 +153,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Weekly Reports */}
+      <WeeklyReports />
+
       {/* Recent sources + insights */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Data Sources */}
