@@ -16,6 +16,9 @@ export default function DataSources() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", type: "statcan", url: "", description: "", category: "demographics", sync_frequency: "manual", status: "pending" });
   const [syncing, setSyncing] = useState(null);
+  const [scheduleFor, setScheduleFor] = useState(null);
+  const [showLogs, setShowLogs] = useState(false);
+  const [failedCount, setFailedCount] = useState(0);
 
   const load = () => {
     base44.entities.DataSource.list("-updated_date", 100)
