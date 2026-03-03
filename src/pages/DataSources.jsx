@@ -29,6 +29,7 @@ export default function DataSources() {
   const [showStatsCanWDS, setShowStatsCanWDS] = useState(false);
   const [showHealthInfobase, setShowHealthInfobase] = useState(false);
   const [showDPD, setShowDPD] = useState(false);
+  const [showCNF, setShowCNF] = useState(false);
   const [failedCount, setFailedCount] = useState(0);
 
   const load = () => {
