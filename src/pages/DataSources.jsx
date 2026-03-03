@@ -23,6 +23,7 @@ export default function DataSources() {
   const [showLogs, setShowLogs] = useState(false);
   const [showCatalogue, setShowCatalogue] = useState(false);
   const [showOpenGov, setShowOpenGov] = useState(false);
+  const [showStatsCanWDS, setShowStatsCanWDS] = useState(false);
   const [failedCount, setFailedCount] = useState(0);
 
   const load = () => {
