@@ -55,10 +55,26 @@ export default function DataSources() {
   const handleSync = async (src) => {
     setSyncing(src.id);
     addLog("info", `Syncing ${src.name}...`);
-    await new Promise(r => setTimeout(r, 2000)); // Simulated sync
-    await base44.entities.DataSource.update(src.id, { last_synced: new Date().toISOString(), status: "active" });
-    addLog("success", `Sync complete: ${src.name}`);
+    try {
+      const res = await base44.functions.invoke("scheduledDataSync", { source_id: src.id });
+      const result = res.data?.results?.[0];
+      if (result?.status === "failed") {
+        addLog("error", `Sync failed: ${src.name} — ${result.error}`);
+      } else {
+        addLog("success", `Sync complete: ${src.name}`);
+      }
+    } catch (e) {
+      addLog("error", `Sync error: ${e.message}`);
+    }
     setSyncing(null);
+    load();
+    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 1).then(jobs => setFailedCount(jobs.length)).catch(() => {});
+  };
+
+  const handleSaveSchedule = async (freq) => {
+    await base44.entities.DataSource.update(scheduleFor.id, { sync_frequency: freq });
+    addLog("success", `Schedule updated: ${scheduleFor.name} → ${freq}`);
+    setScheduleFor(null);
     load();
   };
 
