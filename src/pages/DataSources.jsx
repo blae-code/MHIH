@@ -5,6 +5,7 @@ import { Plus, RefreshCw, Trash2, Edit2, Database, Globe, CheckCircle, AlertCirc
 import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
 import BCDataCatalogueBrowser from "@/components/datasources/BCDataCatalogueBrowser";
+import OpenGovCanadaBrowser from "@/components/datasources/OpenGovCanadaBrowser";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
