@@ -211,6 +211,18 @@ export default function DataSources() {
       {/* Sync logs panel */}
       {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
 
+      {/* BC Data Catalogue browser */}
+      {showCatalogue && (
+        <BCDataCatalogueBrowser
+          onClose={() => setShowCatalogue(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from BC Data Catalogue: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
