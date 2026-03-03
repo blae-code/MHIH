@@ -111,7 +111,7 @@ h1, h2, h3, h4, h5, h6,
   position: relative;
 }
 .activity-icon:hover { color: var(--text-primary); background: var(--bg-hover); }
-.activity-icon.active { color: var(--accent-primary); }
+.activity-icon.active { color: var(--mnbc-yellow); }
 .activity-icon.active::before {
   content: '';
   position: absolute;
@@ -119,7 +119,7 @@ h1, h2, h3, h4, h5, h6,
   top: 8px;
   bottom: 8px;
   width: 2px;
-  background: var(--accent-primary);
+  background: var(--mnbc-yellow);
   border-radius: 0 2px 2px 0;
 }
 
