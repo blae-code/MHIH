@@ -4,7 +4,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, ReferenceLine, Legend
 } from "recharts";
-import { BarChart2, TrendingUp, Grid3X3, X, ChevronDown, Check, Filter, Download } from "lucide-react";
+import { BarChart2, TrendingUp, Grid3X3, X, ChevronDown, Check, Filter, Download, Target, ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#f85149", "#a78bfa", "#d29922", "#38bdf8"];
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
@@ -26,32 +26,28 @@ const TOOLTIP_STYLE = {
   fontSize: 12,
 };
 
+const BENCHMARK_COLOR = "#a78bfa";
+
 // ── Multi-select dropdown ─────────────────────────────────────────────────────
 function MultiSelect({ label, options, selected, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef();
-
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
   const toggle = (val) => {
     if (selected.includes(val)) onChange(selected.filter(v => v !== val));
     else onChange([...selected, val]);
   };
-
-  const allSelected = selected.length === 0;
-
   return (
     <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(o => !o)}
+      <button onClick={() => setOpen(o => !o)}
         className="flex items-center gap-1.5 text-xs pl-2.5 pr-2 py-1 rounded whitespace-nowrap"
         style={{ background: "var(--bg-overlay)", border: `1px solid ${selected.length ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: selected.length ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 110 }}>
         <span className="flex-1 text-left truncate">
-          {allSelected ? `All ${label}s` : selected.length === 1 ? selected[0].replace(/_/g, " ") : `${selected.length} ${label}s`}
+          {!selected.length ? `All ${label}s` : selected.length === 1 ? selected[0].replace(/_/g, " ") : `${selected.length} ${label}s`}
         </span>
         {selected.length > 0 && (
           <span onClick={e => { e.stopPropagation(); onChange([]); }}
@@ -62,22 +58,21 @@ function MultiSelect({ label, options, selected, onChange }) {
         )}
         <ChevronDown size={10} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
       </button>
-
       {open && (
         <div className="absolute z-50 mt-1 rounded-md shadow-xl overflow-hidden"
           style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", minWidth: 180, top: "100%", left: 0 }}>
           <div className="max-h-52 overflow-y-auto py-1">
             {options.map(opt => {
-              const isSelected = selected.includes(opt.value);
+              const isSel = selected.includes(opt.value);
               return (
                 <div key={opt.value} onClick={() => toggle(opt.value)}
                   className="flex items-center gap-2 px-3 py-1.5 cursor-pointer text-xs"
-                  style={{ color: isSelected ? "var(--text-primary)" : "var(--text-secondary)" }}
+                  style={{ color: isSel ? "var(--text-primary)" : "var(--text-secondary)" }}
                   onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
                   onMouseOut={e => e.currentTarget.style.background = "transparent"}>
                   <div className="w-3.5 h-3.5 rounded flex items-center justify-center shrink-0"
-                    style={{ background: isSelected ? "var(--accent-primary)" : "var(--bg-overlay)", border: `1px solid ${isSelected ? "var(--accent-primary)" : "var(--border-default)"}` }}>
-                    {isSelected && <Check size={9} style={{ color: "#000" }} />}
+                    style={{ background: isSel ? "var(--accent-primary)" : "var(--bg-overlay)", border: `1px solid ${isSel ? "var(--accent-primary)" : "var(--border-default)"}` }}>
+                    {isSel && <Check size={9} style={{ color: "#000" }} />}
                   </div>
                   <span className="truncate">{opt.label}</span>
                 </div>
@@ -90,7 +85,7 @@ function MultiSelect({ label, options, selected, onChange }) {
   );
 }
 
-// ── Value filter (operator + threshold) ──────────────────────────────────────
+// ── Value filter ──────────────────────────────────────────────────────────────
 function ValueFilter({ op, setOp, threshold, setThreshold }) {
   return (
     <div className="flex items-center gap-1">
@@ -105,14 +100,9 @@ function ValueFilter({ op, setOp, threshold, setThreshold }) {
         <option value="eq">=</option>
       </select>
       {op !== "any" && (
-        <input
-          type="number"
-          value={threshold}
-          onChange={e => setThreshold(e.target.value)}
-          placeholder="0"
+        <input type="number" value={threshold} onChange={e => setThreshold(e.target.value)} placeholder="0"
           className="text-xs px-2 py-1 rounded outline-none w-20"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
-        />
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }} />
       )}
     </div>
   );
@@ -139,8 +129,158 @@ function YearRangeFilter({ years, yearFrom, setYearFrom, yearTo, setYearTo }) {
   );
 }
 
-// ── Charts ───────────────────────────────────────────────────────────────────
-function DisparityBar({ data, drill }) {
+// ── Benchmark panel ───────────────────────────────────────────────────────────
+function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, setOpen }) {
+  const years = useMemo(() => [...new Set(allMetrics.map(m => m.year).filter(Boolean))].sort(), [allMetrics]);
+
+  const provincialAvg = useMemo(() => {
+    const vals = metrics.filter(m => m.comparison_value != null).map(m => m.comparison_value);
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  }, [metrics]);
+
+  const yearAvgs = useMemo(() => {
+    const map = {};
+    allMetrics.forEach(m => {
+      if (!m.year) return;
+      if (!map[m.year]) map[m.year] = { sum: 0, count: 0 };
+      map[m.year].sum += m.value; map[m.year].count++;
+    });
+    return Object.fromEntries(Object.entries(map).map(([y, d]) => [y, d.sum / d.count]));
+  }, [allMetrics]);
+
+  return (
+    <div>
+      <button onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-xs"
+        style={{
+          background: benchmark.active ? "#a78bfa22" : "var(--bg-overlay)",
+          border: `1px solid ${benchmark.active ? BENCHMARK_COLOR : "var(--border-subtle)"}`,
+          color: benchmark.active ? BENCHMARK_COLOR : "var(--text-muted)"
+        }}>
+        <Target size={10} />
+        Benchmark {benchmark.active && `(${benchmark.value?.toFixed(1)})`}
+        <ChevronDown size={10} style={{ transform: open ? "rotate(180deg)" : "none", transition: "0.15s" }} />
+      </button>
+
+      {open && (
+        <div className="absolute z-40 mt-1 rounded-md p-3 shadow-xl space-y-2"
+          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", minWidth: 260, right: 0 }}>
+          <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Benchmark Mode</div>
+
+          {/* Provincial average */}
+          <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
+            <input type="radio" checked={benchmark.mode === "provincial"} onChange={() =>
+              setBenchmark({ mode: "provincial", active: true, value: provincialAvg })} />
+            <span>Provincial Average {provincialAvg != null ? <span style={{ color: BENCHMARK_COLOR }}>({provincialAvg.toFixed(1)})</span> : "(no data)"}</span>
+          </label>
+
+          {/* Past year */}
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
+              <input type="radio" checked={benchmark.mode === "year"} onChange={() => {
+                const y = benchmark.selectedYear || years[0];
+                setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
+              }} />
+              <span>Past Year Avg</span>
+            </label>
+            <select
+              value={benchmark.selectedYear || ""}
+              onChange={e => {
+                const y = e.target.value;
+                setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
+              }}
+              className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
+              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+              {years.map(y => <option key={y} value={y}>{y} ({yearAvgs[y]?.toFixed(1) ?? "—"})</option>)}
+            </select>
+          </div>
+
+          {/* Custom target */}
+          <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
+            <input type="radio" checked={benchmark.mode === "custom"} onChange={() =>
+              setBenchmark({ ...benchmark, mode: "custom", active: true })} />
+            <span>Custom Target</span>
+          </label>
+          {benchmark.mode === "custom" && (
+            <input type="number" placeholder="Enter target value"
+              value={benchmark.customValue ?? ""}
+              onChange={e => setBenchmark({ ...benchmark, mode: "custom", active: true, value: parseFloat(e.target.value) || null, customValue: e.target.value })}
+              className="text-xs px-2 py-1 rounded outline-none w-full"
+              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }} />
+          )}
+
+          {/* Clear */}
+          <button onClick={() => { setBenchmark({ active: false, mode: null, value: null }); setOpen(false); }}
+            className="text-xs flex items-center gap-1 mt-1"
+            style={{ color: "var(--color-error)" }}>
+            <X size={9} /> Remove benchmark
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Benchmark performance table ───────────────────────────────────────────────
+function BenchmarkTable({ data, benchmark }) {
+  if (!benchmark.active || benchmark.value == null) return null;
+  const rows = data
+    .filter(m => m.value != null)
+    .map(m => ({ ...m, diff: m.value - benchmark.value, pct: ((m.value - benchmark.value) / Math.abs(benchmark.value || 1)) * 100 }))
+    .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))
+    .slice(0, 10);
+
+  return (
+    <div className="mt-3 rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+      <div className="px-3 py-2 text-xs font-semibold flex items-center gap-2"
+        style={{ background: "var(--bg-overlay)", color: "var(--text-muted)" }}>
+        <Target size={10} style={{ color: BENCHMARK_COLOR }} />
+        Performance vs Benchmark ({benchmark.value.toFixed(1)}) — Top 10 deviations
+      </div>
+      <div className="overflow-auto" style={{ maxHeight: 200 }}>
+        <table className="w-full text-xs">
+          <thead>
+            <tr style={{ background: "var(--bg-elevated)" }}>
+              {["Metric", "Category", "Value", "vs Benchmark", "%"].map(h => (
+                <th key={h} className="px-3 py-1.5 text-left font-semibold" style={{ color: "var(--text-muted)", fontSize: 10 }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((m, i) => {
+              const isAbove = m.diff > 0;
+              const isNeutral = Math.abs(m.diff) < 0.01;
+              const color = isNeutral ? "var(--text-muted)" : isAbove ? "#f85149" : "#2ea043";
+              return (
+                <tr key={i} style={{ borderTop: "1px solid var(--border-subtle)" }}
+                  onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                  onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                  <td className="px-3 py-1.5 font-medium" style={{ color: "var(--text-primary)", maxWidth: 160 }}>
+                    <span className="truncate block">{m.name}</span>
+                  </td>
+                  <td className="px-3 py-1.5" style={{ color: "var(--text-muted)" }}>{m.category?.replace(/_/g, " ")}</td>
+                  <td className="px-3 py-1.5" style={{ color: "var(--text-primary)" }}>{m.value.toFixed(2)}</td>
+                  <td className="px-3 py-1.5">
+                    <span className="flex items-center gap-1 font-medium" style={{ color }}>
+                      {isNeutral ? <Minus size={10} /> : isAbove ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
+                      {isAbove ? "+" : ""}{m.diff.toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="px-3 py-1.5" style={{ color }}>
+                    {isAbove ? "+" : ""}{m.pct.toFixed(1)}%
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+function DisparityBar({ data, drill, benchmark }) {
   const chartData = data
     .filter(m => m.comparison_value != null)
     .slice(0, 20)
@@ -152,7 +292,7 @@ function DisparityBar({ data, drill }) {
       region: m.region, category: m.category, year: m.year,
     })).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
 
-  if (!chartData.length) return <EmptyState msg="No metrics with BC comparison values. Add comparison_value to metrics." />;
+  if (!chartData.length) return <EmptyState msg="No metrics with BC comparison values." />;
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20 }}>
@@ -166,12 +306,16 @@ function DisparityBar({ data, drill }) {
         <Bar dataKey="metis" fill="#e6a817" radius={[0, 3, 3, 0]} onClick={drill} style={{ cursor: "pointer" }} />
         <Bar dataKey="bc" fill="#58a6ff" radius={[0, 3, 3, 0]} opacity={0.7} onClick={drill} style={{ cursor: "pointer" }} />
         <ReferenceLine x={0} stroke="var(--border-default)" />
+        {benchmark.active && benchmark.value != null && (
+          <ReferenceLine x={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
+            label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "top", fill: BENCHMARK_COLOR, fontSize: 10 }} />
+        )}
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-function TrendLine({ data }) {
+function TrendLine({ data, benchmark }) {
   const yearMap = {};
   data.forEach(m => {
     if (!m.year) return;
@@ -192,12 +336,16 @@ function TrendLine({ data }) {
         <Legend formatter={n => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 11 }} />
         <Line type="monotone" dataKey="metis" stroke="#e6a817" strokeWidth={2} dot={{ r: 3 }} />
         <Line type="monotone" dataKey="bc" stroke="#58a6ff" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3 }} connectNulls />
+        {benchmark.active && benchmark.value != null && (
+          <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
+            label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "right", fill: BENCHMARK_COLOR, fontSize: 10 }} />
+        )}
       </LineChart>
     </ResponsiveContainer>
   );
 }
 
-function ScatterPlot({ data, drill }) {
+function ScatterPlot({ data, drill, benchmark }) {
   const catColors = {};
   [...new Set(data.map(m => m.category))].forEach((c, i) => { catColors[c] = COLORS[i % COLORS.length]; });
   const points = data.filter(m => m.value != null && m.comparison_value != null)
@@ -219,18 +367,25 @@ function ScatterPlot({ data, drill }) {
               <div style={{ color: "#e6a817" }}>Métis: {d.y}</div>
               <div style={{ color: "#58a6ff" }}>BC: {d.x}</div>
               <div style={{ color: d.y > d.x ? "#f85149" : "#2ea043" }}>Gap: {(d.y - d.x).toFixed(2)}</div>
+              {benchmark.active && benchmark.value != null && (
+                <div style={{ color: BENCHMARK_COLOR }}>vs Benchmark: {(d.y - benchmark.value).toFixed(2)}</div>
+              )}
             </div>
           );
         }} />
         <Scatter data={points} onClick={drill} style={{ cursor: "pointer" }}>
           {points.map((p, i) => <Cell key={i} fill={catColors[p.category] || "#e6a817"} fillOpacity={0.8} />)}
         </Scatter>
+        {benchmark.active && benchmark.value != null && (
+          <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
+            label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "right", fill: BENCHMARK_COLOR, fontSize: 10 }} />
+        )}
       </ScatterChart>
     </ResponsiveContainer>
   );
 }
 
-function Heatmap({ metrics }) {
+function Heatmap({ metrics, benchmark }) {
   const cats = CATEGORIES.filter(c => metrics.some(m => m.category === c));
   const regs = REGIONS.filter(r => metrics.some(m => m.region === r));
   const grid = useMemo(() => {
@@ -267,10 +422,11 @@ function Heatmap({ metrics }) {
               {cats.map(cat => {
                 const cell = grid[`${reg}||${cat}`];
                 const avg = cell ? (cell.sum / cell.count) : null;
+                const isBelowBench = benchmark.active && benchmark.value != null && avg != null && avg < benchmark.value;
                 return (
-                  <td key={cat} className="px-1 py-1 text-center" title={avg ? `${reg} / ${cat}: ${avg.toFixed(1)}` : "No data"}>
-                    <div className="rounded mx-auto flex items-center justify-center"
-                      style={{ background: color(avg), width: 52, height: 28, color: "var(--text-primary)", fontSize: 10 }}>
+                  <td key={cat} className="px-1 py-1 text-center" title={avg ? `${reg} / ${cat}: ${avg.toFixed(1)}${benchmark.active && benchmark.value != null ? ` (benchmark: ${benchmark.value.toFixed(1)})` : ""}` : "No data"}>
+                    <div className="rounded mx-auto flex items-center justify-center relative"
+                      style={{ background: color(avg), width: 52, height: 28, color: "var(--text-primary)", fontSize: 10, outline: isBelowBench ? `2px solid ${BENCHMARK_COLOR}` : "none" }}>
                       {avg ? avg.toFixed(1) : "—"}
                     </div>
                   </td>
@@ -280,6 +436,12 @@ function Heatmap({ metrics }) {
           ))}
         </tbody>
       </table>
+      {benchmark.active && benchmark.value != null && (
+        <div className="mt-2 text-xs flex items-center gap-1.5" style={{ color: BENCHMARK_COLOR }}>
+          <div className="w-3 h-3 rounded-sm" style={{ outline: `2px solid ${BENCHMARK_COLOR}` }} />
+          Cells below benchmark ({benchmark.value.toFixed(1)}) are highlighted
+        </div>
+      )}
     </div>
   );
 }
@@ -292,9 +454,10 @@ function EmptyState({ msg }) {
   );
 }
 
-function DrillPanel({ metric, onClose }) {
+function DrillPanel({ metric, onClose, benchmark }) {
   if (!metric) return null;
   const gap = metric.comparison_value != null ? (metric.value - metric.comparison_value) : null;
+  const benchDiff = benchmark.active && benchmark.value != null ? ((metric.metis ?? metric.value) - benchmark.value) : null;
   return (
     <div className="rounded-md p-3 mt-3" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
       <div className="flex items-center justify-between mb-2">
@@ -310,10 +473,11 @@ function DrillPanel({ metric, onClose }) {
           ["Métis Value", metric.metis ?? metric.value],
           ["BC Population", metric.bc ?? metric.comparison_value ?? "N/A"],
           ["Gap", gap != null ? (gap > 0 ? `+${gap.toFixed(2)} ▲ higher` : `${gap.toFixed(2)} ▼ lower`) : "N/A"],
+          ...(benchDiff != null ? [["vs Benchmark", benchDiff > 0 ? `+${benchDiff.toFixed(2)} above` : `${benchDiff.toFixed(2)} below`]] : []),
         ].map(([label, val]) => (
           <div key={label} className="flex justify-between gap-2">
             <span style={{ color: "var(--text-muted)" }}>{label}</span>
-            <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{val}</span>
+            <span style={{ color: label === "vs Benchmark" ? BENCHMARK_COLOR : "var(--text-primary)", fontWeight: 500 }}>{val}</span>
           </div>
         ))}
       </div>
@@ -321,7 +485,7 @@ function DrillPanel({ metric, onClose }) {
   );
 }
 
-// ── CSV Export ───────────────────────────────────────────────────────────────
+// ── CSV Export ────────────────────────────────────────────────────────────────
 function exportCSV(data, filename) {
   const cols = ["name", "category", "region", "year", "value", "comparison_value", "unit", "confidence_level", "notes"];
   const header = cols.join(",");
@@ -346,6 +510,15 @@ export default function DisparityExplorer({ metrics }) {
   const [valueThreshold, setValueThreshold] = useState("");
   const [drillItem, setDrillItem] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(true);
+  const [benchmark, setBenchmark] = useState({ active: false, mode: null, value: null });
+  const [benchmarkOpen, setBenchmarkOpen] = useState(false);
+  const benchmarkRef = useRef();
+
+  useEffect(() => {
+    const handler = (e) => { if (benchmarkRef.current && !benchmarkRef.current.contains(e.target)) setBenchmarkOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const years = useMemo(() => [...new Set(metrics.map(m => m.year).filter(Boolean))].sort(), [metrics]);
 
@@ -366,7 +539,6 @@ export default function DisparityExplorer({ metrics }) {
   }), [metrics, selCats, selRegions, yearFrom, yearTo, valueOp, valueThreshold]);
 
   const activeFilterCount = [selCats.length > 0, selRegions.length > 0, yearFrom !== "all" || yearTo !== "all", valueOp !== "any"].filter(Boolean).length;
-
   const clearAll = () => { setSelCats([]); setSelRegions([]); setYearFrom("all"); setYearTo("all"); setValueOp("any"); setValueThreshold(""); };
 
   return (
@@ -376,7 +548,7 @@ export default function DisparityExplorer({ metrics }) {
         <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
           Health Disparity Explorer
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={() => setFiltersOpen(o => !o)}
             className="flex items-center gap-1 px-2 py-1 rounded text-xs"
             style={{ background: activeFilterCount > 0 ? "var(--accent-muted)" : "var(--bg-overlay)", border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-muted)" }}>
@@ -384,6 +556,19 @@ export default function DisparityExplorer({ metrics }) {
             Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
             <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "0.15s" }} />
           </button>
+
+          {/* Benchmark selector */}
+          <div ref={benchmarkRef} className="relative">
+            <BenchmarkPanel
+              metrics={filtered}
+              allMetrics={metrics}
+              benchmark={benchmark}
+              setBenchmark={setBenchmark}
+              open={benchmarkOpen}
+              setOpen={setBenchmarkOpen}
+            />
+          </div>
+
           <div className="flex gap-1">
             {CHART_TYPES.map(ct => (
               <button key={ct.id} onClick={() => { setChartType(ct.id); setDrillItem(null); }}
@@ -401,23 +586,9 @@ export default function DisparityExplorer({ metrics }) {
       {filtersOpen && (
         <div className="rounded-md p-3 mb-3 space-y-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
           <div className="flex flex-wrap gap-2 items-center">
-            {/* Multi-select: Categories */}
-            <MultiSelect
-              label="Category"
-              options={CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))}
-              selected={selCats}
-              onChange={setSelCats}
-            />
-            {/* Multi-select: Regions */}
-            <MultiSelect
-              label="Region"
-              options={REGIONS.map(r => ({ value: r, label: r }))}
-              selected={selRegions}
-              onChange={setSelRegions}
-            />
-            {/* Year range */}
+            <MultiSelect label="Category" options={CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))} selected={selCats} onChange={setSelCats} />
+            <MultiSelect label="Region" options={REGIONS.map(r => ({ value: r, label: r }))} selected={selRegions} onChange={setSelRegions} />
             <YearRangeFilter years={years} yearFrom={yearFrom} setYearFrom={setYearFrom} yearTo={yearTo} setYearTo={setYearTo} />
-            {/* Value filter */}
             <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
               <span>Value</span>
               <ValueFilter op={valueOp} setOp={setValueOp} threshold={valueThreshold} setThreshold={setValueThreshold} />
@@ -433,10 +604,13 @@ export default function DisparityExplorer({ metrics }) {
       )}
 
       {/* Chart */}
-      {chartType === "bar" && <DisparityBar data={filtered} drill={setDrillItem} />}
-      {chartType === "line" && <TrendLine data={filtered} />}
-      {chartType === "scatter" && <ScatterPlot data={filtered} drill={setDrillItem} />}
-      {chartType === "heatmap" && <Heatmap metrics={filtered} />}
+      {chartType === "bar" && <DisparityBar data={filtered} drill={setDrillItem} benchmark={benchmark} />}
+      {chartType === "line" && <TrendLine data={filtered} benchmark={benchmark} />}
+      {chartType === "scatter" && <ScatterPlot data={filtered} drill={setDrillItem} benchmark={benchmark} />}
+      {chartType === "heatmap" && <Heatmap metrics={filtered} benchmark={benchmark} />}
+
+      {/* Benchmark performance table */}
+      <BenchmarkTable data={filtered} benchmark={benchmark} />
 
       {/* Export */}
       <div className="flex gap-2 mt-3">
@@ -466,9 +640,14 @@ export default function DisparityExplorer({ metrics }) {
             </span>
           );
         })()}
+        {benchmark.active && benchmark.value != null && (
+          <span style={{ color: "var(--text-muted)" }}>
+            Benchmark: <span style={{ color: BENCHMARK_COLOR }}>{benchmark.value.toFixed(1)}</span>
+          </span>
+        )}
       </div>
 
-      <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} />
+      <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} benchmark={benchmark} />
     </div>
   );
 }
