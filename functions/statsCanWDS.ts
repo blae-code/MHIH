@@ -14,13 +14,10 @@ Deno.serve(async (req) => {
     // ── Search cubes (filter getAllCubesListLite by keyword) ────────────────
     if (action === "search") {
       const { query = "" } = body;
-      const url = "https://www150.statcan.gc.ca/t1/tbl1/en/tv!downloadTbl/csvDownload/getAllCubesListLite";
 
-      // WDS getAllCubesListLite endpoint
-      const res = await fetch(
-        "https://www150.statcan.gc.ca/t1/tbl1/en/json!downloadTbl/getAllCubesListLite",
-        { headers: { Accept: "application/json" } }
-      );
+      const res = await fetch(`${WDS_REST}/getAllCubesListLite`, {
+        headers: { Accept: "application/json" },
+      });
 
       if (!res.ok) throw new Error(`WDS getAllCubesListLite failed: ${res.status}`);
       const all = await res.json();
