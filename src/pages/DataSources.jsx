@@ -244,6 +244,18 @@ export default function DataSources() {
         />
       )}
 
+      {/* Health Infobase browser */}
+      {showHealthInfobase && (
+        <HealthInfobaseBrowser
+          onClose={() => setShowHealthInfobase(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from Health Infobase: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* Open Government Canada browser */}
       {showOpenGov && (
         <OpenGovCanadaBrowser
