@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { TrendingUp, TrendingDown, Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity } from "lucide-react";
+import WeeklyReports from "../components/dashboard/WeeklyReports";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 
