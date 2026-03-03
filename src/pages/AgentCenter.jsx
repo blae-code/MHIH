@@ -52,6 +52,15 @@ const AGENTS = [
     description: "Scans for missing data across categories, regions, and years. Ranks gaps by strategic priority and suggests sources.",
     schedule: "Weekly",
   },
+  {
+    key: "trend_forecast",
+    fn: "agentTrendForecasting",
+    name: "Trend Forecasting Agent",
+    icon: Telescope,
+    color: "#f472b6",
+    description: "Uses historical metric time series and linear regression to forecast future health outcomes, detect widening disparities, and issue early warnings for policymakers.",
+    schedule: "Weekly on Sundays",
+  },
 ];
 
 const STATUS_ICON = {
