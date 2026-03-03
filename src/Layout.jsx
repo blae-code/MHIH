@@ -106,8 +106,8 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold"
-                style={{ background: "var(--accent-primary)", color: "#000" }}>M</div>
-              <span className="font-semibold text-xs tracking-wide whitespace-nowrap" style={{ color: "var(--text-primary)" }}>
+                style={{ background: "var(--mnbc-yellow)", color: "var(--mnbc-blue)" }}>M</div>
+              <span className="whitespace-nowrap" style={{ color: "var(--text-primary)", fontFamily: "'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.05em" }}>
                 MHIP
               </span>
             </div>
