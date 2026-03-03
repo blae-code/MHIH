@@ -1,11 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const WDS = "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action";
-const WDS_API = "https://www150.statcan.gc.ca/t1/tbl1/en/dtbl";
-const WDS_JSON = "https://www150.statcan.gc.ca/t1/tbl1/en/dtbl/download";
-
-// Core WDS REST base
-const WDS_REST = "https://www150.statcan.gc.ca/t1/tbl1/en";
+const WDS_REST = "https://www150.statcan.gc.ca/t1/wds/rest";
 
 Deno.serve(async (req) => {
   try {
