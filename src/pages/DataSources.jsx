@@ -6,6 +6,7 @@ import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
 import BCDataCatalogueBrowser from "@/components/datasources/BCDataCatalogueBrowser";
 import OpenGovCanadaBrowser from "@/components/datasources/OpenGovCanadaBrowser";
+import StatsCanWDSBrowser from "@/components/datasources/StatsCanWDSBrowser";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
