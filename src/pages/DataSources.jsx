@@ -27,7 +27,10 @@ export default function DataSources() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 1).then(jobs => setFailedCount(jobs.length)).catch(() => {});
+  }, []);
 
   const handleSave = async () => {
     if (editing) {
