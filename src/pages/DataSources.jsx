@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Plus, RefreshCw, Trash2, Edit2, Database, Globe, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { Plus, RefreshCw, Trash2, Edit2, Database, Globe, CheckCircle, AlertCircle, Clock, CalendarClock, ScrollText } from "lucide-react";
+import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
+import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
