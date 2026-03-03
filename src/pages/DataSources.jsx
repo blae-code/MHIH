@@ -218,6 +218,18 @@ export default function DataSources() {
       {/* Sync logs panel */}
       {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
 
+      {/* Open Government Canada browser */}
+      {showOpenGov && (
+        <OpenGovCanadaBrowser
+          onClose={() => setShowOpenGov(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from Open Gov Canada: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* BC Data Catalogue browser */}
       {showCatalogue && (
         <BCDataCatalogueBrowser
