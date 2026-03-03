@@ -251,6 +251,18 @@ export default function DataSources() {
         />
       )}
 
+      {/* Health Canada DPD browser */}
+      {showDPD && (
+        <HealthCanadaDPDBrowser
+          onClose={() => setShowDPD(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from Health Canada DPD: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* Health Infobase browser */}
       {showHealthInfobase && (
         <HealthInfobaseBrowser
