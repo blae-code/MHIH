@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
 
       const payload = vectors.map(v => ({ vectorId: v, latestN: n_periods }));
       const res = await fetch(
-        "https://www150.statcan.gc.ca/t1/tbl1/en/dtbl/getDataFromVectorsAndLatestNPeriods",
+        `${WDS_REST}/getDataFromVectorsAndLatestNPeriods`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
