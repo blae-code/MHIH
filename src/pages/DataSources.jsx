@@ -196,6 +196,14 @@ export default function DataSources() {
         )}
       </div>
 
+      {/* Sync schedule modal */}
+      {scheduleFor && (
+        <SyncScheduleModal source={scheduleFor} onSave={handleSaveSchedule} onClose={() => setScheduleFor(null)} />
+      )}
+
+      {/* Sync logs panel */}
+      {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
+
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
