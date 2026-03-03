@@ -321,6 +321,20 @@ function DrillPanel({ metric, onClose }) {
   );
 }
 
+// ── CSV Export ───────────────────────────────────────────────────────────────
+function exportCSV(data, filename) {
+  const cols = ["name", "category", "region", "year", "value", "comparison_value", "unit", "confidence_level", "notes"];
+  const header = cols.join(",");
+  const rows = data.map(m => cols.map(c => {
+    const val = m[c] ?? "";
+    return typeof val === "string" && val.includes(",") ? `"${val}"` : val;
+  }).join(","));
+  const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function DisparityExplorer({ metrics }) {
   const [chartType, setChartType] = useState("bar");
