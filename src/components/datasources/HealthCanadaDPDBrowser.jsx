@@ -252,7 +252,7 @@ export default function HealthCanadaDPDBrowser({ onClose, onImport }) {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <a href={`https://health-products.canada.ca/dpd-bdpp/info.do?lang=en&code=${code}`}
+                          <a href={`https://health-products.canada.ca/dpd-bdpp/info.do?lang=en&code=${code}`}  
                             target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
                             className="flex items-center gap-1 text-xs" style={{ color: "var(--color-info)" }}>
