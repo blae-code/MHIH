@@ -31,6 +31,7 @@ const COMMAND_ITEMS = [
   { label: "Open Data Repository", page: "DataRepository", icon: Database },
   { label: "Manage Data Sources", page: "DataSources", icon: FolderOpen },
   { label: "Data Quality Monitor", page: "DataQuality", icon: ShieldCheck },
+  { label: "AI Agent Center", page: "AgentCenter", icon: Bot },
   { label: "View Visualizations", page: "Visualizations", icon: LineChart },
   { label: "AI Insights & Analysis", page: "AIInsights", icon: Brain },
   { label: "Export Data", page: "Export", icon: FileDown },
