@@ -189,7 +189,7 @@ export default function Layout({ children, currentPageName }) {
                   return (
                     <div key={sec.key} className="mb-4">
                       <div className="px-2 py-1 text-xs font-semibold tracking-widest uppercase mb-1"
-                        style={{ color: "var(--text-muted)", fontSize: 10 }}>{sec.label}</div>
+                        style={{ color: "var(--mnbc-yellow)", fontSize: 10, opacity: 0.7 }}>{sec.label}</div>
                       {items.map(item => (
                         <Link key={item.page} to={createPageUrl(item.page)}>
                           <div className={`nav-item ${currentPageName === item.page ? "active" : ""}`}>
