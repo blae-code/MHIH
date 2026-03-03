@@ -225,6 +225,18 @@ export default function DataSources() {
       {/* Sync logs panel */}
       {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
 
+      {/* StatsCan WDS browser */}
+      {showStatsCanWDS && (
+        <StatsCanWDSBrowser
+          onClose={() => setShowStatsCanWDS(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from StatsCan WDS: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* Open Government Canada browser */}
       {showOpenGov && (
         <OpenGovCanadaBrowser
