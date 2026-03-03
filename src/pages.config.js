@@ -57,6 +57,7 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import DataQuality from './pages/DataQuality';
+import AgentCenter from './pages/AgentCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +72,7 @@ export const PAGES = {
     "Team": Team,
     "Visualizations": Visualizations,
     "DataQuality": DataQuality,
+    "AgentCenter": AgentCenter,
 }
 
 export const pagesConfig = {
