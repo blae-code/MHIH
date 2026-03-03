@@ -227,22 +227,22 @@ export default function HealthCanadaDPDBrowser({ onClose, onImport }) {
                         </button>
 
                         <div className="flex-1 min-w-0" onClick={() => toggleExpand(code)}>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
-                              {item.BRAND_NAME || item.INGREDIENT || "—"}
+                              {item.brand_name || item.ingredient_name || item.BRAND_NAME || item.INGREDIENT || "—"}
                             </span>
-                            {item.INGREDIENT && item.BRAND_NAME && (
-                              <span className="tag">{item.INGREDIENT}</span>
+                            {item.ingredient_name && item.brand_name && (
+                              <span className="tag">{item.ingredient_name}</span>
                             )}
                             <span className="text-xs px-1.5 rounded" style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", border: "1px solid var(--border-subtle)" }}>
                               #{code}
                             </span>
                           </div>
                           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                            {item.CLASS && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{item.CLASS}</span>}
-                            {item.DESCRIPTOR && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{item.DESCRIPTOR}</span>}
-                            {item.NUMBER_OF_AIS && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{item.NUMBER_OF_AIS} ingredient(s)</span>}
-                            {item.PEDIATRIC_FLAG === "Y" && (
+                            {(item.class || item.CLASS) && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{item.class || item.CLASS}</span>}
+                            {(item.strength) && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{item.strength} {item.strength_unit}/{item.dosage_unit}</span>}
+                            {(item.descriptor || item.DESCRIPTOR) && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{item.descriptor || item.DESCRIPTOR}</span>}
+                            {(item.pediatric_flag || item.PEDIATRIC_FLAG) === "Y" && (
                               <span className="text-xs px-1.5 rounded" style={{ background: "rgba(46,160,67,0.15)", color: "var(--color-success)", border: "1px solid var(--color-success)" }}>Pediatric</span>
                             )}
                           </div>
