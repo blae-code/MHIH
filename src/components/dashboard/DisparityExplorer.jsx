@@ -438,6 +438,22 @@ export default function DisparityExplorer({ metrics }) {
       {chartType === "scatter" && <ScatterPlot data={filtered} drill={setDrillItem} />}
       {chartType === "heatmap" && <Heatmap metrics={filtered} />}
 
+      {/* Export */}
+      <div className="flex gap-2 mt-3">
+        <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          <Download size={11} style={{ color: "var(--accent-primary)" }} />
+          Export Filtered ({filtered.length})
+        </button>
+        <button onClick={() => exportCSV(metrics, "health_metrics_all.csv")}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          <Download size={11} />
+          Export All ({metrics.length})
+        </button>
+      </div>
+
       {/* Summary */}
       <div className="flex gap-4 mt-3 pt-3 border-t text-xs flex-wrap" style={{ borderColor: "var(--border-subtle)" }}>
         <span style={{ color: "var(--text-muted)" }}>Showing <span style={{ color: "var(--text-primary)" }}>{filtered.length}</span> of {metrics.length} metrics</span>
