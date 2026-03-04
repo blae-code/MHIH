@@ -236,27 +236,27 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="p-6 space-y-6 h-full overflow-auto">
+    <div className="p-5 space-y-5 h-full overflow-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pb-1 border-b" style={{ borderColor: "var(--border-subtle)" }}>
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>BC Métis Health Intelligence</h1>
+          <h1 className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>BC Métis Health Intelligence</h1>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-            Real-time overview of Métis-specific health metrics in British Columbia
+            Real-time overview of Métis-specific health metrics across British Columbia
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setCustomizerOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
-            title="Customize dashboard layout">
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors"
+            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}
+            title="Rearrange and show/hide dashboard widgets">
             <SlidersHorizontal size={12} />
-            Customize
+            Customize Layout
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }} title="Dashboard data is live">
             <span className="status-dot active" />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Live</span>
+            <span className="text-xs" style={{ color: "var(--color-success)" }}>Live</span>
           </div>
         </div>
       </div>
