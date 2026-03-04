@@ -14,25 +14,25 @@ export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", section: "main" },
-  { icon: Database, label: "Data Repository", page: "DataRepository", section: "main" },
-  { icon: BarChart3, label: "Visualizations", page: "Visualizations", section: "main" },
-  { icon: Brain, label: "AI Insights", page: "AIInsights", section: "main" },
-  { icon: Brain, label: "AI Data Analyst", page: "DataAnalyst", section: "main" },
-  { icon: BookOpen, label: "Data Sources", page: "DataSources", section: "data" },
-  { icon: Database, label: "My Data Sources", page: "MyDataSources", section: "data" },
-  { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", section: "data" },
-  { icon: Bot, label: "AI Agents", page: "AgentCenter", section: "data" },
-  { icon: FileDown, label: "Export", page: "Export", section: "data" },
-  { icon: TrendingUp, label: "Predictive Analytics", page: "PredictiveAnalytics", section: "analytics" },
-  { icon: MapPin, label: "Geo Map", page: "GeoMap", section: "analytics" },
-  { icon: BellRing, label: "Alerts", page: "Alerts", section: "analytics" },
-  { icon: Wrench, label: "Data Prep", page: "DataPrep", section: "analytics" },
-  { icon: Workflow, label: "Workflows", page: "Workflows", section: "analytics" },
-  { icon: Shield, label: "Governance", page: "DataGovernance", section: "analytics" },
-  { icon: Users, label: "Team", page: "Team", adminOnly: true, section: "admin" },
-  { icon: Shield, label: "Admin", page: "Admin", adminOnly: true, section: "admin" },
-  { icon: Settings, label: "Settings", page: "Settings", section: "system" },
+  { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", section: "main", tooltip: "Platform overview & KPIs" },
+  { icon: Database, label: "Data Repository", page: "DataRepository", section: "main", tooltip: "Browse all health metrics" },
+  { icon: BarChart3, label: "Visualizations", page: "Visualizations", section: "main", tooltip: "Charts, maps & trend views" },
+  { icon: Brain, label: "AI Insights", page: "AIInsights", section: "main", tooltip: "AI-generated health analysis" },
+  { icon: Brain, label: "AI Data Analyst", page: "DataAnalyst", section: "main", tooltip: "Ask questions about your data" },
+  { icon: BookOpen, label: "Data Sources", page: "DataSources", section: "data", tooltip: "Manage external data connections" },
+  { icon: Database, label: "My Data Sources", page: "MyDataSources", section: "data", tooltip: "Your personal data imports" },
+  { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", section: "data", tooltip: "Review flags & quality issues" },
+  { icon: Bot, label: "AI Agents", page: "AgentCenter", section: "data", tooltip: "Automated agent tasks & runs" },
+  { icon: FileDown, label: "Export", page: "Export", section: "data", tooltip: "Download data as CSV or PDF" },
+  { icon: TrendingUp, label: "Predictive Analytics", page: "PredictiveAnalytics", section: "analytics", tooltip: "Forecasts & trend modelling" },
+  { icon: MapPin, label: "Geo Map", page: "GeoMap", section: "analytics", tooltip: "Regional health data map" },
+  { icon: BellRing, label: "Alerts", page: "Alerts", section: "analytics", tooltip: "Threshold alerts & notifications" },
+  { icon: Wrench, label: "Data Prep", page: "DataPrep", section: "analytics", tooltip: "Clean & transform data" },
+  { icon: Workflow, label: "Workflows", page: "Workflows", section: "analytics", tooltip: "Automated data pipelines" },
+  { icon: Shield, label: "Governance", page: "DataGovernance", section: "analytics", tooltip: "Audit logs & data policies" },
+  { icon: Users, label: "Team", page: "Team", adminOnly: true, section: "admin", tooltip: "Manage team members & roles" },
+  { icon: Shield, label: "Admin", page: "Admin", adminOnly: true, section: "admin", tooltip: "System administration panel" },
+  { icon: Settings, label: "Settings", page: "Settings", section: "system", tooltip: "App preferences & configuration" },
 ];
 
 const COMMAND_ITEMS = [
@@ -197,18 +197,18 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex flex-1 overflow-hidden">
 
           {/* ── ACTIVITY BAR (icon strip) ── */}
-          <div className="flex flex-col items-center py-2 gap-1 shrink-0 border-r z-40"
+          <div className="flex flex-col items-center py-2 gap-0.5 shrink-0 border-r z-40"
             style={{ width: 48, background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
             {filteredNav.map(item => (
-              <Link key={item.page} to={createPageUrl(item.page)} title={item.label}>
+              <Link key={item.page} to={createPageUrl(item.page)} title={item.tooltip || item.label}>
                 <div className={`activity-icon ${currentPageName === item.page ? "active" : ""}`}>
-                  <item.icon size={18} />
+                  <item.icon size={17} />
                 </div>
               </Link>
             ))}
             <div className="flex-1" />
-            <button className="activity-icon" title="Toggle sidebar" onClick={() => setSidebarOpen(v => !v)}>
-              {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            <button className="activity-icon" title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"} onClick={() => setSidebarOpen(v => !v)}>
+              {sidebarOpen ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
             </button>
           </div>
 
