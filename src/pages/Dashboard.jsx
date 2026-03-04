@@ -508,17 +508,19 @@ export default function Dashboard() {
           color: var(--text-primary);
         }
         .dashboard-widget-card {
-          border-radius: 8px;
-          border: 1px solid var(--border-subtle);
+          border-radius: 10px;
+          border: 1.5px solid;
+          border-image: linear-gradient(135deg, rgba(254,221,0,0.4) 0%, rgba(64,196,255,0.3) 50%, rgba(254,221,0,0.2) 100%) 1;
           background: #0a1220;
           padding: 16px;
           transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
           position: relative;
           overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(254,221,0,0.08), 0 0 20px rgba(254,221,0,0.05);
         }
         .dashboard-widget-card:hover {
-          border-color: var(--border-default);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(254,221,0,0.05);
+          border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
+          box-shadow: inset 0 1px 0 rgba(254,221,0,0.15), 0 0 32px rgba(254,221,0,0.15), 0 8px 24px rgba(0,0,0,0.4);
           transform: translateY(-1px);
         }
         .dashboard-widget-card::before {
