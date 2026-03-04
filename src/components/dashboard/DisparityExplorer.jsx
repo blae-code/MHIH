@@ -303,7 +303,7 @@ function DisparityBar({ data, drill, benchmark }) {
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-        <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
+        <XAxis type="number" tick={{ fill: "#8bafd4", fontSize: 10 }} />
         <YAxis type="category" dataKey="name" width={140} tick={{ fill: "#8bafd4", fontSize: 10 }} />
         <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE}
           formatter={(val, name) => [val, name === "metis" ? "Métis" : "BC Population"]}
@@ -339,8 +339,8 @@ function TrendLine({ data, benchmark }) {
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-        <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-        <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
+        <XAxis dataKey="year" tick={{ fill: "#8bafd4", fontSize: 11 }} />
+        <YAxis tick={{ fill: "#8bafd4", fontSize: 11 }} />
         <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} formatter={(v, n) => [v, n === "metis" ? "Métis Avg" : "BC Avg"]} />
         <Legend formatter={n => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
         <Line type="monotone" dataKey="metis" stroke="#e6a817" strokeWidth={2} dot={{ r: 3 }} />
@@ -368,8 +368,8 @@ function ScatterPlot({ data, drill, benchmark }) {
     <ResponsiveContainer width="100%" height={260}>
       <ScatterChart>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-        <XAxis dataKey="x" name="BC" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} label={{ value: "BC Pop.", position: "insideBottom", offset: -4, fill: "var(--text-muted)", fontSize: 10 }} />
-        <YAxis dataKey="y" name="Métis" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} label={{ value: "Métis", angle: -90, position: "insideLeft", fill: "var(--text-muted)", fontSize: 10 }} />
+        <XAxis dataKey="x" name="BC" tick={{ fill: "#8bafd4", fontSize: 11 }} label={{ value: "BC Pop.", position: "insideBottom", offset: -4, fill: "#4a6a8a", fontSize: 10 }} />
+        <YAxis dataKey="y" name="Métis" tick={{ fill: "#8bafd4", fontSize: 11 }} label={{ value: "Métis", angle: -90, position: "insideLeft", fill: "#4a6a8a", fontSize: 10 }} />
         <Tooltip contentStyle={TOOLTIP_STYLE} content={({ payload }) => {
           const d = payload?.[0]?.payload;
           if (!d) return null;
@@ -552,8 +552,8 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
           <ResponsiveContainer width="100%" height={120}>
             <LineChart data={historicalData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-              <XAxis dataKey="year" tick={{ fontSize: 9, fill: "var(--text-secondary)" }} />
-              <YAxis tick={{ fontSize: 9, fill: "var(--text-secondary)" }} />
+              <XAxis dataKey="year" tick={{ fontSize: 9, fill: "#8bafd4" }} />
+              <YAxis tick={{ fontSize: 9, fill: "#8bafd4" }} />
               <Tooltip contentStyle={TOOLTIP_STYLE} />
               <Line type="monotone" dataKey="value" stroke="#e6a817" strokeWidth={2} dot={{ r: 2 }} name="Métis" />
               {historicalData.some(d => d.comparison != null) && (
