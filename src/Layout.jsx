@@ -555,21 +555,6 @@ export default function Layout({ children, currentPageName }) {
                 {contextPanel?.content || <RightPanelDefault user={user} addLog={addLog} isAdmin={isAdmin} />}
               </div>
             </aside>
-          ) : (
-            <button
-              onClick={() => setRightPanelOpen(true)}
-              className="shrink-0 flex items-center justify-center"
-              style={{
-                width: 22,
-                background: "var(--bg-surface)",
-                borderLeft: "1px solid var(--border-subtle)",
-                cursor: "pointer"
-              }}
-              title="Open Tools panel"
-            >
-              <SlidersHorizontal size={11} style={{ color: "var(--text-muted)" }} />
-            </button>
-          )}
         </div>
 
         {/* ══ STATUS BAR ══ */}
