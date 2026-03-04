@@ -94,7 +94,7 @@ function ValueFilter({ op, setOp, threshold, setThreshold }) {
     <div className="flex items-center gap-1">
       <select value={op} onChange={e => setOp(e.target.value)}
         className="text-xs px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="any">Any value</option>
         <option value="gt">&gt;</option>
         <option value="gte">≥</option>
