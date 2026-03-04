@@ -279,6 +279,18 @@ export default function DataSources() {
         />
       )}
 
+      {/* DataBC Tools browser */}
+      {showDataBCTools && (
+        <DataBCToolsBrowser
+          onClose={() => setShowDataBCTools(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* ArcGIS Hub BC browser */}
       {showArcGISHub && (
         <ArcGISHubBCBrowser
