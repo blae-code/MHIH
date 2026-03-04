@@ -592,7 +592,7 @@ export default function DisparityExplorer({ metrics }) {
             <MultiSelect label="Category" options={CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))} selected={selCats} onChange={setSelCats} />
             <MultiSelect label="Region" options={REGIONS.map(r => ({ value: r, label: r }))} selected={selRegions} onChange={setSelRegions} />
             <YearRangeFilter years={years} yearFrom={yearFrom} setYearFrom={setYearFrom} yearTo={yearTo} setYearTo={setYearTo} />
-            <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
+            <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
               <span>Value</span>
               <ValueFilter op={valueOp} setOp={setValueOp} threshold={valueThreshold} setThreshold={setValueThreshold} />
             </div>
