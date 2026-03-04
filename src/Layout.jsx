@@ -227,13 +227,13 @@ export default function Layout({ children, currentPageName }) {
                   const items = filteredNav.filter(n => n.section === sec.key);
                   if (!items.length) return null;
                   return (
-                    <div key={sec.key} className="mb-4">
-                      <div className="px-2 py-1 text-xs font-semibold tracking-widest uppercase mb-1"
-                        style={{ color: "var(--mnbc-yellow)", fontSize: 10, opacity: 0.7 }}>{sec.label}</div>
+                    <div key={sec.key} className="mb-3">
+                      <div className="px-2 pt-2 pb-1 text-xs font-semibold tracking-widest uppercase"
+                        style={{ color: "var(--mnbc-yellow)", fontSize: 9, opacity: 0.65, letterSpacing: "0.14em" }}>{sec.label}</div>
                       {items.map(item => (
-                        <Link key={item.page} to={createPageUrl(item.page)}>
+                        <Link key={item.page} to={createPageUrl(item.page)} title={item.tooltip}>
                           <div className={`nav-item ${currentPageName === item.page ? "active" : ""}`}>
-                            <item.icon size={14} style={{ flexShrink: 0 }} />
+                            <item.icon size={13} style={{ flexShrink: 0 }} />
                             <span className="nav-label truncate">{item.label}</span>
                           </div>
                         </Link>
@@ -296,21 +296,22 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* ── FOOTER / STATUS BAR ── */}
-        <footer className="flex items-center px-3 gap-4 shrink-0 border-t overflow-hidden"
+        <footer className="flex items-center px-4 gap-4 shrink-0 border-t overflow-hidden"
           style={{ height: "var(--footer-height)", background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            {lastLog?.type === "error" ? <AlertCircle size={11} className="text-red-400 shrink-0" />
-              : lastLog?.type === "success" ? <CheckCircle size={11} className="text-green-400 shrink-0" />
-              : <Info size={11} className="text-blue-400 shrink-0" />}
-            <span className={`text-xs truncate ${logColor}`}>{lastLog?.msg}</span>
+            {lastLog?.type === "error" ? <AlertCircle size={10} className="text-red-400 shrink-0" />
+              : lastLog?.type === "success" ? <CheckCircle size={10} className="text-green-400 shrink-0" />
+              : <Info size={10} className="text-blue-400 shrink-0" />}
+            <span className={`truncate ${logColor}`} style={{ fontSize: 11 }} title={lastLog?.msg}>{lastLog?.msg}</span>
+            {lastLog?.time && <span className="shrink-0" style={{ color: "var(--text-muted)", fontSize: 10 }}>{lastLog.time}</span>}
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <span style={{ color: "var(--text-muted)", fontSize: 11 }}>
               {new Date().toLocaleDateString("en-CA")}
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5" title="System online">
               <span className="status-dot active" />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>BC Métis Health Intelligence Platform</span>
+              <span style={{ color: "var(--text-muted)", fontSize: 11 }}>MHIP · Online</span>
             </div>
           </div>
         </footer>
