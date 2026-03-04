@@ -35,6 +35,7 @@ export default function DataSources() {
   const [showCNF, setShowCNF] = useState(false);
   const [showWMSWFS, setShowWMSWFS] = useState(false);
   const [showArcGISHub, setShowArcGISHub] = useState(false);
+  const [showDataBCTools, setShowDataBCTools] = useState(false);
   const [failedCount, setFailedCount] = useState(0);
 
   const load = () => {
