@@ -102,7 +102,7 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
               itemStyle={{ fontSize: 11 }}
               cursor={{ fill: "rgba(254,221,0,0.04)" }}
             />
-            <Legend />
+            <Legend wrapperStyle={{ paddingTop: "12px" }} />
             <Line 
               type="monotone" 
               dataKey="Health Disparity" 
