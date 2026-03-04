@@ -213,11 +213,38 @@ export default function Dashboard() {
     return acc;
   }, []).sort((a, b) => a.year - b.year).slice(-8);
 
+  // Calculate health metrics
+  const healthStats = (() => {
+    const metisMetrics = metrics.filter(m => m.metis_specific);
+    const withComparison = metisMetrics.filter(m => m.comparison_value != null);
+    const disparities = withComparison.map(m => m.value - m.comparison_value);
+    const avgDisparity = disparities.length > 0 ? disparities.reduce((a, b) => a + b, 0) / disparities.length : 0;
+    
+    // Trend: compare last year vs previous year
+    const thisYear = Math.max(...metrics.filter(m => m.year).map(m => m.year));
+    const lastYear = thisYear - 1;
+    const thisYearMetrics = metrics.filter(m => m.year === thisYear);
+    const lastYearMetrics = metrics.filter(m => m.year === lastYear);
+    const trend = thisYearMetrics.length > 0 && lastYearMetrics.length > 0 
+      ? ((thisYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / thisYearMetrics.length) - 
+         (lastYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / lastYearMetrics.length))
+      : 0;
+    
+    const regionCounts = {};
+    metisMetrics.forEach(m => {
+      regionCounts[m.region] = (regionCounts[m.region] || 0) + 1;
+    });
+    const topRegion = Object.entries(regionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+    const categories = [...new Set(metisMetrics.map(m => m.category))].length;
+    
+    return { avgDisparity, trend, topRegion, categories, totalMetricsSeries: metisMetrics.length };
+  })();
+
   const ALL_STAT_CARDS = {
-    total_metrics: { label: "Total Metrics", value: metrics.length, icon: BarChart3, color: "var(--accent-primary)", desc: "Health indicators tracked across all categories" },
-    data_sources: { label: "Data Sources", value: sources.length, icon: Database, color: "var(--color-info)", desc: "Connected external data feeds & repositories" },
-    active_sources: { label: "Active Sources", value: sources.filter(s => s.status === "active").length, icon: Activity, color: "var(--color-success)", desc: "Sources currently syncing successfully" },
-    ai_insights: { label: "AI Insights", value: insights.length, icon: Brain, color: "#a78bfa", desc: "AI-generated analyses & recommendations" },
+    metis_metrics: { label: "Métis Health Indicators", value: healthStats.totalMetricsSeries, icon: Activity, color: "var(--accent-primary)", desc: "Métis-specific health metrics tracked" },
+    health_disparity: { label: "Avg Health Disparity", value: healthStats.avgDisparity.toFixed(1), icon: TrendingUp, color: healthStats.avgDisparity > 0 ? "var(--color-error)" : "var(--color-success)", desc: healthStats.avgDisparity > 0 ? "Higher than BC population" : "Better than BC population" },
+    yearly_trend: { label: "Year-over-Year Trend", value: (healthStats.trend > 0 ? "+" : "") + healthStats.trend.toFixed(1), icon: Brain, color: healthStats.trend > 0 ? "var(--color-success)" : "var(--color-error)", desc: healthStats.trend > 0 ? "Improving health outcomes" : "Declining health outcomes" },
+    coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "var(--color-info)", desc: `${healthStats.categories} major health categories tracked` },
   };
 
   const STAT_CARDS = visibleStatCards.map(id => ALL_STAT_CARDS[id]).filter(Boolean);
