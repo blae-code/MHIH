@@ -1,9 +1,9 @@
+/* MNBC Brand Fonts — Sofia Sans from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sofia+Sans+Extra+Condensed:wght@700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* MNBC Brand Fonts — Sofia Sans from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sofia+Sans+Extra+Condensed:wght@700;800&display=swap');
 
 :root {
   /* ── MNBC Primary Colour Palette ── */
