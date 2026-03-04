@@ -752,8 +752,8 @@ export default function DisparityExplorer({ metrics }) {
 
       {/* Filter panel — collapsible */}
       {filtersOpen && (
-        <div className="rounded-lg p-3 mb-4 space-y-3 relative z-10" style={{ background: "rgba(254,221,0,0.03)", border: "1px solid var(--border-subtle)" }}>
-          <div className="text-xs font-semibold" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Filters</div>
+        <div className="rounded-lg p-2.5 mb-3 space-y-2.5 relative z-10" style={{ background: "rgba(254,221,0,0.03)", border: "1px solid var(--border-subtle)" }}>
+          <div className="text-xs font-semibold" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "8.5px", lineHeight: 1.2 }}>Filters</div>
           <div className="disparity-controls-row">
             <MultiSelect label="Category" options={CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))} selected={selCats} onChange={setSelCats} />
             <MultiSelect label="Region" options={REGIONS.map(r => ({ value: r, label: r }))} selected={selRegions} onChange={setSelRegions} />
