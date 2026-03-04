@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
-import { Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity, SlidersHorizontal, RotateCcw, Save, Layout, Pencil, Edit3, TrendingUp } from "lucide-react";
+import { Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity, SlidersHorizontal, RotateCcw, Save, Layout, Pencil, Edit3, TrendingUp, Pin, PinOff } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import WeeklyReports from "../components/dashboard/WeeklyReports";
 import PinnedMetrics from "../components/dashboard/PinnedMetrics";
@@ -362,9 +362,7 @@ export default function Dashboard() {
       <DisparityExplorer key="disparity_explorer" metrics={metrics} />
     ),
     weekly_reports: isVisible("weekly_reports") && <WeeklyReports key="weekly_reports" />,
-    pinned_metrics: isVisible("pinned_metrics") && (
-      <PinnedMetrics key="pinned_metrics" pinnedIds={pinnedIds} onUnpin={handleUnpin} />
-    ),
+
     data_sources: isVisible("data_sources") && (
       <div key="data_sources" className="dashboard-widget-card">
         <div className="flex items-center justify-between mb-3 relative z-10">
