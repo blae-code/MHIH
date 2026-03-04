@@ -6,7 +6,8 @@ import {
   LayoutDashboard, Database, LineChart, Brain, Settings, Users,
   Search, Bell, ChevronRight, Activity, AlertCircle, CheckCircle,
   Info, X, Zap, FileDown, Upload, BookOpen, Shield, HelpCircle,
-  FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot
+  FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot,
+  MapPin, TrendingUp, Wrench, BellRing, Workflow
 } from "lucide-react";
 
 export const AppContext = createContext({});
@@ -23,6 +24,12 @@ const NAV_ITEMS = [
   { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", section: "data" },
   { icon: Bot, label: "AI Agents", page: "AgentCenter", section: "data" },
   { icon: FileDown, label: "Export", page: "Export", section: "data" },
+  { icon: TrendingUp, label: "Predictive Analytics", page: "PredictiveAnalytics", section: "analytics" },
+  { icon: MapPin, label: "Geo Map", page: "GeoMap", section: "analytics" },
+  { icon: BellRing, label: "Alerts", page: "Alerts", section: "analytics" },
+  { icon: Wrench, label: "Data Prep", page: "DataPrep", section: "analytics" },
+  { icon: Workflow, label: "Workflows", page: "Workflows", section: "analytics" },
+  { icon: Shield, label: "Governance", page: "DataGovernance", section: "analytics" },
   { icon: Users, label: "Team", page: "Team", adminOnly: true, section: "admin" },
   { icon: Shield, label: "Admin", page: "Admin", adminOnly: true, section: "admin" },
   { icon: Settings, label: "Settings", page: "Settings", section: "system" },
