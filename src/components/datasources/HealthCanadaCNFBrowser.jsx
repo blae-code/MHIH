@@ -41,6 +41,7 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
     setLoading(true);
     setResults([]);
     setExpanded(null);
+    setRecentSearches(prev => [searchQuery, ...prev.filter(s => s !== searchQuery)].slice(0, 5));
     const res = await base44.functions.invoke("healthCanadaCNF", { action: "search_food", query: searchQuery });
     setResults(res.data?.results || []);
     setLoading(false);

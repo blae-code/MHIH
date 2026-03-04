@@ -32,6 +32,7 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
     setLoading(true);
     setResults([]);
     setExpanded(null);
+    setRecentSearches(prev => [sq, ...prev.filter(s => s !== sq)].slice(0, 5));
     try {
       const res = await base44.functions.invoke("openGovCanada", { action: "search", query: sq, limit: 30 });
       setResults(res.data?.datasets || []);
