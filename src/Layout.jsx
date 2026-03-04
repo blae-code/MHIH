@@ -322,32 +322,35 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ══ HEADER ══ */}
         <header
-          className="flex items-center justify-between px-4 shrink-0 z-50"
+          className="flex items-center justify-between px-5 shrink-0 z-50"
           style={{
             height: "var(--header-height)",
             background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
             borderBottom: "1px solid var(--border-default)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.08)"
+            boxShadow: "0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(254,221,0,0.12), 0 0 0 1px rgba(254,221,0,0.08)"
           }}
         >
           {/* Brand */}
           <div className="flex items-center gap-3 min-w-0" style={{ minWidth: sidebarOpen ? "var(--panel-left)" : "auto" }}>
             <div className="flex items-center gap-2.5 shrink-0">
-              <div className="relative">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm"
+              <div className="relative group">
+                <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: "radial-gradient(circle at top-left, rgba(254,221,0,0.15), transparent)", filter: "blur(12px)" }} />
+                <div className="relative w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-sm"
                   style={{
                     background: "linear-gradient(135deg, #FEDD00 0%, #e6c000 100%)",
                     color: "#04245a",
-                    boxShadow: "0 2px 8px rgba(254,221,0,0.35), inset 0 1px 0 rgba(255,255,255,0.3)"
+                    boxShadow: "0 4px 12px rgba(254,221,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2)",
+                    border: "1px solid rgba(255,255,255,0.15)"
                   }}>
                   M
                 </div>
               </div>
               <div>
-                <div style={{ fontFamily: "'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif", fontWeight: 800, fontSize: 15, letterSpacing: "0.08em", color: "var(--text-primary)", lineHeight: 1 }}>
+                <div style={{ fontFamily: "'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: "0.1em", color: "var(--text-primary)", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
                   MHIP
                 </div>
-                <div style={{ fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.06em", lineHeight: 1, marginTop: 2 }}>
+                <div style={{ fontSize: 8.5, color: "var(--text-muted)", letterSpacing: "0.08em", lineHeight: 1, marginTop: 2, fontWeight: 600 }}>
                   HEALTH INTELLIGENCE
                 </div>
               </div>
@@ -365,47 +368,50 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Breadcrumb + Search center */}
-          <div className="flex-1 flex items-center justify-center gap-3 mx-4">
+          <div className="flex-1 flex items-center justify-center gap-3 mx-6">
             {/* Breadcrumb pill */}
             {currentSection && (
-              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
-                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}>
-                <span style={{ color: currentSection.color, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{currentSection.label}</span>
-                <ChevronRight size={10} style={{ opacity: 0.5 }} />
-                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{currentPageName?.replace(/([A-Z])/g, ' $1').trim()}</span>
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs backdrop-blur-sm"
+                style={{ background: "rgba(20, 35, 60, 0.6)", border: "1px solid var(--border-default)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                <span style={{ color: currentSection.color, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{currentSection.label}</span>
+                <ChevronRight size={9} style={{ opacity: 0.6, color: "var(--text-muted)" }} />
+                <span style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: 11 }}>{currentPageName?.replace(/([A-Z])/g, ' $1').trim()}</span>
               </div>
             )}
 
             {/* Command search */}
             <button
               onClick={() => { setCmdOpen(true); setTimeout(() => cmdInputRef.current?.focus(), 50); }}
-              className="header-search-btn hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all hover:shadow-lg"
+              className="header-search-btn hidden md:flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-medium transition-all group"
               style={{
-                background: "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)",
-                border: "1px solid rgba(254,221,0,0.2)",
+                background: "linear-gradient(135deg, rgba(254,221,0,0.08) 0%, rgba(254,221,0,0.03) 100%)",
+                border: "1px solid rgba(254,221,0,0.25)",
                 color: "var(--text-secondary)",
-                width: 240,
+                width: 260,
                 position: "relative",
-                overflow: "hidden"
+                overflow: "hidden",
+                boxShadow: "0 4px 12px rgba(254,221,0,0.05), inset 0 1px 0 rgba(254,221,0,0.1)"
               }}
               onMouseOver={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.12) 0%, rgba(254,221,0,0.06) 100%)";
-                e.currentTarget.style.borderColor = "rgba(254,221,0,0.4)";
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.15) 0%, rgba(254,221,0,0.08) 100%)";
+                e.currentTarget.style.borderColor = "rgba(254,221,0,0.5)";
                 e.currentTarget.style.color = "var(--text-primary)";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(254,221,0,0.12), inset 0 1px 0 rgba(254,221,0,0.15)";
               }}
               onMouseOut={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)";
-                e.currentTarget.style.borderColor = "rgba(254,221,0,0.2)";
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.08) 0%, rgba(254,221,0,0.03) 100%)";
+                e.currentTarget.style.borderColor = "rgba(254,221,0,0.25)";
                 e.currentTarget.style.color = "var(--text-secondary)";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(254,221,0,0.05), inset 0 1px 0 rgba(254,221,0,0.1)";
               }}>
-              <Search size={13} style={{ color: "var(--mnbc-yellow)", flexShrink: 0 }} />
-              <span className="flex-1 text-left">Search...</span>
-              <kbd style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 8, padding: "2px 6px", borderRadius: 2, border: "1px solid rgba(254,221,0,0.25)", fontFamily: "monospace", flexShrink: 0, fontWeight: 600 }}>⌘K</kbd>
+              <Search size={13} style={{ color: "var(--mnbc-yellow)", flexShrink: 0, opacity: 0.8 }} />
+              <span className="flex-1 text-left opacity-80">Search workspace...</span>
+              <kbd style={{ background: "rgba(254,221,0,0.12)", color: "var(--mnbc-yellow)", fontSize: 8, padding: "3px 7px", borderRadius: 3, border: "1px solid rgba(254,221,0,0.3)", fontFamily: "monospace", flexShrink: 0, fontWeight: 600, letterSpacing: "0.05em" }}>⌘K</kbd>
             </button>
           </div>
 
           {/* Right controls */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button onClick={() => setCmdOpen(true)} className="md:hidden activity-icon" title="Search">
               <Search size={15} />
             </button>
@@ -435,11 +441,24 @@ export default function Layout({ children, currentPageName }) {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(v => !v)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all ml-1"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all ml-2 group"
                 style={{
-                  background: userMenuOpen ? "var(--bg-overlay)" : "var(--bg-elevated)",
-                  border: `1px solid ${userMenuOpen ? "var(--border-default)" : "var(--border-subtle)"}`,
-                  cursor: "pointer"
+                  background: userMenuOpen ? "rgba(254,221,0,0.06)" : "var(--bg-overlay)",
+                  border: `1px solid ${userMenuOpen ? "rgba(254,221,0,0.3)" : "var(--border-subtle)"}`,
+                  cursor: "pointer",
+                  boxShadow: userMenuOpen ? "0 0 0 1px rgba(254,221,0,0.1)" : "none"
+                }}
+                onMouseOver={e => {
+                  if (!userMenuOpen) {
+                    e.currentTarget.style.background = "rgba(254,221,0,0.08)";
+                    e.currentTarget.style.borderColor = "rgba(254,221,0,0.2)";
+                  }
+                }}
+                onMouseOut={e => {
+                  if (!userMenuOpen) {
+                    e.currentTarget.style.background = "var(--bg-overlay)";
+                    e.currentTarget.style.borderColor = "var(--border-subtle)";
+                  }
                 }}>
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
