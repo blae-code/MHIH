@@ -611,7 +611,7 @@ export default function Layout({ children, currentPageName }) {
               onClick={e => e.stopPropagation()}
             >
               {/* Search input */}
-              <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+              <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
                 <Search size={16} style={{ color: "var(--mnbc-yellow)", flexShrink: 0 }} />
                 <input
                   ref={cmdInputRef}
