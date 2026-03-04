@@ -95,12 +95,12 @@ function ValueFilter({ op, setOp, threshold, setThreshold }) {
       <select value={op} onChange={e => setOp(e.target.value)}
         className="text-xs px-1.5 py-1 rounded appearance-none outline-none"
         style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
-        <option value="any">Any value</option>
-        <option value="gt">&gt;</option>
-        <option value="gte">≥</option>
-        <option value="lt">&lt;</option>
-        <option value="lte">≤</option>
-        <option value="eq">=</option>
+        <option value="any" style={{ background: "#0c1625", color: "#f0f6ff" }}>Any value</option>
+        <option value="gt" style={{ background: "#0c1625", color: "#f0f6ff" }}>&gt;</option>
+        <option value="gte" style={{ background: "#0c1625", color: "#f0f6ff" }}>≥</option>
+        <option value="lt" style={{ background: "#0c1625", color: "#f0f6ff" }}>&lt;</option>
+        <option value="lte" style={{ background: "#0c1625", color: "#f0f6ff" }}>≤</option>
+        <option value="eq" style={{ background: "#0c1625", color: "#f0f6ff" }}>=</option>
       </select>
       {op !== "any" && (
         <input type="number" value={threshold} onChange={e => setThreshold(e.target.value)} placeholder="0"
