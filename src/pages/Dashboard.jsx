@@ -9,6 +9,8 @@ import PinnedMetrics from "../components/dashboard/PinnedMetrics";
 import DashboardCustomizer, { DEFAULT_WIDGETS } from "../components/dashboard/DashboardCustomizer";
 import DashboardLayoutManager, { PRESET_LAYOUTS } from "../components/dashboard/DashboardLayoutManager";
 import DisparityExplorer from "../components/dashboard/DisparityExplorer";
+import RegionalPerformance from "../components/dashboard/RegionalPerformance";
+import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREFS_KEY = "mhip_dashboard_prefs";
@@ -317,39 +319,10 @@ export default function Dashboard() {
       </div>
     ),
     category_pie: isVisible("category_pie") && (
-      <div key="category_pie" className="dashboard-widget-card">
-        <div className="dashboard-section-label mb-3">Metrics by Category</div>
-        <div className="text-xs mb-4 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Distribution across health indicator categories</div>
-        {categoryData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={false}>
-                {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip
-                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-                labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
-                itemStyle={{ color: "var(--text-secondary)", fontSize: 11 }}
-                cursor={{ fill: "rgba(254,221,0,0.04)" }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        ) : <EmptyChart message="No categories yet." />}
-        {categoryData.length > 0 && (
-          <ResponsiveContainer width="100%" height={140}>
-            <BarChart data={categoryData.slice(0, 6)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-              <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
-              <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#8bafd4", fontSize: 9 }} />
-              <Tooltip 
-                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-                cursor={{ fill: "rgba(254,221,0,0.04)" }}
-              />
-              <Bar dataKey="value" fill="#e6a817" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+      <CategoryLeaders key="category_pie" metrics={metrics} />
+    ),
+    regional_performance: isVisible("regional_performance") && (
+      <RegionalPerformance key="regional_performance" metrics={metrics} />
     ),
     disparity_explorer: isVisible("disparity_explorer") && (
       <DisparityExplorer key="disparity_explorer" metrics={metrics} />
