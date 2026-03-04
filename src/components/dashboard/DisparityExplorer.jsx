@@ -26,6 +26,9 @@ const TOOLTIP_STYLE = {
   fontSize: 12,
 };
 
+const TOOLTIP_LABEL_STYLE = { color: "var(--text-primary)" };
+const TOOLTIP_ITEM_STYLE = { color: "var(--text-secondary)" };
+
 const BENCHMARK_COLOR = "#a78bfa";
 
 // ── Multi-select dropdown ─────────────────────────────────────────────────────
