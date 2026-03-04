@@ -128,6 +128,18 @@ export default function DataRepository() {
             style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <Upload size={12} /> Import
           </button>
+          <div className="flex items-center rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+            <button onClick={() => setViewMode("table")}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs"
+              style={{ background: viewMode === "table" ? "var(--accent-muted)" : "var(--bg-elevated)", color: viewMode === "table" ? "var(--accent-primary)" : "var(--text-muted)" }}>
+              <Table2 size={12} /> Table
+            </button>
+            <button onClick={() => setViewMode("chart")}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs border-l"
+              style={{ background: viewMode === "chart" ? "var(--accent-muted)" : "var(--bg-elevated)", color: viewMode === "chart" ? "var(--accent-primary)" : "var(--text-muted)", borderColor: "var(--border-subtle)" }}>
+              <BarChart2 size={12} /> Charts
+            </button>
+          </div>
           <button onClick={() => { setEditing(null); setShowForm(true); }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
             style={{ background: "var(--accent-primary)", color: "#000" }}>
