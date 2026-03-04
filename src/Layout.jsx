@@ -408,9 +408,17 @@ export default function Layout({ children, currentPageName }) {
               <Search size={15} />
             </button>
 
-            <button className="activity-icon relative" title="Notifications">
+            <button 
+              onClick={() => setNotifCenterOpen(true)}
+              className="activity-icon relative" 
+              title="Notifications">
               <Bell size={15} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-error)" }} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" 
+                  style={{ background: "var(--color-error)", color: "white", fontSize: 9 }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             <button
