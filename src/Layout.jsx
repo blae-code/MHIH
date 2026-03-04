@@ -825,12 +825,11 @@ function RightPanelDefault({ user, isAdmin }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "Loading..."}</div>
-              <div className="flex items-center gap-1.5 mt-0.5">
+              {user?.role === "admin" ? (
+                <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
+              ) : (
                 <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "viewer"}</span>
-                {user?.role === "admin" && (
-                  <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
-                )}
-              </div>
+              )}
             </div>
           </div>
 
