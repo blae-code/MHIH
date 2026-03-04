@@ -628,7 +628,7 @@ export default function Layout({ children, currentPageName }) {
                     <X size={12} />
                   </button>
                 )}
-                <kbd style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", fontSize: 10, padding: "2px 6px", borderRadius: 4, border: "1px solid var(--border-default)", fontFamily: "monospace", flexShrink: 0 }}>ESC</kbd>
+                <kbd style={{ background: "rgba(254,221,0,0.08)", color: "var(--mnbc-yellow)", fontSize: 10, padding: "2px 6px", borderRadius: 4, border: "1px solid rgba(254,221,0,0.25)", fontFamily: "monospace", flexShrink: 0 }}>ESC</kbd>
               </div>
 
               {/* Results */}
