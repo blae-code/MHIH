@@ -1,7 +1,9 @@
-import React, { useMemo } from "react";
-import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { TrendingUp, TrendingDown, AlertCircle, ChevronDown } from "lucide-react";
 
 export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
+  const [expandedPositive, setExpandedPositive] = useState(false);
+  const [expandedRisk, setExpandedRisk] = useState(false);
   // Calculate individual metric trends
   const trends = useMemo(() => {
     let metricsToAnalyze = metrics;
@@ -60,8 +62,7 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
     // Separate positive and risk trends
     const positivetrends = allTrends
       .filter(t => t.isImproving)
-      .sort((a, b) => b.changePercent - a.changePercent)
-      .slice(0, 3);
+      .sort((a, b) => b.changePercent - a.changePercent);
 
     const riskTrends = allTrends
       .filter(t => t.isAtRisk)
@@ -70,8 +71,7 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
         const aScore = Math.min(a.change, a.currentDisparity || 0);
         const bScore = Math.min(b.change, b.currentDisparity || 0);
         return aScore - bScore;
-      })
-      .slice(0, 3);
+      });
 
     return { positivetrends, riskTrends };
   }, [metrics, trackedMetricIds]);
@@ -97,11 +97,8 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
           {/* Positive Trends */}
           {trends.positivetrends.length > 0 && (
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#2ea043", letterSpacing: "0.05em" }}>
-                ↑ Improving Health Outcomes
-              </div>
               <div className="space-y-2">
-                {trends.positivetrends.map((t, i) => (
+                {trends.positivetrends.slice(0, 3).map((t, i) => (
                   <div key={i} className="p-3 rounded-lg" style={{ background: "rgba(46, 213, 115, 0.08)", border: "1px solid rgba(46, 213, 115, 0.2)" }}>
                     <div className="flex items-start gap-2.5">
                       <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded" style={{ background: "rgba(46, 213, 115, 0.2)" }}>
@@ -123,17 +120,41 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
                   </div>
                 ))}
               </div>
+
+              {/* Expandable positive trends */}
+              {trends.positivetrends.length > 3 && (
+                <div>
+                  <button
+                    onClick={() => setExpandedPositive(!expandedPositive)}
+                    className="mt-2 w-full text-xs font-medium py-2 rounded-lg transition-colors flex items-center justify-between px-3"
+                    style={{ background: "rgba(46, 213, 115, 0.05)", color: "#2ea043", border: "1px solid rgba(46, 213, 115, 0.15)" }}
+                  >
+                    <span>↑ {trends.positivetrends.length - 3} more positive trends</span>
+                    <ChevronDown size={11} style={{ transform: expandedPositive ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+                  </button>
+                  {expandedPositive && (
+                    <div className="mt-2 space-y-2">
+                      {trends.positivetrends.slice(3).map((t, i) => (
+                        <div key={i} className="p-2.5 rounded-lg text-xs" style={{ background: "rgba(46, 213, 115, 0.04)", border: "1px solid rgba(46, 213, 115, 0.15)" }}>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp size={10} style={{ color: "#2ea043", flexShrink: 0 }} />
+                            <span className="flex-1 truncate font-medium" title={t.name}>{t.name}</span>
+                            <span style={{ color: "#2ea043", fontWeight: 600, flexShrink: 0 }}>+{t.changePercent.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
           {/* Risk Trends */}
           {trends.riskTrends.length > 0 && (
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#f85149", letterSpacing: "0.05em" }}>
-                ⚠ Highest-Risk Indicators
-              </div>
               <div className="space-y-2">
-                {trends.riskTrends.map((t, i) => (
+                {trends.riskTrends.slice(0, 3).map((t, i) => (
                   <div key={i} className="p-3 rounded-lg" style={{ background: "rgba(255, 71, 87, 0.08)", border: "1px solid rgba(255, 71, 87, 0.2)" }}>
                     <div className="flex items-start gap-2.5">
                       <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded" style={{ background: "rgba(255, 71, 87, 0.2)" }}>
@@ -160,6 +181,33 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
                   </div>
                 ))}
               </div>
+
+              {/* Expandable risk trends */}
+              {trends.riskTrends.length > 3 && (
+                <div>
+                  <button
+                    onClick={() => setExpandedRisk(!expandedRisk)}
+                    className="mt-2 w-full text-xs font-medium py-2 rounded-lg transition-colors flex items-center justify-between px-3"
+                    style={{ background: "rgba(255, 71, 87, 0.05)", color: "#f85149", border: "1px solid rgba(255, 71, 87, 0.15)" }}
+                  >
+                    <span>⚠ {trends.riskTrends.length - 3} more risk indicators</span>
+                    <ChevronDown size={11} style={{ transform: expandedRisk ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+                  </button>
+                  {expandedRisk && (
+                    <div className="mt-2 space-y-2">
+                      {trends.riskTrends.slice(3).map((t, i) => (
+                        <div key={i} className="p-2.5 rounded-lg text-xs" style={{ background: "rgba(255, 71, 87, 0.04)", border: "1px solid rgba(255, 71, 87, 0.15)" }}>
+                          <div className="flex items-center gap-2">
+                            {t.change < 0 ? <TrendingDown size={10} style={{ color: "#f85149", flexShrink: 0 }} /> : <AlertCircle size={10} style={{ color: "#f85149", flexShrink: 0 }} />}
+                            <span className="flex-1 truncate font-medium" title={t.name}>{t.name}</span>
+                            <span style={{ color: "#f85149", fontWeight: 600, flexShrink: 0 }}>{t.changePercent.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
