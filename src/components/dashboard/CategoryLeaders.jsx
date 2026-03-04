@@ -160,12 +160,12 @@ export default function CategoryLeaders({ metrics }) {
                 </span>
                 <div className="flex items-center gap-1">
                   <select
-                    value={sortBy}
-                    onChange={e => setSortBy(e.target.value)}
-                    className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
-                    style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
-                    <option value="value" style={{ background: "#0c1625", color: "#f0f6ff" }}>By Value</option>
-                    <option value="disparity" style={{ background: "#0c1625", color: "#f0f6ff" }}>By Disparity</option>
+                   value={sortBy}
+                   onChange={e => setSortBy(e.target.value)}
+                   className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
+                   style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+                   <option value="value" style={{ background: "var(--bg-surface)", color: "var(--text-primary)" }}>By Value</option>
+                   <option value="disparity" style={{ background: "var(--bg-surface)", color: "var(--text-primary)" }}>By Disparity</option>
                   </select>
                   <button 
                     onClick={() => setSelectedCategory(null)}
