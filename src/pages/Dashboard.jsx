@@ -276,6 +276,17 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
+              {hasChanges && (
+                <button
+                  onClick={handleResetLayout}
+                  className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
+                  style={{ background: "rgba(255,171,64,0.08)", border: "1px solid rgba(255,171,64,0.2)", color: "var(--text-secondary)" }}
+                  onMouseOver={e => { e.currentTarget.style.background = "rgba(255,171,64,0.14)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                  onMouseOut={e => { e.currentTarget.style.background = "rgba(255,171,64,0.08)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                  title="Reset to default layout">
+                  <RotateCcw size={13} />
+                </button>
+              )}
               <button
                 onClick={() => setCustomizerOpen(true)}
                 className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
