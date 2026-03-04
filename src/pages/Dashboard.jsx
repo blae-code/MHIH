@@ -80,9 +80,19 @@ export default function Dashboard() {
   const handleWidgetsChange = useCallback((newWidgets) => {
     setWidgets(newWidgets);
     setHasChanges(true);
-    savePrefs(currentLayoutId, newWidgets, pinnedIds, dashboardTitle);
+    savePrefs(currentLayoutId, newWidgets, pinnedIds, dashboardTitle, visibleStatCards);
     addLog("success", "Dashboard layout updated");
-  }, [currentLayoutId, pinnedIds, dashboardTitle, addLog]);
+  }, [currentLayoutId, pinnedIds, dashboardTitle, visibleStatCards, addLog]);
+
+  const handleStatCardToggle = useCallback((cardId) => {
+    const newVisible = visibleStatCards.includes(cardId)
+      ? visibleStatCards.filter(id => id !== cardId)
+      : [...visibleStatCards, cardId];
+    setVisibleStatCards(newVisible);
+    savePrefs(currentLayoutId, widgets, pinnedIds, dashboardTitle, newVisible);
+    setHasChanges(true);
+    addLog("success", "Stat cards updated");
+  }, [visibleStatCards, currentLayoutId, widgets, pinnedIds, dashboardTitle, addLog]);
 
   const handleUnpin = useCallback((id) => {
     const next = pinnedIds.filter(p => p !== id);
