@@ -93,14 +93,17 @@ export default function Dashboard() {
   // Ordered widget render map
   const WIDGET_RENDER = {
     stat_cards: isVisible("stat_cards") && (
-      <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {STAT_CARDS.map(card => (
-          <div key={card.label} className="metric-card">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{card.label}</span>
-              <card.icon size={14} style={{ color: card.color }} />
+          <div key={card.label} className="metric-card" title={card.desc}>
+            <div className="flex items-start justify-between mb-2">
+              <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
+              <div className="p-1.5 rounded-md shrink-0" style={{ background: `${card.color}18` }}>
+                <card.icon size={13} style={{ color: card.color }} />
+              </div>
             </div>
-            <div className="text-3xl font-bold" style={{ color: card.color }}>{card.value}</div>
+            <div className="text-3xl font-bold mb-1" style={{ color: card.color }}>{card.value}</div>
+            <div className="text-xs leading-snug" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
           </div>
         ))}
       </div>
