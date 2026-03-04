@@ -83,13 +83,13 @@ export default function CategoryLeaders({ metrics }) {
               <XAxis 
                 dataKey="x" 
                 name="Count" 
-                tick={{ fill: "var(--text-primary)", fontSize: 10, fontWeight: 600 }}
+                tick={{ fill: "var(--text-secondary)", fontSize: 10, fontWeight: 600 }}
                 label={{ value: "Metric Count", position: "insideBottomRight", offset: -10, fill: "var(--text-secondary)", fontSize: 10 }}
               />
               <YAxis 
                 dataKey="y" 
                 name="Avg Value" 
-                tick={{ fill: "var(--text-primary)", fontSize: 10, fontWeight: 600 }}
+                tick={{ fill: "var(--text-secondary)", fontSize: 10, fontWeight: 600 }}
                 label={{ value: "Avg Value", angle: -90, position: "insideLeft", fill: "var(--text-secondary)", fontSize: 10 }}
               />
               <Tooltip

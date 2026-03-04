@@ -62,7 +62,7 @@ export default function RegionalPerformance({ metrics, onDrill }) {
                 height={80}
                 tick={{ fill: "var(--text-secondary)", fontSize: 10 }} 
               />
-              <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
+              <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }} />
               <Tooltip
                 contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
                 labelStyle={{ color: "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}

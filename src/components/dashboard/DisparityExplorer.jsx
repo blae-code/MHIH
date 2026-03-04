@@ -306,8 +306,8 @@ function DisparityBar({ data, drill, benchmark }) {
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" opacity={0.3} />
-        <XAxis type="number" tick={{ fill: "#40C4FF", fontSize: 11, fontWeight: 500 }} />
-        <YAxis type="category" dataKey="name" width={140} tick={{ fill: "#FEDD00", fontSize: 11, fontWeight: 500 }} />
+        <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }} />
+        <YAxis type="category" dataKey="name" width={140} tick={{ fill: "var(--accent-primary)", fontSize: 11, fontWeight: 500 }} />
         <Tooltip
           contentStyle={TOOLTIP_STYLE}
           labelStyle={TOOLTIP_LABEL_STYLE}
@@ -315,7 +315,7 @@ function DisparityBar({ data, drill, benchmark }) {
           formatter={(val, name) => [val?.toFixed(2), name === "metis" ? "Métis" : name === "bc" ? "BC Population" : name]}
           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
           cursor={{ fill: "rgba(254,221,0,0.08)" }} />
-        <Legend formatter={(n) => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 12, color: "#FEDD00", fontWeight: 600 }} />
+        <Legend formatter={(n) => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 12, color: "var(--accent-primary)", fontWeight: 600 }} />
         <Bar dataKey="metis" fill="#e6a817" radius={[0, 3, 3, 0]} onClick={drill} style={{ cursor: "pointer" }} />
         <Bar dataKey="bc" fill="#58a6ff" radius={[0, 3, 3, 0]} opacity={0.7} onClick={drill} style={{ cursor: "pointer" }} />
         <ReferenceLine x={0} stroke="var(--border-default)" />
@@ -346,15 +346,15 @@ function TrendLine({ data, benchmark }) {
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" opacity={0.3} />
-        <XAxis dataKey="year" tick={{ fill: "#40C4FF", fontSize: 11, fontWeight: 500 }} />
-        <YAxis tick={{ fill: "#40C4FF", fontSize: 11, fontWeight: 500 }} />
+        <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }} />
+        <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }} />
         <Tooltip
           contentStyle={TOOLTIP_STYLE}
           labelStyle={TOOLTIP_LABEL_STYLE}
           itemStyle={TOOLTIP_ITEM_STYLE}
           formatter={(v, n) => [v?.toFixed(2), n === "metis" ? "Métis Avg" : "BC Avg"]}
           cursor={{ fill: "rgba(254,221,0,0.08)" }} />
-        <Legend formatter={(n) => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 12, color: "#2ED573", fontWeight: 600 }} />
+        <Legend formatter={(n) => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 600 }} />
         <Line type="monotone" dataKey="metis" stroke="#e6a817" strokeWidth={2} dot={{ r: 3 }} />
         <Line type="monotone" dataKey="bc" stroke="#58a6ff" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3 }} connectNulls />
         {benchmark.active && benchmark.value != null &&
@@ -380,8 +380,8 @@ function ScatterPlot({ data, drill, benchmark }) {
     <ResponsiveContainer width="100%" height={260}>
       <ScatterChart>
          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" opacity={0.3} />
-         <XAxis dataKey="x" name="BC" tick={{ fill: "#58A6FF", fontSize: 11, fontWeight: 500 }} label={{ value: "BC Pop.", position: "insideBottom", offset: -4, fill: "#58A6FF", fontSize: 11, fontWeight: 600 }} />
-         <YAxis dataKey="y" name="Métis" tick={{ fill: "#FEDD00", fontSize: 11, fontWeight: 500 }} label={{ value: "Métis", angle: -90, position: "insideLeft", fill: "#FEDD00", fontSize: 11, fontWeight: 600 }} />
+         <XAxis dataKey="x" name="BC" tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }} label={{ value: "BC Pop.", position: "insideBottom", offset: -4, fill: "var(--text-secondary)", fontSize: 11, fontWeight: 600 }} />
+         <YAxis dataKey="y" name="Métis" tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }} label={{ value: "Métis", angle: -90, position: "insideLeft", fill: "var(--text-secondary)", fontSize: 11, fontWeight: 600 }} />
         <Tooltip content={({ payload }) => {
           const d = payload?.[0]?.payload;
           if (!d) return null;
@@ -457,14 +457,14 @@ function Heatmap({ metrics, benchmark }) {
       <table className="text-xs border-collapse" style={{ minWidth: 400 }}>
          <thead>
            <tr>
-             <th className="px-2 py-1 text-left sticky left-0" style={{ background: "var(--bg-elevated)", color: "#40C4FF", fontSize: 11, fontWeight: 600 }}>Region \ Category</th>
-             {cats.map((c) => <th key={c} className="px-2 py-1 text-center" style={{ color: "#FEDD00", fontSize: 10, fontWeight: 600, whiteSpace: "nowrap" }}>{c.replace(/_/g, " ")}</th>)}
-           </tr>
+              <th className="px-2 py-1 text-left sticky left-0" style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", fontSize: 11, fontWeight: 600 }}>Region \ Category</th>
+              {cats.map((c) => <th key={c} className="px-2 py-1 text-center" style={{ color: "var(--accent-primary)", fontSize: 10, fontWeight: 600, whiteSpace: "nowrap" }}>{c.replace(/_/g, " ")}</th>)}
+            </tr>
          </thead>
          <tbody>
            {regs.map((reg) =>
-          <tr key={reg}>
-               <td className="px-2 py-1 sticky left-0 font-medium" style={{ background: "var(--bg-elevated)", color: "#58A6FF", whiteSpace: "nowrap", fontWeight: 600 }}>{reg}</td>
+           <tr key={reg}>
+            <td className="px-2 py-1 sticky left-0 font-medium" style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", whiteSpace: "nowrap", fontWeight: 600 }}>{reg}</td>
               {cats.map((cat) => {
               const cell = grid[`${reg}||${cat}`];
               const avg = cell ? cell.sum / cell.count : null;
