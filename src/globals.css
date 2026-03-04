@@ -17,34 +17,34 @@
   --mnbc-brush: #F2E3D1;
   --mnbc-cedar: #CD7236;
 
-  /* ── Core background palette (dark interface, MNBC-aligned) ── */
-  --bg-base: #06112a;          /* deep MNBC blue-black */
-  --bg-surface: #0a1e42;       /* dark navy */
-  --bg-elevated: #0f2754;      /* mid navy */
-  --bg-overlay: #163169;       /* lighter navy */
-  --bg-hover: #1c3d7a;         /* hover state */
+  /* ── Core background palette (high-contrast dark) ── */
+  --bg-base: #03080f;          /* near-black */
+  --bg-surface: #080f1a;       /* very dark blue-black */
+  --bg-elevated: #0c1625;      /* dark surface */
+  --bg-overlay: #111f33;       /* raised overlay */
+  --bg-hover: #162843;         /* hover state */
 
-  /* Borders */
-  --border-subtle: #1e3d6e;
-  --border-default: #2d5499;
-  --border-emphasis: #4a78c4;
+  /* Borders — crisper for high contrast */
+  --border-subtle: #1a2e48;
+  --border-default: #243f60;
+  --border-emphasis: #FEDD00;
 
-  /* Text */
-  --text-primary: #edf2f7;
-  --text-secondary: #a8bed8;
-  --text-muted: #5d7fa8;
+  /* Text — maximum contrast */
+  --text-primary: #f0f6ff;
+  --text-secondary: #8bafd4;
+  --text-muted: #4a6a8a;
 
   /* Accent — MNBC Yellow (primary brand accent) */
   --accent-primary: #FEDD00;
   --accent-hover: #ffe933;
-  --accent-muted: #2a2600;
+  --accent-muted: #1f1a00;
   --accent-text: #FEDD00;
 
-  /* Semantic colours */
-  --color-success: #2ea043;
-  --color-warning: #CD7236;
-  --color-error: #B9262D;
-  --color-info: #306369;
+  /* Semantic colours — vivid for high contrast */
+  --color-success: #00e676;
+  --color-warning: #ffab40;
+  --color-error: #ff1744;
+  --color-info: #40c4ff;
 
   /* Panel widths */
   --panel-left: 240px;
