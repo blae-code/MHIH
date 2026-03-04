@@ -55,9 +55,11 @@ import DataQuality from './pages/DataQuality';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
 import Export from './pages/Export';
+import MyDataSources from './pages/MyDataSources';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
+import DataAnalyst from './pages/DataAnalyst';
 import __Layout from './Layout.jsx';
 
 
@@ -70,9 +72,11 @@ export const PAGES = {
     "DataRepository": DataRepository,
     "DataSources": DataSources,
     "Export": Export,
+    "MyDataSources": MyDataSources,
     "Settings": Settings,
     "Team": Team,
     "Visualizations": Visualizations,
+    "DataAnalyst": DataAnalyst,
 }
 
 export const pagesConfig = {
