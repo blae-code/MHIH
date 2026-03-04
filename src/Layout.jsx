@@ -119,7 +119,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── HEADER / COMMAND BAR ── */}
         <header className="flex items-center justify-between px-3 shrink-0 z-50 border-b"
-          style={{ height: "var(--header-height)", background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
+          style={{ height: "var(--header-height)", background: "var(--bg-surface)", borderColor: "var(--border-default)", boxShadow: "0 1px 0 rgba(254,221,0,0.06)" }}>
           {/* Left: Logo + App name */}
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex items-center gap-2">
