@@ -620,8 +620,9 @@ export default function Layout({ children, currentPageName }) {
           className="flex items-center px-4 gap-4 shrink-0 overflow-hidden"
           style={{
             height: "var(--footer-height)",
-            background: "var(--bg-surface)",
-            borderTop: "1px solid var(--border-subtle)",
+            background: "linear-gradient(to top, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+            borderTop: "1px solid var(--border-default)",
+            boxShadow: "0 -4px 16px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(254,221,0,0.05)"
           }}
         >
           {/* Log message */}
