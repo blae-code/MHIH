@@ -20,6 +20,7 @@ export default function DataRepository() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [selected, setSelected] = useState(new Set());
+  const [viewMode, setViewMode] = useState("table"); // "table" | "chart"
 
   const load = () => {
     setLoading(true);
