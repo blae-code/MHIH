@@ -356,18 +356,28 @@ export default function Layout({ children, currentPageName }) {
             {/* Command search */}
             <button
               onClick={() => { setCmdOpen(true); setTimeout(() => cmdInputRef.current?.focus(), 50); }}
-              className="header-search-btn hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+              className="header-search-btn hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all hover:shadow-lg"
               style={{
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border-subtle)",
-                color: "var(--text-muted)",
-                width: 220
+                background: "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)",
+                border: "1px solid rgba(254,221,0,0.2)",
+                color: "var(--text-secondary)",
+                width: 240,
+                position: "relative",
+                overflow: "hidden"
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.12) 0%, rgba(254,221,0,0.06) 100%)";
+                e.currentTarget.style.borderColor = "rgba(254,221,0,0.4)";
+                e.currentTarget.style.color = "var(--text-primary)";
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)";
+                e.currentTarget.style.borderColor = "rgba(254,221,0,0.2)";
+                e.currentTarget.style.color = "var(--text-secondary)";
               }}>
-              <Search size={12} style={{ opacity: 0.6 }} />
-              <span className="flex-1 text-left">Quick search...</span>
-              <div className="flex items-center gap-0.5">
-                <kbd style={{ background: "var(--bg-overlay)", color: "var(--text-secondary)", fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid var(--border-default)", fontFamily: "monospace" }}>Ctrl+K</kbd>
-              </div>
+              <Search size={13} style={{ color: "var(--mnbc-yellow)", flexShrink: 0 }} />
+              <span className="flex-1 text-left">Search...</span>
+              <kbd style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 8, padding: "2px 6px", borderRadius: 2, border: "1px solid rgba(254,221,0,0.25)", fontFamily: "monospace", flexShrink: 0, fontWeight: 600 }}>⌘K</kbd>
             </button>
           </div>
 
