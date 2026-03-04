@@ -220,7 +220,7 @@ export default function DataRepository() {
             </tbody>
           </table>
         )}
-        </div>}
+      </div>}
 
       {/* Status bar */}
       <div className="px-4 py-1.5 border-t flex items-center gap-4 shrink-0"

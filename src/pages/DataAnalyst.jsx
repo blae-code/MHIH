@@ -310,18 +310,18 @@ export default function DataAnalyst() {
                           ))}
                         </div>
                       </div>
+                    )}
 
-                      {/* Inline chart from supporting data */}
-                      {chartMsgIdx === i && (
-                        <AnalystChartPanel
-                          title={msg.result.answer?.slice(0, 50) + "..."}
-                          chartData={msg.result.supporting_data.map(d => ({
-                            name: d.label,
-                            value: parseFloat(String(d.value).replace(/[^0-9.-]/g, "")) || 0,
-                          }))}
-                          onClose={() => setChartMsgIdx(null)}
-                        />
-                      )}
+                    {/* Inline chart from supporting data */}
+                    {msg.result.supporting_data?.length > 0 && chartMsgIdx === i && (
+                      <AnalystChartPanel
+                        title={msg.result.answer?.slice(0, 50) + "..."}
+                        chartData={msg.result.supporting_data.map(d => ({
+                          name: d.label,
+                          value: parseFloat(String(d.value).replace(/[^0-9.-]/g, "")) || 0,
+                        }))}
+                        onClose={() => setChartMsgIdx(null)}
+                      />
                     )}
 
                     {/* Key insights */}
