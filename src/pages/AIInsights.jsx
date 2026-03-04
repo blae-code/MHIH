@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Brain, Zap, Pin, Trash2, RefreshCw, Send, MessageSquare, TrendingUp, AlertTriangle, BarChart3, FileText } from "lucide-react";
+import { Brain, Pin, Trash2, RefreshCw, Send, MessageSquare, TrendingUp, AlertTriangle, BarChart3, FileText, ShieldCheck } from "lucide-react";
 
 const INSIGHT_TYPES = [
   { value: "summary", label: "Data Summary", icon: FileText },
@@ -10,6 +10,17 @@ const INSIGHT_TYPES = [
   { value: "comparison", label: "Population Comparison", icon: BarChart3 },
   { value: "recommendation", label: "Policy Recommendation", icon: Brain },
 ];
+
+function avgConfidence(metrics) {
+  if (!metrics.length) return 0.6;
+  const values = metrics.map(m => {
+    const fresh = Number(m.freshness_score ?? 0.6);
+    const grade = String(m.evidence_grade || "").toLowerCase();
+    const gradeScore = grade === "high" ? 0.95 : grade === "moderate" ? 0.75 : grade === "low" ? 0.45 : 0.6;
+    return fresh * 0.5 + gradeScore * 0.5;
+  });
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
 
 export default function AIInsights() {
   const { addLog } = useApp();
@@ -20,64 +31,122 @@ export default function AIInsights() {
   const [query, setQuery] = useState("");
   const [insightType, setInsightType] = useState("summary");
   const [activeInsight, setActiveInsight] = useState(null);
+  const [approvedOnly, setApprovedOnly] = useState(false);
 
   const load = () => {
     Promise.all([
-      base44.entities.AIInsight.list("-created_date", 50),
-      base44.entities.HealthMetric.list("-year", 200),
+      base44.entities.AIInsight.list("-created_date", 120),
+      base44.entities.HealthMetric.list("-year", 300),
     ]).then(([ins, met]) => {
-      setInsights(ins);
-      setMetrics(met);
-      addLog("success", `${ins.length} insights loaded`);
+      setInsights(ins || []);
+      setMetrics(met || []);
+      addLog("success", `${ins?.length || 0} insights loaded`);
     }).catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
 
+  const filteredInsights = useMemo(() => {
+    if (!approvedOnly) return insights;
+    return insights.filter(i => i.approval_status === "approved");
+  }, [insights, approvedOnly]);
+
   const handleGenerate = async () => {
     if (!query.trim()) return;
     setGenerating(true);
-    addLog("info", "Generating AI insight...");
+    addLog("info", "Generating policy-grade AI insight...");
 
-    const metricsSummary = metrics.slice(0, 50).map(m =>
-      `${m.name} (${m.category}, ${m.region}, ${m.year}): ${m.value} ${m.unit || ""}`
+    const metricsSubset = metrics.slice(0, 60);
+    const metricsSummary = metricsSubset.map(m =>
+      `${m.name} (${m.category}, ${m.region}, ${m.year}): ${m.value} ${m.unit || ""} | evidence=${m.evidence_grade || "unknown"} freshness=${m.freshness_score ?? "n/a"}`
     ).join("\n");
 
-    const prompt = `You are a senior health policy analyst specializing in Métis health and wellness in British Columbia, Canada.
-
-Available health metrics data:
-${metricsSummary}
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a senior health policy analyst specializing in Metis health in BC.
 
 User request (${insightType}): ${query}
 
-Provide a professional, evidence-based analysis. Structure your response with:
-1. Key findings
-2. Context & significance for Métis health policy in BC
-3. Data gaps or limitations
-4. Actionable recommendations
+Metrics sample:
+${metricsSummary}
 
-Be specific, cite patterns from the data, and connect to BC Métis community health priorities.`;
+Return: title, executive summary, findings, caveats, actions, and confidence(0-1).`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            executive_summary: { type: "string" },
+            findings: { type: "array", items: { type: "string" } },
+            caveats: { type: "array", items: { type: "string" } },
+            actions: { type: "array", items: { type: "string" } },
+            confidence: { type: "number" },
+          }
+        }
+      });
 
-    const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      const confidence = Math.max(0.2, Math.min(0.95, ((Number(result.confidence || 0.6) + avgConfidence(metricsSubset)) / 2)));
+      const content = [
+        `Executive Summary\n${result.executive_summary || ""}`,
+        `\nKey Findings\n${(result.findings || []).map(f => `- ${f}`).join("\n")}`,
+        `\nCaveats\n${(result.caveats || []).map(c => `- ${c}`).join("\n")}`,
+        `\nRecommended Actions\n${(result.actions || []).map(a => `- ${a}`).join("\n")}`,
+      ].join("\n");
 
-    const insight = await base44.entities.AIInsight.create({
-      title: query.slice(0, 80),
-      content: result,
-      type: insightType,
-      prompt: query,
-      generated_by: "AI",
-    });
+      const insight = await base44.entities.AIInsight.create({
+        title: result.title || query.slice(0, 100),
+        content,
+        type: insightType,
+        prompt: query,
+        generated_by: "AI",
+        confidence_score: Number(confidence.toFixed(2)),
+        requires_approval: true,
+        approval_status: "pending",
+      });
 
-    setInsights(prev => [insight, ...prev]);
-    setActiveInsight(insight);
-    setQuery("");
+      for (const metric of metricsSubset.slice(0, 12)) {
+        await base44.entities.EvidenceLink.create({
+          link_type: "insight_claim",
+          metric_id: metric.id,
+          metric_name: metric.name,
+          source_name: metric.data_source_name || "HealthMetric",
+          model_version: "insights-policy-v2",
+          confidence_score: Number(confidence.toFixed(2)),
+          evidence_grade: metric.evidence_grade || "moderate",
+          insight_id: insight.id,
+        }).catch(() => {});
+      }
+
+      const admins = await base44.entities.User.filter({ role: "admin" }, "-created_date", 5).catch(() => []);
+      const due = new Date();
+      due.setDate(due.getDate() + 2);
+      await base44.entities.ApprovalTask.create({
+        entity_type: "AIInsight",
+        entity_id: insight.id,
+        title: `Review AI Insight: ${insight.title}`,
+        status: "pending",
+        priority: confidence < 0.5 ? "high" : "medium",
+        assigned_to: admins?.[0]?.id || null,
+        assigned_to_email: admins?.[0]?.email || null,
+        requested_by: "system-ai",
+        due_date: due.toISOString(),
+        sla_hours: 48,
+        notes: "Human gate required before policy publication.",
+      }).catch(() => {});
+
+      setInsights(prev => [insight, ...prev]);
+      setActiveInsight(insight);
+      setQuery("");
+      addLog("success", "Insight generated and routed to approval queue");
+    } catch (e) {
+      addLog("error", e.message);
+    }
+
     setGenerating(false);
-    addLog("success", "AI insight generated");
   };
 
   const handlePin = async (ins) => {
-    const updated = await base44.entities.AIInsight.update(ins.id, { pinned: !ins.pinned });
+    await base44.entities.AIInsight.update(ins.id, { pinned: !ins.pinned });
     setInsights(prev => prev.map(i => i.id === ins.id ? { ...i, pinned: !i.pinned } : i));
   };
 
@@ -88,19 +157,23 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
     addLog("success", "Insight removed");
   };
 
-  const pinned = insights.filter(i => i.pinned);
-  const recent = insights.filter(i => !i.pinned);
+  const pinned = filteredInsights.filter(i => i.pinned);
+  const recent = filteredInsights.filter(i => !i.pinned);
 
   const TypeIcon = INSIGHT_TYPES.find(t => t.value === (activeInsight?.type || insightType))?.icon || Brain;
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Left: insight list */}
       <div className="flex flex-col border-r shrink-0"
-        style={{ width: 280, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
+        style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
         <div className="px-4 py-4 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-          <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)", letterSpacing: "0.08em" }}>
-            Generated Insights
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)", letterSpacing: "0.08em" }}>
+              Generated Insights
+            </div>
+            <label className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+              <input type="checkbox" checked={approvedOnly} onChange={e => setApprovedOnly(e.target.checked)} /> approved
+            </label>
           </div>
           <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>AI-powered analysis</p>
         </div>
@@ -120,7 +193,7 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
               <div>
                 <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--text-muted)", fontSize: 9, letterSpacing: "0.08em" }}>Recent</div>
                 {recent.length === 0 && (
-                  <div className="px-3 py-4 text-xs" style={{ color: "var(--text-muted)" }}>Generate your first insight below.</div>
+                  <div className="px-3 py-4 text-xs" style={{ color: "var(--text-muted)" }}>No insights in current filter.</div>
                 )}
                 {recent.map(ins => <InsightListItem key={ins.id} ins={ins} active={activeInsight?.id === ins.id} onClick={setActiveInsight} />)}
               </div>
@@ -129,24 +202,24 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
         </div>
       </div>
 
-      {/* Right: content area */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Active insight view */}
         {activeInsight ? (
           <div className="flex-1 overflow-auto p-6">
             <div className="max-w-3xl mx-auto">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded flex items-center justify-center"
-                    style={{ background: "var(--accent-muted)" }}>
+                  <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: "var(--accent-muted)" }}>
                     <TypeIcon size={14} style={{ color: "var(--accent-primary)" }} />
                   </div>
                   <div>
                     <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{activeInsight.title}</h2>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="tag">{activeInsight.type?.replace(/_/g," ")}</span>
-                      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        {new Date(activeInsight.created_date).toLocaleDateString("en-CA")}
+                      <span className="tag">{activeInsight.type?.replace(/_/g, " ")}</span>
+                      <span className="tag" style={{ color: "var(--accent-primary)", borderColor: "var(--accent-primary)" }}>
+                        confidence {(Number(activeInsight.confidence_score || 0) * 100).toFixed(0)}%
+                      </span>
+                      <span className="tag" style={{ color: activeInsight.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)", borderColor: activeInsight.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)" }}>
+                        {activeInsight.approval_status || "pending"}
                       </span>
                     </div>
                   </div>
@@ -174,10 +247,9 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
           </div>
         )}
 
-        {/* Query input */}
         <div className="p-6 border-t shrink-0" style={{ background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
           <div className="max-w-3xl mx-auto space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               {INSIGHT_TYPES.map(t => (
                 <button key={t.value} onClick={() => setInsightType(t.value)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
@@ -190,6 +262,9 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
                   <span className="hidden sm:inline">{t.label}</span>
                 </button>
               ))}
+              <span className="text-xs ml-auto flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                <ShieldCheck size={11} /> Human gate enabled
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
@@ -198,7 +273,7 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
                 <input
                   className="flex-1 bg-transparent outline-none text-sm"
                   style={{ color: "var(--text-primary)" }}
-                  placeholder={`Ask about Métis health data — e.g. "Summarize diabetes trends in BC Métis communities..."`}
+                  placeholder={`Ask about Metis health data (policy-focused insight)...`}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleGenerate()}
@@ -237,8 +312,9 @@ function InsightListItem({ ins, active, onClick }) {
         </span>
         {ins.pinned && <Pin size={9} style={{ color: "var(--accent-primary)", flexShrink: 0 }} />}
       </div>
-      <div className="text-xs mt-1 ml-5" style={{ color: "var(--text-muted)", fontSize: 9 }}>
-        {new Date(ins.created_date).toLocaleDateString("en-CA")}
+      <div className="text-xs mt-0.5 ml-5 flex items-center gap-2" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+        <span>{new Date(ins.created_date).toLocaleDateString("en-CA")}</span>
+        <span style={{ color: ins.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)" }}>{ins.approval_status || "pending"}</span>
       </div>
     </button>
   );

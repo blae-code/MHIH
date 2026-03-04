@@ -5,6 +5,7 @@ import {
   Cell, ReferenceLine, Legend } from
 "recharts";
 import { BarChart2, TrendingUp, Grid3X3, X, ChevronDown, Check, Filter, Download, Target, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { compareToBenchmark, directionLabel, getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#f85149", "#a78bfa", "#d29922", "#38bdf8"];
 const CATEGORIES = ["chronic_disease", "mental_health", "substance_use", "maternal_child", "social_determinants", "demographics", "mortality", "access_to_care", "other"];
@@ -232,7 +233,17 @@ function BenchmarkTable({ data, benchmark }) {
   if (!benchmark.active || benchmark.value == null) return null;
   const rows = data.
   filter((m) => m.value != null).
-  map((m) => ({ ...m, diff: m.value - benchmark.value, pct: (m.value - benchmark.value) / Math.abs(benchmark.value || 1) * 100 })).
+  map((m) => {
+    const direction = getMetricDirection(m);
+    const bench = compareToBenchmark(m.value, benchmark.value, direction);
+    return {
+      ...m,
+      direction,
+      diff: bench.delta,
+      better: bench.better,
+      pct: (bench.delta / Math.abs(benchmark.value || 1)) * 100
+    };
+  }).
   sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).
   slice(0, 10);
 
@@ -241,7 +252,7 @@ function BenchmarkTable({ data, benchmark }) {
       <div className="px-3 py-2 text-xs font-semibold flex items-center gap-2"
       style={{ background: "var(--bg-overlay)", color: "var(--text-secondary)" }}>
         <Target size={10} style={{ color: BENCHMARK_COLOR }} />
-        Performance vs Benchmark ({benchmark.value.toFixed(1)}) — Top 10 deviations
+        Performance vs Benchmark ({benchmark.value.toFixed(1)}) — Semantics-aware top deviations
       </div>
       <div className="overflow-auto" style={{ maxHeight: 200 }}>
         <table className="w-full text-xs">
@@ -254,9 +265,8 @@ function BenchmarkTable({ data, benchmark }) {
           </thead>
           <tbody>
             {rows.map((m, i) => {
-              const isAbove = m.diff > 0;
-              const isNeutral = Math.abs(m.diff) < 0.01;
-              const color = isNeutral ? "var(--text-muted)" : isAbove ? "#f85149" : "#2ea043";
+              const isNeutral = Math.abs(m.diff) < 0.01 || m.better == null;
+              const color = isNeutral ? "var(--text-muted)" : m.better ? "#2ea043" : "#f85149";
               return (
                 <tr key={i} style={{ borderTop: "1px solid var(--border-subtle)" }}
                 onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
@@ -268,12 +278,13 @@ function BenchmarkTable({ data, benchmark }) {
                   <td className="px-3 py-1.5" style={{ color: "var(--text-primary)" }}>{m.value.toFixed(2)}</td>
                   <td className="px-3 py-1.5">
                     <span className="flex items-center gap-1 font-medium" style={{ color }}>
-                      {isNeutral ? <Minus size={10} /> : isAbove ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
-                      {isAbove ? "+" : ""}{m.diff.toFixed(2)}
+                      {isNeutral ? <Minus size={10} /> : m.diff > 0 ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
+                      {m.diff > 0 ? "+" : ""}{m.diff.toFixed(2)}
                     </span>
                   </td>
                   <td className="px-3 py-1.5" style={{ color }}>
-                    {isAbove ? "+" : ""}{m.pct.toFixed(1)}%
+                    {m.diff > 0 ? "+" : ""}{m.pct.toFixed(1)}%
+                    <div style={{ fontSize: 9, color: "var(--text-muted)" }}>{directionLabel(m.direction)}</div>
                   </td>
                 </tr>);
 
@@ -296,6 +307,7 @@ function DisparityBar({ data, drill, benchmark }) {
       fullName: m.name, metis: parseFloat(m.value?.toFixed(2)),
       bc: parseFloat(m.comparison_value?.toFixed(2)),
       gap: parseFloat((m.value - m.comparison_value).toFixed(2)),
+      direction: getMetricDirection(m),
       region: m.region, category: m.category, year: m.year
     })).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
   }, [data]);
@@ -371,7 +383,15 @@ function ScatterPlot({ data, drill, benchmark }) {
     const colorMap = {};
     [...new Set(data.map((m) => m.category))].forEach((c, i) => {colorMap[c] = COLORS[i % COLORS.length];});
     const pts = data.filter((m) => m.value != null && m.comparison_value != null).
-    map((m) => ({ x: parseFloat(m.comparison_value?.toFixed(2)), y: parseFloat(m.value?.toFixed(2)), name: m.name, category: m.category, region: m.region, year: m.year }));
+    map((m) => ({
+      x: parseFloat(m.comparison_value?.toFixed(2)),
+      y: parseFloat(m.value?.toFixed(2)),
+      name: m.name,
+      category: m.category,
+      region: m.region,
+      year: m.year,
+      direction: getMetricDirection(m),
+    }));
     return { catColors: colorMap, points: pts };
   }, [data]);
 
@@ -385,6 +405,9 @@ function ScatterPlot({ data, drill, benchmark }) {
         <Tooltip content={({ payload }) => {
           const d = payload?.[0]?.payload;
           if (!d) return null;
+          const bench = benchmark.active && benchmark.value != null
+            ? compareToBenchmark(d.y, benchmark.value, d.direction)
+            : null;
           return (
             <div className="rounded-lg p-3 text-xs space-y-2" style={{ ...TOOLTIP_STYLE, minWidth: 200 }}>
               <div style={{ ...TOOLTIP_LABEL_STYLE, fontSize: 12, marginBottom: 4 }}>{d.name}</div>
@@ -406,12 +429,17 @@ function ScatterPlot({ data, drill, benchmark }) {
                 </div>
                 <div className="flex justify-between items-center pt-1 border-t" style={{ borderColor: "var(--border-subtle)" }}>
                   <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>Disparity Gap</span>
-                  <span style={{ color: d.y > d.x ? "#f85149" : "#2ea043", fontWeight: 700 }}>{d.y - d.x > 0 ? "+" : ""}{(d.y - d.x).toFixed(2)}</span>
+                  <span style={{ color: isHarmfulGap(d.y - d.x, d.direction) ? "#f85149" : "#2ea043", fontWeight: 700 }}>
+                    {(d.y - d.x) > 0 ? "+" : ""}{(d.y - d.x).toFixed(2)}
+                  </span>
                 </div>
                 {benchmark.active && benchmark.value != null &&
                 <div className="flex justify-between items-center">
                     <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>vs Benchmark</span>
-                    <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>{d.y - benchmark.value > 0 ? "+" : ""}{(d.y - benchmark.value).toFixed(2)}</span>
+                    <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>
+                      {bench?.delta > 0 ? "+" : ""}
+                      {(bench?.delta || 0).toFixed(2)}
+                    </span>
                   </div>
                 }
               </div>
@@ -437,8 +465,11 @@ function Heatmap({ metrics, benchmark }) {
     const map = {};
     metrics.forEach((m) => {
       const key = `${m.region}||${m.category}`;
-      if (!map[key]) map[key] = { sum: 0, count: 0 };
+      if (!map[key]) map[key] = { sum: 0, count: 0, direction: getMetricDirection(m) };
       map[key].sum += m.value;map[key].count++;
+      if (!map[key].direction || map[key].direction === "neutral") {
+        map[key].direction = getMetricDirection(m);
+      }
     });
     return { cats, regs, grid: map };
   }, [metrics]);
@@ -468,11 +499,14 @@ function Heatmap({ metrics, benchmark }) {
               {cats.map((cat) => {
               const cell = grid[`${reg}||${cat}`];
               const avg = cell ? cell.sum / cell.count : null;
-              const isBelowBench = benchmark.active && benchmark.value != null && avg != null && avg < benchmark.value;
+              const benchEval = benchmark.active && benchmark.value != null && avg != null
+                ? compareToBenchmark(avg, benchmark.value, cell?.direction || "neutral")
+                : null;
+              const isHarmfulVsBench = benchEval ? benchEval.better === false : false;
               return (
                 <td key={cat} className="px-1 py-1 text-center" title={avg ? `${reg} / ${cat}: ${avg.toFixed(1)}${benchmark.active && benchmark.value != null ? ` (benchmark: ${benchmark.value.toFixed(1)})` : ""}` : "No data"}>
                     <div className="rounded mx-auto flex items-center justify-center relative font-bold"
-                  style={{ background: color(avg), width: 52, height: 28, color: "var(--bg-base)", fontSize: 11, fontWeight: 700, outline: isBelowBench ? `2px solid ${BENCHMARK_COLOR}` : "none", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+                  style={{ background: color(avg), width: 52, height: 28, color: "var(--bg-base)", fontSize: 11, fontWeight: 700, outline: isHarmfulVsBench ? `2px solid ${BENCHMARK_COLOR}` : "none", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
                       {avg ? avg.toFixed(1) : "—"}
                     </div>
                   </td>);
@@ -485,7 +519,7 @@ function Heatmap({ metrics, benchmark }) {
       {benchmark.active && benchmark.value != null &&
       <div className="mt-2 text-xs flex items-center gap-1.5" style={{ color: BENCHMARK_COLOR }}>
           <div className="w-3 h-3 rounded-sm" style={{ outline: `2px solid ${BENCHMARK_COLOR}` }} />
-          Cells below benchmark ({benchmark.value.toFixed(1)}) are highlighted
+          Cells on the harmful side of benchmark ({benchmark.value.toFixed(1)}) are highlighted
         </div>
       }
     </div>);
@@ -503,8 +537,13 @@ function EmptyState({ msg }) {
 function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
   if (!metric) return null;
 
+  const direction = getMetricDirection(metric);
   const gap = metric.comparison_value != null ? metric.value - metric.comparison_value : null;
-  const benchDiff = benchmark.active && benchmark.value != null ? (metric.metis ?? metric.value) - benchmark.value : null;
+  const gapIsHarmfulNow = gap != null ? isHarmfulGap(gap, direction) : null;
+  const benchCmp = benchmark.active && benchmark.value != null
+    ? compareToBenchmark((metric.metis ?? metric.value), benchmark.value, direction)
+    : null;
+  const benchDiff = benchCmp ? benchCmp.delta : null;
 
   // Get historical data for this specific metric (same name, region, category)
   const historicalData = useMemo(() => {
@@ -553,6 +592,8 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
           <span style={{ color: "var(--text-muted)" }}>{metric.category?.replace(/_/g, " ")}</span>
           <span style={{ color: "var(--text-muted)" }}>•</span>
           <span style={{ color: "var(--text-muted)" }}>{metric.region}</span>
+          <span style={{ color: "var(--text-muted)" }}>•</span>
+          <span style={{ color: "var(--text-muted)" }}>{directionLabel(direction)}</span>
         </div>
       </div>
 
@@ -568,9 +609,9 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
         {gap != null &&
         <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Disparity Gap</div>
-            <div style={{ color: gap > 0 ? "#f85149" : "#2ea043", fontWeight: 700 }}>{gap > 0 ? "+" : ""}{gap.toFixed(2)}</div>
+            <div style={{ color: gapIsHarmfulNow ? "#f85149" : "#2ea043", fontWeight: 700 }}>{gap > 0 ? "+" : ""}{gap.toFixed(2)}</div>
             <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
-              {gap > 0 ? "Higher" : "Lower"} than BC
+              {gapIsHarmfulNow ? "Worse" : "Better"} than BC baseline
             </div>
           </div>
         }
@@ -614,7 +655,7 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
         {histChange != null &&
         <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Total Trend</div>
-            <div style={{ color: histChange > 0 ? "#2ea043" : "#f85149", fontWeight: 700 }}>
+            <div style={{ color: isImprovement(histChange, direction) ? "#2ea043" : "#f85149", fontWeight: 700 }}>
               {histChange > 0 ? "↑" : "↓"} {Math.abs(histChange).toFixed(2)}
             </div>
             <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
@@ -629,7 +670,7 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
       <div className="rounded-md p-2" style={{ background: `${BENCHMARK_COLOR}11`, border: `1px solid ${BENCHMARK_COLOR}33` }}>
           <div style={{ fontSize: 9, fontWeight: 600, color: BENCHMARK_COLOR, marginBottom: 2 }}>vs Benchmark ({benchmark.value.toFixed(1)})</div>
           <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 12 }}>
-            {benchDiff > 0 ? "+" : ""}{benchDiff.toFixed(2)} {benchDiff > 0 ? "above" : "below"}
+            {benchDiff > 0 ? "+" : ""}{benchDiff.toFixed(2)} {benchCmp?.better == null ? "delta" : benchCmp.better ? "beneficial side" : "harmful side"}
           </div>
         </div>
       }

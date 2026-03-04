@@ -23,14 +23,14 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, triaged: 0 });
     }
 
-    // Identify analysts/admins for assignment
-    const assignable = users.filter(u => u.role === 'admin' || u.role === 'analyst');
+    // Identify assignable admins/users for review assignment
+    const assignable = users.filter(u => u.role === 'admin' || u.role === 'user');
 
     const flagSummary = flags.slice(0, 30).map(f =>
       `ID:${f.id.slice(-6)} | ${f.severity} | ${f.flag_type} | Metric: "${f.metric_name}" | ${f.description}`
     ).join('\n');
 
-    const userList = assignable.map(u => `${u.email} (${u.role})`).join(', ') || 'No analysts available';
+    const userList = assignable.map(u => `${u.email} (${u.role})`).join(', ') || 'No assignable users available';
 
     const prompt = `You are a data quality triage agent for the BC Métis Health Intelligence Platform.
 

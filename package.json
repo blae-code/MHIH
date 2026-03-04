@@ -9,7 +9,11 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate:functions": "node scripts/validate-function-integrity.mjs",
+    "validate:routes": "node scripts/validate-route-integrity.mjs",
+    "validate:roles": "node scripts/validate-role-policy.mjs",
+    "validate:runtime": "npm run validate:functions && npm run validate:routes && npm run validate:roles"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.18",

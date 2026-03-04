@@ -92,7 +92,23 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      let resolvedUser = currentUser;
+
+      // Enforce runtime role normalization (idempotent).
+      try {
+        const roleRes = await base44.functions.invoke("assignDefaultUserRole", {
+          user_id: currentUser?.id,
+          email: currentUser?.email,
+        });
+        const resolvedRole = roleRes?.data?.role;
+        if (resolvedRole && resolvedRole !== currentUser?.role) {
+          resolvedUser = { ...currentUser, role: resolvedRole };
+        }
+      } catch (roleErr) {
+        console.warn("Role normalization skipped:", roleErr?.message || roleErr);
+      }
+
+      setUser(resolvedUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
     } catch (error) {

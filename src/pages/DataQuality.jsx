@@ -43,7 +43,7 @@ export default function DataQuality() {
   const [selected, setSelected] = useState(null);
   const [lastScan, setLastScan] = useState(null);
 
-  const canEdit = user?.role === "admin" || user?.role === "analyst";
+  const canEdit = user?.role === "admin" || user?.role === "user";
 
   const load = async () => {
     const data = await base44.entities.DataQualityFlag.list("-created_date", 500);

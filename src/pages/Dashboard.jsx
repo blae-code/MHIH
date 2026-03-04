@@ -17,6 +17,7 @@ import TrendingMetrics from "../components/dashboard/TrendingMetrics";
 import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
 import { Plus } from "lucide-react";
+import { getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREFS_KEY = "mhip_dashboard_prefs";
@@ -256,18 +257,38 @@ export default function Dashboard() {
   const healthStats = (() => {
     const metisMetrics = metrics.filter((m) => m.metis_specific);
     const withComparison = metisMetrics.filter((m) => m.comparison_value != null);
-    const disparities = withComparison.map((m) => m.value - m.comparison_value);
-    const avgDisparity = disparities.length > 0 ? disparities.reduce((a, b) => a + b, 0) / disparities.length : 0;
+    const disparityScores = withComparison.map((m) => {
+      const gap = Number(m.value) - Number(m.comparison_value);
+      const direction = getMetricDirection(m);
+      return isHarmfulGap(gap, direction) ? Math.abs(gap) : -Math.abs(gap);
+    });
+    const avgDisparityScore = disparityScores.length > 0
+      ? disparityScores.reduce((a, b) => a + b, 0) / disparityScores.length
+      : 0;
 
-    // Trend: compare last year vs previous year
-    const thisYear = Math.max(...metrics.filter((m) => m.year).map((m) => m.year));
-    const lastYear = thisYear - 1;
-    const thisYearMetrics = metrics.filter((m) => m.year === thisYear);
-    const lastYearMetrics = metrics.filter((m) => m.year === lastYear);
-    const trend = thisYearMetrics.length > 0 && lastYearMetrics.length > 0 ?
-    thisYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / thisYearMetrics.length -
-    lastYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / lastYearMetrics.length :
-    0;
+    // Trend: compare latest vs prior point per metric with directional semantics.
+    const seriesMap = {};
+    for (const m of metisMetrics) {
+      if (!m.name || !m.year || m.value == null) continue;
+      const key = `${m.name}||${m.region || "BC"}||${m.category || "other"}`;
+      if (!seriesMap[key]) seriesMap[key] = [];
+      seriesMap[key].push(m);
+    }
+
+    let improved = 0;
+    let worsened = 0;
+    for (const rows of Object.values(seriesMap)) {
+      const ordered = rows.sort((a, b) => a.year - b.year);
+      if (ordered.length < 2) continue;
+      const latest = ordered[ordered.length - 1];
+      const prev = ordered[ordered.length - 2];
+      const delta = Number(latest.value) - Number(prev.value);
+      const direction = getMetricDirection(latest);
+      if (direction === "neutral") continue;
+      if (isImprovement(delta, direction)) improved += 1; else worsened += 1;
+    }
+    const directionalCount = improved + worsened;
+    const trendBalance = directionalCount > 0 ? ((improved - worsened) / directionalCount) * 100 : 0;
 
     const regionCounts = {};
     metisMetrics.forEach((m) => {
@@ -276,13 +297,36 @@ export default function Dashboard() {
     const topRegion = Object.entries(regionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
     const categories = [...new Set(metisMetrics.map((m) => m.category))].length;
 
-    return { avgDisparity, trend, topRegion, categories, totalMetricsSeries: metisMetrics.length };
+    return {
+      avgDisparityScore,
+      trendBalance,
+      improved,
+      worsened,
+      directionalCount,
+      topRegion,
+      categories,
+      totalMetricsSeries: metisMetrics.length,
+    };
   })();
 
   const ALL_STAT_CARDS = {
     metis_metrics: { label: "Métis Health Indicators", value: healthStats.totalMetricsSeries, icon: Activity, color: "#FEDD00", bgColor: "rgba(254,221,0,0.08)", desc: "Métis-specific health metrics tracked" },
-    health_disparity: { label: "Avg Health Disparity", value: healthStats.avgDisparity.toFixed(1), icon: TrendingUp, color: healthStats.avgDisparity > 0 ? "#FF4757" : "#2ED573", bgColor: healthStats.avgDisparity > 0 ? "rgba(255,71,87,0.08)" : "rgba(46,213,115,0.08)", desc: healthStats.avgDisparity > 0 ? "Higher than BC population" : "Better than BC population" },
-    yearly_trend: { label: "Year-over-Year Trend", value: (healthStats.trend > 0 ? "+" : "") + healthStats.trend.toFixed(1), icon: Brain, color: healthStats.trend > 0 ? "#2ED573" : "#FF4757", bgColor: healthStats.trend > 0 ? "rgba(46,213,115,0.08)" : "rgba(255,71,87,0.08)", desc: healthStats.trend > 0 ? "Improving health outcomes" : "Declining health outcomes" },
+    health_disparity: {
+      label: "Net Disparity Burden",
+      value: healthStats.avgDisparityScore.toFixed(1),
+      icon: TrendingUp,
+      color: healthStats.avgDisparityScore > 0 ? "#FF4757" : "#2ED573",
+      bgColor: healthStats.avgDisparityScore > 0 ? "rgba(255,71,87,0.08)" : "rgba(46,213,115,0.08)",
+      desc: healthStats.avgDisparityScore > 0 ? "Harmful gaps dominate" : "Protective gaps dominate",
+    },
+    yearly_trend: {
+      label: "Directional Trend Balance",
+      value: `${healthStats.trendBalance > 0 ? "+" : ""}${healthStats.trendBalance.toFixed(1)}%`,
+      icon: Brain,
+      color: healthStats.trendBalance > 0 ? "#2ED573" : "#FF4757",
+      bgColor: healthStats.trendBalance > 0 ? "rgba(46,213,115,0.08)" : "rgba(255,71,87,0.08)",
+      desc: `${healthStats.improved} improving vs ${healthStats.worsened} worsening`,
+    },
     coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "#40C4FF", bgColor: "rgba(64,196,255,0.08)", desc: `${healthStats.categories} major health categories tracked` }
   };
 
@@ -304,8 +348,8 @@ export default function Dashboard() {
             const cardId = Object.keys(ALL_STAT_CARDS).find((k) => ALL_STAT_CARDS[k].label === card.label);
             const tooltips = {
               "Métis Health Indicators": "Total number of Métis-specific health indicators currently tracked in the system. Includes data on chronic diseases, mental health, substance use, maternal/child health, social determinants, and mortality metrics.",
-              "Avg Health Disparity": "Average difference between Métis health outcomes and the BC general population. Positive values indicate worse outcomes for Métis; negative values indicate better outcomes.",
-              "Year-over-Year Trend": "Percentage change in average health metric values from the previous year. Positive indicates improving health outcomes; negative indicates declining outcomes.",
+              "Net Disparity Burden": "Average signed burden where gaps are scored by metric directionality (higher/lower-is-better). Positive means harmful gaps dominate.",
+              "Directional Trend Balance": "Share balance of improving versus worsening metric series, interpreted by each metric's directionality semantics.",
               "Health Categories": "Number of major health indicator categories being monitored, including chronic disease, mental health, substance use, maternal/child health, social determinants, demographics, mortality, and access to care."
             };
             return (

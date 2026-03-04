@@ -8,12 +8,13 @@ import {
   Info, X, Zap, FileDown, Upload, BookOpen, Shield, HelpCircle,
   FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot,
   MapPin, TrendingUp, Wrench, BellRing, Workflow, PanelLeftClose,
-  PanelLeftOpen, Sparkles, LogOut, User, Circle
+  PanelLeftOpen, Sparkles, LogOut, User, Circle,
+  FlaskConical, ClipboardCheck, MapPinned, Siren, BookMarked, Link2,
+  BrainCircuit, ListOrdered, GitCompare, FileText
 } from "lucide-react";
-import NotificationCenter from "../components/notifications/NotificationCenter";
-import NotificationPreferences from "../components/notifications/NotificationPreferences";
-import FeedbackModal from "../components/feedback/FeedbackModal";
-import { MessageSquare as FeedbackIcon } from "lucide-react";
+import NotificationCenter from "./components/notifications/NotificationCenter";
+import NotificationPreferences from "./components/notifications/NotificationPreferences";
+import FeedbackModal from "./components/feedback/FeedbackModal";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
@@ -27,6 +28,23 @@ const NAV_SECTIONS = [
       { icon: BarChart3, label: "Visualizations", page: "Visualizations", tooltip: "Charts, maps & trend views" },
       { icon: Brain, label: "AI Insights", page: "AIInsights", tooltip: "AI-generated health analysis" },
       { icon: Sparkles, label: "AI Analyst", page: "DataAnalyst", tooltip: "Ask questions about your data" },
+    ]
+  },
+  {
+    key: "policy", label: "Policy", color: "#f472b6",
+    items: [
+      { icon: FlaskConical, label: "Policy Lab", page: "PolicyLab", tooltip: "Scenario and policy experimentation" },
+      { icon: ListOrdered, label: "Recommendations", page: "Recommendations", tooltip: "Confidence-ranked recommendation queue" },
+      { icon: BellRing, label: "Watchlists", page: "Watchlists", tooltip: "KPI missions and threshold watches" },
+      { icon: Activity, label: "Interventions", page: "Interventions", tooltip: "Intervention registry and outcomes" },
+      { icon: ClipboardCheck, label: "Approvals Inbox", page: "ApprovalsInbox", tooltip: "Human gate for high-impact outputs" },
+      { icon: BrainCircuit, label: "Backtesting", page: "Backtesting", tooltip: "Forecast error and drift monitoring" },
+      { icon: GitCompare, label: "Conflict Workbench", page: "ConflictWorkbench", tooltip: "Adjudicate conflicting source values" },
+      { icon: Link2, label: "Evidence Explorer", page: "EvidenceExplorer", tooltip: "Trace claims to evidence links" },
+      { icon: Siren, label: "Alerts Center", page: "AlertsCenter", tooltip: "Sentinel and conflict alert operations" },
+      { icon: MapPinned, label: "Geo Equity Map", page: "GeoEquityMap", tooltip: "Regional burden and disparity hotspots" },
+      { icon: BookMarked, label: "Knowledge Admin", page: "KnowledgeAdmin", tooltip: "Policy knowledge indexing and query" },
+      { icon: FileText, label: "Hansard Intel", page: "HansardIntel", tooltip: "BC/Federal Hansard intelligence feed" },
     ]
   },
   {
@@ -78,6 +96,18 @@ const COMMAND_ITEMS = [
   { label: "Visualizations", page: "Visualizations", icon: LineChart, desc: "Charts & trend views" },
   { label: "AI Insights", page: "AIInsights", icon: Brain, desc: "AI-generated analysis" },
   { label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, desc: "Ask questions about data" },
+  { label: "Policy Lab", page: "PolicyLab", icon: FlaskConical, desc: "Intervention scenarios and simulation runs" },
+  { label: "Recommendations", page: "Recommendations", icon: ListOrdered, desc: "Ranked policy recommendations" },
+  { label: "Watchlists", page: "Watchlists", icon: BellRing, desc: "Mission thresholds and breach monitoring" },
+  { label: "Interventions Registry", page: "Interventions", icon: Activity, desc: "Track planned and active interventions" },
+  { label: "Approvals Inbox", page: "ApprovalsInbox", icon: ClipboardCheck, desc: "Human approvals for sensitive outputs" },
+  { label: "Forecast Backtesting", page: "Backtesting", icon: BrainCircuit, desc: "MAPE drift and holdout checks" },
+  { label: "Conflict Workbench", page: "ConflictWorkbench", icon: GitCompare, desc: "Reconcile source conflicts" },
+  { label: "Evidence Explorer", page: "EvidenceExplorer", icon: Link2, desc: "Trace claims to source evidence" },
+  { label: "Alerts Center", page: "AlertsCenter", icon: Siren, desc: "Sentinel and source conflict alerts" },
+  { label: "Geo Equity Map", page: "GeoEquityMap", icon: MapPinned, desc: "Map-first disparity exploration" },
+  { label: "Knowledge Admin", page: "KnowledgeAdmin", icon: BookMarked, desc: "Policy knowledge document management" },
+  { label: "Hansard Intelligence", page: "HansardIntel", icon: FileText, desc: "BC and Federal Hansard intelligence" },
   { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp, desc: "Forecasts & modelling" },
   { label: "Geo Map", page: "GeoMap", icon: MapPin, desc: "Regional health map" },
   { label: "Alerts", page: "Alerts", icon: BellRing, desc: "Threshold notifications" },
@@ -656,7 +686,7 @@ export default function Layout({ children, currentPageName }) {
                         {user?.role === "admin" ? (
                           <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
                         ) : (
-                          <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "viewer"}</span>
+                          <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "user"}</span>
                         )}
                       </div>
                     </div>

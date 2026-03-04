@@ -3,9 +3,10 @@ import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { UserPlus, Mail, Shield, User, Eye, RefreshCw, Trash2 } from "lucide-react";
 
-const ROLES = ["admin", "analyst", "viewer"];
-const ROLE_COLORS = { admin: "var(--accent-primary)", analyst: "var(--color-info)", viewer: "var(--text-muted)" };
-const ROLE_ICONS = { admin: Shield, analyst: User, viewer: Eye };
+const SYSTEM_ADMIN_EMAIL = "blae@katrasoluta.com";
+const ROLES = ["admin", "user"];
+const ROLE_COLORS = { admin: "var(--accent-primary)", user: "var(--color-info)" };
+const ROLE_ICONS = { admin: Shield, user: User };
 
 export default function Team() {
   const { user, addLog } = useApp();
@@ -13,15 +14,25 @@ export default function Team() {
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("viewer");
+  const [inviteRole, setInviteRole] = useState("user");
   const [inviting, setInviting] = useState(false);
 
   const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     if (!isAdmin) { setLoading(false); return; }
-    base44.entities.User.list("-created_date", 100)
-      .then(data => { setUsers(data); addLog("success", `${data.length} team members loaded`); })
+    base44.functions.invoke("normalizeUserRoles", { dry_run: false, limit: 3000 })
+      .catch(() => null)
+      .then(() => base44.entities.User.list("-created_date", 200))
+      .then(data => {
+        const normalized = (data || []).map((u) => {
+          const email = String(u.email || "").toLowerCase();
+          const expectedRole = email === SYSTEM_ADMIN_EMAIL ? "admin" : (u.role === "admin" ? "admin" : "user");
+          return { ...u, role: expectedRole };
+        });
+        setUsers(normalized);
+        addLog("success", `${normalized.length} team members loaded`);
+      })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));
   }, [isAdmin]);
@@ -29,17 +40,29 @@ export default function Team() {
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
     setInviting(true);
-    await base44.users.inviteUser(inviteEmail.trim(), inviteRole);
-    addLog("success", `Invited ${inviteEmail} as ${inviteRole}`);
-    setInviteEmail("");
-    setShowInvite(false);
-    setInviting(false);
+    try {
+      const inviteEmailTrimmed = inviteEmail.trim();
+      const normalizedRole = inviteEmailTrimmed.toLowerCase() === SYSTEM_ADMIN_EMAIL ? "admin" : (inviteRole === "admin" ? "admin" : "user");
+      await base44.users.inviteUser(inviteEmailTrimmed, normalizedRole);
+      addLog("success", `Invited ${inviteEmailTrimmed} as ${normalizedRole}`);
+      setInviteEmail("");
+      setShowInvite(false);
+    } catch (e) {
+      addLog("error", e.message);
+    } finally {
+      setInviting(false);
+    }
   };
 
-  const handleRoleChange = async (userId, newRole) => {
-    await base44.entities.User.update(userId, { role: newRole });
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    addLog("success", "Role updated");
+  const handleRoleChange = async (targetUser, newRole) => {
+    try {
+      const normalizedRole = targetUser.email?.toLowerCase() === SYSTEM_ADMIN_EMAIL ? "admin" : (newRole === "admin" ? "admin" : "user");
+      await base44.entities.User.update(targetUser.id, { role: normalizedRole });
+      setUsers(prev => prev.map(u => u.id === targetUser.id ? { ...u, role: normalizedRole } : u));
+      addLog("success", "Role updated");
+    } catch (e) {
+      addLog("error", e.message);
+    }
   };
 
   if (!isAdmin) return (
@@ -66,7 +89,7 @@ export default function Team() {
         {ROLES.map(role => {
           const RoleIcon = ROLE_ICONS[role];
           const count = users.filter(u => u.role === role).length;
-          const colors = { admin: "#FEDD00", analyst: "#40c4ff", viewer: "#a78bfa" };
+          const colors = { admin: "#FEDD00", user: "#40c4ff" };
           return (
             <div key={role} className="rounded-xl p-5 transition-all"
               style={{
@@ -114,7 +137,7 @@ export default function Team() {
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
                     {u.full_name || "—"}
-                    {u.email === "blae@katrasoluta.com" && (
+                    {u.email === SYSTEM_ADMIN_EMAIL && (
                       <span className="ml-2 text-xs px-2 py-0.5 rounded-full ml-2"
                         style={{ background: "var(--accent-muted)", color: "var(--accent-primary)", fontSize: 9, fontWeight: 700 }}>
                         SYSTEM ADMIN
@@ -128,15 +151,15 @@ export default function Team() {
               </div>
               <div className="flex items-center gap-2">
                 <select
-                   value={u.role || "viewer"}
-                   onChange={e => handleRoleChange(u.id, e.target.value)}
-                   disabled={u.email === "blae@katrasoluta.com"}
+                   value={u.role || "user"}
+                   onChange={e => handleRoleChange(u, e.target.value)}
+                   disabled={u.email === SYSTEM_ADMIN_EMAIL}
                    className="text-xs px-3 py-1.5 rounded-lg outline-none font-semibold transition-all"
                    style={{
                      background: "var(--bg-overlay)",
                      border: `1.5px solid ${ROLE_COLORS[u.role] || "var(--border-subtle)"}`,
                      color: ROLE_COLORS[u.role] || "var(--text-muted)",
-                     opacity: u.email === "blae@katrasoluta.com" ? 0.6 : 1
+                     opacity: u.email === SYSTEM_ADMIN_EMAIL ? 0.6 : 1
                    }}>
                    {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
                 </select>

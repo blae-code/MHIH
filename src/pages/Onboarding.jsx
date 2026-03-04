@@ -241,8 +241,7 @@ export default function Onboarding() {
                     </div>
                     <ul className="space-y-2 text-xs" style={{ color: "var(--text-muted)" }}>
                       <li>• <strong>Admin:</strong> Full platform access & team management</li>
-                      <li>• <strong>Analyst:</strong> Data management & insights</li>
-                      <li>• <strong>Viewer:</strong> View-only dashboard access</li>
+                      <li>• <strong>User:</strong> Analysis, ingestion, and recommendation workflows</li>
                     </ul>
                   </div>
                 )}

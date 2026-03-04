@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import {
   Bot, Zap, RefreshCw, CheckCircle, AlertCircle, Clock,
-  TrendingUp, ShieldCheck, FileText, GitCompare, Search, ChevronDown, ChevronRight, Telescope
+  TrendingUp, ShieldCheck, FileText, GitCompare, Search, ChevronDown, ChevronRight, Telescope, ListOrdered
 } from "lucide-react";
 
 const AGENTS = [
@@ -61,6 +61,105 @@ const AGENTS = [
     description: "Uses historical metric time series and linear regression to forecast future health outcomes, detect widening disparities, and issue early warnings for policymakers.",
     schedule: "Weekly on Sundays",
   },
+  {
+    key: "sentinel_scan",
+    fn: "runSentinelScan",
+    name: "Sentinel Alert Agent",
+    icon: AlertCircle,
+    color: "var(--color-error)",
+    description: "Detects abnormal trend shifts and widening disparity signals, then posts alert events and weekly intelligence feed updates.",
+    schedule: "Daily at 6am",
+  },
+  {
+    key: "source_conflict",
+    fn: "reconcileSourceConflict",
+    name: "Conflict Reconciliation Agent",
+    icon: GitCompare,
+    color: "var(--color-warning)",
+    description: "Finds conflicting source values, opens conflict alerts, and routes inconsistency flags for review.",
+    schedule: "Twice weekly",
+  },
+  {
+    key: "conflict_adjudication_digest",
+    fn: "agentConflictAdjudicationDigest",
+    name: "Conflict Adjudication Digest",
+    icon: GitCompare,
+    color: "var(--color-error)",
+    description: "Publishes weekly adjudication backlog digest, tracks unresolved critical conflicts, and flags governance pressure.",
+    schedule: "Weekly on Fridays",
+  },
+  {
+    key: "source_reliability",
+    fn: "scoreSourceReliability",
+    name: "Source Reliability Scorer",
+    icon: ShieldCheck,
+    color: "var(--color-info)",
+    description: "Scores each data source using sync stability, freshness, and quality outcomes to support source trust decisions.",
+    schedule: "Weekly",
+  },
+  {
+    key: "watchlist_digest",
+    fn: "generateWatchlistDigest",
+    name: "Watchlist Digest Agent",
+    icon: Search,
+    color: "var(--accent-primary)",
+    description: "Evaluates KPI missions, triggers threshold-breach alerts, and publishes digest summaries.",
+    schedule: "Daily",
+  },
+  {
+    key: "approval_sla",
+    fn: "runApprovalSLAEscalation",
+    name: "Approval SLA Monitor",
+    icon: Clock,
+    color: "var(--color-warning)",
+    description: "Escalates near-due and overdue approval tasks to preserve human-gate integrity.",
+    schedule: "Hourly",
+  },
+  {
+    key: "forecast_backtest",
+    fn: "runForecastBacktest",
+    name: "Forecast Backtest Agent",
+    icon: Telescope,
+    color: "var(--color-info)",
+    description: "Runs holdout backtests, computes MAPE by region/category, and flags model drift.",
+    schedule: "Weekly",
+  },
+  {
+    key: "policy_governance_scheduler",
+    fn: "scheduledPolicyGovernance",
+    name: "Policy Governance Scheduler",
+    icon: Clock,
+    color: "var(--accent-primary)",
+    description: "Runs schedule-aware governance automation: recommendation ranking, conflict digest, and SLA checks with interval guards.",
+    schedule: "Hourly/cron hook",
+  },
+  {
+    key: "hansard_intelligence",
+    fn: "scanHansards",
+    name: "Hansard Intelligence Agent",
+    icon: FileText,
+    color: "var(--accent-primary)",
+    description: "Scrapes BC and Federal Hansards, scores topical relevance, and publishes policy-facing political intelligence with evidence links.",
+    schedule: "Daily (or on-demand)",
+  },
+  {
+    key: "report_ingestion",
+    fn: "runReportIngestionWorker",
+    name: "Report Ingestion Agent",
+    icon: FileText,
+    color: "var(--color-info)",
+    description: "Processes imported reports (PDF and others), extracts quantitative metrics and qualitative findings, and indexes policy-ready intelligence artifacts.",
+    schedule: "On-demand / queued",
+  },
+  {
+    key: "recommendation_ranker",
+    fn: "rankRecommendations",
+    name: "Recommendation Ranker",
+    icon: ListOrdered,
+    color: "var(--accent-primary)",
+    description: "Ranks recommendations by confidence, freshness, and evidence strength, suppresses weak outputs, and auto-routes top items for approval.",
+    schedule: "Daily",
+  },
 ];
 
 const STATUS_ICON = {
@@ -91,7 +190,7 @@ export default function AgentCenter() {
     setRunning(r => ({ ...r, [agent.key]: true }));
     addLog("info", `Running ${agent.name}...`);
     try {
-      const res = await base44.functions.invoke(agent.fn, {});
+      await base44.functions.invoke(agent.fn, {});
       addLog("success", `${agent.name} complete`);
       await loadTasks();
     } catch (e) {
@@ -103,7 +202,13 @@ export default function AgentCenter() {
   const toggleExpand = (id) => setExpanded(e => ({ ...e, [id]: !e[id] }));
 
   // Last task per agent
-  const lastTask = (key) => tasks.find(t => t.task_type === key);
+  const lastTask = (agent) => tasks.find((t) => {
+    const taskType = String(t.task_type || "").toLowerCase();
+    const agentName = String(t.agent_name || "").toLowerCase();
+    return taskType === String(agent.key).toLowerCase()
+      || taskType === String(agent.fn).toLowerCase()
+      || agentName.includes(String(agent.name).toLowerCase());
+  });
 
   return (
     <div className="flex flex-col h-full overflow-auto p-5 space-y-5">
@@ -114,14 +219,14 @@ export default function AgentCenter() {
           AI Agent Command Center
         </h2>
         <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-          Six background agents continuously monitor, analyze, forecast, and improve your health data.
+          Policy intelligence agents continuously monitor, analyze, forecast, and improve data quality and decision readiness.
         </p>
       </div>
 
       {/* Agent cards */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {AGENTS.map(agent => {
-          const last = lastTask(agent.task_type);
+          const last = lastTask(agent);
           const isRunning = running[agent.key];
           return (
             <div key={agent.key} className="metric-card space-y-3">

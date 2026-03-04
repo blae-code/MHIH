@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
     let authorized = false;
     try {
       const user = await base44.auth.me();
-      if (user?.role === 'admin' || user?.role === 'analyst') authorized = true;
+      if (user?.role === 'admin' || user?.role === 'user') authorized = true;
     } catch (_) {}
 
     if (!authorized) {

@@ -14,7 +14,7 @@ export const PRESET_LAYOUTS = {
     ]
   },
   analyst: {
-    name: "Analyst Dashboard",
+    name: "Power User Dashboard",
     description: "Deep-dive data exploration",
     widgets: [
       { id: "stat_cards", visible: true, span: 4 },
