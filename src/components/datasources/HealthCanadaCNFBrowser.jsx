@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { X, ChevronDown, ChevronRight, Plus, Check, Loader2, FlaskConical, Eye, ArrowUpDown } from "lucide-react";
 import SmartSearchBar from "./SmartSearchBar";
 import DataSourcePreview from "./DataSourcePreview";
+import AIRecommendations from "./AIRecommendations";
 
 const QUICK_SEARCHES = [
   { label: "Bannock", query: "bannock" },

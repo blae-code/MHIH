@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { ExternalLink, Database, FileText, X, ChevronDown, ChevronRight, Plus, Loader, Eye, ArrowUpDown } from "lucide-react";
 import SmartSearchBar from "./SmartSearchBar";
 import DataSourcePreview from "./DataSourcePreview";
+import AIRecommendations from "./AIRecommendations";
 
 const QUICK_SEARCHES = ["Indigenous health", "mental health", "chronic disease", "mortality", "substance use", "maternal", "Métis", "health authority"];
 const SORT_OPTIONS = [
