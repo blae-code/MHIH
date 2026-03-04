@@ -271,16 +271,22 @@ export default function Dashboard() {
            {STAT_CARDS.map((card, idx) => {
              const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
              return (
-               <div key={cardId} className="dashboard-widget-card relative">
+               <div key={cardId} className="dashboard-widget-card relative overflow-hidden group"
+                 style={{
+                   background: `linear-gradient(135deg, ${card.bgColor || "rgba(254,221,0,0.03)"} 0%, var(--bg-elevated) 100%)`,
+                   border: `1.5px solid ${card.color}33`
+                 }}>
+                 {/* Accent line */}
+                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${card.color} 0%, transparent 100%)` }} />
                  
-                 <div className="flex items-start justify-between mb-2 relative z-10">
-                   <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
-                   <div className="p-1.5 rounded-md shrink-0 transition-all" style={{ background: `${card.color}18` }}>
-                     <card.icon size={13} style={{ color: card.color }} />
+                 <div className="flex items-start justify-between mb-3 relative z-10">
+                   <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{card.label}</span>
+                   <div className="p-2 rounded-lg shrink-0 transition-all group-hover:scale-110" style={{ background: card.bgColor, boxShadow: `0 0 12px ${card.color}22` }}>
+                     <card.icon size={14} style={{ color: card.color, strokeWidth: 2.5 }} />
                    </div>
                  </div>
-                 <div className="text-3xl font-bold mb-1 relative z-10" style={{ color: card.color }}>{card.value}</div>
-                 <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
+                 <div className="text-4xl font-black mb-2 relative z-10 leading-tight" style={{ color: card.color, textShadow: `0 2px 8px ${card.color}18` }}>{card.value}</div>
+                 <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "11px" }}>{card.desc}</div>
                </div>
              );
            })}
