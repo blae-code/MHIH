@@ -98,6 +98,9 @@ export default function Layout({ children, currentPageName }) {
   const [contextPanel, setContextPanel] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifCenterOpen, setNotifCenterOpen] = useState(false);
+  const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const cmdInputRef = useRef(null);
 
   useEffect(() => {
