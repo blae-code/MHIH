@@ -382,6 +382,14 @@ export default function Layout({ children, currentPageName }) {
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-error)" }} />
             </button>
 
+            <button
+              onClick={() => setRightPanelOpen(v => !v)}
+              className="activity-icon"
+              title={rightPanelOpen ? "Collapse tools panel" : "Expand tools panel"}
+            >
+              <SlidersHorizontal size={15} />
+            </button>
+
             {/* User menu */}
             <div className="relative">
               <button
