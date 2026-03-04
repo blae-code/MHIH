@@ -338,7 +338,7 @@ export default function Dashboard() {
             <BarChart data={categoryData.slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
               <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
-              <YAxis dataKey="name" type="category" width={90} tick={{ fill: "var(--text-secondary)", fontSize: 9 }} />
+              <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#8bafd4", fontSize: 9 }} />
               <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }} />
               <Bar dataKey="value" fill="#e6a817" radius={[0, 4, 4, 0]} />
             </BarChart>
