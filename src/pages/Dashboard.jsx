@@ -247,7 +247,7 @@ export default function Dashboard() {
     coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "var(--color-info)", desc: `${healthStats.categories} major health categories tracked` },
   };
 
-  const STAT_CARDS = visibleStatCards.map(id => ALL_STAT_CARDS[id]).filter(Boolean);
+  const STAT_CARDS = ["metis_metrics", "health_disparity", "yearly_trend", "coverage"].map(id => ALL_STAT_CARDS[id]).filter(Boolean);
 
   const isVisible = (id) => {
     const w = widgets.find(w => w.id === id);
