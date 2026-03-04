@@ -168,7 +168,7 @@ function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, se
       {open && (
         <div className="absolute z-40 mt-1 rounded-md p-3 shadow-xl space-y-2"
           style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", minWidth: 260, right: 0 }}>
-          <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Benchmark Mode</div>
+          <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Benchmark Mode</div>
 
           {/* Provincial average */}
           <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
