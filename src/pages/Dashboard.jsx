@@ -326,7 +326,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-1">
-            {sources.slice(0, 6).map(src => (
+            {sources.slice(0, 8).map(src => (
               <div key={src.id} className="flex items-center justify-between py-1.5 px-2 rounded-md" style={{ background: "var(--bg-overlay)" }}>
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={`status-dot ${src.status} shrink-0`} title={`Status: ${src.status}`} />
