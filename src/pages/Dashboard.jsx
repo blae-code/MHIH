@@ -45,14 +45,22 @@ export default function Dashboard() {
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [layoutManagerOpen, setLayoutManagerOpen] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
 
-  // Load persisted prefs
+  // Load persisted prefs and layouts
+  const [prefs, setPrefs] = useState(() => loadPrefs() || {});
+  const [layouts, setLayouts] = useState(() => loadLayouts());
+  const [currentLayoutId, setCurrentLayoutId] = useState(prefs.currentLayoutId || "default");
+  const [dashboardTitle, setDashboardTitle] = useState(prefs.title || "Dashboard");
+  const [tempTitle, setTempTitle] = useState(dashboardTitle);
+
+  // Initialize widgets
   const [widgets, setWidgets] = useState(() => {
-    const saved = loadPrefs();
-    if (saved?.widgets) return saved.widgets;
-    return DEFAULT_WIDGETS.map(w => ({ ...w, visible: true }));
+    if (prefs?.widgets) return prefs.widgets;
+    return DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
   });
-  const [pinnedIds, setPinnedIds] = useState(() => loadPrefs()?.pinnedIds || []);
+  const [pinnedIds, setPinnedIds] = useState(() => prefs?.pinnedIds || []);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
