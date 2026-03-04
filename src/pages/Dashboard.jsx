@@ -393,32 +393,7 @@ export default function Dashboard() {
      </div>
     ),
     year_trend: isVisible("year_trend") && (
-      <div key="year_trend" className="dashboard-widget-card">
-        <div className="dashboard-section-label mb-3">Metrics by Year</div>
-        <div className="text-xs mb-4 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Number of health indicators recorded per year</div>
-        {yearData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={yearData}>
-              <defs>
-                <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#e6a817" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#e6a817" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-              <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-              <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-              <Tooltip
-                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-                labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
-                itemStyle={{ color: "var(--text-secondary)", fontSize: 11 }}
-                cursor={{ fill: "rgba(254,221,0,0.04)" }}
-              />
-              <Area type="monotone" dataKey="count" stroke="#e6a817" fill="url(#grad1)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        ) : <EmptyChart message="No metric data yet." />}
-      </div>
+      <HealthTrendTracker key="year_trend" metrics={metrics} trackedMetricIds={pinnedIds} />
     ),
     category_pie: isVisible("category_pie") && (
       <CategoryLeaders key="category_pie" metrics={metrics} />
