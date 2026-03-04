@@ -431,14 +431,43 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Widgets grid — flex container, no scroll */}
+        {/* Widgets grid — drag-and-drop enabled */}
         <div className="flex-1 overflow-hidden">
-          <div className="h-full gap-3 grid grid-cols-2 auto-rows-max" style={{ overflowY: "auto", paddingRight: "4px" }}>
-            {widgets
-              .filter(w => w.visible !== false)
-              .map(w => WIDGET_RENDER[w.id])
-              .filter(Boolean)}
-          </div>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="dashboard-widgets" type="WIDGET">
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="h-full gap-3 grid grid-cols-2 auto-rows-max"
+                  style={{
+                    overflowY: "auto",
+                    paddingRight: "4px",
+                    background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent",
+                  }}>
+                  {widgets
+                    .filter(w => w.visible !== false)
+                    .map((w, index) => (
+                      <Draggable key={w.id} draggableId={w.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              opacity: snapshot.isDragging ? 0.5 : 1,
+                            }}>
+                            {WIDGET_RENDER[w.id]}
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
 
