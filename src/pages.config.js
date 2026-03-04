@@ -66,6 +66,7 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import Workflows from './pages/Workflows';
+import Onboarding from './pages/Onboarding';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +90,7 @@ export const PAGES = {
     "Team": Team,
     "Visualizations": Visualizations,
     "Workflows": Workflows,
+    "Onboarding": Onboarding,
 }
 
 export const pagesConfig = {
