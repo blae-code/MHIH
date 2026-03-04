@@ -548,7 +548,7 @@ export default function DisparityExplorer({ metrics }) {
     <div className="metric-card">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
           Health Disparity Explorer
         </span>
         <div className="flex items-center gap-2 flex-wrap">
