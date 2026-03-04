@@ -153,6 +153,19 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+          {/* AI Recommendations */}
+          {(results.length > 0 || imported.size > 0 || recentSearches.length > 0) && (
+            <AIRecommendations
+              context={{
+                currentQuery: query,
+                recentSearches,
+                importedNames: Array.from(imported),
+                activeFilters: [subjectFilter !== "All" ? `subject:${subjectFilter}` : "", sortBy !== "relevance" ? `sort:${sortBy}` : ""].filter(Boolean),
+                sourceName: "Open Government Canada",
+              }}
+              onSearchSuggestion={q => { setQuery(q); doSearch(q); }}
+            />
+          )}
           {loading && (
             <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--text-muted)" }}>
               <Loader size={16} className="animate-spin" />

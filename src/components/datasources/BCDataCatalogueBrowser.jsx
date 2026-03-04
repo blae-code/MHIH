@@ -160,6 +160,19 @@ export default function BCDataCatalogueBrowser({ onImport, onClose }) {
 
         {/* Results */}
         <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+          {/* AI Recommendations */}
+          {(results.length > 0 || Object.keys(imported).length > 0 || recentSearches.length > 0) && (
+            <AIRecommendations
+              context={{
+                currentQuery: query,
+                recentSearches,
+                importedNames: Array.from(imported),
+                activeFilters: [formatFilter !== "All" ? `format:${formatFilter}` : "", sortBy !== "relevance" ? `sort:${sortBy}` : ""].filter(Boolean),
+                sourceName: "BC Data Catalogue",
+              }}
+              onSearchSuggestion={q => { setQuery(q); doSearch(q); }}
+            />
+          )}
           {loading && (
             <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--text-muted)" }}>
               <Loader size={16} className="animate-spin" />

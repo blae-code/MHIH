@@ -146,6 +146,21 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
         </div>
 
         <div className="flex-1 overflow-y-auto">
+          {/* AI Recommendations */}
+          {(results.length > 0 || Object.keys(imported).length > 0 || recentSearches.length > 0) && (
+            <div className="px-4 pt-3">
+              <AIRecommendations
+                context={{
+                  currentQuery: query,
+                  recentSearches,
+                  importedNames: Object.keys(imported).map(k => `food:${k}`),
+                  activeFilters: [groupFilter !== "All" ? `group:${groupFilter}` : ""].filter(Boolean),
+                  sourceName: "Health Canada Canadian Nutrient File",
+                }}
+                onSearchSuggestion={q => { setQuery(q); search(q); }}
+              />
+            </div>
+          )}
           {loading && (
             <div className="flex items-center justify-center gap-2 py-12" style={{ color: "var(--text-muted)" }}>
               <Loader2 size={16} className="animate-spin" />
