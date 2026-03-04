@@ -118,15 +118,15 @@ function YearRangeFilter({ years, yearFrom, setYearFrom, yearTo, setYearTo }) {
       <select value={yearFrom} onChange={e => setYearFrom(e.target.value)}
         className="px-1.5 py-1 rounded appearance-none outline-none"
         style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
-        <option value="all">From</option>
-        {years.map(y => <option key={y} value={y}>{y}</option>)}
+        <option value="all" style={{ background: "#0c1625", color: "#f0f6ff" }}>From</option>
+        {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
       </select>
       <span style={{ color: "var(--text-secondary)" }}>–</span>
       <select value={yearTo} onChange={e => setYearTo(e.target.value)}
         className="px-1.5 py-1 rounded appearance-none outline-none"
         style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
-        <option value="all">To</option>
-        {years.map(y => <option key={y} value={y}>{y}</option>)}
+        <option value="all" style={{ background: "#0c1625", color: "#f0f6ff" }}>To</option>
+        {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
       </select>
     </div>
   );
