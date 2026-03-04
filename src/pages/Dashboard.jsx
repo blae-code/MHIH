@@ -38,6 +38,7 @@ export default function Dashboard() {
     return DEFAULT_WIDGETS.map(w => ({ ...w, visible: true }));
   });
   const [pinnedIds, setPinnedIds] = useState(() => loadPrefs()?.pinnedIds || []);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     Promise.all([
