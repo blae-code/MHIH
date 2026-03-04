@@ -204,15 +204,23 @@ export default function Dashboard() {
     ),
     ai_insights: isVisible("ai_insights") && (
       <div key="ai_insights" className="metric-card">
-        <div className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Recent AI Insights</div>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Recent AI Insights</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
+          </div>
+        </div>
         {insights.length === 0 ? (
-          <div className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>No insights yet. Visit AI Insights to generate analysis.</div>
+          <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
+            No insights generated yet.<br />
+            <span style={{ opacity: 0.6 }}>Visit AI Insights to generate your first analysis.</span>
+          </div>
         ) : (
           <div className="space-y-2">
             {insights.slice(0, 4).map(ins => (
-              <div key={ins.id} className="p-2 rounded" style={{ background: "var(--bg-overlay)" }}>
-                <div className="text-xs font-medium mb-1" style={{ color: "var(--accent-primary)" }}>{ins.title}</div>
-                <div className="text-xs line-clamp-2" style={{ color: "var(--text-secondary)" }}>{ins.content}</div>
+              <div key={ins.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div className="text-xs font-semibold mb-1 leading-tight" style={{ color: "var(--accent-primary)" }}>{ins.title}</div>
+                <div className="text-xs line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{ins.content}</div>
               </div>
             ))}
           </div>
