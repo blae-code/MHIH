@@ -510,7 +510,7 @@ export default function Layout({ children, currentPageName }) {
             }}
           >
               {/* Nav — file-tree style */}
-              <nav className="flex-1 overflow-y-auto py-2 px-2">
+              <nav className="flex-1 overflow-y-auto py-2 px-2 flex flex-col">
                 {visibleSections.map(sec => {
                   const collapsed = collapsedSections[sec.key];
                   return (
