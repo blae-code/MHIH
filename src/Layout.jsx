@@ -604,9 +604,9 @@ export default function Layout({ children, currentPageName }) {
             <div
               className="w-full max-w-lg rounded-2xl overflow-hidden"
               style={{
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border-default)",
-                boxShadow: "0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(254,221,0,0.06)"
+                background: "#0d1929",
+                border: "1px solid var(--border-emphasis)",
+                boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(254,221,0,0.15)"
               }}
               onClick={e => e.stopPropagation()}
             >
