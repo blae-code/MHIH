@@ -81,30 +81,37 @@ export default function DataRepository() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="px-6 py-4 border-b shrink-0"
+        style={{ background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
+        <div className="dashboard-section-label">Health Metrics Repository</div>
+        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Browse, import, and manage Métis health data</p>
+      </div>
+
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b shrink-0"
+      <div className="flex items-center gap-2 px-4 py-3 border-b shrink-0"
         style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="relative flex-1 max-w-sm">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
             <input
-              className="w-full text-xs pl-8 pr-3 py-1.5 rounded-md outline-none"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}
+              className="w-full text-xs pl-8 pr-3 py-2 rounded-lg outline-none transition-all"
+              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}
               placeholder="Search metrics..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
           <select
-            className="text-xs px-2 py-1.5 rounded-md outline-none"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
+            className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
             value={catFilter} onChange={e => setCatFilter(e.target.value)}>
             <option value="all">All Categories</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{c.replace(/_/g," ")}</option>)}
           </select>
           <select
-            className="text-xs px-2 py-1.5 rounded-md outline-none"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
+            className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
             value={regionFilter} onChange={e => setRegionFilter(e.target.value)}>
             <option value="all">All Regions</option>
             {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -119,30 +126,30 @@ export default function DataRepository() {
             </button>
           )}
           <button onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
             <Download size={12} /> Export
           </button>
           <button onClick={() => setShowImport(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
             <Upload size={12} /> Import
           </button>
-          <div className="flex items-center rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+          <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
             <button onClick={() => setViewMode("table")}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs"
-              style={{ background: viewMode === "table" ? "var(--accent-muted)" : "var(--bg-elevated)", color: viewMode === "table" ? "var(--accent-primary)" : "var(--text-muted)" }}>
+              className="flex items-center gap-1 px-3 py-2 text-xs font-medium transition-all"
+              style={{ background: viewMode === "table" ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", color: viewMode === "table" ? "var(--accent-primary)" : "var(--text-muted)" }}>
               <Table2 size={12} /> Table
             </button>
             <button onClick={() => setViewMode("chart")}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs border-l"
-              style={{ background: viewMode === "chart" ? "var(--accent-muted)" : "var(--bg-elevated)", color: viewMode === "chart" ? "var(--accent-primary)" : "var(--text-muted)", borderColor: "var(--border-subtle)" }}>
+              className="flex items-center gap-1 px-3 py-2 text-xs font-medium border-l transition-all"
+              style={{ background: viewMode === "chart" ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", color: viewMode === "chart" ? "var(--accent-primary)" : "var(--text-muted)", borderColor: "var(--border-subtle)" }}>
               <BarChart2 size={12} /> Charts
             </button>
           </div>
           <button onClick={() => { setEditing(null); setShowForm(true); }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--accent-primary)", color: "#000" }}>
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+            style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 4px 12px rgba(254,221,0,0.25)" }}>
             <Plus size={12} /> Add Metric
           </button>
         </div>
