@@ -58,7 +58,7 @@ export default function Dashboard() {
   // Initialize widgets
   const [widgets, setWidgets] = useState(() => {
     if (prefs?.widgets) return prefs.widgets;
-    return DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
+    return DEFAULT_WIDGETS.map((w) => ({ ...w, visible: true, span: 2 }));
   });
   const [pinnedIds, setPinnedIds] = useState(() => prefs?.pinnedIds || []);
   const [visibleStatCards, setVisibleStatCards] = useState(() => prefs?.visibleStatCards || ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
@@ -67,15 +67,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.HealthMetric.list("-year", 100),
-      base44.entities.DataSource.list("-updated_date", 500),
-      base44.entities.AIInsight.list("-created_date", 5),
-    ]).then(([m, s, i]) => {
+    base44.entities.HealthMetric.list("-year", 100),
+    base44.entities.DataSource.list("-updated_date", 500),
+    base44.entities.AIInsight.list("-created_date", 5)]
+    ).then(([m, s, i]) => {
       setMetrics(m);
       setSources(s);
       setInsights(i);
       addLog("success", `Dashboard loaded — ${m.length} metrics, ${s.length} sources`);
-    }).catch(e => addLog("error", e.message)).finally(() => setLoading(false));
+    }).catch((e) => addLog("error", e.message)).finally(() => setLoading(false));
   }, []);
 
   const handleWidgetsChange = useCallback((newWidgets) => {
@@ -86,9 +86,9 @@ export default function Dashboard() {
   }, [currentLayoutId, pinnedIds, dashboardTitle, visibleStatCards, addLog]);
 
   const handleStatCardToggle = useCallback((cardId) => {
-    const newVisible = visibleStatCards.includes(cardId)
-      ? visibleStatCards.filter(id => id !== cardId)
-      : [...visibleStatCards, cardId];
+    const newVisible = visibleStatCards.includes(cardId) ?
+    visibleStatCards.filter((id) => id !== cardId) :
+    [...visibleStatCards, cardId];
     setVisibleStatCards(newVisible);
     savePrefs(currentLayoutId, widgets, pinnedIds, dashboardTitle, newVisible);
     setHasChanges(true);
@@ -96,13 +96,13 @@ export default function Dashboard() {
   }, [visibleStatCards, currentLayoutId, widgets, pinnedIds, dashboardTitle, addLog]);
 
   const handleUnpin = useCallback((id) => {
-    const next = pinnedIds.filter(p => p !== id);
+    const next = pinnedIds.filter((p) => p !== id);
     setPinnedIds(next);
     savePrefs(currentLayoutId, widgets, next, dashboardTitle, visibleStatCards);
   }, [currentLayoutId, widgets, dashboardTitle, visibleStatCards]);
 
   const handleResetLayout = useCallback(() => {
-    const defaultLayout = DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
+    const defaultLayout = DEFAULT_WIDGETS.map((w) => ({ ...w, visible: true, span: 2 }));
     setWidgets(defaultLayout);
     setVisibleStatCards(["total_metrics", "data_sources", "active_sources", "ai_insights"]);
     savePrefs(currentLayoutId, defaultLayout, pinnedIds, dashboardTitle, ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
@@ -122,11 +122,11 @@ export default function Dashboard() {
     const newLayout = {
       id: `layout_${Date.now()}`,
       name,
-      widgetCount: widgets.filter(w => w.visible !== false).length,
+      widgetCount: widgets.filter((w) => w.visible !== false).length,
       widgets: JSON.parse(JSON.stringify(widgets)),
       pinnedIds: [...pinnedIds],
       title: dashboardTitle,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
     const newLayouts = [...layouts, newLayout];
     saveLayouts(newLayouts);
@@ -144,16 +144,16 @@ export default function Dashboard() {
         layoutToLoad = {
           widgets: preset.widgets,
           pinnedIds: [],
-          title: preset.name,
+          title: preset.name
         };
       }
     } else {
-      const saved = layouts.find(l => l.id === layoutId);
+      const saved = layouts.find((l) => l.id === layoutId);
       if (saved) {
         layoutToLoad = {
           widgets: saved.widgets,
           pinnedIds: saved.pinnedIds,
-          title: saved.title,
+          title: saved.title
         };
       }
     }
@@ -172,7 +172,7 @@ export default function Dashboard() {
   };
 
   const handleDeleteLayout = (layoutId) => {
-    const newLayouts = layouts.filter(l => l.id !== layoutId);
+    const newLayouts = layouts.filter((l) => l.id !== layoutId);
     saveLayouts(newLayouts);
     setLayouts(newLayouts);
     addLog("success", "Layout deleted");
@@ -206,37 +206,37 @@ export default function Dashboard() {
   const categoryData = Object.entries(categoryCount).map(([k, v]) => ({ name: k.replace(/_/g, " "), value: v }));
   const yearData = metrics.reduce((acc, m) => {
     if (m.year && m.value != null) {
-      const found = acc.find(a => a.year === m.year);
-      if (found) { found.count++; found.total += m.value; }
-      else acc.push({ year: m.year, count: 1, total: m.value });
+      const found = acc.find((a) => a.year === m.year);
+      if (found) {found.count++;found.total += m.value;} else
+      acc.push({ year: m.year, count: 1, total: m.value });
     }
     return acc;
   }, []).sort((a, b) => a.year - b.year).slice(-8);
 
   // Calculate health metrics
   const healthStats = (() => {
-    const metisMetrics = metrics.filter(m => m.metis_specific);
-    const withComparison = metisMetrics.filter(m => m.comparison_value != null);
-    const disparities = withComparison.map(m => m.value - m.comparison_value);
+    const metisMetrics = metrics.filter((m) => m.metis_specific);
+    const withComparison = metisMetrics.filter((m) => m.comparison_value != null);
+    const disparities = withComparison.map((m) => m.value - m.comparison_value);
     const avgDisparity = disparities.length > 0 ? disparities.reduce((a, b) => a + b, 0) / disparities.length : 0;
-    
+
     // Trend: compare last year vs previous year
-    const thisYear = Math.max(...metrics.filter(m => m.year).map(m => m.year));
+    const thisYear = Math.max(...metrics.filter((m) => m.year).map((m) => m.year));
     const lastYear = thisYear - 1;
-    const thisYearMetrics = metrics.filter(m => m.year === thisYear);
-    const lastYearMetrics = metrics.filter(m => m.year === lastYear);
-    const trend = thisYearMetrics.length > 0 && lastYearMetrics.length > 0 
-      ? ((thisYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / thisYearMetrics.length) - 
-         (lastYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / lastYearMetrics.length))
-      : 0;
-    
+    const thisYearMetrics = metrics.filter((m) => m.year === thisYear);
+    const lastYearMetrics = metrics.filter((m) => m.year === lastYear);
+    const trend = thisYearMetrics.length > 0 && lastYearMetrics.length > 0 ?
+    thisYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / thisYearMetrics.length -
+    lastYearMetrics.reduce((s, m) => s + (m.value || 0), 0) / lastYearMetrics.length :
+    0;
+
     const regionCounts = {};
-    metisMetrics.forEach(m => {
+    metisMetrics.forEach((m) => {
       regionCounts[m.region] = (regionCounts[m.region] || 0) + 1;
     });
     const topRegion = Object.entries(regionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
-    const categories = [...new Set(metisMetrics.map(m => m.category))].length;
-    
+    const categories = [...new Set(metisMetrics.map((m) => m.category))].length;
+
     return { avgDisparity, trend, topRegion, categories, totalMetricsSeries: metisMetrics.length };
   })();
 
@@ -244,27 +244,27 @@ export default function Dashboard() {
     metis_metrics: { label: "Métis Health Indicators", value: healthStats.totalMetricsSeries, icon: Activity, color: "var(--accent-primary)", desc: "Métis-specific health metrics tracked" },
     health_disparity: { label: "Avg Health Disparity", value: healthStats.avgDisparity.toFixed(1), icon: TrendingUp, color: healthStats.avgDisparity > 0 ? "var(--color-error)" : "var(--color-success)", desc: healthStats.avgDisparity > 0 ? "Higher than BC population" : "Better than BC population" },
     yearly_trend: { label: "Year-over-Year Trend", value: (healthStats.trend > 0 ? "+" : "") + healthStats.trend.toFixed(1), icon: Brain, color: healthStats.trend > 0 ? "var(--color-success)" : "var(--color-error)", desc: healthStats.trend > 0 ? "Improving health outcomes" : "Declining health outcomes" },
-    coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "var(--color-info)", desc: `${healthStats.categories} major health categories tracked` },
+    coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "var(--color-info)", desc: `${healthStats.categories} major health categories tracked` }
   };
 
-  const STAT_CARDS = ["metis_metrics", "health_disparity", "yearly_trend", "coverage"].map(id => ALL_STAT_CARDS[id]).filter(Boolean);
+  const STAT_CARDS = ["metis_metrics", "health_disparity", "yearly_trend", "coverage"].map((id) => ALL_STAT_CARDS[id]).filter(Boolean);
 
   const isVisible = (id) => {
-    const w = widgets.find(w => w.id === id);
+    const w = widgets.find((w) => w.id === id);
     return !w || w.visible !== false;
   };
 
   // Ordered widget render map
   const WIDGET_RENDER = {
-    stat_cards: isVisible("stat_cards") && (
-     <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-3 group">
+    stat_cards: isVisible("stat_cards") &&
+    <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-3 group">
        <div className="col-span-full">
          <div className="dashboard-section-label">Platform Metrics</div>
        </div>
        {STAT_CARDS.map((card, idx) => {
-         const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
-         return (
-           <div key={cardId} className="dashboard-widget-card relative">
+        const cardId = Object.keys(ALL_STAT_CARDS).find((k) => ALL_STAT_CARDS[k].label === card.label);
+        return (
+          <div key={cardId} className="dashboard-widget-card relative">
              
              <div className="flex items-start justify-between mb-2 relative z-10">
                <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
@@ -274,26 +274,26 @@ export default function Dashboard() {
              </div>
              <div className="text-3xl font-bold mb-1 relative z-10" style={{ color: card.color }}>{card.value}</div>
              <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
-           </div>
-         );
-       })}
-       {Object.keys(ALL_STAT_CARDS).filter(id => !visibleStatCards.includes(id)).length > 0 && (
-         <button
-           onClick={() => handleStatCardToggle(Object.keys(ALL_STAT_CARDS).find(id => !visibleStatCards.includes(id)))}
-           className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed"
-           style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
-           title="Add a stat card">
+           </div>);
+
+      })}
+       {Object.keys(ALL_STAT_CARDS).filter((id) => !visibleStatCards.includes(id)).length > 0 &&
+      <button
+        onClick={() => handleStatCardToggle(Object.keys(ALL_STAT_CARDS).find((id) => !visibleStatCards.includes(id)))}
+        className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed"
+        style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
+        title="Add a stat card">
            <span>+ Add Card</span>
          </button>
-       )}
-     </div>
-    ),
-    year_trend: isVisible("year_trend") && (
-      <div key="year_trend" className="dashboard-widget-card">
+      }
+     </div>,
+
+    year_trend: isVisible("year_trend") &&
+    <div key="year_trend" className="dashboard-widget-card">
         <div className="dashboard-section-label mb-3">Metrics by Year</div>
         <div className="text-xs mb-4 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Number of health indicators recorded per year</div>
-        {yearData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
+        {yearData.length > 0 ?
+      <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={yearData}>
               <defs>
                 <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
@@ -305,131 +305,131 @@ export default function Dashboard() {
               <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
               <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
               <Tooltip
-                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-                labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
-                itemStyle={{ color: "var(--text-secondary)", fontSize: 11 }}
-                cursor={{ fill: "rgba(254,221,0,0.04)" }}
-              />
+            contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
+            labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
+            itemStyle={{ color: "var(--text-secondary)", fontSize: 11 }}
+            cursor={{ fill: "rgba(254,221,0,0.04)" }} />
+
               <Area type="monotone" dataKey="count" stroke="#e6a817" fill="url(#grad1)" strokeWidth={2} />
             </AreaChart>
-          </ResponsiveContainer>
-        ) : <EmptyChart message="No metric data yet." />}
-      </div>
-    ),
-    category_pie: isVisible("category_pie") && (
-      <div key="category_pie" className="dashboard-widget-card">
+          </ResponsiveContainer> :
+      <EmptyChart message="No metric data yet." />}
+      </div>,
+
+    category_pie: isVisible("category_pie") &&
+    <div key="category_pie" className="dashboard-widget-card">
         <div className="dashboard-section-label mb-3">Metrics by Category</div>
         <div className="text-xs mb-4 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Distribution across health indicator categories</div>
-        {categoryData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
+        {categoryData.length > 0 ?
+      <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={false}>
                 {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip
-                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-                labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
-                itemStyle={{ color: "var(--text-secondary)", fontSize: 11 }}
-                cursor={{ fill: "rgba(254,221,0,0.04)" }}
-              />
+            contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
+            labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
+            itemStyle={{ color: "var(--text-secondary)", fontSize: 11 }}
+            cursor={{ fill: "rgba(254,221,0,0.04)" }} />
+
             </PieChart>
-          </ResponsiveContainer>
-        ) : <EmptyChart message="No categories yet." />}
-        {categoryData.length > 0 && (
-          <ResponsiveContainer width="100%" height={140}>
+          </ResponsiveContainer> :
+      <EmptyChart message="No categories yet." />}
+        {categoryData.length > 0 &&
+      <ResponsiveContainer width="100%" height={140}>
             <BarChart data={categoryData.slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
               <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
               <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#8bafd4", fontSize: 9 }} />
-              <Tooltip 
-                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-                cursor={{ fill: "rgba(254,221,0,0.04)" }}
-              />
+              <Tooltip
+            contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
+            cursor={{ fill: "rgba(254,221,0,0.04)" }} />
+
               <Bar dataKey="value" fill="#e6a817" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        )}
-      </div>
-    ),
-    disparity_explorer: isVisible("disparity_explorer") && (
-      <DisparityExplorer key="disparity_explorer" metrics={metrics} />
-    ),
+      }
+      </div>,
+
+    disparity_explorer: isVisible("disparity_explorer") &&
+    <DisparityExplorer key="disparity_explorer" metrics={metrics} />,
+
     weekly_reports: isVisible("weekly_reports") && <WeeklyReports key="weekly_reports" />,
-    pinned_metrics: isVisible("pinned_metrics") && (
-      <PinnedMetrics key="pinned_metrics" pinnedIds={pinnedIds} onUnpin={handleUnpin} />
-    ),
-    data_sources: isVisible("data_sources") && (
-      <div key="data_sources" className="dashboard-widget-card">
-        <div className="flex items-center justify-between mb-3 relative z-10">
-          <div className="dashboard-section-label">Data Sources</div>
-          <span className="tag" style={{ fontSize: 10 }}>{sources.length} total</span>
-        </div>
-        <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Recently updated connections</div>
-        {sources.length === 0 ? (
-          <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
-            No sources configured yet.<br />
-            <span style={{ opacity: 0.6 }}>Go to Data Sources to add a connection.</span>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            {sources.slice(0, 8).map(src => (
-              <div key={src.id} className="flex items-center justify-between py-1.5 px-2 rounded-md" style={{ background: "var(--bg-overlay)" }}>
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className={`status-dot ${src.status} shrink-0`} title={`Status: ${src.status}`} />
-                  <span className="text-xs truncate" style={{ color: "var(--text-primary)" }} title={src.name}>{src.name}</span>
-                </div>
-                <span className="tag shrink-0 ml-2" style={{ fontSize: 10 }}>{src.type?.replace(/_/g, " ")}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    ),
-    ai_insights: isVisible("ai_insights") && (
-      <div key="ai_insights" className="dashboard-widget-card">
+    pinned_metrics: isVisible("pinned_metrics") &&
+    <PinnedMetrics key="pinned_metrics" pinnedIds={pinnedIds} onUnpin={handleUnpin} />,
+
+    data_sources: null,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ai_insights: isVisible("ai_insights") &&
+    <div key="ai_insights" className="dashboard-widget-card">
         <div className="flex items-center justify-between mb-3 relative z-10">
           <div className="dashboard-section-label">Recent AI Insights</div>
           <button
-            onClick={handleRegenerateInsights}
-            disabled={regeneratingInsights}
-            className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
-            style={{
-              background: "rgba(254,221,0,0.08)",
-              border: "1px solid rgba(254,221,0,0.2)",
-              color: "var(--text-secondary)",
-              opacity: regeneratingInsights ? 0.5 : 1,
-              cursor: regeneratingInsights ? "not-allowed" : "pointer"
-            }}
-            title="Regenerate insights">
+          onClick={handleRegenerateInsights}
+          disabled={regeneratingInsights}
+          className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
+          style={{
+            background: "rgba(254,221,0,0.08)",
+            border: "1px solid rgba(254,221,0,0.2)",
+            color: "var(--text-secondary)",
+            opacity: regeneratingInsights ? 0.5 : 1,
+            cursor: regeneratingInsights ? "not-allowed" : "pointer"
+          }}
+          title="Regenerate insights">
             <RefreshCw size={11} style={{ transform: regeneratingInsights ? "rotate(180deg)" : "none", transition: "transform 0.3s linear" }} className={regeneratingInsights ? "animate-spin" : ""} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
         <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
-        {insights.length === 0 ? (
-          <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
+        {insights.length === 0 ?
+      <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
             No insights generated yet.<br />
             <span style={{ opacity: 0.6 }}>Visit AI Insights to generate your first analysis.</span>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {insights.slice(0, 4).map(ins => (
-              <div key={ins.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+          </div> :
+
+      <div className="space-y-2">
+            {insights.slice(0, 4).map((ins) =>
+        <div key={ins.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
                 <div className="text-xs font-semibold mb-1 leading-tight" style={{ color: "var(--accent-primary)" }}>{ins.title}</div>
                 <div className="text-xs line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{ins.content}</div>
               </div>
-            ))}
-          </div>
         )}
+          </div>
+      }
       </div>
-    ),
+
   };
 
   if (loading) return (
     <div className="flex items-center justify-center h-full" style={{ color: "var(--text-muted)" }}>
       <RefreshCw size={20} className="animate-spin mr-2" /> Loading dashboard...
-    </div>
-  );
+    </div>);
+
 
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--bg-surface)" }}>
@@ -503,54 +503,54 @@ export default function Dashboard() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-3 h-3 rounded-full" style={{ background: "var(--color-success)", boxShadow: "0 0 8px rgba(0,230,118,0.5)" }} />
-                {editingTitle ? (
-                  <input
-                    type="text"
-                    value={tempTitle}
-                    onChange={e => setTempTitle(e.target.value)}
-                    onBlur={handleUpdateTitle}
-                    onKeyDown={e => e.key === "Enter" && handleUpdateTitle()}
-                    autoFocus
-                    className="text-sm font-bold tracking-wider outline-none px-2 py-0.5 rounded-md"
-                    style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em", background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}
-                  />
-                ) : (
-                  <h1 className="text-sm font-bold tracking-wider cursor-pointer" style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em" }} onClick={() => setEditingTitle(true)}>
+                {editingTitle ?
+                <input
+                  type="text"
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  onBlur={handleUpdateTitle}
+                  onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
+                  autoFocus
+                  className="text-sm font-bold tracking-wider outline-none px-2 py-0.5 rounded-md"
+                  style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em", background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }} /> :
+
+
+                <h1 className="text-sm font-bold tracking-wider cursor-pointer" style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em" }} onClick={() => setEditingTitle(true)}>
                     {dashboardTitle}
                   </h1>
-                )}
+                }
               </div>
               <p className="text-xs mt-1" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
                 Real-time overview of Métis-specific health metrics across British Columbia
               </p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0 ml-4">
-              {editingTitle && (
-                <button
-                  onClick={handleUpdateTitle}
-                  className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
-                  style={{ background: "var(--accent-primary)", color: "#000" }}
-                  title="Save title">
+              {editingTitle &&
+              <button
+                onClick={handleUpdateTitle}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
+                style={{ background: "var(--accent-primary)", color: "#000" }}
+                title="Save title">
                   <Save size={13} />
                 </button>
-              )}
-              {hasChanges && (
-                <button
-                  onClick={handleResetLayout}
-                  className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
-                  style={{ background: "rgba(255,171,64,0.08)", border: "1px solid rgba(255,171,64,0.2)", color: "var(--text-secondary)" }}
-                  onMouseOver={e => { e.currentTarget.style.background = "rgba(255,171,64,0.14)"; e.currentTarget.style.color = "var(--text-primary)"; }}
-                  onMouseOut={e => { e.currentTarget.style.background = "rgba(255,171,64,0.08)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
-                  title="Reset to default layout">
+              }
+              {hasChanges &&
+              <button
+                onClick={handleResetLayout}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
+                style={{ background: "rgba(255,171,64,0.08)", border: "1px solid rgba(255,171,64,0.2)", color: "var(--text-secondary)" }}
+                onMouseOver={(e) => {e.currentTarget.style.background = "rgba(255,171,64,0.14)";e.currentTarget.style.color = "var(--text-primary)";}}
+                onMouseOut={(e) => {e.currentTarget.style.background = "rgba(255,171,64,0.08)";e.currentTarget.style.color = "var(--text-secondary)";}}
+                title="Reset to default layout">
                   <RotateCcw size={13} />
                 </button>
-              )}
+              }
               <button
                 onClick={() => setLayoutManagerOpen(true)}
                 className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
                 style={{ background: "rgba(64,196,255,0.08)", border: "1px solid rgba(64,196,255,0.2)", color: "var(--text-secondary)" }}
-                onMouseOver={e => { e.currentTarget.style.background = "rgba(64,196,255,0.14)"; e.currentTarget.style.color = "var(--text-primary)"; }}
-                onMouseOut={e => { e.currentTarget.style.background = "rgba(64,196,255,0.08)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                onMouseOver={(e) => {e.currentTarget.style.background = "rgba(64,196,255,0.14)";e.currentTarget.style.color = "var(--text-primary)";}}
+                onMouseOut={(e) => {e.currentTarget.style.background = "rgba(64,196,255,0.08)";e.currentTarget.style.color = "var(--text-secondary)";}}
                 title="Save, load, and manage layouts">
                 <Layout size={13} />
               </button>
@@ -558,8 +558,8 @@ export default function Dashboard() {
                 onClick={() => setCustomizerOpen(true)}
                 className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
                 style={{ background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.2)", color: "var(--text-secondary)" }}
-                onMouseOver={e => { e.currentTarget.style.background = "rgba(254,221,0,0.14)"; e.currentTarget.style.color = "var(--text-primary)"; }}
-                onMouseOut={e => { e.currentTarget.style.background = "rgba(254,221,0,0.08)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                onMouseOver={(e) => {e.currentTarget.style.background = "rgba(254,221,0,0.14)";e.currentTarget.style.color = "var(--text-primary)";}}
+                onMouseOut={(e) => {e.currentTarget.style.background = "rgba(254,221,0,0.08)";e.currentTarget.style.color = "var(--text-secondary)";}}
                 title="Rearrange and show/hide dashboard widgets">
                 <SlidersHorizontal size={13} />
               </button>
@@ -571,62 +571,62 @@ export default function Dashboard() {
         <div className="flex-1 overflow-hidden">
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="dashboard-widgets" type="WIDGET">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="h-full gap-3 grid grid-cols-2 auto-rows-max"
-                  style={{
-                    overflowY: "auto",
-                    paddingRight: "4px",
-                    background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent",
-                  }}>
-                  {widgets
-                    .filter(w => w.visible !== false)
-                    .map((w, index) => (
-                      <Draggable key={w.id} draggableId={w.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{
-                              ...provided.draggableProps.style,
-                              opacity: snapshot.isDragging ? 0.5 : 1,
-                            }}>
+              {(provided, snapshot) =>
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="h-full gap-3 grid grid-cols-2 auto-rows-max"
+                style={{
+                  overflowY: "auto",
+                  paddingRight: "4px",
+                  background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent"
+                }}>
+                  {widgets.
+                filter((w) => w.visible !== false).
+                map((w, index) =>
+                <Draggable key={w.id} draggableId={w.id} index={index}>
+                        {(provided, snapshot) =>
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    style={{
+                      ...provided.draggableProps.style,
+                      opacity: snapshot.isDragging ? 0.5 : 1
+                    }}>
                             {WIDGET_RENDER[w.id]}
                           </div>
-                        )}
+                  }
                       </Draggable>
-                    ))}
+                )}
                   {provided.placeholder}
                 </div>
-              )}
+              }
             </Droppable>
           </DragDropContext>
         </div>
       </div>
 
-      {customizerOpen && (
-        <DashboardCustomizer
-          widgets={widgets}
-          onWidgetsChange={handleWidgetsChange}
-          onClose={() => setCustomizerOpen(false)}
-        />
-      )}
+      {customizerOpen &&
+      <DashboardCustomizer
+        widgets={widgets}
+        onWidgetsChange={handleWidgetsChange}
+        onClose={() => setCustomizerOpen(false)} />
 
-      {layoutManagerOpen && (
-        <DashboardLayoutManager
-          layouts={layouts}
-          currentLayout={{ id: currentLayoutId }}
-          onLoadLayout={handleLoadLayout}
-          onSaveLayout={handleSaveNewLayout}
-          onDeleteLayout={handleDeleteLayout}
-          onClose={() => setLayoutManagerOpen(false)}
-        />
-      )}
-    </div>
-  );
+      }
+
+      {layoutManagerOpen &&
+      <DashboardLayoutManager
+        layouts={layouts}
+        currentLayout={{ id: currentLayoutId }}
+        onLoadLayout={handleLoadLayout}
+        onSaveLayout={handleSaveNewLayout}
+        onDeleteLayout={handleDeleteLayout}
+        onClose={() => setLayoutManagerOpen(false)} />
+
+      }
+    </div>);
+
 }
 
 function EmptyChart({ message }) {
@@ -635,6 +635,6 @@ function EmptyChart({ message }) {
       <AlertCircle size={18} style={{ color: "var(--text-muted)" }} />
       <span className="text-xs text-center" style={{ color: "var(--text-muted)" }}>{message}</span>
       <span className="text-xs text-center" style={{ color: "var(--text-muted)", opacity: 0.6 }}>Add data from the Data Repository to see charts here.</span>
-    </div>
-  );
+    </div>);
+
 }
