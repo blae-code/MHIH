@@ -825,7 +825,7 @@ export default function DisparityExplorer({ metrics }) {
       </div>
 
       {/* Drill-down panel */}
-      <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} benchmark={benchmark} />
+      <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} benchmark={benchmark} allMetrics={metrics} />
     </div>
   );
 }
