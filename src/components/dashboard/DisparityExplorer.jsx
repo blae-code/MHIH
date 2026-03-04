@@ -193,7 +193,7 @@ function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, se
                 setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
               }}
               className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
               {years.map(y => <option key={y} value={y}>{y} ({yearAvgs[y]?.toFixed(1) ?? "—"})</option>)}
             </select>
           </div>
