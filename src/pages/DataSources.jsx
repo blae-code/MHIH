@@ -265,6 +265,18 @@ export default function DataSources() {
         />
       )}
 
+      {/* BC WMS/WFS browser */}
+      {showWMSWFS && (
+        <BCWMSWFSBrowser
+          onClose={() => setShowWMSWFS(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported BC WMS/WFS layer: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* Health Canada CNF browser */}
       {showCNF && (
         <HealthCanadaCNFBrowser
