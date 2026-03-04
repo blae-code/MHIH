@@ -76,6 +76,7 @@ export default function Dashboard() {
   const [regeneratingInsights, setRegeneratingInsights] = useState(false);
   const [customStats, setCustomStats] = useState(() => prefs?.customStats || []);
   const [statBuilderOpen, setStatBuilderOpen] = useState(false);
+  const [widgetLibraryOpen, setWidgetLibraryOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([
