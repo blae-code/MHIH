@@ -199,12 +199,14 @@ export default function Dashboard() {
     return acc;
   }, []).sort((a, b) => a.year - b.year).slice(-8);
 
-  const STAT_CARDS = [
-    { label: "Total Metrics", value: metrics.length, icon: BarChart3, color: "var(--accent-primary)", desc: "Health indicators tracked across all categories" },
-    { label: "Data Sources", value: sources.length, icon: Database, color: "var(--color-info)", desc: "Connected external data feeds & repositories" },
-    { label: "Active Sources", value: sources.filter(s => s.status === "active").length, icon: Activity, color: "var(--color-success)", desc: "Sources currently syncing successfully" },
-    { label: "AI Insights", value: insights.length, icon: Brain, color: "#a78bfa", desc: "AI-generated analyses & recommendations" },
-  ];
+  const ALL_STAT_CARDS = {
+    total_metrics: { label: "Total Metrics", value: metrics.length, icon: BarChart3, color: "var(--accent-primary)", desc: "Health indicators tracked across all categories" },
+    data_sources: { label: "Data Sources", value: sources.length, icon: Database, color: "var(--color-info)", desc: "Connected external data feeds & repositories" },
+    active_sources: { label: "Active Sources", value: sources.filter(s => s.status === "active").length, icon: Activity, color: "var(--color-success)", desc: "Sources currently syncing successfully" },
+    ai_insights: { label: "AI Insights", value: insights.length, icon: Brain, color: "#a78bfa", desc: "AI-generated analyses & recommendations" },
+  };
+
+  const STAT_CARDS = visibleStatCards.map(id => ALL_STAT_CARDS[id]).filter(Boolean);
 
   const isVisible = (id) => {
     const w = widgets.find(w => w.id === id);
