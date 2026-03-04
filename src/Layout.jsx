@@ -322,26 +322,56 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ══ HEADER ══ */}
         <header
-          className="flex items-center justify-between px-5 shrink-0 z-50"
+          className="flex items-center justify-between px-5 shrink-0 z-50 relative overflow-hidden"
           style={{
             height: "var(--header-height)",
-            background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+            background: "linear-gradient(90deg, #0a1220 0%, #0f1829 25%, #0d1f2a 50%, #0a1523 75%, #0a1220 100%)",
             borderBottom: "1px solid var(--border-default)",
-            boxShadow: "0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(254,221,0,0.12), 0 0 0 1px rgba(254,221,0,0.08)"
+            boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.15), 0 0 20px rgba(64,196,255,0.08)"
+          }}>
+          {/* Dynamic accent bar top */}
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "2px",
+            background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 33%, #2ed573 66%, #FEDD00 100%)",
+            backgroundSize: "200% 100%",
+            animation: "gradientShift 8s ease-in-out infinite"
+          }} />
+        </header>
+
+        <style>{`
+          @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+          }
+        `}</style>
+
+        <header
+          className="flex items-center justify-between px-5 shrink-0 z-50 relative"
+          style={{
+            height: "var(--header-height)",
+            background: "linear-gradient(90deg, #0a1220 0%, #0f1829 25%, #0d1f2a 50%, #0a1523 75%, #0a1220 100%)",
+            borderBottom: "1px solid var(--border-default)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.15), 0 0 20px rgba(64,196,255,0.08)"
           }}
-        >
           {/* Brand */}
           <div className="flex items-center gap-3 min-w-0" style={{ minWidth: sidebarOpen ? "var(--panel-left)" : "auto" }}>
             <div className="flex items-center gap-2.5 shrink-0">
               <div className="relative group">
-                <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ background: "radial-gradient(circle at top-left, rgba(254,221,0,0.15), transparent)", filter: "blur(12px)" }} />
-                <div className="relative w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-sm"
+                <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{
-                    background: "linear-gradient(135deg, #FEDD00 0%, #e6c000 100%)",
+                    background: "radial-gradient(circle at top-left, rgba(254,221,0,0.3), rgba(64,196,255,0.1))",
+                    filter: "blur(16px)"
+                  }} />
+                <div className="relative w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-sm group-hover:scale-110 transition-transform duration-300"
+                  style={{
+                    background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 50%, #e6c000 100%)",
                     color: "#04245a",
-                    boxShadow: "0 4px 12px rgba(254,221,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2)",
-                    border: "1px solid rgba(255,255,255,0.15)"
+                    boxShadow: "0 0 16px rgba(254,221,0,0.5), 0 4px 12px rgba(254,221,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.2)",
+                    border: "1.5px solid rgba(255,255,255,0.2)"
                   }}>
                   M
                 </div>
@@ -371,10 +401,14 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex-1 flex items-center justify-center gap-3 mx-6">
             {/* Breadcrumb pill */}
             {currentSection && (
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs backdrop-blur-sm"
-                style={{ background: "rgba(20, 35, 60, 0.6)", border: "1px solid var(--border-default)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+              <div className="hidden lg:flex items-center gap-2.5 px-3 py-2 rounded-full text-xs backdrop-blur-md transition-all duration-300 hover:scale-105"
+                style={{
+                  background: `linear-gradient(135deg, ${currentSection.color}12 0%, ${currentSection.color}08 100%)`,
+                  border: `1.5px solid ${currentSection.color}44`,
+                  boxShadow: `0 4px 16px ${currentSection.color}15, inset 0 1px 0 ${currentSection.color}22`
+                }}>
                 <span style={{ color: currentSection.color, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{currentSection.label}</span>
-                <ChevronRight size={9} style={{ opacity: 0.6, color: "var(--text-muted)" }} />
+                <ChevronRight size={9} style={{ color: currentSection.color, opacity: 0.7 }} />
                 <span style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: 11 }}>{currentPageName?.replace(/([A-Z])/g, ' $1').trim()}</span>
               </div>
             )}
@@ -384,29 +418,29 @@ export default function Layout({ children, currentPageName }) {
               onClick={() => { setCmdOpen(true); setTimeout(() => cmdInputRef.current?.focus(), 50); }}
               className="header-search-btn hidden md:flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-medium transition-all group"
               style={{
-                background: "linear-gradient(135deg, rgba(254,221,0,0.08) 0%, rgba(254,221,0,0.03) 100%)",
-                border: "1px solid rgba(254,221,0,0.25)",
+                background: "linear-gradient(135deg, rgba(64,196,255,0.08) 0%, rgba(254,221,0,0.05) 100%)",
+                border: "1px solid rgba(64,196,255,0.3)",
                 color: "var(--text-secondary)",
                 width: 260,
                 position: "relative",
                 overflow: "hidden",
-                boxShadow: "0 4px 12px rgba(254,221,0,0.05), inset 0 1px 0 rgba(254,221,0,0.1)"
+                boxShadow: "0 4px 16px rgba(64,196,255,0.08), inset 0 1px 0 rgba(64,196,255,0.15)"
               }}
               onMouseOver={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.15) 0%, rgba(254,221,0,0.08) 100%)";
-                e.currentTarget.style.borderColor = "rgba(254,221,0,0.5)";
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(64,196,255,0.15) 0%, rgba(254,221,0,0.1) 100%)";
+                e.currentTarget.style.borderColor = "rgba(64,196,255,0.6)";
                 e.currentTarget.style.color = "var(--text-primary)";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(254,221,0,0.12), inset 0 1px 0 rgba(254,221,0,0.15)";
+                e.currentTarget.style.boxShadow = "0 8px 28px rgba(64,196,255,0.2), inset 0 1px 0 rgba(64,196,255,0.25)";
               }}
               onMouseOut={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.08) 0%, rgba(254,221,0,0.03) 100%)";
-                e.currentTarget.style.borderColor = "rgba(254,221,0,0.25)";
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(64,196,255,0.08) 0%, rgba(254,221,0,0.05) 100%)";
+                e.currentTarget.style.borderColor = "rgba(64,196,255,0.3)";
                 e.currentTarget.style.color = "var(--text-secondary)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(254,221,0,0.05), inset 0 1px 0 rgba(254,221,0,0.1)";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(64,196,255,0.08), inset 0 1px 0 rgba(64,196,255,0.15)";
               }}>
-              <Search size={13} style={{ color: "var(--mnbc-yellow)", flexShrink: 0, opacity: 0.8 }} />
+              <Search size={13} style={{ color: "#40c4ff", flexShrink: 0, opacity: 0.9 }} />
               <span className="flex-1 text-left opacity-80">Search workspace...</span>
-              <kbd style={{ background: "rgba(254,221,0,0.12)", color: "var(--mnbc-yellow)", fontSize: 8, padding: "3px 7px", borderRadius: 3, border: "1px solid rgba(254,221,0,0.3)", fontFamily: "monospace", flexShrink: 0, fontWeight: 600, letterSpacing: "0.05em" }}>⌘K</kbd>
+              <kbd style={{ background: "rgba(64,196,255,0.15)", color: "#40c4ff", fontSize: 8, padding: "3px 7px", borderRadius: 3, border: "1px solid rgba(64,196,255,0.4)", fontFamily: "monospace", flexShrink: 0, fontWeight: 600, letterSpacing: "0.05em" }}>⌘K</kbd>
             </button>
           </div>
 
@@ -418,12 +452,12 @@ export default function Layout({ children, currentPageName }) {
 
             <button 
               onClick={() => setNotifCenterOpen(true)}
-              className="activity-icon relative" 
+              className="activity-icon relative group" 
               title="Notifications">
-              <Bell size={15} />
+              <Bell size={15} style={{ transition: "all 0.3s", color: unreadCount > 0 ? "#ff6b6b" : "inherit" }} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" 
-                  style={{ background: "var(--color-error)", color: "white", fontSize: 9 }}>
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold animate-pulse" 
+                  style={{ background: "linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)", color: "white", fontSize: 9, boxShadow: "0 0 12px rgba(255,107,107,0.5)" }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -431,37 +465,38 @@ export default function Layout({ children, currentPageName }) {
 
             <button
               onClick={() => setRightPanelOpen(v => !v)}
-              className="activity-icon"
+              className="activity-icon transition-all group"
               title={rightPanelOpen ? "Collapse tools panel" : "Expand tools panel"}
+              style={{ color: rightPanelOpen ? "#40c4ff" : "inherit" }}
             >
-              <SlidersHorizontal size={15} />
+              <SlidersHorizontal size={15} style={{ transition: "all 0.3s" }} />
             </button>
 
             {/* User menu */}
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(v => !v)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all ml-2 group"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all ml-2 group hover:scale-105"
                 style={{
-                  background: userMenuOpen ? "rgba(254,221,0,0.06)" : "var(--bg-overlay)",
-                  border: `1px solid ${userMenuOpen ? "rgba(254,221,0,0.3)" : "var(--border-subtle)"}`,
+                  background: userMenuOpen ? "linear-gradient(135deg, rgba(254,221,0,0.12) 0%, rgba(64,196,255,0.08) 100%)" : "linear-gradient(135deg, rgba(254,221,0,0.04) 0%, rgba(64,196,255,0.04) 100%)",
+                  border: `1.5px solid ${userMenuOpen ? "rgba(254,221,0,0.4)" : "rgba(64,196,255,0.2)"}`,
                   cursor: "pointer",
-                  boxShadow: userMenuOpen ? "0 0 0 1px rgba(254,221,0,0.1)" : "none"
+                  boxShadow: userMenuOpen ? `0 0 16px rgba(254,221,0,0.15), inset 0 1px 0 rgba(254,221,0,0.2)` : "0 0 8px rgba(64,196,255,0.08)"
                 }}
                 onMouseOver={e => {
                   if (!userMenuOpen) {
-                    e.currentTarget.style.background = "rgba(254,221,0,0.08)";
-                    e.currentTarget.style.borderColor = "rgba(254,221,0,0.2)";
+                    e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.1) 0%, rgba(64,196,255,0.08) 100%)";
+                    e.currentTarget.style.borderColor = "rgba(64,196,255,0.4)";
                   }
                 }}
                 onMouseOut={e => {
                   if (!userMenuOpen) {
-                    e.currentTarget.style.background = "var(--bg-overlay)";
-                    e.currentTarget.style.borderColor = "var(--border-subtle)";
+                    e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.04) 0%, rgba(64,196,255,0.04) 100%)";
+                    e.currentTarget.style.borderColor = "rgba(64,196,255,0.2)";
                   }
                 }}>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 group-hover:shadow-lg"
+                  style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.25) 0%, rgba(64,196,255,0.15) 100%)", color: "var(--mnbc-yellow)", border: "1.5px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.2)" }}>
                   {user?.full_name?.[0] || "?"}
                 </div>
                 <div className="hidden md:block text-left">
