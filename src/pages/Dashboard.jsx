@@ -339,7 +339,10 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
               <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
               <YAxis dataKey="name" type="category" width={90} tick={{ fill: "#8bafd4", fontSize: 9 }} />
-              <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }} />
+              <Tooltip 
+                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
+                cursor={{ fill: "rgba(254,221,0,0.04)" }}
+              />
               <Bar dataKey="value" fill="#e6a817" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
