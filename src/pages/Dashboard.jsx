@@ -79,23 +79,98 @@ export default function Dashboard() {
   const handleWidgetsChange = useCallback((newWidgets) => {
     setWidgets(newWidgets);
     setHasChanges(true);
-    savePrefs(newWidgets, pinnedIds);
+    savePrefs(currentLayoutId, newWidgets, pinnedIds, dashboardTitle);
     addLog("success", "Dashboard layout updated");
-  }, [pinnedIds, addLog]);
+  }, [currentLayoutId, pinnedIds, dashboardTitle, addLog]);
 
   const handleUnpin = useCallback((id) => {
     const next = pinnedIds.filter(p => p !== id);
     setPinnedIds(next);
-    savePrefs(widgets, next);
-  }, [pinnedIds, widgets]);
+    savePrefs(currentLayoutId, widgets, next, dashboardTitle);
+  }, [currentLayoutId, widgets, dashboardTitle]);
 
   const handleResetLayout = useCallback(() => {
-    const defaultLayout = DEFAULT_WIDGETS.map(w => ({ ...w, visible: true }));
+    const defaultLayout = DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
     setWidgets(defaultLayout);
-    savePrefs(defaultLayout, pinnedIds);
+    savePrefs(currentLayoutId, defaultLayout, pinnedIds, dashboardTitle);
     setHasChanges(false);
     addLog("success", "Dashboard layout reset to default");
-  }, [pinnedIds, addLog]);
+  }, [currentLayoutId, pinnedIds, dashboardTitle, addLog]);
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    const items = Array.from(widgets);
+    const [moved] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, moved);
+    handleWidgetsChange(items);
+  };
+
+  const handleSaveNewLayout = (name) => {
+    const newLayout = {
+      id: `layout_${Date.now()}`,
+      name,
+      widgetCount: widgets.filter(w => w.visible !== false).length,
+      widgets: JSON.parse(JSON.stringify(widgets)),
+      pinnedIds: [...pinnedIds],
+      title: dashboardTitle,
+      createdAt: new Date().toISOString(),
+    };
+    const newLayouts = [...layouts, newLayout];
+    saveLayouts(newLayouts);
+    setLayouts(newLayouts);
+    addLog("success", `Layout "${name}" saved`);
+  };
+
+  const handleLoadLayout = (layoutId) => {
+    let layoutToLoad = null;
+
+    if (layoutId.startsWith("preset_")) {
+      const presetKey = layoutId.replace("preset_", "");
+      const preset = PRESET_LAYOUTS[presetKey];
+      if (preset) {
+        layoutToLoad = {
+          widgets: preset.widgets,
+          pinnedIds: [],
+          title: preset.name,
+        };
+      }
+    } else {
+      const saved = layouts.find(l => l.id === layoutId);
+      if (saved) {
+        layoutToLoad = {
+          widgets: saved.widgets,
+          pinnedIds: saved.pinnedIds,
+          title: saved.title,
+        };
+      }
+    }
+
+    if (layoutToLoad) {
+      setCurrentLayoutId(layoutId);
+      setWidgets(layoutToLoad.widgets);
+      setPinnedIds(layoutToLoad.pinnedIds);
+      setDashboardTitle(layoutToLoad.title);
+      setTempTitle(layoutToLoad.title);
+      savePrefs(layoutId, layoutToLoad.widgets, layoutToLoad.pinnedIds, layoutToLoad.title);
+      setHasChanges(false);
+      addLog("success", `Loaded layout: ${layoutToLoad.title}`);
+      setLayoutManagerOpen(false);
+    }
+  };
+
+  const handleDeleteLayout = (layoutId) => {
+    const newLayouts = layouts.filter(l => l.id !== layoutId);
+    saveLayouts(newLayouts);
+    setLayouts(newLayouts);
+    addLog("success", "Layout deleted");
+  };
+
+  const handleUpdateTitle = () => {
+    setDashboardTitle(tempTitle);
+    savePrefs(currentLayoutId, widgets, pinnedIds, tempTitle);
+    setEditingTitle(false);
+    addLog("success", "Dashboard title updated");
+  };
 
   // Derived stats
   const categoryCount = metrics.reduce((acc, m) => {
