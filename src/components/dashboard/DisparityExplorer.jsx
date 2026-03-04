@@ -787,10 +787,10 @@ export default function DisparityExplorer({ metrics }) {
       <div className="mt-3 pt-3 space-y-2.5" style={{ borderTop: "1px solid var(--border-subtle)" }}>
         {/* Summary stats */}
         <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="rounded-lg p-2.5" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-            <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4 }}>Showing</div>
-            <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 13 }}>{filtered.length}/{metrics.length}</div>
-          </div>
+          <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                    <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Showing</div>
+                    <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{filtered.length}/{metrics.length}</div>
+                  </div>
           {filtered.some(m => m.comparison_value != null) && (() => {
             const withGap = filtered.filter(m => m.comparison_value != null);
             const avgGap = withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length;
