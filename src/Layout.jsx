@@ -273,6 +273,19 @@ export default function Layout({ children, currentPageName }) {
         }
         .right-panel-widget:hover { border-color: var(--border-default); }
 
+        .panel-drawer {
+          transition: width 0.22s cubic-bezier(0.4,0,0.2,1), opacity 0.18s ease;
+          overflow: hidden;
+        }
+        .panel-drawer.closed {
+          width: 0 !important;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .panel-drawer.open {
+          opacity: 1;
+        }
+
         .header-search-btn {
           transition: all 0.15s;
         }
