@@ -2,22 +2,22 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   BarChart, Bar, ScatterChart, Scatter, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, ReferenceLine, Legend
-} from "recharts";
+  Cell, ReferenceLine, Legend } from
+"recharts";
 import { BarChart2, TrendingUp, Grid3X3, X, ChevronDown, Check, Filter, Download, Target, ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#f85149", "#a78bfa", "#d29922", "#38bdf8"];
-const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
-const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
+const CATEGORIES = ["chronic_disease", "mental_health", "substance_use", "maternal_child", "social_determinants", "demographics", "mortality", "access_to_care", "other"];
+const REGIONS = ["BC", "Northern BC", "Interior BC", "Fraser", "Vancouver Island", "Vancouver Coastal", "Provincial"];
 
 const CHART_TYPES = [
-  { id: "bar", label: "Bar", icon: BarChart2 },
-  { id: "line", label: "Trend", icon: TrendingUp },
-  { id: "scatter", label: "Scatter", icon: ({ size }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="7" cy="17" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="12" r="2"/></svg>
-  )},
-  { id: "heatmap", label: "Heatmap", icon: Grid3X3 },
-];
+{ id: "bar", label: "Bar", icon: BarChart2 },
+{ id: "line", label: "Trend", icon: TrendingUp },
+{ id: "scatter", label: "Scatter", icon: ({ size }) =>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="7" cy="17" r="2" /><circle cx="17" cy="7" r="2" /><circle cx="12" cy="12" r="2" /></svg>
+},
+{ id: "heatmap", label: "Heatmap", icon: Grid3X3 }];
+
 
 const TOOLTIP_STYLE = {
   background: "var(--bg-elevated)",
@@ -26,7 +26,7 @@ const TOOLTIP_STYLE = {
   fontSize: 12,
   padding: "8px 12px",
   borderRadius: "6px",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.6)"
 };
 
 const TOOLTIP_LABEL_STYLE = { color: "var(--accent-primary)", fontWeight: 600, marginBottom: "4px" };
@@ -39,65 +39,65 @@ function MultiSelect({ label, options, selected, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef();
   useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = (e) => {if (ref.current && !ref.current.contains(e.target)) setOpen(false);};
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
   const toggle = (val) => {
-    if (selected.includes(val)) onChange(selected.filter(v => v !== val));
-    else onChange([...selected, val]);
+    if (selected.includes(val)) onChange(selected.filter((v) => v !== val));else
+    onChange([...selected, val]);
   };
   return (
     <div ref={ref} className="relative">
-      <button onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 text-xs pl-2.5 pr-2 py-1 rounded whitespace-nowrap"
-        style={{ background: "var(--bg-overlay)", border: `1px solid ${selected.length ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: selected.length ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 110 }}>
+      <button onClick={() => setOpen((o) => !o)}
+      className="flex items-center gap-1.5 text-xs pl-2.5 pr-2 py-1 rounded whitespace-nowrap"
+      style={{ background: "var(--bg-overlay)", border: `1px solid ${selected.length ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: selected.length ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 110 }}>
         <span className="flex-1 text-left truncate">
           {!selected.length ? `All ${label}s` : selected.length === 1 ? selected[0].replace(/_/g, " ") : `${selected.length} ${label}s`}
         </span>
-        {selected.length > 0 && (
-          <span onClick={e => { e.stopPropagation(); onChange([]); }}
-            className="rounded-full flex items-center justify-center shrink-0"
-            style={{ background: "var(--accent-muted)", width: 14, height: 14 }}>
+        {selected.length > 0 &&
+        <span onClick={(e) => {e.stopPropagation();onChange([]);}}
+        className="rounded-full flex items-center justify-center shrink-0"
+        style={{ background: "var(--accent-muted)", width: 14, height: 14 }}>
             <X size={8} style={{ color: "var(--accent-primary)" }} />
           </span>
-        )}
+        }
         <ChevronDown size={10} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
       </button>
-      {open && (
-        <div className="absolute z-50 mt-1 rounded-md shadow-xl overflow-hidden"
-          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 180, top: "100%", left: 0 }}>
+      {open &&
+      <div className="absolute z-50 mt-1 rounded-md shadow-xl overflow-hidden"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 180, top: "100%", left: 0 }}>
           <div className="max-h-52 overflow-y-auto py-1">
-            {options.map(opt => {
-              const isSel = selected.includes(opt.value);
-              return (
-                <div key={opt.value} onClick={() => toggle(opt.value)}
-                  className="flex items-center gap-2 px-3 py-1.5 cursor-pointer text-xs"
-                  style={{ color: isSel ? "var(--text-primary)" : "var(--text-secondary)" }}
-                  onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                  onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+            {options.map((opt) => {
+            const isSel = selected.includes(opt.value);
+            return (
+              <div key={opt.value} onClick={() => toggle(opt.value)}
+              className="flex items-center gap-2 px-3 py-1.5 cursor-pointer text-xs"
+              style={{ color: isSel ? "var(--text-primary)" : "var(--text-secondary)" }}
+              onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
+              onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
                   <div className="w-3.5 h-3.5 rounded flex items-center justify-center shrink-0"
-                    style={{ background: isSel ? "var(--accent-primary)" : "var(--bg-overlay)", border: `1px solid ${isSel ? "var(--accent-primary)" : "var(--border-default)"}` }}>
+                style={{ background: isSel ? "var(--accent-primary)" : "var(--bg-overlay)", border: `1px solid ${isSel ? "var(--accent-primary)" : "var(--border-default)"}` }}>
                     {isSel && <Check size={9} style={{ color: "#000" }} />}
                   </div>
                   <span className="truncate">{opt.label}</span>
-                </div>
-              );
-            })}
+                </div>);
+
+          })}
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 // ── Value filter ──────────────────────────────────────────────────────────────
 function ValueFilter({ op, setOp, threshold, setThreshold }) {
   return (
     <div className="flex items-center gap-1">
-      <select value={op} onChange={e => setOp(e.target.value)}
-        className="text-xs px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+      <select value={op} onChange={(e) => setOp(e.target.value)}
+      className="text-xs px-1.5 py-1 rounded appearance-none outline-none"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="any" style={{ background: "#0c1625", color: "#f0f6ff" }}>Any value</option>
         <option value="gt" style={{ background: "#0c1625", color: "#f0f6ff" }}>&gt;</option>
         <option value="gte" style={{ background: "#0c1625", color: "#f0f6ff" }}>≥</option>
@@ -105,78 +105,78 @@ function ValueFilter({ op, setOp, threshold, setThreshold }) {
         <option value="lte" style={{ background: "#0c1625", color: "#f0f6ff" }}>≤</option>
         <option value="eq" style={{ background: "#0c1625", color: "#f0f6ff" }}>=</option>
       </select>
-      {op !== "any" && (
-        <input type="number" value={threshold} onChange={e => setThreshold(e.target.value)} placeholder="0"
-          className="text-xs px-2 py-1 rounded outline-none w-20"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }} />
-      )}
-    </div>
-  );
+      {op !== "any" &&
+      <input type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} placeholder="0"
+      className="text-xs px-2 py-1 rounded outline-none w-20"
+      style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }} />
+      }
+    </div>);
+
 }
 
 // ── Year range filter ─────────────────────────────────────────────────────────
 function YearRangeFilter({ years, yearFrom, setYearFrom, yearTo, setYearTo }) {
   return (
     <div className="flex items-center gap-1 text-xs">
-      <select value={yearFrom} onChange={e => setYearFrom(e.target.value)}
-         className="px-1.5 py-1 rounded appearance-none outline-none"
-         style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+      <select value={yearFrom} onChange={(e) => setYearFrom(e.target.value)}
+      className="px-1.5 py-1 rounded appearance-none outline-none"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="all" style={{ background: "#0c1625", color: "#f0f6ff" }}>From</option>
-        {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
+        {years.map((y) => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
       </select>
       <span style={{ color: "var(--text-secondary)" }}>–</span>
-      <select value={yearTo} onChange={e => setYearTo(e.target.value)}
-         className="px-1.5 py-1 rounded appearance-none outline-none"
-         style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+      <select value={yearTo} onChange={(e) => setYearTo(e.target.value)}
+      className="px-1.5 py-1 rounded appearance-none outline-none"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="all" style={{ background: "#0c1625", color: "#f0f6ff" }}>To</option>
-        {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
+        {years.map((y) => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
       </select>
-    </div>
-  );
+    </div>);
+
 }
 
 // ── Benchmark panel ───────────────────────────────────────────────────────────
 function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, setOpen }) {
-  const years = useMemo(() => [...new Set(allMetrics.map(m => m.year).filter(Boolean))].sort(), [allMetrics]);
+  const years = useMemo(() => [...new Set(allMetrics.map((m) => m.year).filter(Boolean))].sort(), [allMetrics]);
 
   const provincialAvg = useMemo(() => {
-    const vals = metrics.filter(m => m.comparison_value != null).map(m => m.comparison_value);
+    const vals = metrics.filter((m) => m.comparison_value != null).map((m) => m.comparison_value);
     return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
   }, [metrics]);
 
   const yearAvgs = useMemo(() => {
     const map = {};
-    allMetrics.forEach(m => {
+    allMetrics.forEach((m) => {
       if (!m.year) return;
       if (!map[m.year]) map[m.year] = { sum: 0, count: 0 };
-      map[m.year].sum += m.value; map[m.year].count++;
+      map[m.year].sum += m.value;map[m.year].count++;
     });
     return Object.fromEntries(Object.entries(map).map(([y, d]) => [y, d.sum / d.count]));
   }, [allMetrics]);
 
   return (
     <div>
-      <button onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 rounded text-xs"
-        style={{
-          background: benchmark.active ? "#a78bfa22" : "var(--bg-overlay)",
-          border: `1px solid ${benchmark.active ? BENCHMARK_COLOR : "var(--border-subtle)"}`,
-          color: benchmark.active ? BENCHMARK_COLOR : "var(--text-muted)"
-        }}>
+      <button onClick={() => setOpen((o) => !o)}
+      className="flex items-center gap-1.5 px-2 py-1 rounded text-xs"
+      style={{
+        background: benchmark.active ? "#a78bfa22" : "var(--bg-overlay)",
+        border: `1px solid ${benchmark.active ? BENCHMARK_COLOR : "var(--border-subtle)"}`,
+        color: benchmark.active ? BENCHMARK_COLOR : "var(--text-muted)"
+      }}>
         <Target size={10} />
         Benchmark {benchmark.active && `(${benchmark.value?.toFixed(1)})`}
         <ChevronDown size={10} style={{ transform: open ? "rotate(180deg)" : "none", transition: "0.15s" }} />
       </button>
 
-      {open && (
-        <div className="absolute z-40 mt-1 rounded-md p-3 shadow-xl space-y-2"
-          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 260, right: 0 }}>
+      {open &&
+      <div className="absolute z-40 mt-1 rounded-md p-3 shadow-xl space-y-2"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 260, right: 0 }}>
           <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Benchmark Mode</div>
 
           {/* Provincial average */}
           <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
             <input type="radio" checked={benchmark.mode === "provincial"} onChange={() =>
-              setBenchmark({ mode: "provincial", active: true, value: provincialAvg })} />
+          setBenchmark({ mode: "provincial", active: true, value: provincialAvg })} />
             <span>Provincial Average {provincialAvg != null ? <span style={{ color: BENCHMARK_COLOR }}>({provincialAvg.toFixed(1)})</span> : "(no data)"}</span>
           </label>
 
@@ -184,57 +184,57 @@ function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, se
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
               <input type="radio" checked={benchmark.mode === "year"} onChange={() => {
-                const y = benchmark.selectedYear || years[0];
-                setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
-              }} />
+              const y = benchmark.selectedYear || years[0];
+              setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
+            }} />
               <span>Past Year Avg</span>
             </label>
             <select
-              value={benchmark.selectedYear || ""}
-              onChange={e => {
-                const y = e.target.value;
-                setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
-              }}
-              className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
-              style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
-              {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y} ({yearAvgs[y]?.toFixed(1) ?? "—"})</option>)}
+            value={benchmark.selectedYear || ""}
+            onChange={(e) => {
+              const y = e.target.value;
+              setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
+            }}
+            className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+              {years.map((y) => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y} ({yearAvgs[y]?.toFixed(1) ?? "—"})</option>)}
             </select>
           </div>
 
           {/* Custom target */}
           <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: "var(--text-secondary)" }}>
             <input type="radio" checked={benchmark.mode === "custom"} onChange={() =>
-              setBenchmark({ ...benchmark, mode: "custom", active: true })} />
+          setBenchmark({ ...benchmark, mode: "custom", active: true })} />
             <span>Custom Target</span>
           </label>
-          {benchmark.mode === "custom" && (
-            <input type="number" placeholder="Enter target value"
-              value={benchmark.customValue ?? ""}
-              onChange={e => setBenchmark({ ...benchmark, mode: "custom", active: true, value: parseFloat(e.target.value) || null, customValue: e.target.value })}
-              className="text-xs px-2 py-1 rounded outline-none w-full"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }} />
-          )}
+          {benchmark.mode === "custom" &&
+        <input type="number" placeholder="Enter target value"
+        value={benchmark.customValue ?? ""}
+        onChange={(e) => setBenchmark({ ...benchmark, mode: "custom", active: true, value: parseFloat(e.target.value) || null, customValue: e.target.value })}
+        className="text-xs px-2 py-1 rounded outline-none w-full"
+        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }} />
+        }
 
           {/* Clear */}
-          <button onClick={() => { setBenchmark({ active: false, mode: null, value: null }); setOpen(false); }}
-            className="text-xs flex items-center gap-1 mt-1"
-            style={{ color: "var(--color-error)" }}>
+          <button onClick={() => {setBenchmark({ active: false, mode: null, value: null });setOpen(false);}}
+        className="text-xs flex items-center gap-1 mt-1"
+        style={{ color: "var(--color-error)" }}>
             <X size={9} /> Remove benchmark
           </button>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 // ── Benchmark performance table ───────────────────────────────────────────────
 function BenchmarkTable({ data, benchmark }) {
   if (!benchmark.active || benchmark.value == null) return null;
-  const rows = data
-    .filter(m => m.value != null)
-    .map(m => ({ ...m, diff: m.value - benchmark.value, pct: ((m.value - benchmark.value) / Math.abs(benchmark.value || 1)) * 100 }))
-    .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))
-    .slice(0, 10);
+  const rows = data.
+  filter((m) => m.value != null).
+  map((m) => ({ ...m, diff: m.value - benchmark.value, pct: (m.value - benchmark.value) / Math.abs(benchmark.value || 1) * 100 })).
+  sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).
+  slice(0, 10);
 
   return (
     <div className="mt-3 rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
@@ -247,9 +247,9 @@ function BenchmarkTable({ data, benchmark }) {
         <table className="w-full text-xs">
           <thead>
             <tr style={{ background: "var(--bg-elevated)" }}>
-              {["Metric", "Category", "Value", "vs Benchmark", "%"].map(h => (
-                <th key={h} className="px-3 py-1.5 text-left font-semibold" style={{ color: "var(--text-muted)", fontSize: 10 }}>{h}</th>
-              ))}
+              {["Metric", "Category", "Value", "vs Benchmark", "%"].map((h) =>
+              <th key={h} className="px-3 py-1.5 text-left font-semibold" style={{ color: "var(--text-muted)", fontSize: 10 }}>{h}</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -259,8 +259,8 @@ function BenchmarkTable({ data, benchmark }) {
               const color = isNeutral ? "var(--text-muted)" : isAbove ? "#f85149" : "#2ea043";
               return (
                 <tr key={i} style={{ borderTop: "1px solid var(--border-subtle)" }}
-                  onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                  onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
+                onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
                   <td className="px-3 py-1.5 font-medium" style={{ color: "var(--text-primary)", maxWidth: 160 }}>
                     <span className="truncate block">{m.name}</span>
                   </td>
@@ -275,72 +275,72 @@ function BenchmarkTable({ data, benchmark }) {
                   <td className="px-3 py-1.5" style={{ color }}>
                     {isAbove ? "+" : ""}{m.pct.toFixed(1)}%
                   </td>
-                </tr>
-              );
+                </tr>);
+
             })}
           </tbody>
         </table>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 // ── Charts ────────────────────────────────────────────────────────────────────
 function DisparityBar({ data, drill, benchmark }) {
   const chartData = useMemo(() => {
-    return data
-      .filter(m => m.comparison_value != null)
-      .slice(0, 20)
-      .map(m => ({
-        name: m.name.length > 22 ? m.name.slice(0, 22) + "…" : m.name,
-        fullName: m.name, metis: parseFloat(m.value?.toFixed(2)),
-        bc: parseFloat(m.comparison_value?.toFixed(2)),
-        gap: parseFloat((m.value - m.comparison_value).toFixed(2)),
-        region: m.region, category: m.category, year: m.year,
-      })).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
+    return data.
+    filter((m) => m.comparison_value != null).
+    slice(0, 20).
+    map((m) => ({
+      name: m.name.length > 22 ? m.name.slice(0, 22) + "…" : m.name,
+      fullName: m.name, metis: parseFloat(m.value?.toFixed(2)),
+      bc: parseFloat(m.comparison_value?.toFixed(2)),
+      gap: parseFloat((m.value - m.comparison_value).toFixed(2)),
+      region: m.region, category: m.category, year: m.year
+    })).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
   }, [data]);
 
   if (!chartData.length) return <EmptyState msg="No metrics with BC comparison values." />;
-  
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" opacity={0.3} />
         <XAxis type="number" tick={{ fill: "#40C4FF", fontSize: 11, fontWeight: 500 }} />
         <YAxis type="category" dataKey="name" width={140} tick={{ fill: "#FEDD00", fontSize: 11, fontWeight: 500 }} />
-        <Tooltip 
-          contentStyle={TOOLTIP_STYLE} 
-          labelStyle={TOOLTIP_LABEL_STYLE} 
+        <Tooltip
+          contentStyle={TOOLTIP_STYLE}
+          labelStyle={TOOLTIP_LABEL_STYLE}
           itemStyle={TOOLTIP_ITEM_STYLE}
           formatter={(val, name) => [val?.toFixed(2), name === "metis" ? "Métis" : name === "bc" ? "BC Population" : name]}
           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
           cursor={{ fill: "rgba(254,221,0,0.08)" }} />
-        <Legend formatter={n => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 12, color: "#FEDD00", fontWeight: 600 }} />
+        <Legend formatter={(n) => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 12, color: "#FEDD00", fontWeight: 600 }} />
         <Bar dataKey="metis" fill="#e6a817" radius={[0, 3, 3, 0]} onClick={drill} style={{ cursor: "pointer" }} />
         <Bar dataKey="bc" fill="#58a6ff" radius={[0, 3, 3, 0]} opacity={0.7} onClick={drill} style={{ cursor: "pointer" }} />
         <ReferenceLine x={0} stroke="var(--border-default)" />
-        {benchmark.active && benchmark.value != null && (
-          <ReferenceLine x={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
-            label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "top", fill: BENCHMARK_COLOR, fontSize: 10 }} />
-        )}
+        {benchmark.active && benchmark.value != null &&
+        <ReferenceLine x={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
+        label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "top", fill: BENCHMARK_COLOR, fontSize: 10 }} />
+        }
       </BarChart>
-    </ResponsiveContainer>
-  );
+    </ResponsiveContainer>);
+
 }
 
 function TrendLine({ data, benchmark }) {
   const chartData = useMemo(() => {
     const yearMap = {};
-    data.forEach(m => {
+    data.forEach((m) => {
       if (!m.year) return;
       if (!yearMap[m.year]) yearMap[m.year] = { year: m.year, sum: 0, count: 0, bcSum: 0, bcCount: 0 };
-      yearMap[m.year].sum += m.value; yearMap[m.year].count++;
-      if (m.comparison_value != null) { yearMap[m.year].bcSum += m.comparison_value; yearMap[m.year].bcCount++; }
+      yearMap[m.year].sum += m.value;yearMap[m.year].count++;
+      if (m.comparison_value != null) {yearMap[m.year].bcSum += m.comparison_value;yearMap[m.year].bcCount++;}
     });
-    return Object.values(yearMap).sort((a, b) => a.year - b.year)
-      .map(d => ({ year: d.year, metis: parseFloat((d.sum / d.count).toFixed(2)), bc: d.bcCount ? parseFloat((d.bcSum / d.bcCount).toFixed(2)) : null }));
+    return Object.values(yearMap).sort((a, b) => a.year - b.year).
+    map((d) => ({ year: d.year, metis: parseFloat((d.sum / d.count).toFixed(2)), bc: d.bcCount ? parseFloat((d.bcSum / d.bcCount).toFixed(2)) : null }));
   }, [data]);
-  
+
   if (!chartData.length) return <EmptyState />;
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -348,33 +348,33 @@ function TrendLine({ data, benchmark }) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" opacity={0.3} />
         <XAxis dataKey="year" tick={{ fill: "#40C4FF", fontSize: 11, fontWeight: 500 }} />
         <YAxis tick={{ fill: "#40C4FF", fontSize: 11, fontWeight: 500 }} />
-        <Tooltip 
-          contentStyle={TOOLTIP_STYLE} 
-          labelStyle={TOOLTIP_LABEL_STYLE} 
-          itemStyle={TOOLTIP_ITEM_STYLE} 
-          formatter={(v, n) => [v?.toFixed(2), n === "metis" ? "Métis Avg" : "BC Avg"]} 
+        <Tooltip
+          contentStyle={TOOLTIP_STYLE}
+          labelStyle={TOOLTIP_LABEL_STYLE}
+          itemStyle={TOOLTIP_ITEM_STYLE}
+          formatter={(v, n) => [v?.toFixed(2), n === "metis" ? "Métis Avg" : "BC Avg"]}
           cursor={{ fill: "rgba(254,221,0,0.08)" }} />
-        <Legend formatter={n => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 12, color: "#2ED573", fontWeight: 600 }} />
+        <Legend formatter={(n) => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 12, color: "#2ED573", fontWeight: 600 }} />
         <Line type="monotone" dataKey="metis" stroke="#e6a817" strokeWidth={2} dot={{ r: 3 }} />
         <Line type="monotone" dataKey="bc" stroke="#58a6ff" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3 }} connectNulls />
-        {benchmark.active && benchmark.value != null && (
-          <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
-            label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "right", fill: BENCHMARK_COLOR, fontSize: 10 }} />
-        )}
+        {benchmark.active && benchmark.value != null &&
+        <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
+        label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "right", fill: BENCHMARK_COLOR, fontSize: 10 }} />
+        }
       </LineChart>
-    </ResponsiveContainer>
-  );
+    </ResponsiveContainer>);
+
 }
 
 function ScatterPlot({ data, drill, benchmark }) {
   const { catColors, points } = useMemo(() => {
     const colorMap = {};
-    [...new Set(data.map(m => m.category))].forEach((c, i) => { colorMap[c] = COLORS[i % COLORS.length]; });
-    const pts = data.filter(m => m.value != null && m.comparison_value != null)
-      .map(m => ({ x: parseFloat(m.comparison_value?.toFixed(2)), y: parseFloat(m.value?.toFixed(2)), name: m.name, category: m.category, region: m.region, year: m.year }));
+    [...new Set(data.map((m) => m.category))].forEach((c, i) => {colorMap[c] = COLORS[i % COLORS.length];});
+    const pts = data.filter((m) => m.value != null && m.comparison_value != null).
+    map((m) => ({ x: parseFloat(m.comparison_value?.toFixed(2)), y: parseFloat(m.value?.toFixed(2)), name: m.name, category: m.category, region: m.region, year: m.year }));
     return { catColors: colorMap, points: pts };
   }, [data]);
-  
+
   if (!points.length) return <EmptyState msg="No metrics with BC comparison values for scatter plot." />;
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -406,44 +406,44 @@ function ScatterPlot({ data, drill, benchmark }) {
                 </div>
                 <div className="flex justify-between items-center pt-1 border-t" style={{ borderColor: "var(--border-subtle)" }}>
                   <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>Disparity Gap</span>
-                  <span style={{ color: d.y > d.x ? "#f85149" : "#2ea043", fontWeight: 700 }}>{(d.y - d.x) > 0 ? "+" : ""}{(d.y - d.x).toFixed(2)}</span>
+                  <span style={{ color: d.y > d.x ? "#f85149" : "#2ea043", fontWeight: 700 }}>{d.y - d.x > 0 ? "+" : ""}{(d.y - d.x).toFixed(2)}</span>
                 </div>
-                {benchmark.active && benchmark.value != null && (
-                  <div className="flex justify-between items-center">
+                {benchmark.active && benchmark.value != null &&
+                <div className="flex justify-between items-center">
                     <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>vs Benchmark</span>
-                    <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>{(d.y - benchmark.value) > 0 ? "+" : ""}{(d.y - benchmark.value).toFixed(2)}</span>
+                    <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>{d.y - benchmark.value > 0 ? "+" : ""}{(d.y - benchmark.value).toFixed(2)}</span>
                   </div>
-                )}
+                }
               </div>
-            </div>
-          );
+            </div>);
+
         }} cursor={{ fill: "rgba(254,221,0,0.04)" }} />
         <Scatter data={points} onClick={drill} style={{ cursor: "pointer" }}>
           {points.map((p, i) => <Cell key={i} fill={catColors[p.category] || "#e6a817"} fillOpacity={0.8} />)}
         </Scatter>
-        {benchmark.active && benchmark.value != null && (
-          <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
-            label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "right", fill: BENCHMARK_COLOR, fontSize: 10 }} />
-        )}
+        {benchmark.active && benchmark.value != null &&
+        <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={2}
+        label={{ value: `Benchmark: ${benchmark.value.toFixed(1)}`, position: "right", fill: BENCHMARK_COLOR, fontSize: 10 }} />
+        }
       </ScatterChart>
-    </ResponsiveContainer>
-  );
+    </ResponsiveContainer>);
+
 }
 
 function Heatmap({ metrics, benchmark }) {
   const { cats, regs, grid } = useMemo(() => {
-    const cats = CATEGORIES.filter(c => metrics.some(m => m.category === c));
-    const regs = REGIONS.filter(r => metrics.some(m => m.region === r));
+    const cats = CATEGORIES.filter((c) => metrics.some((m) => m.category === c));
+    const regs = REGIONS.filter((r) => metrics.some((m) => m.region === r));
     const map = {};
-    metrics.forEach(m => {
+    metrics.forEach((m) => {
       const key = `${m.region}||${m.category}`;
       if (!map[key]) map[key] = { sum: 0, count: 0 };
-      map[key].sum += m.value; map[key].count++;
+      map[key].sum += m.value;map[key].count++;
     });
     return { cats, regs, grid: map };
   }, [metrics]);
-  const vals = Object.values(grid).map(v => v.sum / v.count).filter(Boolean);
-  const min = Math.min(...vals), max = Math.max(...vals);
+  const vals = Object.values(grid).map((v) => v.sum / v.count).filter(Boolean);
+  const min = Math.min(...vals),max = Math.max(...vals);
   const color = (val) => {
     if (!val) return "var(--bg-overlay)";
     const t = (val - min) / (max - min || 1);
@@ -458,77 +458,77 @@ function Heatmap({ metrics, benchmark }) {
          <thead>
            <tr>
              <th className="px-2 py-1 text-left sticky left-0" style={{ background: "var(--bg-elevated)", color: "#40C4FF", fontSize: 11, fontWeight: 600 }}>Region \ Category</th>
-             {cats.map(c => <th key={c} className="px-2 py-1 text-center" style={{ color: "#FEDD00", fontSize: 10, fontWeight: 600, whiteSpace: "nowrap" }}>{c.replace(/_/g, " ")}</th>)}
+             {cats.map((c) => <th key={c} className="px-2 py-1 text-center" style={{ color: "#FEDD00", fontSize: 10, fontWeight: 600, whiteSpace: "nowrap" }}>{c.replace(/_/g, " ")}</th>)}
            </tr>
          </thead>
          <tbody>
-           {regs.map(reg => (
-             <tr key={reg}>
+           {regs.map((reg) =>
+          <tr key={reg}>
                <td className="px-2 py-1 sticky left-0 font-medium" style={{ background: "var(--bg-elevated)", color: "#58A6FF", whiteSpace: "nowrap", fontWeight: 600 }}>{reg}</td>
-              {cats.map(cat => {
-                const cell = grid[`${reg}||${cat}`];
-                const avg = cell ? (cell.sum / cell.count) : null;
-                const isBelowBench = benchmark.active && benchmark.value != null && avg != null && avg < benchmark.value;
-                return (
-                  <td key={cat} className="px-1 py-1 text-center" title={avg ? `${reg} / ${cat}: ${avg.toFixed(1)}${benchmark.active && benchmark.value != null ? ` (benchmark: ${benchmark.value.toFixed(1)})` : ""}` : "No data"}>
+              {cats.map((cat) => {
+              const cell = grid[`${reg}||${cat}`];
+              const avg = cell ? cell.sum / cell.count : null;
+              const isBelowBench = benchmark.active && benchmark.value != null && avg != null && avg < benchmark.value;
+              return (
+                <td key={cat} className="px-1 py-1 text-center" title={avg ? `${reg} / ${cat}: ${avg.toFixed(1)}${benchmark.active && benchmark.value != null ? ` (benchmark: ${benchmark.value.toFixed(1)})` : ""}` : "No data"}>
                     <div className="rounded mx-auto flex items-center justify-center relative font-bold"
-                      style={{ background: color(avg), width: 52, height: 28, color: "var(--bg-base)", fontSize: 11, fontWeight: 700, outline: isBelowBench ? `2px solid ${BENCHMARK_COLOR}` : "none", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+                  style={{ background: color(avg), width: 52, height: 28, color: "var(--bg-base)", fontSize: 11, fontWeight: 700, outline: isBelowBench ? `2px solid ${BENCHMARK_COLOR}` : "none", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
                       {avg ? avg.toFixed(1) : "—"}
                     </div>
-                  </td>
-                );
-              })}
+                  </td>);
+
+            })}
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
-      {benchmark.active && benchmark.value != null && (
-        <div className="mt-2 text-xs flex items-center gap-1.5" style={{ color: BENCHMARK_COLOR }}>
+      {benchmark.active && benchmark.value != null &&
+      <div className="mt-2 text-xs flex items-center gap-1.5" style={{ color: BENCHMARK_COLOR }}>
           <div className="w-3 h-3 rounded-sm" style={{ outline: `2px solid ${BENCHMARK_COLOR}` }} />
           Cells below benchmark ({benchmark.value.toFixed(1)}) are highlighted
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 function EmptyState({ msg }) {
   return (
     <div className="flex items-center justify-center h-48 text-xs text-center px-6" style={{ color: "var(--text-muted)" }}>
       {msg || "No data matches the current filters."}
-    </div>
-  );
+    </div>);
+
 }
 
 function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
   if (!metric) return null;
 
-  const gap = metric.comparison_value != null ? (metric.value - metric.comparison_value) : null;
-  const benchDiff = benchmark.active && benchmark.value != null ? ((metric.metis ?? metric.value) - benchmark.value) : null;
+  const gap = metric.comparison_value != null ? metric.value - metric.comparison_value : null;
+  const benchDiff = benchmark.active && benchmark.value != null ? (metric.metis ?? metric.value) - benchmark.value : null;
 
   // Get historical data for this specific metric (same name, region, category)
   const historicalData = useMemo(() => {
     if (!allMetrics) return [];
-    return allMetrics
-      .filter(m => m.name === metric.name && m.region === metric.region && m.category === metric.category)
-      .sort((a, b) => a.year - b.year)
-      .map(m => ({ year: m.year, value: m.value, comparison: m.comparison_value }));
+    return allMetrics.
+    filter((m) => m.name === metric.name && m.region === metric.region && m.category === metric.category).
+    sort((a, b) => a.year - b.year).
+    map((m) => ({ year: m.year, value: m.value, comparison: m.comparison_value }));
   }, [metric, allMetrics]);
 
   // Calculate historical average and trend
   const histAvg = historicalData.length > 0 ? historicalData.reduce((s, d) => s + d.value, 0) / historicalData.length : null;
-  const histChange = historicalData.length >= 2 
-    ? historicalData[historicalData.length - 1].value - historicalData[0].value 
-    : null;
+  const histChange = historicalData.length >= 2 ?
+  historicalData[historicalData.length - 1].value - historicalData[0].value :
+  null;
 
   const exportMetricData = () => {
     const header = ["Year", "Métis Value", "BC Population", "Gap"].join(",");
-    const rows = historicalData.map(d => [
-      d.year,
-      d.value.toFixed(2),
-      d.comparison ? d.comparison.toFixed(2) : "N/A",
-      d.comparison ? (d.value - d.comparison).toFixed(2) : "N/A"
-    ].join(","));
+    const rows = historicalData.map((d) => [
+    d.year,
+    d.value.toFixed(2),
+    d.comparison ? d.comparison.toFixed(2) : "N/A",
+    d.comparison ? (d.value - d.comparison).toFixed(2) : "N/A"].
+    join(","));
     const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -561,24 +561,24 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
         <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
           <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Current Year ({metric.year})</div>
           <div style={{ color: "var(--accent-primary)", fontWeight: 700 }}>{(metric.metis ?? metric.value).toFixed(2)}</div>
-          {metric.comparison_value != null && (
-            <div style={{ color: "var(--text-secondary)", fontSize: 9, marginTop: 2 }}>vs BC: {(metric.comparison_value).toFixed(2)}</div>
-          )}
+          {metric.comparison_value != null &&
+          <div style={{ color: "var(--text-secondary)", fontSize: 9, marginTop: 2 }}>vs BC: {metric.comparison_value.toFixed(2)}</div>
+          }
         </div>
-        {gap != null && (
-          <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+        {gap != null &&
+        <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Disparity Gap</div>
             <div style={{ color: gap > 0 ? "#f85149" : "#2ea043", fontWeight: 700 }}>{gap > 0 ? "+" : ""}{gap.toFixed(2)}</div>
             <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
               {gap > 0 ? "Higher" : "Lower"} than BC
             </div>
           </div>
-        )}
+        }
       </div>
 
       {/* Historical trend mini-chart */}
-      {historicalData.length > 1 && (
-        <div style={{ marginTop: 8 }}>
+      {historicalData.length > 1 &&
+      <div style={{ marginTop: 8 }}>
           <div style={{ fontSize: 9, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Historical Trend
           </div>
@@ -589,30 +589,30 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
               <YAxis tick={{ fontSize: 9, fill: "#8bafd4" }} />
               <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "rgba(254,221,0,0.04)" }} />
               <Line type="monotone" dataKey="value" stroke="#e6a817" strokeWidth={2} dot={{ r: 2 }} name="Métis" />
-              {historicalData.some(d => d.comparison != null) && (
-                <Line type="monotone" dataKey="comparison" stroke="#58a6ff" strokeWidth={2} dot={{ r: 2 }} strokeDasharray="4 3" name="BC" connectNulls />
-              )}
-              {benchmark.active && benchmark.value != null && (
-                <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={1.5} />
-              )}
+              {historicalData.some((d) => d.comparison != null) &&
+            <Line type="monotone" dataKey="comparison" stroke="#58a6ff" strokeWidth={2} dot={{ r: 2 }} strokeDasharray="4 3" name="BC" connectNulls />
+            }
+              {benchmark.active && benchmark.value != null &&
+            <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={1.5} />
+            }
             </LineChart>
           </ResponsiveContainer>
         </div>
-      )}
+      }
 
       {/* Historical analysis */}
       <div className="grid grid-cols-2 gap-2 text-xs">
-        {histAvg != null && (
-          <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+        {histAvg != null &&
+        <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Historical Avg</div>
             <div style={{ color: "var(--text-primary)", fontWeight: 700 }}>{histAvg.toFixed(2)}</div>
             <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
-              vs Current: {((metric.value - histAvg) > 0 ? "+" : "")}{(metric.value - histAvg).toFixed(2)}
+              vs Current: {metric.value - histAvg > 0 ? "+" : ""}{(metric.value - histAvg).toFixed(2)}
             </div>
           </div>
-        )}
-        {histChange != null && (
-          <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+        }
+        {histChange != null &&
+        <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
             <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Total Trend</div>
             <div style={{ color: histChange > 0 ? "#2ea043" : "#f85149", fontWeight: 700 }}>
               {histChange > 0 ? "↑" : "↓"} {Math.abs(histChange).toFixed(2)}
@@ -621,43 +621,43 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
               {historicalData[0]?.year} to {historicalData[historicalData.length - 1]?.year}
             </div>
           </div>
-        )}
+        }
       </div>
 
       {/* Benchmark deviation */}
-      {benchDiff != null && (
-        <div className="rounded-md p-2" style={{ background: `${BENCHMARK_COLOR}11`, border: `1px solid ${BENCHMARK_COLOR}33` }}>
+      {benchDiff != null &&
+      <div className="rounded-md p-2" style={{ background: `${BENCHMARK_COLOR}11`, border: `1px solid ${BENCHMARK_COLOR}33` }}>
           <div style={{ fontSize: 9, fontWeight: 600, color: BENCHMARK_COLOR, marginBottom: 2 }}>vs Benchmark ({benchmark.value.toFixed(1)})</div>
           <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 12 }}>
             {benchDiff > 0 ? "+" : ""}{benchDiff.toFixed(2)} {benchDiff > 0 ? "above" : "below"}
           </div>
         </div>
-      )}
+      }
 
       {/* Export button */}
-      {historicalData.length > 0 && (
-        <button onClick={exportMetricData}
-          className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded text-xs font-medium transition-all"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+      {historicalData.length > 0 &&
+      <button onClick={exportMetricData}
+      className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded text-xs font-medium transition-all"
+      style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
           <Download size={11} style={{ color: "var(--accent-primary)" }} />
           Export Metric History
         </button>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
 function exportCSV(data, filename) {
   const cols = ["name", "category", "region", "year", "value", "comparison_value", "unit", "confidence_level", "notes"];
   const header = cols.join(",");
-  const rows = data.map(m => cols.map(c => {
+  const rows = data.map((m) => cols.map((c) => {
     const val = m[c] ?? "";
     return typeof val === "string" && val.includes(",") ? `"${val}"` : val;
   }).join(","));
   const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+  const a = document.createElement("a");a.href = url;a.download = filename;a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -677,14 +677,14 @@ export default function DisparityExplorer({ metrics }) {
   const benchmarkRef = useRef();
 
   useEffect(() => {
-    const handler = (e) => { if (benchmarkRef.current && !benchmarkRef.current.contains(e.target)) setBenchmarkOpen(false); };
+    const handler = (e) => {if (benchmarkRef.current && !benchmarkRef.current.contains(e.target)) setBenchmarkOpen(false);};
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const years = useMemo(() => [...new Set(metrics.map(m => m.year).filter(Boolean))].sort(), [metrics]);
+  const years = useMemo(() => [...new Set(metrics.map((m) => m.year).filter(Boolean))].sort(), [metrics]);
 
-  const filtered = useMemo(() => metrics.filter(m => {
+  const filtered = useMemo(() => metrics.filter((m) => {
     if (selCats.length && !selCats.includes(m.category)) return false;
     if (selRegions.length && !selRegions.includes(m.region)) return false;
     if (yearFrom !== "all" && m.year < parseInt(yearFrom)) return false;
@@ -701,7 +701,7 @@ export default function DisparityExplorer({ metrics }) {
   }), [metrics, selCats, selRegions, yearFrom, yearTo, valueOp, valueThreshold]);
 
   const activeFilterCount = [selCats.length > 0, selRegions.length > 0, yearFrom !== "all" || yearTo !== "all", valueOp !== "any"].filter(Boolean).length;
-  const clearAll = () => { setSelCats([]); setSelRegions([]); setYearFrom("all"); setYearTo("all"); setValueOp("any"); setValueThreshold(""); };
+  const clearAll = () => {setSelCats([]);setSelRegions([]);setYearFrom("all");setYearTo("all");setValueOp("any");setValueThreshold("");};
 
   return (
     <div className="dashboard-widget-card">
@@ -786,13 +786,13 @@ export default function DisparityExplorer({ metrics }) {
         <div className="disparity-explorer-toolbar">
           {/* Filters and Benchmark controls */}
           <div className="flex items-center gap-1.5">
-            <button onClick={() => setFiltersOpen(o => !o)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
-              style={{
-                background: activeFilterCount > 0 ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
-                border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-                color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)"
-              }}>
+            <button onClick={() => setFiltersOpen((o) => !o)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
+            style={{
+              background: activeFilterCount > 0 ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
+              border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+              color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)"
+            }}>
               <Filter size={11} />
               <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
               <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
@@ -805,50 +805,50 @@ export default function DisparityExplorer({ metrics }) {
                 benchmark={benchmark}
                 setBenchmark={setBenchmark}
                 open={benchmarkOpen}
-                setOpen={setBenchmarkOpen}
-              />
+                setOpen={setBenchmarkOpen} />
+
             </div>
           </div>
 
           {/* Chart type selector */}
           <div className="flex gap-0.5 px-2 py-1 rounded" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-            {CHART_TYPES.map(ct => (
-              <button key={ct.id} onClick={() => { setChartType(ct.id); setDrillItem(null); }}
-                className="flex items-center justify-center w-7 h-7 rounded transition-all text-xs font-medium"
-                style={{
-                  background: chartType === ct.id ? "rgba(254,221,0,0.15)" : "transparent",
-                  color: chartType === ct.id ? "var(--accent-primary)" : "var(--text-secondary)",
-                  border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "transparent"}`
-                }}
-                title={ct.label}>
+            {CHART_TYPES.map((ct) =>
+            <button key={ct.id} onClick={() => {setChartType(ct.id);setDrillItem(null);}}
+            className="flex items-center justify-center w-7 h-7 rounded transition-all text-xs font-medium"
+            style={{
+              background: chartType === ct.id ? "rgba(254,221,0,0.15)" : "transparent",
+              color: chartType === ct.id ? "var(--accent-primary)" : "var(--text-secondary)",
+              border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "transparent"}`
+            }}
+            title={ct.label}>
                 <ct.icon size={12} />
               </button>
-            ))}
+            )}
           </div>
         </div>
       </div>
 
       {/* Filter panel — collapsible */}
-      {filtersOpen && (
-        <div className="rounded-lg p-2.5 mb-3 space-y-2.5 relative z-10" style={{ background: "rgba(254,221,0,0.03)", border: "1px solid var(--border-subtle)" }}>
+      {filtersOpen &&
+      <div className="rounded-lg p-2.5 mb-3 space-y-2.5 relative z-10" style={{ background: "rgba(254,221,0,0.03)", border: "1px solid var(--border-subtle)" }}>
           <div className="text-xs font-semibold" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "8.5px", lineHeight: 1.2 }}>Filters</div>
           <div className="disparity-controls-row">
-            <MultiSelect label="Category" options={CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))} selected={selCats} onChange={setSelCats} />
-            <MultiSelect label="Region" options={REGIONS.map(r => ({ value: r, label: r }))} selected={selRegions} onChange={setSelRegions} />
+            <MultiSelect label="Category" options={CATEGORIES.map((c) => ({ value: c, label: c.replace(/_/g, " ") }))} selected={selCats} onChange={setSelCats} />
+            <MultiSelect label="Region" options={REGIONS.map((r) => ({ value: r, label: r }))} selected={selRegions} onChange={setSelRegions} />
             <YearRangeFilter years={years} yearFrom={yearFrom} setYearFrom={setYearFrom} yearTo={yearTo} setYearTo={setYearTo} />
             <div className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
               <span>Value</span>
               <ValueFilter op={valueOp} setOp={setValueOp} threshold={valueThreshold} setThreshold={setValueThreshold} />
             </div>
-            {activeFilterCount > 0 && (
-              <button onClick={clearAll} className="text-xs flex items-center gap-1 px-2 py-1.5 rounded font-medium transition-all"
-                style={{ color: "var(--color-error)", border: "1px solid rgba(255, 23, 68, 0.3)", background: "rgba(255, 23, 68, 0.05)" }}>
+            {activeFilterCount > 0 &&
+          <button onClick={clearAll} className="text-xs flex items-center gap-1 px-2 py-1.5 rounded font-medium transition-all"
+          style={{ color: "var(--color-error)", border: "1px solid rgba(255, 23, 68, 0.3)", background: "rgba(255, 23, 68, 0.05)" }}>
                 <X size={10} /> Clear
               </button>
-            )}
+          }
           </div>
         </div>
-      )}
+      }
 
       {/* Chart display */}
       <div className="disparity-chart-container relative z-10">
@@ -865,117 +865,117 @@ export default function DisparityExplorer({ metrics }) {
       <div className="mt-4 pt-4 space-y-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
        {/* Key metrics grid */}
        {(() => {
-         const withGap = filtered.filter(m => m.comparison_value != null);
-         const avgGap = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length : 0;
-         const avgValue = filtered.length > 0 ? filtered.reduce((s, m) => s + (m.value || 0), 0) / filtered.length : 0;
-         const minValue = filtered.length > 0 ? Math.min(...filtered.map(m => m.value || 0)) : 0;
-         const maxValue = filtered.length > 0 ? Math.max(...filtered.map(m => m.value || 0)) : 0;
-         const uniqueRegions = new Set(filtered.map(m => m.region)).size;
-         const uniqueCategories = new Set(filtered.map(m => m.category)).size;
-         const disparityCount = withGap.filter(m => (m.value || 0) > m.comparison_value).length;
-         const disparityPct = withGap.length > 0 ? ((disparityCount / withGap.length) * 100).toFixed(0) : 0;
+          const withGap = filtered.filter((m) => m.comparison_value != null);
+          const avgGap = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length : 0;
+          const avgValue = filtered.length > 0 ? filtered.reduce((s, m) => s + (m.value || 0), 0) / filtered.length : 0;
+          const minValue = filtered.length > 0 ? Math.min(...filtered.map((m) => m.value || 0)) : 0;
+          const maxValue = filtered.length > 0 ? Math.max(...filtered.map((m) => m.value || 0)) : 0;
+          const uniqueRegions = new Set(filtered.map((m) => m.region)).size;
+          const uniqueCategories = new Set(filtered.map((m) => m.category)).size;
+          const disparityCount = withGap.filter((m) => (m.value || 0) > m.comparison_value).length;
+          const disparityPct = withGap.length > 0 ? (disparityCount / withGap.length * 100).toFixed(0) : 0;
 
-         return (
-           <div className="disparity-stats-grid">
-             {/* Core metrics */}
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Records</div>
-               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{filtered.length}</div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>of {metrics.length}</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Filtered Records</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Shows the count of metrics matching your current filters out of the total available metrics in the system.</div>
-               </div>
-             </div>
+          return null;
 
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Métis Avg</div>
-               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{avgValue.toFixed(1)}</div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>health metric</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Average Value</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>The mean value across all Métis-specific health metrics in your filtered dataset.</div>
-               </div>
-             </div>
 
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Avg Gap</div>
-               <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>
-                 {avgGap > 0 ? "↑" : "↓"} {Math.abs(avgGap).toFixed(2)}
-               </div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>{avgGap > 0 ? "higher" : "lower"} than BC</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Disparity Gap</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Average difference between Métis metrics and BC general population. Positive values indicate higher rates in Métis communities.</div>
-               </div>
-             </div>
 
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Disparity</div>
-               <div style={{ color: disparityPct > 50 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{disparityPct}%</div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>exceed BC avg</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Disparity Rate</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Percentage of filtered metrics where Métis values exceed the BC population average, indicating worse health outcomes.</div>
-               </div>
-             </div>
 
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Range</div>
-               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{(maxValue - minValue).toFixed(1)}</div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>spread</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Value Range</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Difference between the highest and lowest metric values in your filtered dataset. Larger ranges indicate greater variability.</div>
-               </div>
-             </div>
 
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Regions</div>
-               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{uniqueRegions}</div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>analyzed</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Geographic Coverage</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Number of distinct BC regions represented in your filtered dataset (e.g., Northern BC, Fraser, Vancouver Island).</div>
-               </div>
-             </div>
 
-             <div className="disparity-stat-card relative z-10 group cursor-help">
-               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Categories</div>
-               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{uniqueCategories}</div>
-               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>health types</div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                 <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Health Categories</div>
-                 <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Number of unique health topic areas covered (chronic disease, mental health, substance use, maternal/child health, etc.).</div>
-               </div>
-             </div>
 
-             {benchmark.active && benchmark.value != null && (
-               <div className="disparity-stat-card relative z-10 group cursor-help" style={{ borderColor: `${BENCHMARK_COLOR}44` }}>
-                 <div style={{ color: BENCHMARK_COLOR, fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Benchmark</div>
-                 <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{benchmark.value.toFixed(1)}</div>
-                 <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>target goal</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                   <div style={{ color: BENCHMARK_COLOR, fontWeight: 600, marginBottom: 1 }}>Target Benchmark</div>
-                   <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Set target value for comparison. Compare your current metrics against this goal to track progress toward health equity objectives.</div>
-                 </div>
-               </div>
-             )}
-           </div>
-         );
-       })()}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        })()}
 
         {/* Export buttons */}
         <div className="flex gap-1.5">
           <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
-            className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
-            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <Download size={11} style={{ color: "var(--accent-primary)" }} />
             <span>Filtered</span>
           </button>
           <button onClick={() => exportCSV(metrics, "health_metrics_all.csv")}
-            className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
-            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <Download size={11} />
             <span>All Data</span>
           </button>
@@ -984,6 +984,6 @@ export default function DisparityExplorer({ metrics }) {
 
       {/* Drill-down panel */}
       <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} benchmark={benchmark} allMetrics={metrics} />
-    </div>
-  );
+    </div>);
+
 }
