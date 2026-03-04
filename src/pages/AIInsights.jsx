@@ -97,9 +97,12 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
     <div className="flex h-full overflow-hidden">
       {/* Left: insight list */}
       <div className="flex flex-col border-r shrink-0"
-        style={{ width: 280, background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-        <div className="px-3 py-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-          <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Insights</div>
+        style={{ width: 280, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
+        <div className="px-4 py-4 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+          <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)", letterSpacing: "0.08em" }}>
+            Generated Insights
+          </div>
+          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>AI-powered analysis</p>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {loading ? (
@@ -109,13 +112,13 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
           ) : (
             <>
               {pinned.length > 0 && (
-                <div>
-                  <div className="px-3 py-1 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--text-muted)", fontSize: 10 }}>Pinned</div>
+                <div className="mb-1">
+                  <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--accent-primary)", fontSize: 9, letterSpacing: "0.08em" }}>✓ Pinned</div>
                   {pinned.map(ins => <InsightListItem key={ins.id} ins={ins} active={activeInsight?.id === ins.id} onClick={setActiveInsight} />)}
                 </div>
               )}
               <div>
-                <div className="px-3 py-1 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--text-muted)", fontSize: 10 }}>Recent</div>
+                <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--text-muted)", fontSize: 9, letterSpacing: "0.08em" }}>Recent</div>
                 {recent.length === 0 && (
                   <div className="px-3 py-4 text-xs" style={{ color: "var(--text-muted)" }}>Generate your first insight below.</div>
                 )}
@@ -172,26 +175,26 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
         )}
 
         {/* Query input */}
-        <div className="p-4 border-t shrink-0" style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-          <div className="max-w-3xl mx-auto space-y-2">
-            <div className="flex items-center gap-2 mb-2">
+        <div className="p-6 border-t shrink-0" style={{ background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
+          <div className="max-w-3xl mx-auto space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
               {INSIGHT_TYPES.map(t => (
                 <button key={t.value} onClick={() => setInsightType(t.value)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
                   style={{
-                    background: insightType === t.value ? "var(--accent-muted)" : "var(--bg-elevated)",
+                    background: insightType === t.value ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
                     color: insightType === t.value ? "var(--accent-primary)" : "var(--text-muted)",
                     border: `1px solid ${insightType === t.value ? "var(--accent-primary)" : "var(--border-subtle)"}`,
                   }}>
-                  <t.icon size={11} />
-                  <span className="hidden md:inline">{t.label}</span>
+                  <t.icon size={12} />
+                  <span className="hidden sm:inline">{t.label}</span>
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg"
-                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}>
-                <MessageSquare size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            <div className="flex items-center gap-3">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
+                <MessageSquare size={16} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
                 <input
                   className="flex-1 bg-transparent outline-none text-sm"
                   style={{ color: "var(--text-primary)" }}
@@ -203,10 +206,10 @@ Be specific, cite patterns from the data, and connect to BC Métis community hea
                 />
               </div>
               <button onClick={handleGenerate} disabled={generating || !query.trim()}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-                style={{ background: "var(--accent-primary)", color: "#000" }}>
+                className="flex items-center gap-1.5 px-4 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-60 shrink-0"
+                style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 4px 12px rgba(254,221,0,0.25)" }}>
                 {generating ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
-                {generating ? "Generating..." : "Generate"}
+                <span className="hidden sm:inline">{generating ? "Generating..." : "Generate"}</span>
               </button>
             </div>
           </div>
@@ -220,18 +223,21 @@ function InsightListItem({ ins, active, onClick }) {
   const IconComp = INSIGHT_TYPES.find(t => t.value === ins.type)?.icon || Brain;
   return (
     <button onClick={() => onClick(ins)}
-      className="w-full text-left px-3 py-2 transition-colors"
-      style={{ background: active ? "var(--bg-hover)" : "transparent" }}
-      onMouseOver={e => { if (!active) e.currentTarget.style.background = "var(--bg-hover)"; }}
+      className="w-full text-left px-3 py-2.5 mx-1 transition-all rounded-lg"
+      style={{ 
+        background: active ? "rgba(254,221,0,0.08)" : "transparent",
+        borderLeft: active ? "2px solid var(--accent-primary)" : "2px solid transparent"
+      }}
+      onMouseOver={e => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
       onMouseOut={e => { if (!active) e.currentTarget.style.background = "transparent"; }}>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-0">
         <IconComp size={12} style={{ color: "var(--accent-primary)", flexShrink: 0 }} />
-        <span className="text-xs truncate" style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)" }}>
+        <span className="text-xs truncate font-medium" style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)" }}>
           {ins.title}
         </span>
-        {ins.pinned && <Pin size={10} style={{ color: "var(--accent-primary)", flexShrink: 0 }} />}
+        {ins.pinned && <Pin size={9} style={{ color: "var(--accent-primary)", flexShrink: 0 }} />}
       </div>
-      <div className="text-xs mt-0.5 ml-5" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+      <div className="text-xs mt-1 ml-5" style={{ color: "var(--text-muted)", fontSize: 9 }}>
         {new Date(ins.created_date).toLocaleDateString("en-CA")}
       </div>
     </button>
