@@ -545,22 +545,63 @@ export default function DisparityExplorer({ metrics }) {
   const clearAll = () => { setSelCats([]); setSelRegions([]); setYearFrom("all"); setYearTo("all"); setValueOp("any"); setValueThreshold(""); };
 
   return (
-    <div className="metric-card">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-          Health Disparity Explorer
-        </span>
-        <div className="flex items-center gap-2 flex-wrap">
+    <div className="dashboard-widget-card">
+      <style>{`
+        .disparity-explorer-header {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid var(--border-subtle);
+        }
+        .disparity-explorer-title {
+          font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif;
+          font-weight: 700;
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--mnbc-yellow);
+        }
+        .disparity-explorer-toolbar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .disparity-controls-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          align-items: center;
+        }
+        .disparity-chart-container {
+          margin: 16px 0;
+          padding: 12px;
+          border-radius: 8px;
+          background: rgba(0, 0, 0, 0.1);
+          border: 1px solid var(--border-subtle);
+        }
+      `}</style>
+
+      {/* Header section */}
+      <div className="disparity-explorer-header">
+        <div className="disparity-explorer-title">Health Disparity Explorer</div>
+        
+        {/* Controls toolbar */}
+        <div className="disparity-explorer-toolbar">
           <button onClick={() => setFiltersOpen(o => !o)}
-            className="flex items-center gap-1 px-2 py-1 rounded text-xs"
-            style={{ background: activeFilterCount > 0 ? "var(--accent-muted)" : "var(--bg-overlay)", border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)" }}>
-            <Filter size={10} />
-            Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-            <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "0.15s" }} />
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
+            style={{
+              background: activeFilterCount > 0 ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
+              border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+              color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)"
+            }}>
+            <Filter size={11} />
+            <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
+            <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
           </button>
 
-          {/* Benchmark selector */}
           <div ref={benchmarkRef} className="relative">
             <BenchmarkPanel
               metrics={filtered}
@@ -572,23 +613,28 @@ export default function DisparityExplorer({ metrics }) {
             />
           </div>
 
-          <div className="flex gap-1">
+          <div className="flex gap-1 border-l border-r" style={{ borderColor: "var(--border-subtle)", paddingLeft: 8, paddingRight: 8 }}>
             {CHART_TYPES.map(ct => (
               <button key={ct.id} onClick={() => { setChartType(ct.id); setDrillItem(null); }}
-                className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
-                style={{ background: chartType === ct.id ? "var(--accent-primary)" : "var(--bg-overlay)", color: chartType === ct.id ? "#04245a" : "var(--text-secondary)", border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "var(--border-subtle)"}` }}>
-                <ct.icon size={11} />
-                {ct.label}
+                className="flex items-center justify-center w-8 h-8 rounded transition-all"
+                style={{
+                  background: chartType === ct.id ? "rgba(254,221,0,0.12)" : "transparent",
+                  color: chartType === ct.id ? "var(--accent-primary)" : "var(--text-secondary)",
+                  border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "transparent"}`
+                }}
+                title={ct.label}>
+                <ct.icon size={13} />
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Filter panel */}
+      {/* Filter panel — collapsible */}
       {filtersOpen && (
-        <div className="rounded-md p-3 mb-3 space-y-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-          <div className="flex flex-wrap gap-2 items-center">
+        <div className="rounded-lg p-3 mb-4 space-y-3 relative z-10" style={{ background: "rgba(254,221,0,0.03)", border: "1px solid var(--border-subtle)" }}>
+          <div className="text-xs font-semibold" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Filters</div>
+          <div className="disparity-controls-row">
             <MultiSelect label="Category" options={CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))} selected={selCats} onChange={setSelCats} />
             <MultiSelect label="Region" options={REGIONS.map(r => ({ value: r, label: r }))} selected={selRegions} onChange={setSelRegions} />
             <YearRangeFilter years={years} yearFrom={yearFrom} setYearFrom={setYearFrom} yearTo={yearTo} setYearTo={setYearTo} />
@@ -597,59 +643,72 @@ export default function DisparityExplorer({ metrics }) {
               <ValueFilter op={valueOp} setOp={setValueOp} threshold={valueThreshold} setThreshold={setValueThreshold} />
             </div>
             {activeFilterCount > 0 && (
-              <button onClick={clearAll} className="text-xs flex items-center gap-1 px-2 py-1 rounded"
-                style={{ color: "var(--color-error)", border: "1px solid var(--color-error)", background: "transparent" }}>
-                <X size={9} /> Clear all
+              <button onClick={clearAll} className="text-xs flex items-center gap-1 px-2 py-1.5 rounded font-medium transition-all"
+                style={{ color: "var(--color-error)", border: "1px solid rgba(255, 23, 68, 0.3)", background: "rgba(255, 23, 68, 0.05)" }}>
+                <X size={10} /> Clear
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* Chart */}
-      {chartType === "bar" && <DisparityBar data={filtered} drill={setDrillItem} benchmark={benchmark} />}
-      {chartType === "line" && <TrendLine data={filtered} benchmark={benchmark} />}
-      {chartType === "scatter" && <ScatterPlot data={filtered} drill={setDrillItem} benchmark={benchmark} />}
-      {chartType === "heatmap" && <Heatmap metrics={filtered} benchmark={benchmark} />}
+      {/* Chart display */}
+      <div className="disparity-chart-container relative z-10">
+        {chartType === "bar" && <DisparityBar data={filtered} drill={setDrillItem} benchmark={benchmark} />}
+        {chartType === "line" && <TrendLine data={filtered} benchmark={benchmark} />}
+        {chartType === "scatter" && <ScatterPlot data={filtered} drill={setDrillItem} benchmark={benchmark} />}
+        {chartType === "heatmap" && <Heatmap metrics={filtered} benchmark={benchmark} />}
+      </div>
 
       {/* Benchmark performance table */}
-      <BenchmarkTable data={filtered} benchmark={benchmark} />
+      {<BenchmarkTable data={filtered} benchmark={benchmark} />}
 
-      {/* Export */}
-      <div className="flex gap-2 mt-3">
-        <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-          <Download size={11} style={{ color: "var(--accent-primary)" }} />
-          Export Filtered ({filtered.length})
-        </button>
-        <button onClick={() => exportCSV(metrics, "health_metrics_all.csv")}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-          <Download size={11} />
-          Export All ({metrics.length})
-        </button>
+      {/* Stats & actions footer */}
+      <div className="mt-4 pt-4 space-y-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+        {/* Summary stats */}
+        <div className="grid grid-cols-3 gap-3 text-xs">
+          <div className="rounded-lg p-2.5" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4 }}>Showing</div>
+            <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 13 }}>{filtered.length}/{metrics.length}</div>
+          </div>
+          {filtered.some(m => m.comparison_value != null) && (() => {
+            const withGap = filtered.filter(m => m.comparison_value != null);
+            const avgGap = withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length;
+            return (
+              <div className="rounded-lg p-2.5" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4 }}>Avg Gap</div>
+                <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 13 }}>
+                  {avgGap > 0 ? "+" : ""}{avgGap.toFixed(2)}
+                </div>
+              </div>
+            );
+          })()}
+          {benchmark.active && benchmark.value != null && (
+            <div className="rounded-lg p-2.5" style={{ background: "var(--bg-overlay)", border: `1px solid ${BENCHMARK_COLOR}33` }}>
+              <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4 }}>Benchmark</div>
+              <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 13 }}>{benchmark.value.toFixed(1)}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Export buttons */}
+        <div className="flex gap-2">
+          <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
+            className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+            <Download size={11} style={{ color: "var(--accent-primary)" }} />
+            <span>Filtered</span>
+          </button>
+          <button onClick={() => exportCSV(metrics, "health_metrics_all.csv")}
+            className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+            <Download size={11} />
+            <span>All Data</span>
+          </button>
+        </div>
       </div>
 
-      {/* Summary */}
-      <div className="flex gap-4 mt-3 pt-3 border-t text-xs flex-wrap" style={{ borderColor: "var(--border-subtle)" }}>
-        <span style={{ color: "var(--text-secondary)" }}>Showing <span style={{ color: "var(--text-primary)" }}>{filtered.length}</span> of <span style={{ color: "var(--text-primary)" }}>{metrics.length}</span> metrics</span>
-        {filtered.some(m => m.comparison_value != null) && (() => {
-          const withGap = filtered.filter(m => m.comparison_value != null);
-          const avgGap = withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length;
-          return (
-            <span style={{ color: "var(--text-secondary)" }}>
-              Avg gap: <span style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 600 }}>{avgGap > 0 ? "+" : ""}{avgGap.toFixed(2)}</span>
-            </span>
-          );
-        })()}
-        {benchmark.active && benchmark.value != null && (
-          <span style={{ color: "var(--text-secondary)" }}>
-            Benchmark: <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>{benchmark.value.toFixed(1)}</span>
-          </span>
-        )}
-      </div>
-
+      {/* Drill-down panel */}
       <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} benchmark={benchmark} />
     </div>
   );
