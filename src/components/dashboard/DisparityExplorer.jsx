@@ -209,7 +209,7 @@ function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, se
               value={benchmark.customValue ?? ""}
               onChange={e => setBenchmark({ ...benchmark, mode: "custom", active: true, value: parseFloat(e.target.value) || null, customValue: e.target.value })}
               className="text-xs px-2 py-1 rounded outline-none w-full"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }} />
+              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }} />
           )}
 
           {/* Clear */}
