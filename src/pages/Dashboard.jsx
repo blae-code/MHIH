@@ -319,14 +319,12 @@ export default function Dashboard() {
       <PinnedMetrics key="pinned_metrics" pinnedIds={pinnedIds} onUnpin={handleUnpin} />
     ),
     data_sources: isVisible("data_sources") && (
-      <div key="data_sources" className="metric-card">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Data Sources</div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Recently updated connections</div>
-          </div>
+      <div key="data_sources" className="dashboard-widget-card">
+        <div className="flex items-center justify-between mb-3 relative z-10">
+          <div className="dashboard-section-label">Data Sources</div>
           <span className="tag" style={{ fontSize: 10 }}>{sources.length} total</span>
         </div>
+        <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Recently updated connections</div>
         {sources.length === 0 ? (
           <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
             No sources configured yet.<br />
