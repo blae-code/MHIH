@@ -55,14 +55,24 @@ export default function Dashboard() {
 
   const handleWidgetsChange = useCallback((newWidgets) => {
     setWidgets(newWidgets);
+    setHasChanges(true);
     savePrefs(newWidgets, pinnedIds);
-  }, [pinnedIds]);
+    addLog("success", "Dashboard layout updated");
+  }, [pinnedIds, addLog]);
 
   const handleUnpin = useCallback((id) => {
     const next = pinnedIds.filter(p => p !== id);
     setPinnedIds(next);
     savePrefs(widgets, next);
   }, [pinnedIds, widgets]);
+
+  const handleResetLayout = useCallback(() => {
+    const defaultLayout = DEFAULT_WIDGETS.map(w => ({ ...w, visible: true }));
+    setWidgets(defaultLayout);
+    savePrefs(defaultLayout, pinnedIds);
+    setHasChanges(false);
+    addLog("success", "Dashboard layout reset to default");
+  }, [pinnedIds, addLog]);
 
   // Derived stats
   const categoryCount = metrics.reduce((acc, m) => {
