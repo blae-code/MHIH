@@ -175,18 +175,27 @@ export default function Dashboard() {
     ),
     data_sources: isVisible("data_sources") && (
       <div key="data_sources" className="metric-card">
-        <div className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Data Sources</div>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Data Sources</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Recently updated connections</div>
+          </div>
+          <span className="tag" style={{ fontSize: 10 }}>{sources.length} total</span>
+        </div>
         {sources.length === 0 ? (
-          <div className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>No sources configured yet.</div>
+          <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
+            No sources configured yet.<br />
+            <span style={{ opacity: 0.6 }}>Go to Data Sources to add a connection.</span>
+          </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {sources.slice(0, 6).map(src => (
-              <div key={src.id} className="flex items-center justify-between py-1 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-                <div className="flex items-center gap-2">
-                  <span className={`status-dot ${src.status}`} />
-                  <span className="text-xs" style={{ color: "var(--text-primary)" }}>{src.name}</span>
+              <div key={src.id} className="flex items-center justify-between py-1.5 px-2 rounded-md" style={{ background: "var(--bg-overlay)" }}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`status-dot ${src.status} shrink-0`} title={`Status: ${src.status}`} />
+                  <span className="text-xs truncate" style={{ color: "var(--text-primary)" }} title={src.name}>{src.name}</span>
                 </div>
-                <span className="tag">{src.type}</span>
+                <span className="tag shrink-0 ml-2" style={{ fontSize: 10 }}>{src.type?.replace(/_/g, " ")}</span>
               </div>
             ))}
           </div>
