@@ -157,9 +157,12 @@ h1, h2, h3, h4, h5, h6,
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 16px;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.metric-card:hover { border-color: var(--border-default); }
+.metric-card:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px var(--accent-primary), 0 4px 24px rgba(254,221,0,0.08);
+}
 
 /* Command palette overlay */
 .cmd-overlay {
