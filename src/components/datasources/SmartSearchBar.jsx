@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Sparkles, Loader2, X } from "lucide-react";
+import { Search, Sparkles, Loader2, X, History } from "lucide-react";
 
 /**
  * SmartSearchBar — reusable AI-powered search bar for data source browsers.
@@ -12,10 +12,11 @@ import { Search, Sparkles, Loader2, X } from "lucide-react";
  *   aiContext                  — brief context string sent to LLM for better suggestions
  *   filterSlot                 — optional JSX rendered below the bar (sort/filter controls)
  */
-export default function SmartSearchBar({ value, onChange, onSearch, placeholder, quickSearches = [], aiContext = "", filterSlot }) {
+export default function SmartSearchBar({ value, onChange, onSearch, placeholder, quickSearches = [], aiContext = "", filterSlot, recentSearches = [] }) {
   const [suggestions, setSuggestions] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const debounceRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -49,6 +50,7 @@ Return as a JSON array of strings only. No explanations.`,
   const handleSelect = (s) => {
     onChange(s);
     setShowSuggestions(false);
+    setShowHistory(false);
     setSuggestions([]);
     onSearch(s);
   };
@@ -56,6 +58,7 @@ Return as a JSON array of strings only. No explanations.`,
   const handleSubmit = (e) => {
     e?.preventDefault();
     setShowSuggestions(false);
+    setShowHistory(false);
     onSearch(value);
   };
 
@@ -77,8 +80,11 @@ Return as a JSON array of strings only. No explanations.`,
                 placeholder={placeholder || "Search datasets..."}
                 value={value}
                 onChange={e => { onChange(e.target.value); }}
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onFocus={() => {
+                  if (suggestions.length > 0) setShowSuggestions(true);
+                  else if (!value && recentSearches.length > 0) setShowHistory(true);
+                }}
+                onBlur={() => setTimeout(() => { setShowSuggestions(false); setShowHistory(false); }, 150)}
               />
               {aiLoading && <Loader2 size={12} className="animate-spin shrink-0" style={{ color: "var(--accent-primary)" }} />}
               {!aiLoading && value && (
@@ -90,6 +96,29 @@ Return as a JSON array of strings only. No explanations.`,
                 <Sparkles size={12} style={{ color: "var(--accent-primary)", opacity: 0.6, flexShrink: 0 }} title="AI autocomplete active" />
               )}
             </div>
+
+            {/* Recent searches dropdown */}
+            {showHistory && !value && recentSearches.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1 rounded-md overflow-hidden shadow-xl z-50"
+                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}>
+                <div className="px-3 py-1 border-b flex items-center gap-1"
+                  style={{ borderColor: "var(--border-subtle)", background: "var(--bg-surface)" }}>
+                  <History size={10} style={{ color: "var(--text-muted)" }} />
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>Recent searches</span>
+                </div>
+                {recentSearches.slice(0, 5).map((s, i) => (
+                  <button key={i} type="button"
+                    className="w-full text-left px-3 py-2 text-xs transition-colors flex items-center gap-2"
+                    style={{ color: "var(--text-secondary)" }}
+                    onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                    onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                    onMouseDown={() => handleSelect(s)}>
+                    <History size={10} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Autocomplete dropdown */}
             {showSuggestions && suggestions.length > 0 && (
