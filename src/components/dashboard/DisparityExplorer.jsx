@@ -644,8 +644,8 @@ export default function DisparityExplorer({ metrics }) {
           );
         })()}
         {benchmark.active && benchmark.value != null && (
-          <span style={{ color: "var(--text-muted)" }}>
-            Benchmark: <span style={{ color: BENCHMARK_COLOR }}>{benchmark.value.toFixed(1)}</span>
+          <span style={{ color: "var(--text-secondary)" }}>
+            Benchmark: <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>{benchmark.value.toFixed(1)}</span>
           </span>
         )}
       </div>
