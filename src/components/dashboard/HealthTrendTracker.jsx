@@ -104,19 +104,19 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
             <Legend />
             <Line 
               type="monotone" 
-              dataKey="Métis" 
-              stroke="#FEDD00" 
+              dataKey="Health Disparity" 
+              stroke="#FF4757" 
               strokeWidth={2.5}
-              dot={{ fill: "#FEDD00", r: 4 }}
+              dot={{ fill: "#FF4757", r: 4 }}
               connectNulls
             />
             <Line 
               type="monotone" 
-              dataKey="BC Population" 
-              stroke="#40c4ff" 
-              strokeWidth={2.5}
-              dot={{ fill: "#40c4ff", r: 4 }}
-              connectNulls
+              dataKey="zero" 
+              stroke="var(--border-subtle)" 
+              strokeWidth={1}
+              strokeDasharray="5 5"
+              dot={false}
             />
           </LineChart>
         </ResponsiveContainer>
