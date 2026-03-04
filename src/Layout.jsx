@@ -515,7 +515,6 @@ export default function Layout({ children, currentPageName }) {
                 </div>
               </div>
             </aside>
-          )}
 
           {/* ══ MAIN ══ */}
           <main className="flex-1 overflow-auto relative" style={{ background: "var(--bg-base)" }}>
