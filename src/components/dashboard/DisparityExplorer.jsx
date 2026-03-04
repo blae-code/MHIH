@@ -284,18 +284,21 @@ function BenchmarkTable({ data, benchmark }) {
 
 // ── Charts ────────────────────────────────────────────────────────────────────
 function DisparityBar({ data, drill, benchmark }) {
-  const chartData = data
-    .filter(m => m.comparison_value != null)
-    .slice(0, 20)
-    .map(m => ({
-      name: m.name.length > 22 ? m.name.slice(0, 22) + "…" : m.name,
-      fullName: m.name, metis: parseFloat(m.value?.toFixed(2)),
-      bc: parseFloat(m.comparison_value?.toFixed(2)),
-      gap: parseFloat((m.value - m.comparison_value).toFixed(2)),
-      region: m.region, category: m.category, year: m.year,
-    })).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
+  const chartData = useMemo(() => {
+    return data
+      .filter(m => m.comparison_value != null)
+      .slice(0, 20)
+      .map(m => ({
+        name: m.name.length > 22 ? m.name.slice(0, 22) + "…" : m.name,
+        fullName: m.name, metis: parseFloat(m.value?.toFixed(2)),
+        bc: parseFloat(m.comparison_value?.toFixed(2)),
+        gap: parseFloat((m.value - m.comparison_value).toFixed(2)),
+        region: m.region, category: m.category, year: m.year,
+      })).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
+  }, [data]);
 
   if (!chartData.length) return <EmptyState msg="No metrics with BC comparison values." />;
+  
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20 }}>
