@@ -264,34 +264,63 @@ export default function Dashboard() {
   // Ordered widget render map
   const WIDGET_RENDER = {
     stat_cards: isVisible("stat_cards") && (
-     <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-3 group">
-       <div className="col-span-full">
-         <div className="dashboard-section-label">Platform Metrics</div>
-       </div>
-       {STAT_CARDS.map((card, idx) => {
-         const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
-         return (
-           <div key={cardId} className="dashboard-widget-card relative">
-             
-             <div className="flex items-start justify-between mb-2 relative z-10">
-               <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
-               <div className="p-1.5 rounded-md shrink-0 transition-all" style={{ background: `${card.color}18` }}>
-                 <card.icon size={13} style={{ color: card.color }} />
+     <div key="stat_cards" className="space-y-3 group col-span-full">
+       <div>
+         <div className="dashboard-section-label mb-3">Platform Metrics</div>
+         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+           {STAT_CARDS.map((card, idx) => {
+             const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
+             return (
+               <div key={cardId} className="dashboard-widget-card relative">
+                 
+                 <div className="flex items-start justify-between mb-2 relative z-10">
+                   <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
+                   <div className="p-1.5 rounded-md shrink-0 transition-all" style={{ background: `${card.color}18` }}>
+                     <card.icon size={13} style={{ color: card.color }} />
+                   </div>
+                 </div>
+                 <div className="text-3xl font-bold mb-1 relative z-10" style={{ color: card.color }}>{card.value}</div>
+                 <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
                </div>
-             </div>
-             <div className="text-3xl font-bold mb-1 relative z-10" style={{ color: card.color }}>{card.value}</div>
-             <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
+             );
+           })}
+           {Object.keys(ALL_STAT_CARDS).filter(id => !visibleStatCards.includes(id)).length > 0 && (
+             <button
+               onClick={() => handleStatCardToggle(Object.keys(ALL_STAT_CARDS).find(id => !visibleStatCards.includes(id)))}
+               className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed"
+               style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
+               title="Add a stat card">
+               <span>+ Add Card</span>
+             </button>
+           )}
+         </div>
+       </div>
+
+       {pinnedIds && pinnedIds.length > 0 && (
+         <div className="dashboard-widget-card">
+           <div className="flex items-center gap-2 mb-3 relative z-10">
+             <Pin size={13} style={{ color: "var(--accent-primary)" }} />
+             <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Pinned Metrics</span>
            </div>
-         );
-       })}
-       {Object.keys(ALL_STAT_CARDS).filter(id => !visibleStatCards.includes(id)).length > 0 && (
-         <button
-           onClick={() => handleStatCardToggle(Object.keys(ALL_STAT_CARDS).find(id => !visibleStatCards.includes(id)))}
-           className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed"
-           style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
-           title="Add a stat card">
-           <span>+ Add Card</span>
-         </button>
+           <div className="space-y-2">
+             {metrics.filter(m => pinnedIds.includes(m.id)).map(m => (
+               <div key={m.id} className="flex items-center justify-between py-2 px-2.5 rounded relative z-10" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                 <div className="min-w-0 flex-1">
+                   <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{m.name}</div>
+                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                     {m.category?.replace(/_/g, " ")} · {m.region} · {m.year}
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-2.5 shrink-0 ml-3">
+                   <span className="text-sm font-bold" style={{ color: "var(--accent-primary)" }}>{m.value}{m.unit || ""}</span>
+                   <button onClick={() => handleUnpin(m.id)} title="Unpin" className="activity-icon" style={{ width: 18, height: 18 }}>
+                     <PinOff size={11} style={{ color: "var(--text-muted)" }} />
+                   </button>
+                 </div>
+               </div>
+             ))}
+           </div>
+         </div>
        )}
      </div>
     ),
