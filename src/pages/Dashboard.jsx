@@ -478,6 +478,17 @@ export default function Dashboard() {
           onClose={() => setCustomizerOpen(false)}
         />
       )}
+
+      {layoutManagerOpen && (
+        <DashboardLayoutManager
+          layouts={layouts}
+          currentLayout={{ id: currentLayoutId }}
+          onLoadLayout={handleLoadLayout}
+          onSaveLayout={handleSaveNewLayout}
+          onDeleteLayout={handleDeleteLayout}
+          onClose={() => setLayoutManagerOpen(false)}
+        />
+      )}
     </div>
   );
 }
