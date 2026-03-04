@@ -185,6 +185,19 @@ export default function Dashboard() {
     addLog("success", "Dashboard title updated");
   };
 
+  const handleRegenerateInsights = async () => {
+    setRegeneratingInsights(true);
+    try {
+      const newInsights = await base44.entities.AIInsight.list("-created_date", 5);
+      setInsights(newInsights);
+      addLog("success", "AI Insights regenerated");
+    } catch (e) {
+      addLog("error", "Failed to regenerate insights");
+    } finally {
+      setRegeneratingInsights(false);
+    }
+  };
+
   // Derived stats
   const categoryCount = metrics.reduce((acc, m) => {
     acc[m.category] = (acc[m.category] || 0) + 1;
