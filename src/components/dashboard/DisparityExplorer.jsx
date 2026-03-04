@@ -554,7 +554,7 @@ export default function DisparityExplorer({ metrics }) {
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={() => setFiltersOpen(o => !o)}
             className="flex items-center gap-1 px-2 py-1 rounded text-xs"
-            style={{ background: activeFilterCount > 0 ? "var(--accent-muted)" : "var(--bg-overlay)", border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-muted)" }}>
+            style={{ background: activeFilterCount > 0 ? "var(--accent-muted)" : "var(--bg-overlay)", border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`, color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)" }}>
             <Filter size={10} />
             Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
             <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "0.15s" }} />
