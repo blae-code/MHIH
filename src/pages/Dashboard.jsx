@@ -364,16 +364,40 @@ export default function Dashboard() {
           boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.04)"
         }}>
           <div className="p-4 flex items-start justify-between">
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-3 h-3 rounded-full" style={{ background: "var(--color-success)", boxShadow: "0 0 8px rgba(0,230,118,0.5)" }} />
-                <h1 className="text-sm font-bold tracking-wider" style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Dashboard</h1>
+                {editingTitle ? (
+                  <input
+                    type="text"
+                    value={tempTitle}
+                    onChange={e => setTempTitle(e.target.value)}
+                    onBlur={handleUpdateTitle}
+                    onKeyDown={e => e.key === "Enter" && handleUpdateTitle()}
+                    autoFocus
+                    className="text-sm font-bold tracking-wider outline-none px-2 py-0.5 rounded-md"
+                    style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em", background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}
+                  />
+                ) : (
+                  <h1 className="text-sm font-bold tracking-wider cursor-pointer" style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em" }} onClick={() => setEditingTitle(true)}>
+                    {dashboardTitle}
+                  </h1>
+                )}
               </div>
               <p className="text-xs mt-1" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
                 Real-time overview of Métis-specific health metrics across British Columbia
               </p>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0 ml-4">
+              {editingTitle && (
+                <button
+                  onClick={handleUpdateTitle}
+                  className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
+                  style={{ background: "var(--accent-primary)", color: "#000" }}
+                  title="Save title">
+                  <Save size={13} />
+                </button>
+              )}
               {hasChanges && (
                 <button
                   onClick={handleResetLayout}
@@ -385,6 +409,15 @@ export default function Dashboard() {
                   <RotateCcw size={13} />
                 </button>
               )}
+              <button
+                onClick={() => setLayoutManagerOpen(true)}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
+                style={{ background: "rgba(64,196,255,0.08)", border: "1px solid rgba(64,196,255,0.2)", color: "var(--text-secondary)" }}
+                onMouseOver={e => { e.currentTarget.style.background = "rgba(64,196,255,0.14)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                onMouseOut={e => { e.currentTarget.style.background = "rgba(64,196,255,0.08)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                title="Save, load, and manage layouts">
+                <Layout size={13} />
+              </button>
               <button
                 onClick={() => setCustomizerOpen(true)}
                 className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
