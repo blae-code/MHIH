@@ -355,10 +355,14 @@ function TrendLine({ data, benchmark }) {
 }
 
 function ScatterPlot({ data, drill, benchmark }) {
-  const catColors = {};
-  [...new Set(data.map(m => m.category))].forEach((c, i) => { catColors[c] = COLORS[i % COLORS.length]; });
-  const points = data.filter(m => m.value != null && m.comparison_value != null)
-    .map(m => ({ x: parseFloat(m.comparison_value?.toFixed(2)), y: parseFloat(m.value?.toFixed(2)), name: m.name, category: m.category, region: m.region, year: m.year }));
+  const { catColors, points } = useMemo(() => {
+    const colorMap = {};
+    [...new Set(data.map(m => m.category))].forEach((c, i) => { colorMap[c] = COLORS[i % COLORS.length]; });
+    const pts = data.filter(m => m.value != null && m.comparison_value != null)
+      .map(m => ({ x: parseFloat(m.comparison_value?.toFixed(2)), y: parseFloat(m.value?.toFixed(2)), name: m.name, category: m.category, region: m.region, year: m.year }));
+    return { catColors: colorMap, points: pts };
+  }, [data]);
+  
   if (!points.length) return <EmptyState msg="No metrics with BC comparison values for scatter plot." />;
   return (
     <ResponsiveContainer width="100%" height={260}>
