@@ -426,7 +426,7 @@ export default function Dashboard() {
       <RegionalPerformance key="regional_performance" metrics={metrics} />
     ),
     disparity_explorer: isVisible("disparity_explorer") && (
-      <DisparityExplorer key="disparity_explorer" metrics={metrics} />
+      <DisparityExplorer key="disparity_explorer" metrics={metrics} trackedMetricIds={pinnedIds} />
     ),
     weekly_reports: isVisible("weekly_reports") && <WeeklyReports key="weekly_reports" />,
 

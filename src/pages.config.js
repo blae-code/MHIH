@@ -51,6 +51,7 @@ import AIInsights from './pages/AIInsights';
 import Admin from './pages/Admin';
 import AgentCenter from './pages/AgentCenter';
 import Alerts from './pages/Alerts';
+import Dashboard from './pages/Dashboard';
 import DataAnalyst from './pages/DataAnalyst';
 import DataGovernance from './pages/DataGovernance';
 import DataPrep from './pages/DataPrep';
@@ -65,7 +66,6 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import Workflows from './pages/Workflows';
-import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -74,6 +74,7 @@ export const PAGES = {
     "Admin": Admin,
     "AgentCenter": AgentCenter,
     "Alerts": Alerts,
+    "Dashboard": Dashboard,
     "DataAnalyst": DataAnalyst,
     "DataGovernance": DataGovernance,
     "DataPrep": DataPrep,
@@ -88,7 +89,6 @@ export const PAGES = {
     "Team": Team,
     "Visualizations": Visualizations,
     "Workflows": Workflows,
-    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {
