@@ -302,7 +302,7 @@ function DisparityBar({ data, drill, benchmark }) {
         <Tooltip contentStyle={TOOLTIP_STYLE}
           formatter={(val, name) => [val, name === "metis" ? "Métis" : "BC Population"]}
           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label} />
-        <Legend formatter={n => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 11 }} />
+        <Legend formatter={n => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
         <Bar dataKey="metis" fill="#e6a817" radius={[0, 3, 3, 0]} onClick={drill} style={{ cursor: "pointer" }} />
         <Bar dataKey="bc" fill="#58a6ff" radius={[0, 3, 3, 0]} opacity={0.7} onClick={drill} style={{ cursor: "pointer" }} />
         <ReferenceLine x={0} stroke="var(--border-default)" />
