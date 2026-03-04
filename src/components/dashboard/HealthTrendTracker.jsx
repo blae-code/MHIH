@@ -46,6 +46,7 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
         return {
           year: d.year,
           "Health Disparity": disparity,
+          zero: 0,
         };
       })
       .sort((a, b) => a.year - b.year)
