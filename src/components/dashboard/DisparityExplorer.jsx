@@ -399,16 +399,16 @@ function ScatterPlot({ data, drill, benchmark }) {
 }
 
 function Heatmap({ metrics, benchmark }) {
-  const cats = CATEGORIES.filter(c => metrics.some(m => m.category === c));
-  const regs = REGIONS.filter(r => metrics.some(m => m.region === r));
-  const grid = useMemo(() => {
+  const { cats, regs, grid } = useMemo(() => {
+    const cats = CATEGORIES.filter(c => metrics.some(m => m.category === c));
+    const regs = REGIONS.filter(r => metrics.some(m => m.region === r));
     const map = {};
     metrics.forEach(m => {
       const key = `${m.region}||${m.category}`;
       if (!map[key]) map[key] = { sum: 0, count: 0 };
       map[key].sum += m.value; map[key].count++;
     });
-    return map;
+    return { cats, regs, grid: map };
   }, [metrics]);
   const vals = Object.values(grid).map(v => v.sum / v.count).filter(Boolean);
   const min = Math.min(...vals), max = Math.max(...vals);
