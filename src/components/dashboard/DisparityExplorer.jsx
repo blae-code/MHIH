@@ -302,7 +302,7 @@ function DisparityBar({ data, drill, benchmark }) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
         <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
         <YAxis type="category" dataKey="name" width={140} tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
-        <Tooltip contentStyle={TOOLTIP_STYLE}
+        <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE}
           formatter={(val, name) => [val, name === "metis" ? "Métis" : "BC Population"]}
           labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label} />
         <Legend formatter={n => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
