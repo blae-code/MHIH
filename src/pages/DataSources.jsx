@@ -127,6 +127,11 @@ export default function DataSources() {
               </span>
             )}
           </button>
+          <button onClick={() => setShowArcGISHub(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
+            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
+            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> ArcGIS Hub BC
+          </button>
           <button onClick={() => setShowWMSWFS(true)}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
             style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
