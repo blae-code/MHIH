@@ -4,8 +4,9 @@ import { useApp } from "../Layout";
 import {
   Brain, Send, Database, Sparkles, Loader2, ChevronDown,
   MessageSquare, BarChart2, AlertCircle, Info, RefreshCw,
-  Lightbulb, Clock, X
+  Lightbulb, Clock, X, BarChart3
 } from "lucide-react";
+import AnalystChartPanel from "@/components/analyst/AnalystChartPanel";
 
 const EXAMPLE_QUESTIONS = [
   "What are the top 5 highest-calorie foods in this dataset?",
