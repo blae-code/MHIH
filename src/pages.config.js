@@ -60,6 +60,9 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import DataAnalyst from './pages/DataAnalyst';
+import Alerts from './pages/Alerts';
+import Workflows from './pages/Workflows';
+import GeoMap from './pages/GeoMap';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +80,9 @@ export const PAGES = {
     "Team": Team,
     "Visualizations": Visualizations,
     "DataAnalyst": DataAnalyst,
+    "Alerts": Alerts,
+    "Workflows": Workflows,
+    "GeoMap": GeoMap,
 }
 
 export const pagesConfig = {
