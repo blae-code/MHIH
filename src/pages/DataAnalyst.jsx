@@ -283,7 +283,7 @@ export default function DataAnalyst() {
                       <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{msg.result.answer}</p>
                     </div>
 
-                    {/* Supporting data table */}
+                    {/* Supporting data table + Visualise button */}
                     {msg.result.supporting_data?.length > 0 && (
                       <div className="rounded-lg overflow-hidden"
                         style={{ border: "1px solid var(--border-subtle)" }}>
