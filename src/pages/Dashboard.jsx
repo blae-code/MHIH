@@ -346,13 +346,9 @@ export default function Dashboard() {
       </div>
     ),
     ai_insights: isVisible("ai_insights") && (
-      <div key="ai_insights" className="metric-card">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Recent AI Insights</div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
-          </div>
-        </div>
+      <div key="ai_insights" className="dashboard-widget-card">
+        <div className="dashboard-section-label mb-3">Recent AI Insights</div>
+        <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
         {insights.length === 0 ? (
           <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
             No insights generated yet.<br />
