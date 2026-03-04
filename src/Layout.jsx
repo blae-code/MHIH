@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import NotificationCenter from "../components/notifications/NotificationCenter";
 import NotificationPreferences from "../components/notifications/NotificationPreferences";
+import FeedbackModal from "../components/feedback/FeedbackModal";
+import { MessageSquare as FeedbackIcon } from "lucide-react";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
@@ -103,6 +105,7 @@ export default function Layout({ children, currentPageName }) {
   const [notifCenterOpen, setNotifCenterOpen] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const cmdInputRef = useRef(null);
 
   useEffect(() => {
@@ -437,6 +440,12 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Right controls */}
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setFeedbackOpen(true)}
+              className="activity-icon" 
+              title="Send Feedback">
+              <FeedbackIcon size={15} />
+            </button>
             <button onClick={() => setCmdOpen(true)} className="md:hidden activity-icon" title="Search">
               <Search size={15} />
             </button>
@@ -756,6 +765,14 @@ export default function Layout({ children, currentPageName }) {
           isOpen={notifPrefsOpen}
           onClose={() => setNotifPrefsOpen(false)}
           user={user}
+        />
+
+        {/* Feedback Modal */}
+        <FeedbackModal 
+          isOpen={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+          user={user}
+          currentPage={currentPageName}
         />
 
         {cmdOpen && (
