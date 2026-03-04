@@ -24,6 +24,7 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
   const [previewItem, setPreviewItem] = useState(null);
   const [sortBy, setSortBy] = useState("relevance");
   const [subjectFilter, setSubjectFilter] = useState("All");
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const doSearch = async (q) => {
     const sq = (q ?? query).trim();

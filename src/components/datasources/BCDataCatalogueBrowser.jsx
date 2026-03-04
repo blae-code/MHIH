@@ -25,6 +25,7 @@ export default function BCDataCatalogueBrowser({ onImport, onClose }) {
   const [previewItem, setPreviewItem] = useState(null);
   const [sortBy, setSortBy] = useState("relevance");
   const [formatFilter, setFormatFilter] = useState("All");
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const doSearch = async (q) => {
     const sq = (q ?? query).trim();

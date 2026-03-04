@@ -33,6 +33,7 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
   const [previewItem, setPreviewItem] = useState(null);
   const [sortBy, setSortBy] = useState("relevance");
   const [groupFilter, setGroupFilter] = useState("All");
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const search = async (q) => {
     const searchQuery = q ?? query;
