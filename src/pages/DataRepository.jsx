@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Search, Upload, Plus, Filter, Download, Trash2, Edit2, RefreshCw, ChevronDown } from "lucide-react";
+import { Search, Upload, Plus, Filter, Download, Trash2, Edit2, RefreshCw, Table2, BarChart2 } from "lucide-react";
 import ImportMetricModal from "@/components/data/ImportMetricModal";
 import MetricForm from "@/components/data/MetricForm";
+import MetricsChartExplorer from "@/components/analyst/MetricsChartExplorer";
 
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
