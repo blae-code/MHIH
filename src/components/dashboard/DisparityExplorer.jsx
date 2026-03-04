@@ -63,7 +63,7 @@ function MultiSelect({ label, options, selected, onChange }) {
       </button>
       {open && (
         <div className="absolute z-50 mt-1 rounded-md shadow-xl overflow-hidden"
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", minWidth: 180, top: "100%", left: 0 }}>
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 180, top: "100%", left: 0 }}>
           <div className="max-h-52 overflow-y-auto py-1">
             {options.map(opt => {
               const isSel = selected.includes(opt.value);
@@ -94,7 +94,7 @@ function ValueFilter({ op, setOp, threshold, setThreshold }) {
     <div className="flex items-center gap-1">
       <select value={op} onChange={e => setOp(e.target.value)}
         className="text-xs px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="any" style={{ background: "#0c1625", color: "#f0f6ff" }}>Any value</option>
         <option value="gt" style={{ background: "#0c1625", color: "#f0f6ff" }}>&gt;</option>
         <option value="gte" style={{ background: "#0c1625", color: "#f0f6ff" }}>≥</option>
@@ -116,15 +116,15 @@ function YearRangeFilter({ years, yearFrom, setYearFrom, yearTo, setYearTo }) {
   return (
     <div className="flex items-center gap-1 text-xs">
       <select value={yearFrom} onChange={e => setYearFrom(e.target.value)}
-        className="px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+         className="px-1.5 py-1 rounded appearance-none outline-none"
+         style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="all" style={{ background: "#0c1625", color: "#f0f6ff" }}>From</option>
         {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
       </select>
       <span style={{ color: "var(--text-secondary)" }}>–</span>
       <select value={yearTo} onChange={e => setYearTo(e.target.value)}
-        className="px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+         className="px-1.5 py-1 rounded appearance-none outline-none"
+         style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="all" style={{ background: "#0c1625", color: "#f0f6ff" }}>To</option>
         {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y}</option>)}
       </select>
@@ -167,7 +167,7 @@ function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, se
 
       {open && (
         <div className="absolute z-40 mt-1 rounded-md p-3 shadow-xl space-y-2"
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", minWidth: 260, right: 0 }}>
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 260, right: 0 }}>
           <div className="text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Benchmark Mode</div>
 
           {/* Provincial average */}
@@ -193,7 +193,7 @@ function BenchmarkPanel({ metrics, allMetrics, benchmark, setBenchmark, open, se
                 setBenchmark({ mode: "year", active: true, selectedYear: y, value: yearAvgs[y] ?? null });
               }}
               className="text-xs px-1.5 py-0.5 rounded appearance-none outline-none"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
               {years.map(y => <option key={y} value={y} style={{ background: "#0c1625", color: "#f0f6ff" }}>{y} ({yearAvgs[y]?.toFixed(1) ?? "—"})</option>)}
             </select>
           </div>
