@@ -287,9 +287,19 @@ export default function DataAnalyst() {
                     {msg.result.supporting_data?.length > 0 && (
                       <div className="rounded-lg overflow-hidden"
                         style={{ border: "1px solid var(--border-subtle)" }}>
-                        <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider"
-                          style={{ background: "var(--bg-surface)", color: "var(--text-muted)", fontSize: 10 }}>
-                          Supporting Data
+                        <div className="flex items-center justify-between px-3 py-1.5"
+                          style={{ background: "var(--bg-surface)" }}>
+                          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)", fontSize: 10 }}>Supporting Data</span>
+                          <button onClick={() => setChartMsgIdx(chartMsgIdx === i ? null : i)}
+                            className="flex items-center gap-1 text-xs px-2 py-0.5 rounded"
+                            style={{
+                              background: chartMsgIdx === i ? "var(--accent-muted)" : "var(--bg-elevated)",
+                              color: chartMsgIdx === i ? "var(--accent-primary)" : "var(--text-muted)",
+                              border: `1px solid ${chartMsgIdx === i ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                            }}>
+                            <BarChart3 size={10} />
+                            {chartMsgIdx === i ? "Hide Chart" : "Visualise"}
+                          </button>
                         </div>
                         <div className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>
                           {msg.result.supporting_data.map((d, j) => (
@@ -300,6 +310,18 @@ export default function DataAnalyst() {
                           ))}
                         </div>
                       </div>
+
+                      {/* Inline chart from supporting data */}
+                      {chartMsgIdx === i && (
+                        <AnalystChartPanel
+                          title={msg.result.answer?.slice(0, 50) + "..."}
+                          chartData={msg.result.supporting_data.map(d => ({
+                            name: d.label,
+                            value: parseFloat(String(d.value).replace(/[^0-9.-]/g, "")) || 0,
+                          }))}
+                          onClose={() => setChartMsgIdx(null)}
+                        />
+                      )}
                     )}
 
                     {/* Key insights */}
