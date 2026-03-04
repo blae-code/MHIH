@@ -73,10 +73,11 @@ export default function Settings() {
               />
             </div>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+          </div>
 
-      {/* About Section */}
+          {/* About Section */}
       <div className="rounded-xl overflow-hidden"
         style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.05) 0%, rgba(64,196,255,0.03) 100%)", border: "1px solid rgba(254,221,0,0.15)" }}>
         <div className="p-6 space-y-4">
