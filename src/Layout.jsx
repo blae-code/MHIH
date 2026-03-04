@@ -10,6 +10,8 @@ import {
   MapPin, TrendingUp, Wrench, BellRing, Workflow, PanelLeftClose,
   PanelLeftOpen, Sparkles, LogOut, User, Circle
 } from "lucide-react";
+import NotificationCenter from "../components/notifications/NotificationCenter";
+import NotificationPreferences from "../components/notifications/NotificationPreferences";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
