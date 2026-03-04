@@ -24,10 +24,13 @@ const TOOLTIP_STYLE = {
   border: "1px solid var(--border-default)",
   color: "var(--text-primary)",
   fontSize: 12,
+  padding: "8px 12px",
+  borderRadius: "6px",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
 };
 
-const TOOLTIP_LABEL_STYLE = { color: "var(--text-primary)" };
-const TOOLTIP_ITEM_STYLE = { color: "var(--text-secondary)" };
+const TOOLTIP_LABEL_STYLE = { color: "var(--accent-primary)", fontWeight: 600, marginBottom: "4px" };
+const TOOLTIP_ITEM_STYLE = { color: "var(--text-primary)", fontWeight: 500 };
 
 const BENCHMARK_COLOR = "#a78bfa";
 
