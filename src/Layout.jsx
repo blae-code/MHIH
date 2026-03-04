@@ -459,41 +459,67 @@ export default function Layout({ children, currentPageName }) {
               borderRight: sidebarOpen ? "1px solid var(--border-subtle)" : "none",
             }}
           >
-              {/* Nav */}
-              <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+              {/* Nav — file-tree style */}
+              <nav className="flex-1 overflow-y-auto py-2 px-2">
                 {visibleSections.map(sec => {
                   const collapsed = collapsedSections[sec.key];
                   return (
-                    <div key={sec.key} className="mb-1">
-                      {/* Section header */}
+                    <div key={sec.key} className="mb-0.5">
+                      {/* Folder row */}
                       <div
                         className="sidebar-section-toggle"
                         onClick={() => toggleSection(sec.key)}
+                        style={{ padding: "3px 6px", gap: 5 }}
                       >
-                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sec.color, boxShadow: `0 0 4px ${sec.color}80` }} />
-                        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", flex: 1 }}>{sec.label}</span>
+                        {/* Folder icon */}
+                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, color: sec.color }}>
+                          {collapsed
+                            ? <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1"/>
+                            : <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1"/>
+                          }
+                        </svg>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: collapsed ? "var(--text-secondary)" : "var(--text-primary)", flex: 1, letterSpacing: "0.01em" }}>{sec.label}</span>
                         <ChevronRight
-                          size={11}
+                          size={10}
                           style={{
                             color: "var(--text-muted)",
                             transform: collapsed ? "rotate(0deg)" : "rotate(90deg)",
                             transition: "transform 0.15s",
-                            opacity: 0.5
+                            opacity: 0.4,
+                            flexShrink: 0
                           }}
                         />
                       </div>
 
-                      {/* Items */}
+                      {/* File items with tree lines */}
                       {!collapsed && (
-                        <div className="mt-0.5 space-y-0.5 pl-1">
-                          {sec.items.map(item => (
-                            <Link key={item.page} to={createPageUrl(item.page)} title={item.tooltip}>
-                              <div className={`sidebar-nav-item ${currentPageName === item.page ? "active" : ""}`}>
-                                <item.icon size={13} className="nav-icon" style={{ color: currentPageName === item.page ? sec.color : undefined }} />
-                                <span className="truncate">{item.label}</span>
+                        <div className="relative ml-3 mt-0.5" style={{ paddingLeft: 12 }}>
+                          {/* Vertical tree line */}
+                          <div className="absolute top-0 bottom-2 left-0" style={{ width: 1, background: `${sec.color}30` }} />
+
+                          {sec.items.map((item, idx) => {
+                            const isLast = idx === sec.items.length - 1;
+                            const isActive = currentPageName === item.page;
+                            return (
+                              <div key={item.page} className="relative" style={{ marginBottom: 1 }}>
+                                {/* Horizontal connector */}
+                                <div className="absolute top-1/2 -translate-y-1/2" style={{ left: -12, width: 10, height: 1, background: `${sec.color}30` }} />
+                                {/* Cap the vertical line at last item */}
+                                {isLast && <div className="absolute" style={{ left: -13, top: "50%", bottom: 0, width: 3, background: "var(--bg-surface)" }} />}
+
+                                <Link to={createPageUrl(item.page)} title={item.tooltip}>
+                                  <div className={`sidebar-nav-item ${isActive ? "active" : ""}`} style={{ paddingLeft: 6, paddingRight: 6 }}>
+                                    <item.icon
+                                      size={12}
+                                      className="nav-icon"
+                                      style={{ color: isActive ? sec.color : undefined, flexShrink: 0 }}
+                                    />
+                                    <span className="truncate" style={{ fontSize: 12 }}>{item.label}</span>
+                                  </div>
+                                </Link>
                               </div>
-                            </Link>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
