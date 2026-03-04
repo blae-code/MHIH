@@ -244,12 +244,12 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="h-full overflow-auto" style={{ background: "var(--bg-base)", paddingBottom: 0 }}>
-      {/* Main container with edge padding */}
-      <div className="p-4" style={{ maxWidth: "100%", margin: "0 auto" }}>
+    <div className="h-full flex flex-col" style={{ background: "var(--bg-base)" }}>
+      {/* Main container — no scroll */}
+      <div className="flex-1 overflow-hidden flex flex-col p-4">
 
         {/* Hero header with gradient */}
-        <div className="mb-5 rounded-xl overflow-hidden" style={{
+        <div className="mb-4 rounded-xl overflow-hidden shrink-0" style={{
           background: "linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
           border: "1px solid var(--border-default)",
           boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.04)"
@@ -278,16 +278,15 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Widgets grid */}
-        <div className="space-y-4">
-          {widgets
-            .filter(w => w.visible !== false)
-            .map(w => WIDGET_RENDER[w.id])
-            .filter(Boolean)}
+        {/* Widgets grid — flex container, no scroll */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full gap-3 grid grid-cols-2 auto-rows-max" style={{ overflowY: "auto", paddingRight: "4px" }}>
+            {widgets
+              .filter(w => w.visible !== false)
+              .map(w => WIDGET_RENDER[w.id])
+              .filter(Boolean)}
+          </div>
         </div>
-
-        {/* Footer spacer */}
-        <div style={{ height: "var(--footer-height)" }} />
       </div>
 
       {customizerOpen && (
