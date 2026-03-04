@@ -236,7 +236,7 @@ function BenchmarkTable({ data, benchmark }) {
   return (
     <div className="mt-3 rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
       <div className="px-3 py-2 text-xs font-semibold flex items-center gap-2"
-        style={{ background: "var(--bg-overlay)", color: "var(--text-muted)" }}>
+      style={{ background: "var(--bg-overlay)", color: "var(--text-secondary)" }}>
         <Target size={10} style={{ color: BENCHMARK_COLOR }} />
         Performance vs Benchmark ({benchmark.value.toFixed(1)}) — Top 10 deviations
       </div>
