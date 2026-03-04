@@ -670,18 +670,25 @@ export default function Dashboard() {
       )}
 
       {layoutManagerOpen && (
-        <DashboardLayoutManager
-          layouts={layouts}
-          currentLayout={{ id: currentLayoutId }}
-          onLoadLayout={handleLoadLayout}
-          onSaveLayout={handleSaveNewLayout}
-          onDeleteLayout={handleDeleteLayout}
-          onClose={() => setLayoutManagerOpen(false)}
-        />
+       <DashboardLayoutManager
+         layouts={layouts}
+         currentLayout={{ id: currentLayoutId }}
+         onLoadLayout={handleLoadLayout}
+         onSaveLayout={handleSaveNewLayout}
+         onDeleteLayout={handleDeleteLayout}
+         onClose={() => setLayoutManagerOpen(false)}
+       />
       )}
-    </div>
-  );
-}
+
+      {statBuilderOpen && (
+       <CustomStatBuilder
+         onAdd={handleAddCustomStat}
+         onClose={() => setStatBuilderOpen(false)}
+       />
+      )}
+      </div>
+      );
+      }
 
 function EmptyChart({ message }) {
   return (
