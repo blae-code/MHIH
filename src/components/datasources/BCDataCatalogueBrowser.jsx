@@ -155,6 +155,7 @@ export default function BCDataCatalogueBrowser({ onImport, onClose }) {
             quickSearches={QUICK_SEARCHES}
             aiContext="BC Data Catalogue — health, environment, demographics datasets from the BC government"
             filterSlot={results.length > 0 ? filterBar : null}
+            recentSearches={recentSearches}
           />
         </div>
 

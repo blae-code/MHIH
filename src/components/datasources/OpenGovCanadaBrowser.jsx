@@ -149,6 +149,7 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
             quickSearches={QUICK_SEARCHES}
             aiContext="Open Government Canada CKAN catalogue — federal health, demographics, Indigenous datasets"
             filterSlot={results.length > 0 ? filterBar : null}
+            recentSearches={recentSearches}
           />
         </div>
 

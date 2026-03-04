@@ -142,6 +142,7 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
             quickSearches={QUICK_SEARCHES}
             aiContext="Health Canada Canadian Nutrient File — traditional Indigenous foods, game meats, berries, fish"
             filterSlot={results.length > 0 ? filterBar : null}
+            recentSearches={recentSearches}
           />
         </div>
 
