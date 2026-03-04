@@ -123,6 +123,15 @@ export default function Dashboard() {
     addLog("success", "Custom stat removed");
   }, [customStats, currentLayoutId, widgets, pinnedIds, dashboardTitle, visibleStatCards, addLog]);
 
+  const handleAddWidget = useCallback((widget) => {
+    const newWidget = { id: widget.id, visible: true, span: widget.defaultSpan };
+    const newWidgets = [...widgets, newWidget];
+    setWidgets(newWidgets);
+    savePrefs(currentLayoutId, newWidgets, pinnedIds, dashboardTitle, visibleStatCards, customStats);
+    setHasChanges(true);
+    addLog("success", `Added ${widget.name} widget`);
+  }, [widgets, currentLayoutId, pinnedIds, dashboardTitle, visibleStatCards, customStats, addLog]);
+
   const handleUnpin = useCallback((id) => {
     const next = pinnedIds.filter(p => p !== id);
     setPinnedIds(next);
