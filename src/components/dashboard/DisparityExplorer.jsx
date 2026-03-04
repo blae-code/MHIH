@@ -685,6 +685,8 @@ export default function DisparityExplorer({ metrics, trackedMetricIds = [] }) {
   const years = useMemo(() => [...new Set(metrics.map((m) => m.year).filter(Boolean))].sort(), [metrics]);
 
   const filtered = useMemo(() => metrics.filter((m) => {
+    // If tracking specific metrics, prioritize them; otherwise show all
+    if (trackedMetricIds.length > 0 && !trackedMetricIds.includes(m.id)) return false;
     if (selCats.length && !selCats.includes(m.category)) return false;
     if (selRegions.length && !selRegions.includes(m.region)) return false;
     if (yearFrom !== "all" && m.year < parseInt(yearFrom)) return false;
