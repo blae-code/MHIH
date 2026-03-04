@@ -464,7 +464,7 @@ function DrillPanel({ metric, onClose, benchmark }) {
   return (
     <div className="rounded-md p-3 mt-3" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold" style={{ color: "var(--accent-primary)" }}>Drill-down</span>
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)" }}>Drill-down</span>
         <button onClick={onClose} className="activity-icon" style={{ width: 20, height: 20 }}><X size={12} /></button>
       </div>
       <div className="text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>{metric.fullName || metric.name}</div>
