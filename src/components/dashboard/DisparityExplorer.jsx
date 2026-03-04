@@ -261,7 +261,7 @@ function BenchmarkTable({ data, benchmark }) {
                   <td className="px-3 py-1.5 font-medium" style={{ color: "var(--text-primary)", maxWidth: 160 }}>
                     <span className="truncate block">{m.name}</span>
                   </td>
-                  <td className="px-3 py-1.5" style={{ color: "var(--text-muted)" }}>{m.category?.replace(/_/g, " ")}</td>
+                  <td className="px-3 py-1.5" style={{ color: "var(--text-secondary)" }}>{m.category?.replace(/_/g, " ")}</td>
                   <td className="px-3 py-1.5" style={{ color: "var(--text-primary)" }}>{m.value.toFixed(2)}</td>
                   <td className="px-3 py-1.5">
                     <span className="flex items-center gap-1 font-medium" style={{ color }}>
