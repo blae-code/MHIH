@@ -11,18 +11,31 @@ import DashboardLayoutManager, { PRESET_LAYOUTS } from "../components/dashboard/
 import DisparityExplorer from "../components/dashboard/DisparityExplorer";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
-const PREF_KEY = "mhip_dashboard_prefs";
+const PREFS_KEY = "mhip_dashboard_prefs";
+const LAYOUTS_KEY = "mhip_dashboard_layouts";
 
 function loadPrefs() {
   try {
-    const raw = localStorage.getItem(PREF_KEY);
+    const raw = localStorage.getItem(PREFS_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
   return null;
 }
 
-function savePrefs(widgets, pinnedIds) {
-  localStorage.setItem(PREF_KEY, JSON.stringify({ widgets, pinnedIds }));
+function savePrefs(currentLayoutId, widgets, pinnedIds, title) {
+  localStorage.setItem(PREFS_KEY, JSON.stringify({ currentLayoutId, widgets, pinnedIds, title }));
+}
+
+function loadLayouts() {
+  try {
+    const raw = localStorage.getItem(LAYOUTS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+function saveLayouts(layouts) {
+  localStorage.setItem(LAYOUTS_KEY, JSON.stringify(layouts));
 }
 
 export default function Dashboard() {
