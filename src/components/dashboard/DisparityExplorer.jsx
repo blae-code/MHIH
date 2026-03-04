@@ -333,7 +333,7 @@ function TrendLine({ data, benchmark }) {
         <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
         <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
         <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v, n) => [v, n === "metis" ? "Métis Avg" : "BC Avg"]} />
-        <Legend formatter={n => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 11 }} />
+        <Legend formatter={n => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
         <Line type="monotone" dataKey="metis" stroke="#e6a817" strokeWidth={2} dot={{ r: 3 }} />
         <Line type="monotone" dataKey="bc" stroke="#58a6ff" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3 }} connectNulls />
         {benchmark.active && benchmark.value != null && (
