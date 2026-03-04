@@ -48,6 +48,7 @@ const NAV_SECTIONS = [
       { icon: Wrench, label: "Data Prep", page: "DataPrep", tooltip: "Clean & transform data" },
       { icon: Workflow, label: "Workflows", page: "Workflows", tooltip: "Automated data pipelines" },
       { icon: Shield, label: "Governance", page: "DataGovernance", tooltip: "Audit logs & data policies" },
+      { icon: FileDown, label: "Reports", page: "Reports", tooltip: "Custom report builder" },
     ]
   },
   {
