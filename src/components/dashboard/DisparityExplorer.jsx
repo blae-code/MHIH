@@ -827,31 +827,75 @@ export default function DisparityExplorer({ metrics }) {
 
       {/* Stats & actions footer */}
       <div className="mt-3 pt-3 space-y-2.5" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-        {/* Summary stats */}
-        <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                    <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Showing</div>
-                    <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{filtered.length}/{metrics.length}</div>
-                  </div>
-          {filtered.some(m => m.comparison_value != null) && (() => {
-            const withGap = filtered.filter(m => m.comparison_value != null);
-            const avgGap = withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length;
-            return (
-              <div className="rounded-lg p-2.5" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4 }}>Avg Gap</div>
-                <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 13 }}>
+        {/* Compute extended stats */}
+        {(() => {
+          const withGap = filtered.filter(m => m.comparison_value != null);
+          const avgGap = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length : 0;
+          const avgValue = filtered.length > 0 ? filtered.reduce((s, m) => s + (m.value || 0), 0) / filtered.length : 0;
+          const avgComparison = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.comparison_value || 0), 0) / withGap.length : 0;
+          const minValue = filtered.length > 0 ? Math.min(...filtered.map(m => m.value || 0)) : 0;
+          const maxValue = filtered.length > 0 ? Math.max(...filtered.map(m => m.value || 0)) : 0;
+          const uniqueRegions = new Set(filtered.map(m => m.region)).size;
+          const uniqueCategories = new Set(filtered.map(m => m.category)).size;
+          const disparityCount = withGap.filter(m => (m.value || 0) > m.comparison_value).length;
+          const disparityPct = withGap.length > 0 ? ((disparityCount / withGap.length) * 100).toFixed(0) : 0;
+
+          return (
+            <div className="grid grid-cols-4 gap-2 text-xs">
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Showing</div>
+                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{filtered.length}</div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>of {metrics.length}</div>
+              </div>
+              
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Avg Value</div>
+                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{avgValue.toFixed(1)}</div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>Métis</div>
+              </div>
+
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Avg Gap</div>
+                <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 12 }}>
                   {avgGap > 0 ? "+" : ""}{avgGap.toFixed(2)}
                 </div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>vs BC</div>
               </div>
-            );
-          })()}
-          {benchmark.active && benchmark.value != null && (
-            <div className="rounded-lg p-2.5" style={{ background: "var(--bg-overlay)", border: `1px solid ${BENCHMARK_COLOR}33` }}>
-              <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4 }}>Benchmark</div>
-              <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 13 }}>{benchmark.value.toFixed(1)}</div>
+
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Disparity %</div>
+                <div style={{ color: disparityPct > 50 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 12 }}>{disparityPct}%</div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>Higher than BC</div>
+              </div>
+
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Range</div>
+                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{(maxValue - minValue).toFixed(1)}</div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>{minValue.toFixed(0)}–{maxValue.toFixed(0)}</div>
+              </div>
+
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Regions</div>
+                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{uniqueRegions}</div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>covered</div>
+              </div>
+
+              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Categories</div>
+                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{uniqueCategories}</div>
+                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>types</div>
+              </div>
+
+              {benchmark.active && benchmark.value != null && (
+                <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: `1px solid ${BENCHMARK_COLOR}33` }}>
+                  <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Benchmark</div>
+                  <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 12 }}>{benchmark.value.toFixed(1)}</div>
+                  <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>target</div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* Export buttons */}
         <div className="flex gap-1.5">
