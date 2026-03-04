@@ -45,6 +45,12 @@ const COMMAND_ITEMS = [
   { label: "View Visualizations", page: "Visualizations", icon: LineChart },
   { label: "AI Insights & Analysis", page: "AIInsights", icon: Brain },
   { label: "AI Data Analyst", page: "DataAnalyst", icon: Brain },
+  { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp },
+  { label: "Geo Map", page: "GeoMap", icon: MapPin },
+  { label: "Alerts", page: "Alerts", icon: BellRing },
+  { label: "Data Prep", page: "DataPrep", icon: Wrench },
+  { label: "Workflows & Automation", page: "Workflows", icon: Workflow },
+  { label: "Data Governance", page: "DataGovernance", icon: Shield },
   { label: "Export Data", page: "Export", icon: FileDown },
   { label: "Team Management", page: "Team", icon: Users },
   { label: "Admin Panel", page: "Admin", icon: Shield },
@@ -96,6 +102,7 @@ export default function Layout({ children, currentPageName }) {
   const sections = [
     { key: "main", label: "WORKSPACE" },
     { key: "data", label: "DATA" },
+    { key: "analytics", label: "ANALYTICS" },
     ...(isAdmin ? [{ key: "admin", label: "ADMINISTRATION" }] : []),
     { key: "system", label: "SYSTEM" },
   ];
