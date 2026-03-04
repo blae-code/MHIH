@@ -113,7 +113,7 @@ export default function Layout({ children, currentPageName }) {
 
   useEffect(() => {
     const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && (e.key === "p" || e.key === "k")) {
+      if (e.ctrlKey && (e.key === "p" || e.key === "k")) {
         e.preventDefault();
         setCmdOpen(v => !v);
         setCmdQuery("");
