@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity, SlidersHorizontal } from "lucide-react";
+import { Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity, SlidersHorizontal, RotateCcw, Save } from "lucide-react";
 import WeeklyReports from "../components/dashboard/WeeklyReports";
 import PinnedMetrics from "../components/dashboard/PinnedMetrics";
 import DashboardCustomizer, { DEFAULT_WIDGETS } from "../components/dashboard/DashboardCustomizer";
