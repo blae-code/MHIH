@@ -289,19 +289,29 @@ export default function Dashboard() {
          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
            {STAT_CARDS.map((card, idx) => {
              const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
+             const tooltips = {
+               "Métis Health Indicators": "Total number of Métis-specific health indicators currently tracked in the system. Includes data on chronic diseases, mental health, substance use, maternal/child health, social determinants, and mortality metrics.",
+               "Avg Health Disparity": "Average difference between Métis health outcomes and the BC general population. Positive values indicate worse outcomes for Métis; negative values indicate better outcomes.",
+               "Year-over-Year Trend": "Percentage change in average health metric values from the previous year. Positive indicates improving health outcomes; negative indicates declining outcomes.",
+               "Health Categories": "Number of major health indicator categories being monitored, including chronic disease, mental health, substance use, maternal/child health, social determinants, demographics, mortality, and access to care."
+             };
              return (
-               <div key={cardId} className="dashboard-widget-card relative overflow-hidden group"
+               <div key={cardId} className="dashboard-widget-card relative overflow-hidden group" title={tooltips[card.label]}
                  style={{
                    background: `linear-gradient(135deg, ${card.bgColor || "rgba(254,221,0,0.03)"} 0%, var(--bg-elevated) 100%)`,
-                   border: `1.5px solid ${card.color}33`
+                   border: `1.5px solid ${card.color}33`,
+                   cursor: "help"
                  }}>
                  {/* Accent line */}
                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${card.color} 0%, transparent 100%)` }} />
 
                  <div className="flex items-start justify-between mb-3 relative z-10">
                    <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{card.label}</span>
-                   <div className="p-2 rounded-lg shrink-0 transition-all group-hover:scale-110" style={{ background: card.bgColor, boxShadow: `0 0 12px ${card.color}22` }}>
-                     <card.icon size={14} style={{ color: card.color, strokeWidth: 2.5 }} />
+                   <div className="flex items-center gap-1">
+                     <div className="p-2 rounded-lg shrink-0 transition-all group-hover:scale-110" style={{ background: card.bgColor, boxShadow: `0 0 12px ${card.color}22` }}>
+                       <card.icon size={14} style={{ color: card.color, strokeWidth: 2.5 }} />
+                     </div>
+                     <HelpCircle size={11} style={{ color: card.color, opacity: 0.5, marginTop: "2px" }} />
                    </div>
                  </div>
                  <div className="text-4xl font-black mb-2 relative z-10 leading-tight" style={{ color: card.color, textShadow: `0 2px 8px ${card.color}18` }}>{card.value}</div>
