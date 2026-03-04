@@ -8,8 +8,8 @@ import {
   Info, X, Zap, FileDown, Upload, BookOpen, Shield, HelpCircle,
   FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot,
   MapPin, TrendingUp, Wrench, BellRing, Workflow, PanelLeftClose,
-  PanelLeftOpen, Sparkles, LogOut, User, Circle } from
-"lucide-react";
+  PanelLeftOpen, Sparkles, LogOut, User, Circle
+} from "lucide-react";
 import NotificationCenter from "../components/notifications/NotificationCenter";
 import NotificationPreferences from "../components/notifications/NotificationPreferences";
 
@@ -17,75 +17,75 @@ export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
 
 const NAV_SECTIONS = [
-{
-  key: "main", label: "Workspace", color: "#FEDD00",
-  items: [
-  { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", tooltip: "Platform overview & KPIs" },
-  { icon: Database, label: "Data Repository", page: "DataRepository", tooltip: "Browse all health metrics" },
-  { icon: BarChart3, label: "Visualizations", page: "Visualizations", tooltip: "Charts, maps & trend views" },
-  { icon: Brain, label: "AI Insights", page: "AIInsights", tooltip: "AI-generated health analysis" },
-  { icon: Sparkles, label: "AI Analyst", page: "DataAnalyst", tooltip: "Ask questions about your data" }]
+  {
+    key: "main", label: "Workspace", color: "#FEDD00",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", tooltip: "Platform overview & KPIs" },
+      { icon: Database, label: "Data Repository", page: "DataRepository", tooltip: "Browse all health metrics" },
+      { icon: BarChart3, label: "Visualizations", page: "Visualizations", tooltip: "Charts, maps & trend views" },
+      { icon: Brain, label: "AI Insights", page: "AIInsights", tooltip: "AI-generated health analysis" },
+      { icon: Sparkles, label: "AI Analyst", page: "DataAnalyst", tooltip: "Ask questions about your data" },
+    ]
+  },
+  {
+    key: "data", label: "Data", color: "#40c4ff",
+    items: [
+      { icon: BookOpen, label: "Data Sources", page: "DataSources", tooltip: "Manage external data connections" },
+      { icon: Database, label: "My Sources", page: "MyDataSources", tooltip: "Your personal data imports" },
+      { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", tooltip: "Review flags & quality issues" },
+      { icon: Bot, label: "AI Agents", page: "AgentCenter", tooltip: "Automated agent tasks & runs" },
+      { icon: FileDown, label: "Export", page: "Export", tooltip: "Download data as CSV or PDF" },
+    ]
+  },
+  {
+    key: "analytics", label: "Analytics", color: "#00e676",
+    items: [
+      { icon: TrendingUp, label: "Predictive", page: "PredictiveAnalytics", tooltip: "Forecasts & trend modelling" },
+      { icon: MapPin, label: "Geo Map", page: "GeoMap", tooltip: "Regional health data map" },
+      { icon: BellRing, label: "Alerts", page: "Alerts", tooltip: "Threshold alerts & notifications" },
+      { icon: Wrench, label: "Data Prep", page: "DataPrep", tooltip: "Clean & transform data" },
+      { icon: Workflow, label: "Workflows", page: "Workflows", tooltip: "Automated data pipelines" },
+      { icon: Shield, label: "Governance", page: "DataGovernance", tooltip: "Audit logs & data policies" },
+    ]
+  },
+  {
+    key: "admin", label: "Administration", color: "#ffab40", adminOnly: true,
+    items: [
+      { icon: Users, label: "Team", page: "Team", tooltip: "Manage team members & roles" },
+      { icon: Shield, label: "Admin", page: "Admin", tooltip: "System administration panel" },
+    ]
+  },
+  {
+    key: "system", label: "System", color: "#8b8fa8",
+    items: [
+      { icon: Settings, label: "Settings", page: "Settings", tooltip: "App preferences & configuration" },
+    ]
+  },
+];
 
-},
-{
-  key: "data", label: "Data", color: "#40c4ff",
-  items: [
-  { icon: BookOpen, label: "Data Sources", page: "DataSources", tooltip: "Manage external data connections" },
-  { icon: Database, label: "My Sources", page: "MyDataSources", tooltip: "Your personal data imports" },
-  { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", tooltip: "Review flags & quality issues" },
-  { icon: Bot, label: "AI Agents", page: "AgentCenter", tooltip: "Automated agent tasks & runs" },
-  { icon: FileDown, label: "Export", page: "Export", tooltip: "Download data as CSV or PDF" }]
-
-},
-{
-  key: "analytics", label: "Analytics", color: "#00e676",
-  items: [
-  { icon: TrendingUp, label: "Predictive", page: "PredictiveAnalytics", tooltip: "Forecasts & trend modelling" },
-  { icon: MapPin, label: "Geo Map", page: "GeoMap", tooltip: "Regional health data map" },
-  { icon: BellRing, label: "Alerts", page: "Alerts", tooltip: "Threshold alerts & notifications" },
-  { icon: Wrench, label: "Data Prep", page: "DataPrep", tooltip: "Clean & transform data" },
-  { icon: Workflow, label: "Workflows", page: "Workflows", tooltip: "Automated data pipelines" },
-  { icon: Shield, label: "Governance", page: "DataGovernance", tooltip: "Audit logs & data policies" }]
-
-},
-{
-  key: "admin", label: "Administration", color: "#ffab40", adminOnly: true,
-  items: [
-  { icon: Users, label: "Team", page: "Team", tooltip: "Manage team members & roles" },
-  { icon: Shield, label: "Admin", page: "Admin", tooltip: "System administration panel" }]
-
-},
-{
-  key: "system", label: "System", color: "#8b8fa8",
-  items: [
-  { icon: Settings, label: "Settings", page: "Settings", tooltip: "App preferences & configuration" }]
-
-}];
-
-
-const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => ({ ...i, section: s.key })));
+const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items.map(i => ({ ...i, section: s.key })));
 
 const COMMAND_ITEMS = [
-{ label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, desc: "Platform overview & KPIs" },
-{ label: "Data Repository", page: "DataRepository", icon: Database, desc: "Browse all health metrics" },
-{ label: "Data Sources", page: "DataSources", icon: FolderOpen, desc: "Manage external connections" },
-{ label: "My Data Sources", page: "MyDataSources", icon: Database, desc: "Your personal imports" },
-{ label: "Data Quality", page: "DataQuality", icon: ShieldCheck, desc: "Review flags & issues" },
-{ label: "AI Agents", page: "AgentCenter", icon: Bot, desc: "Automated agent tasks" },
-{ label: "Visualizations", page: "Visualizations", icon: LineChart, desc: "Charts & trend views" },
-{ label: "AI Insights", page: "AIInsights", icon: Brain, desc: "AI-generated analysis" },
-{ label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, desc: "Ask questions about data" },
-{ label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp, desc: "Forecasts & modelling" },
-{ label: "Geo Map", page: "GeoMap", icon: MapPin, desc: "Regional health map" },
-{ label: "Alerts", page: "Alerts", icon: BellRing, desc: "Threshold notifications" },
-{ label: "Data Prep", page: "DataPrep", icon: Wrench, desc: "Clean & transform data" },
-{ label: "Workflows", page: "Workflows", icon: Workflow, desc: "Automated pipelines" },
-{ label: "Data Governance", page: "DataGovernance", icon: Shield, desc: "Audit logs & policies" },
-{ label: "Export Data", page: "Export", icon: FileDown, desc: "Download CSV or PDF" },
-{ label: "Team Management", page: "Team", icon: Users, desc: "Manage team & roles" },
-{ label: "Admin Panel", page: "Admin", icon: Shield, desc: "System administration" },
-{ label: "Settings", page: "Settings", icon: Settings, desc: "App preferences" }];
-
+  { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, desc: "Platform overview & KPIs" },
+  { label: "Data Repository", page: "DataRepository", icon: Database, desc: "Browse all health metrics" },
+  { label: "Data Sources", page: "DataSources", icon: FolderOpen, desc: "Manage external connections" },
+  { label: "My Data Sources", page: "MyDataSources", icon: Database, desc: "Your personal imports" },
+  { label: "Data Quality", page: "DataQuality", icon: ShieldCheck, desc: "Review flags & issues" },
+  { label: "AI Agents", page: "AgentCenter", icon: Bot, desc: "Automated agent tasks" },
+  { label: "Visualizations", page: "Visualizations", icon: LineChart, desc: "Charts & trend views" },
+  { label: "AI Insights", page: "AIInsights", icon: Brain, desc: "AI-generated analysis" },
+  { label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, desc: "Ask questions about data" },
+  { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp, desc: "Forecasts & modelling" },
+  { label: "Geo Map", page: "GeoMap", icon: MapPin, desc: "Regional health map" },
+  { label: "Alerts", page: "Alerts", icon: BellRing, desc: "Threshold notifications" },
+  { label: "Data Prep", page: "DataPrep", icon: Wrench, desc: "Clean & transform data" },
+  { label: "Workflows", page: "Workflows", icon: Workflow, desc: "Automated pipelines" },
+  { label: "Data Governance", page: "DataGovernance", icon: Shield, desc: "Audit logs & policies" },
+  { label: "Export Data", page: "Export", icon: FileDown, desc: "Download CSV or PDF" },
+  { label: "Team Management", page: "Team", icon: Users, desc: "Manage team & roles" },
+  { label: "Admin Panel", page: "Admin", icon: Shield, desc: "System administration" },
+  { label: "Settings", page: "Settings", icon: Settings, desc: "App preferences" },
+];
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -95,8 +95,8 @@ export default function Layout({ children, currentPageName }) {
   const [cmdQuery, setCmdQuery] = useState("");
   const [cmdIndex, setCmdIndex] = useState(0);
   const [statusLogs, setStatusLogs] = useState([
-  { type: "success", msg: "System initialized", time: new Date().toLocaleTimeString() }]
-  );
+    { type: "success", msg: "System initialized", time: new Date().toLocaleTimeString() }
+  ]);
   const [contextPanel, setContextPanel] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -128,55 +128,55 @@ export default function Layout({ children, currentPageName }) {
   }, [user]);
 
   const addLog = useCallback((type, msg) => {
-    setStatusLogs((prev) => [
-    { type, msg, time: new Date().toLocaleTimeString() },
-    ...prev.slice(0, 49)]
-    );
+    setStatusLogs(prev => [
+      { type, msg, time: new Date().toLocaleTimeString() },
+      ...prev.slice(0, 49)
+    ]);
   }, []);
 
   useEffect(() => {
     const handler = (e) => {
       if (e.ctrlKey && (e.key === "p" || e.key === "k")) {
         e.preventDefault();
-        setCmdOpen((v) => !v);
+        setCmdOpen(v => !v);
         setCmdQuery("");
         setCmdIndex(0);
       }
-      if (e.key === "Escape") {setCmdOpen(false);setUserMenuOpen(false);}
+      if (e.key === "Escape") { setCmdOpen(false); setUserMenuOpen(false); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
   const isAdmin = user?.role === "admin";
-  const visibleSections = NAV_SECTIONS.filter((s) => !s.adminOnly || isAdmin);
+  const visibleSections = NAV_SECTIONS.filter(s => !s.adminOnly || isAdmin);
 
-  const filteredCmds = COMMAND_ITEMS.filter((c) =>
-  c.label.toLowerCase().includes(cmdQuery.toLowerCase()) ||
-  c.desc.toLowerCase().includes(cmdQuery.toLowerCase())
+  const filteredCmds = COMMAND_ITEMS.filter(c =>
+    c.label.toLowerCase().includes(cmdQuery.toLowerCase()) ||
+    c.desc.toLowerCase().includes(cmdQuery.toLowerCase())
   );
 
   // Keyboard nav for command palette
   const handleCmdKey = (e) => {
-    if (e.key === "ArrowDown") {e.preventDefault();setCmdIndex((i) => Math.min(i + 1, filteredCmds.length - 1));}
-    if (e.key === "ArrowUp") {e.preventDefault();setCmdIndex((i) => Math.max(i - 1, 0));}
+    if (e.key === "ArrowDown") { e.preventDefault(); setCmdIndex(i => Math.min(i + 1, filteredCmds.length - 1)); }
+    if (e.key === "ArrowUp") { e.preventDefault(); setCmdIndex(i => Math.max(i - 1, 0)); }
     if (e.key === "Enter" && filteredCmds[cmdIndex]) {
       window.location.href = createPageUrl(filteredCmds[cmdIndex].page);
       setCmdOpen(false);
     }
   };
 
-  useEffect(() => {setCmdIndex(0);}, [cmdQuery]);
+  useEffect(() => { setCmdIndex(0); }, [cmdQuery]);
 
   const lastLog = statusLogs[0];
-  const logColor = lastLog?.type === "error" ? "#ff4d4f" :
-  lastLog?.type === "warning" ? "#faad14" :
-  lastLog?.type === "success" ? "#52c41a" :
-  "#40c4ff";
+  const logColor = lastLog?.type === "error" ? "#ff4d4f"
+    : lastLog?.type === "warning" ? "#faad14"
+    : lastLog?.type === "success" ? "#52c41a"
+    : "#40c4ff";
 
-  const currentSection = visibleSections.find((s) => s.items.some((i) => i.page === currentPageName));
+  const currentSection = visibleSections.find(s => s.items.some(i => i.page === currentPageName));
 
-  const toggleSection = (key) => setCollapsedSections((p) => ({ ...p, [key]: !p[key] }));
+  const toggleSection = (key) => setCollapsedSections(p => ({ ...p, [key]: !p[key] }));
 
   return (
     <AppContext.Provider value={{ user, addLog, setContextPanel, contextPanel }}>
@@ -328,18 +328,18 @@ export default function Layout({ children, currentPageName }) {
             background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
             borderBottom: "1px solid var(--border-default)",
             boxShadow: "0 8px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.08)"
-          }}>
-
+          }}
+        >
           {/* Brand */}
           <div className="flex items-center gap-3 min-w-0" style={{ minWidth: sidebarOpen ? "var(--panel-left)" : "auto" }}>
             <div className="flex items-center gap-2.5 shrink-0">
               <div className="relative">
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm"
-                style={{
-                  background: "linear-gradient(135deg, #FEDD00 0%, #e6c000 100%)",
-                  color: "#04245a",
-                  boxShadow: "0 2px 8px rgba(254,221,0,0.35), inset 0 1px 0 rgba(255,255,255,0.3)"
-                }}>
+                  style={{
+                    background: "linear-gradient(135deg, #FEDD00 0%, #e6c000 100%)",
+                    color: "#04245a",
+                    boxShadow: "0 2px 8px rgba(254,221,0,0.35), inset 0 1px 0 rgba(255,255,255,0.3)"
+                  }}>
                   M
                 </div>
               </div>
@@ -355,11 +355,11 @@ export default function Layout({ children, currentPageName }) {
 
             {/* Sidebar toggle */}
             <button
-              onClick={() => setSidebarOpen((v) => !v)}
+              onClick={() => setSidebarOpen(v => !v)}
               className="activity-icon shrink-0"
               style={{ width: 28, height: 28, marginLeft: 4 }}
-              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}>
-
+              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
               {sidebarOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
             </button>
           </div>
@@ -367,18 +367,18 @@ export default function Layout({ children, currentPageName }) {
           {/* Breadcrumb + Search center */}
           <div className="flex-1 flex items-center justify-center gap-3 mx-4">
             {/* Breadcrumb pill */}
-            {currentSection &&
-            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
-            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}>
+            {currentSection && (
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}>
                 <span style={{ color: currentSection.color, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{currentSection.label}</span>
                 <ChevronRight size={10} style={{ opacity: 0.5 }} />
                 <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{currentPageName?.replace(/([A-Z])/g, ' $1').trim()}</span>
               </div>
-            }
+            )}
 
             {/* Command search */}
             <button
-              onClick={() => {setCmdOpen(true);setTimeout(() => cmdInputRef.current?.focus(), 50);}}
+              onClick={() => { setCmdOpen(true); setTimeout(() => cmdInputRef.current?.focus(), 50); }}
               className="header-search-btn hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all hover:shadow-lg"
               style={{
                 background: "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)",
@@ -388,12 +388,12 @@ export default function Layout({ children, currentPageName }) {
                 position: "relative",
                 overflow: "hidden"
               }}
-              onMouseOver={(e) => {
+              onMouseOver={e => {
                 e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.12) 0%, rgba(254,221,0,0.06) 100%)";
                 e.currentTarget.style.borderColor = "rgba(254,221,0,0.4)";
                 e.currentTarget.style.color = "var(--text-primary)";
               }}
-              onMouseOut={(e) => {
+              onMouseOut={e => {
                 e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)";
                 e.currentTarget.style.borderColor = "rgba(254,221,0,0.2)";
                 e.currentTarget.style.color = "var(--text-secondary)";
@@ -410,31 +410,31 @@ export default function Layout({ children, currentPageName }) {
               <Search size={15} />
             </button>
 
-            <button
+            <button 
               onClick={() => setNotifCenterOpen(true)}
-              className="activity-icon relative"
+              className="activity-icon relative" 
               title="Notifications">
               <Bell size={15} />
-              {unreadCount > 0 &&
-              <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: "var(--color-error)", color: "white", fontSize: 9 }}>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" 
+                  style={{ background: "var(--color-error)", color: "white", fontSize: 9 }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
-              }
+              )}
             </button>
 
             <button
-              onClick={() => setRightPanelOpen((v) => !v)}
+              onClick={() => setRightPanelOpen(v => !v)}
               className="activity-icon"
-              title={rightPanelOpen ? "Collapse tools panel" : "Expand tools panel"}>
-
+              title={rightPanelOpen ? "Collapse tools panel" : "Expand tools panel"}
+            >
               <SlidersHorizontal size={15} />
             </button>
 
             {/* User menu */}
             <div className="relative">
               <button
-                onClick={() => setUserMenuOpen((v) => !v)}
+                onClick={() => setUserMenuOpen(v => !v)}
                 className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all ml-1"
                 style={{
                   background: userMenuOpen ? "var(--bg-overlay)" : "var(--bg-elevated)",
@@ -442,56 +442,56 @@ export default function Layout({ children, currentPageName }) {
                   cursor: "pointer"
                 }}>
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
+                  style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
                   {user?.full_name?.[0] || "?"}
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-xs font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
                     {user?.full_name?.split(" ")[0] || "Loading"}
                   </div>
-                  {isAdmin &&
-                  <div className="text-xs leading-tight" style={{ color: "var(--mnbc-yellow)", fontSize: 9, letterSpacing: "0.05em" }}>ADMIN</div>
-                  }
+                  {isAdmin && (
+                    <div className="text-xs leading-tight" style={{ color: "var(--mnbc-yellow)", fontSize: 9, letterSpacing: "0.05em" }}>ADMIN</div>
+                  )}
                 </div>
                 <ChevronRight size={11} style={{ color: "var(--text-muted)", transform: userMenuOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }} />
               </button>
 
-              {userMenuOpen &&
-              <div className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-50 min-w-44"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-50 min-w-44"
+                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
                   <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--border-subtle)" }}>
                     <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{user?.full_name || "User"}</div>
                     <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.email || ""}</div>
                   </div>
                   <div className="py-1">
                     <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
-                  style={{ color: "var(--text-secondary)" }}
-                  onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
-                  onMouseOut={(e) => e.currentTarget.style.background = "transparent"}
-                  onClick={() => {setNotifPrefsOpen(true);setUserMenuOpen(false);}}>
+                      style={{ color: "var(--text-secondary)" }}
+                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                      onClick={() => { setNotifPrefsOpen(true); setUserMenuOpen(false); }}>
                       <Bell size={12} />
                       Notification Prefs
                     </div>
                     <Link to={createPageUrl("Settings")} onClick={() => setUserMenuOpen(false)}>
                       <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
-                    style={{ color: "var(--text-secondary)" }}
-                    onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
-                    onMouseOut={(e) => e.currentTarget.style.background = "transparent"}>
+                        style={{ color: "var(--text-secondary)" }}
+                        onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                        onMouseOut={e => e.currentTarget.style.background = "transparent"}>
                         <Settings size={12} />
                         Settings
                       </div>
                     </Link>
                     <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
-                  style={{ color: "var(--color-error)" }}
-                  onMouseOver={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
-                  onMouseOut={(e) => e.currentTarget.style.background = "transparent"}
-                  onClick={() => base44.auth.logout()}>
+                      style={{ color: "var(--color-error)" }}
+                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                      onClick={() => base44.auth.logout()}>
                       <LogOut size={12} />
                       Sign out
                     </div>
                   </div>
                 </div>
-              }
+              )}
             </div>
           </div>
         </header>
@@ -507,51 +507,51 @@ export default function Layout({ children, currentPageName }) {
               background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
               borderRight: sidebarOpen ? "1px solid var(--border-default)" : "none",
               boxShadow: sidebarOpen ? "2px 0 12px rgba(0,0,0,0.3)" : "none"
-            }}>
-
+            }}
+          >
               {/* Nav — file-tree style */}
               <nav className="flex-1 overflow-y-auto py-2 px-2 flex flex-col">
-                {visibleSections.map((sec) => {
-                const collapsed = collapsedSections[sec.key];
-                return (
-                  <div key={sec.key} className="mb-0.5">
+                {visibleSections.map(sec => {
+                  const collapsed = collapsedSections[sec.key];
+                  return (
+                    <div key={sec.key} className="mb-0.5">
                       {/* Folder row */}
                       <div
-                      className="sidebar-section-toggle"
-                      onClick={() => toggleSection(sec.key)}
-                      style={{ padding: "3px 6px", gap: 5 }}>
-
+                        className="sidebar-section-toggle"
+                        onClick={() => toggleSection(sec.key)}
+                        style={{ padding: "3px 6px", gap: 5 }}
+                      >
                         {/* Folder icon */}
                         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, color: sec.color }}>
-                          {collapsed ?
-                        <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1" /> :
-                        <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1" />
-                        }
+                          {collapsed
+                            ? <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1"/>
+                            : <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1"/>
+                          }
                         </svg>
                         <span style={{ fontSize: 11, fontWeight: 600, color: collapsed ? "var(--text-secondary)" : "var(--text-primary)", flex: 1, letterSpacing: "0.01em" }}>{sec.label}</span>
                         <ChevronRight
-                        size={10}
-                        style={{
-                          color: "var(--text-muted)",
-                          transform: collapsed ? "rotate(0deg)" : "rotate(90deg)",
-                          transition: "transform 0.15s",
-                          opacity: 0.4,
-                          flexShrink: 0
-                        }} />
-
+                          size={10}
+                          style={{
+                            color: "var(--text-muted)",
+                            transform: collapsed ? "rotate(0deg)" : "rotate(90deg)",
+                            transition: "transform 0.15s",
+                            opacity: 0.4,
+                            flexShrink: 0
+                          }}
+                        />
                       </div>
 
                       {/* File items with tree lines */}
-                      {!collapsed &&
-                    <div className="relative ml-3 mt-0.5" style={{ paddingLeft: 12 }}>
+                      {!collapsed && (
+                        <div className="relative ml-3 mt-0.5" style={{ paddingLeft: 12 }}>
                           {/* Vertical tree line */}
                           <div className="absolute top-0 bottom-2 left-0" style={{ width: 1, background: `${sec.color}30` }} />
 
                           {sec.items.map((item, idx) => {
-                        const isLast = idx === sec.items.length - 1;
-                        const isActive = currentPageName === item.page;
-                        return (
-                          <div key={item.page} className="relative" style={{ marginBottom: 1 }}>
+                            const isLast = idx === sec.items.length - 1;
+                            const isActive = currentPageName === item.page;
+                            return (
+                              <div key={item.page} className="relative" style={{ marginBottom: 1 }}>
                                 {/* Horizontal connector */}
                                 <div className="absolute top-1/2 -translate-y-1/2" style={{ left: -12, width: 10, height: 1, background: `${sec.color}30` }} />
                                 {/* Cap the vertical line at last item */}
@@ -560,43 +560,43 @@ export default function Layout({ children, currentPageName }) {
                                 <Link to={createPageUrl(item.page)} title={item.tooltip}>
                                   <div className={`sidebar-nav-item ${isActive ? "active" : ""}`} style={{ paddingLeft: 6, paddingRight: 6 }}>
                                     <item.icon
-                                  size={12}
-                                  className="nav-icon"
-                                  style={{ color: isActive ? sec.color : undefined, flexShrink: 0 }} />
-
+                                      size={12}
+                                      className="nav-icon"
+                                      style={{ color: isActive ? sec.color : undefined, flexShrink: 0 }}
+                                    />
                                     <span className="truncate" style={{ fontSize: 12 }}>{item.label}</span>
                                   </div>
                                 </Link>
-                              </div>);
-
-                      })}
+                              </div>
+                            );
+                          })}
                         </div>
-                    }
-                    </div>);
-
-              })}
+                      )}
+                    </div>
+                  );
+                })}
               </nav>
 
               {/* Sidebar footer — user card */}
               <div className="mt-auto pt-3 border-t px-2 pb-2 shrink-0" style={{ borderColor: "var(--border-subtle)" }}>
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                <div className="rounded-lg overflow-hidden relative p-3" style={{
+                  background: "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)",
+                  border: "1px solid rgba(254,221,0,0.15)"
+                }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
+                      style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.2)" }}>
+                      {user?.full_name?.[0] || "?"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "User"}</div>
+                      {isAdmin && (
+                        <div className="text-xs" style={{ color: "var(--mnbc-yellow)", fontSize: 8, letterSpacing: "0.05em" }}>ADMIN</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 9 }}>{user?.email}</div>
+                </div>
               </div>
             </aside>
 
@@ -613,11 +613,11 @@ export default function Layout({ children, currentPageName }) {
               background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
               borderLeft: rightPanelOpen ? "1px solid var(--border-default)" : "none",
               boxShadow: rightPanelOpen ? "-2px 0 12px rgba(0,0,0,0.3)" : "none"
-            }}>
-
+            }}
+          >
               {/* Panel header */}
               <div className="flex items-center justify-between px-3 py-2 shrink-0"
-            style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded flex items-center justify-center" style={{ background: "rgba(254,221,0,0.1)" }}>
                     <Zap size={10} style={{ color: "var(--mnbc-yellow)" }} />
@@ -627,11 +627,11 @@ export default function Layout({ children, currentPageName }) {
                   </span>
                 </div>
                 <button
-                onClick={() => setRightPanelOpen(false)}
-                className="activity-icon"
-                style={{ width: 22, height: 22 }}
-                title="Collapse panel">
-
+                  onClick={() => setRightPanelOpen(false)}
+                  className="activity-icon"
+                  style={{ width: 22, height: 22 }}
+                  title="Collapse panel"
+                >
                   <ChevronRight size={12} />
                 </button>
               </div>
@@ -650,15 +650,15 @@ export default function Layout({ children, currentPageName }) {
             background: "linear-gradient(to top, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
             borderTop: "1px solid var(--border-default)",
             boxShadow: "0 -4px 16px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(254,221,0,0.05)"
-          }}>
-
+          }}
+        >
           {/* Log message */}
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <Circle size={6} className="shrink-0 pulse-live" style={{ color: logColor, fill: logColor }} />
             <span className="truncate" style={{ fontSize: 11, color: logColor, opacity: 0.9 }} title={lastLog?.msg}>{lastLog?.msg}</span>
-            {lastLog?.time &&
-            <span className="shrink-0 ml-1" style={{ color: "var(--text-muted)", fontSize: 10 }}>{lastLog.time}</span>
-            }
+            {lastLog?.time && (
+              <span className="shrink-0 ml-1" style={{ color: "var(--text-muted)", fontSize: 10 }}>{lastLog.time}</span>
+            )}
           </div>
 
           {/* Right side */}
@@ -671,74 +671,74 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ══ COMMAND PALETTE ══ */}
         {/* Notification Center */}
-        <NotificationCenter
-          isOpen={notifCenterOpen}
+        <NotificationCenter 
+          isOpen={notifCenterOpen} 
           onClose={() => setNotifCenterOpen(false)}
-          user={user} />
-
+          user={user}
+        />
 
         {/* Notification Preferences */}
-        <NotificationPreferences
+        <NotificationPreferences 
           isOpen={notifPrefsOpen}
           onClose={() => setNotifPrefsOpen(false)}
-          user={user} />
+          user={user}
+        />
 
-
-        {cmdOpen &&
-        <div
-          className="cmd-overlay"
-          onClick={() => setCmdOpen(false)}>
-
+        {cmdOpen && (
+          <div
+            className="cmd-overlay"
+            onClick={() => setCmdOpen(false)}
+          >
             <div
-            className="w-full max-w-lg rounded-2xl overflow-hidden"
-            style={{
-              background: "#0d1929",
-              border: "1px solid var(--border-emphasis)",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(254,221,0,0.15)"
-            }}
-            onClick={(e) => e.stopPropagation()}>
-
+              className="w-full max-w-lg rounded-2xl overflow-hidden"
+              style={{
+                background: "#0d1929",
+                border: "1px solid var(--border-emphasis)",
+                boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(254,221,0,0.15)"
+              }}
+              onClick={e => e.stopPropagation()}
+            >
               {/* Search input */}
               <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
                 <Search size={16} style={{ color: "var(--mnbc-yellow)", flexShrink: 0 }} />
                 <input
-                ref={cmdInputRef}
-                autoFocus
-                className="flex-1 bg-transparent outline-none"
-                style={{ color: "var(--text-primary)", fontSize: 14 }}
-                placeholder="Search pages and commands..."
-                value={cmdQuery}
-                onChange={(e) => setCmdQuery(e.target.value)}
-                onKeyDown={handleCmdKey} />
-
-                {cmdQuery &&
-              <button onClick={() => setCmdQuery("")} className="activity-icon" style={{ width: 20, height: 20 }}>
+                  ref={cmdInputRef}
+                  autoFocus
+                  className="flex-1 bg-transparent outline-none"
+                  style={{ color: "var(--text-primary)", fontSize: 14 }}
+                  placeholder="Search pages and commands..."
+                  value={cmdQuery}
+                  onChange={e => setCmdQuery(e.target.value)}
+                  onKeyDown={handleCmdKey}
+                />
+                {cmdQuery && (
+                  <button onClick={() => setCmdQuery("")} className="activity-icon" style={{ width: 20, height: 20 }}>
                     <X size={12} />
                   </button>
-              }
+                )}
                 <kbd style={{ background: "rgba(254,221,0,0.08)", color: "var(--mnbc-yellow)", fontSize: 10, padding: "2px 6px", borderRadius: 4, border: "1px solid rgba(254,221,0,0.25)", fontFamily: "monospace", flexShrink: 0 }}>ESC</kbd>
               </div>
 
               {/* Results */}
               <div className="py-1.5 max-h-80 overflow-y-auto">
-                {filteredCmds.length === 0 ?
-              <div className="px-4 py-8 text-center" style={{ color: "var(--text-muted)", fontSize: 13 }}>
+                {filteredCmds.length === 0 ? (
+                  <div className="px-4 py-8 text-center" style={{ color: "var(--text-muted)", fontSize: 13 }}>
                     No results for "{cmdQuery}"
-                  </div> :
-
-              filteredCmds.map((cmd, i) =>
-              <Link
-                key={cmd.page}
-                to={createPageUrl(cmd.page)}
-                onClick={() => {setCmdOpen(false);setCmdQuery("");}}>
-
+                  </div>
+                ) : (
+                  filteredCmds.map((cmd, i) => (
+                    <Link
+                      key={cmd.page}
+                      to={createPageUrl(cmd.page)}
+                      onClick={() => { setCmdOpen(false); setCmdQuery(""); }}
+                    >
                       <div
-                  className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer ${i === cmdIndex ? "cmd-item-selected" : "cmd-item-hover"}`}
-                  style={{ transition: "background 0.1s" }}
-                  onMouseEnter={() => setCmdIndex(i)}>
-
+                        className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer ${i === cmdIndex ? "cmd-item-selected" : "cmd-item-hover"}`}
+                        style={{ transition: "background 0.1s" }}
+                        onMouseEnter={() => setCmdIndex(i)}
+                      >
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: i === cmdIndex ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                          style={{ background: i === cmdIndex ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
                           <cmd.icon size={13} style={{ color: i === cmdIndex ? "var(--mnbc-yellow)" : "var(--text-secondary)" }} />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -748,26 +748,26 @@ export default function Layout({ children, currentPageName }) {
                         <ChevronRight size={12} style={{ color: "var(--text-muted)", opacity: i === cmdIndex ? 1 : 0, transition: "opacity 0.1s" }} />
                       </div>
                     </Link>
-              )
-              }
+                  ))
+                )}
               </div>
 
               {/* Footer */}
               <div className="px-4 py-2 flex items-center gap-4" style={{ borderTop: "1px solid var(--border-default)", background: "rgba(0,0,0,0.2)" }}>
-                {[["↑↓", "navigate"], ["Enter", "open"], ["Esc", "close"]].map(([key, label]) =>
-              <span key={key} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                {[["↑↓", "navigate"], ["Enter", "open"], ["Esc", "close"]].map(([key, label]) => (
+                  <span key={key} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
                     <kbd style={{ background: "rgba(254,221,0,0.08)", color: "var(--mnbc-yellow)", fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid rgba(254,221,0,0.2)", fontFamily: "monospace" }}>{key}</kbd>
                     {label}
                   </span>
-              )}
+                ))}
                 <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>{filteredCmds.length} result{filteredCmds.length !== 1 ? "s" : ""}</span>
               </div>
             </div>
           </div>
-        }
+        )}
       </div>
-    </AppContext.Provider>);
-
+    </AppContext.Provider>
+  );
 }
 
 function PanelSection({ title, icon: Icon, iconColor, children, defaultOpen = true }) {
@@ -775,10 +775,10 @@ function PanelSection({ title, icon: Icon, iconColor, children, defaultOpen = tr
   return (
     <div>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(v => !v)}
         className="sidebar-section-toggle w-full"
-        style={{ padding: "4px 4px" }}>
-
+        style={{ padding: "4px 4px" }}
+      >
         <Icon size={10} style={{ color: iconColor || "var(--text-muted)", flexShrink: 0 }} />
         <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", flex: 1, textAlign: "left" }}>{title}</span>
         <ChevronRight
@@ -789,29 +789,29 @@ function PanelSection({ title, icon: Icon, iconColor, children, defaultOpen = tr
             transition: "transform 0.15s",
             opacity: 0.5,
             flexShrink: 0
-          }} />
-
+          }}
+        />
       </button>
       {open && <div className="mt-1">{children}</div>}
-    </div>);
-
+    </div>
+  );
 }
 
 function MiniSparkline({ values, color }) {
-  const w = 56,h = 22;
-  const min = Math.min(...values),max = Math.max(...values);
+  const w = 56, h = 22;
+  const min = Math.min(...values), max = Math.max(...values);
   const range = max - min || 1;
   const pts = values.map((v, i) => {
-    const x = i / (values.length - 1) * w;
-    const y = h - (v - min) / range * h;
+    const x = (i / (values.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
     return `${x},${y}`;
   }).join(" ");
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ overflow: "visible" }}>
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
       <circle cx={pts.split(" ").pop().split(",")[0]} cy={pts.split(" ").pop().split(",")[1]} r="2.5" fill={color} />
-    </svg>);
-
+    </svg>
+  );
 }
 
 function LiveClock() {
@@ -823,8 +823,8 @@ function LiveClock() {
   return (
     <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.04em" }}>
       {time.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
-    </span>);
-
+    </span>
+  );
 }
 
 function RightPanelDefault({ user, isAdmin }) {
@@ -836,7 +836,7 @@ function RightPanelDefault({ user, isAdmin }) {
   const sparkData = {
     metrics: [42, 45, 43, 47, 51, 49, 53, 57, 54, 58],
     quality: [88, 85, 87, 90, 89, 92, 91, 94, 93, 96],
-    sources: [8, 8, 9, 9, 10, 10, 11, 11, 12, 12]
+    sources: [8, 8, 9, 9, 10, 10, 11, 11, 12, 12],
   };
 
   return (
@@ -854,19 +854,19 @@ function RightPanelDefault({ user, isAdmin }) {
           <div className="flex items-center gap-2.5 mb-2.5">
             <div className="relative">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold"
-              style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.2) 0%, rgba(254,221,0,0.08) 100%)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.15)" }}>
+                style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.2) 0%, rgba(254,221,0,0.08) 100%)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.15)" }}>
                 {user?.full_name?.[0] || "?"}
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
-              style={{ background: "var(--color-success)", borderColor: "#05112a", boxShadow: "0 0 6px rgba(0,230,118,0.6)" }} />
+                style={{ background: "var(--color-success)", borderColor: "#05112a", boxShadow: "0 0 6px rgba(0,230,118,0.6)" }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "Loading..."}</div>
-              {user?.role === "admin" ?
-              <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span> :
-
-              <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "viewer"}</span>
-              }
+              {user?.role === "admin" ? (
+                <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
+              ) : (
+                <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "viewer"}</span>
+              )}
             </div>
           </div>
 
@@ -895,11 +895,11 @@ function RightPanelDefault({ user, isAdmin }) {
       <PanelSection title="Platform Pulse" icon={Activity} iconColor="#00e676">
         <div className="space-y-1.5">
           {[
-          { label: "Active Metrics", value: "58", delta: "+4", trend: sparkData.metrics, color: "#FEDD00" },
-          { label: "Data Quality", value: "96%", delta: "+3%", trend: sparkData.quality, color: "#00e676" },
-          { label: "Live Sources", value: "12", delta: "+1", trend: sparkData.sources, color: "#40c4ff" }].
-          map(({ label, value, delta, trend, color }) =>
-          <div key={label} className="flex items-center gap-2 px-2.5 py-2 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            { label: "Active Metrics", value: "58", delta: "+4", trend: sparkData.metrics, color: "#FEDD00" },
+            { label: "Data Quality", value: "96%", delta: "+3%", trend: sparkData.quality, color: "#00e676" },
+            { label: "Live Sources", value: "12", delta: "+1", trend: sparkData.sources, color: "#40c4ff" },
+          ].map(({ label, value, delta, trend, color }) => (
+            <div key={label} className="flex items-center gap-2 px-2.5 py-2 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
               <div className="flex-1 min-w-0">
                 <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 1 }}>{label}</div>
                 <div className="flex items-center gap-1.5">
@@ -909,7 +909,7 @@ function RightPanelDefault({ user, isAdmin }) {
               </div>
               <MiniSparkline values={trend} color={color} />
             </div>
-          )}
+          ))}
         </div>
       </PanelSection>
 
@@ -917,23 +917,23 @@ function RightPanelDefault({ user, isAdmin }) {
       <PanelSection title="Quick Actions" icon={Zap} iconColor="var(--mnbc-yellow)">
         <div className="grid grid-cols-2 gap-1.5">
           {[
-          { icon: Sparkles, label: "AI Insight", page: "AIInsights", color: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
-          { icon: Upload, label: "Import", page: "DataRepository", color: "#40c4ff", bg: "rgba(64,196,255,0.08)" },
-          { icon: BarChart3, label: "Visualize", page: "Visualizations", color: "#00e676", bg: "rgba(0,230,118,0.08)" },
-          { icon: FileDown, label: "Export", page: "Export", color: "#ffab40", bg: "rgba(255,171,64,0.08)" }].
-          map(({ icon: Icon, label, page, color, bg }) =>
-          <Link key={page} to={createPageUrl(page)}>
+            { icon: Sparkles, label: "AI Insight", page: "AIInsights", color: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
+            { icon: Upload, label: "Import", page: "DataRepository", color: "#40c4ff", bg: "rgba(64,196,255,0.08)" },
+            { icon: BarChart3, label: "Visualize", page: "Visualizations", color: "#00e676", bg: "rgba(0,230,118,0.08)" },
+            { icon: FileDown, label: "Export", page: "Export", color: "#ffab40", bg: "rgba(255,171,64,0.08)" },
+          ].map(({ icon: Icon, label, page, color, bg }) => (
+            <Link key={page} to={createPageUrl(page)}>
               <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-lg cursor-pointer transition-all"
-            style={{ background: bg, border: `1px solid ${color}22`, textAlign: "center" }}
-            onMouseOver={(e) => {e.currentTarget.style.borderColor = `${color}55`;e.currentTarget.style.background = `${color}14`;}}
-            onMouseOut={(e) => {e.currentTarget.style.borderColor = `${color}22`;e.currentTarget.style.background = bg;}}>
+                style={{ background: bg, border: `1px solid ${color}22`, textAlign: "center" }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = `${color}55`; e.currentTarget.style.background = `${color}14`; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = `${color}22`; e.currentTarget.style.background = bg; }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
                   <Icon size={13} style={{ color }} />
                 </div>
                 <span style={{ fontSize: 10, color: "var(--text-secondary)", fontWeight: 500 }}>{label}</span>
               </div>
             </Link>
-          )}
+          ))}
         </div>
       </PanelSection>
 
@@ -941,19 +941,19 @@ function RightPanelDefault({ user, isAdmin }) {
       <PanelSection title="Session" icon={Activity} iconColor="var(--color-success)" defaultOpen={false}>
         <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
           {[
-          { label: "Status", value: "Online", dot: "#00e676" },
-          { label: "Role", value: user?.role || "—", dot: "var(--mnbc-yellow)" },
-          { label: "Version", value: "MHIP v2.0", dot: "#40c4ff" }].
-          map(({ label, value, dot }, i) =>
-          <div key={label} className="flex items-center justify-between px-2.5 py-2"
-          style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none", background: "var(--bg-overlay)" }}>
+            { label: "Status", value: "Online", dot: "#00e676" },
+            { label: "Role", value: user?.role || "—", dot: "var(--mnbc-yellow)" },
+            { label: "Version", value: "MHIP v2.0", dot: "#40c4ff" },
+          ].map(({ label, value, dot }, i) => (
+            <div key={label} className="flex items-center justify-between px-2.5 py-2"
+              style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none", background: "var(--bg-overlay)" }}>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
                 <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span>
               </div>
               <span style={{ fontSize: 11, color: "var(--text-primary)", fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
             </div>
-          )}
+          ))}
         </div>
       </PanelSection>
 
@@ -963,6 +963,6 @@ function RightPanelDefault({ user, isAdmin }) {
           BC Métis Health Intelligence Platform — powered by MNBC and AI-driven analytics.
         </div>
       </PanelSection>
-    </div>);
-
+    </div>
+  );
 }
