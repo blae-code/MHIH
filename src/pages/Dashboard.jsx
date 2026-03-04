@@ -9,6 +9,7 @@ import PinnedMetrics from "../components/dashboard/PinnedMetrics";
 import DashboardCustomizer, { DEFAULT_WIDGETS } from "../components/dashboard/DashboardCustomizer";
 import DashboardLayoutManager, { PRESET_LAYOUTS } from "../components/dashboard/DashboardLayoutManager";
 import WidgetLibrary from "../components/dashboard/WidgetLibrary";
+import DashboardExportMenu from "../components/dashboard/DashboardExportMenu";
 import DisparityExplorer from "../components/dashboard/DisparityExplorer";
 import RegionalPerformance from "../components/dashboard/RegionalPerformance";
 import CategoryLeaders from "../components/dashboard/CategoryLeaders";
