@@ -117,14 +117,14 @@ function YearRangeFilter({ years, yearFrom, setYearFrom, yearTo, setYearTo }) {
     <div className="flex items-center gap-1 text-xs">
       <select value={yearFrom} onChange={e => setYearFrom(e.target.value)}
         className="px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="all">From</option>
         {years.map(y => <option key={y} value={y}>{y}</option>)}
       </select>
-      <span style={{ color: "var(--text-muted)" }}>–</span>
+      <span style={{ color: "var(--text-secondary)" }}>–</span>
       <select value={yearTo} onChange={e => setYearTo(e.target.value)}
         className="px-1.5 py-1 rounded appearance-none outline-none"
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
         <option value="all">To</option>
         {years.map(y => <option key={y} value={y}>{y}</option>)}
       </select>
