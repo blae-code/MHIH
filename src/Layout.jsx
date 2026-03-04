@@ -455,8 +455,9 @@ export default function Layout({ children, currentPageName }) {
             className={`panel-drawer flex flex-col shrink-0 ${sidebarOpen ? "open" : "closed"}`}
             style={{
               width: sidebarOpen ? "var(--panel-left)" : 0,
-              background: "var(--bg-surface)",
-              borderRight: sidebarOpen ? "1px solid var(--border-subtle)" : "none",
+              background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+              borderRight: sidebarOpen ? "1px solid var(--border-default)" : "none",
+              boxShadow: sidebarOpen ? "2px 0 12px rgba(0,0,0,0.3)" : "none"
             }}
           >
               {/* Nav — file-tree style */}
