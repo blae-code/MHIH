@@ -462,6 +462,14 @@ export default function Layout({ children, currentPageName }) {
                     <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.email || ""}</div>
                   </div>
                   <div className="py-1">
+                    <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
+                      style={{ color: "var(--text-secondary)" }}
+                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                      onClick={() => { setNotifPrefsOpen(true); setUserMenuOpen(false); }}>
+                      <Bell size={12} />
+                      Notification Prefs
+                    </div>
                     <Link to={createPageUrl("Settings")} onClick={() => setUserMenuOpen(false)}>
                       <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
                         style={{ color: "var(--text-secondary)" }}
