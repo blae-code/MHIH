@@ -148,8 +148,15 @@ export default function DataRepository() {
         </div>
       </div>
 
+      {/* Chart Explorer */}
+      {viewMode === "chart" && !loading && (
+        <div className="flex-1 overflow-hidden">
+          <MetricsChartExplorer metrics={filtered} />
+        </div>
+      )}
+
       {/* Table */}
-      <div className="flex-1 overflow-auto">
+      {viewMode === "table" && <div className="flex-1 overflow-auto">
         {loading ? (
           <div className="flex items-center justify-center h-40 gap-2" style={{ color: "var(--text-muted)" }}>
             <RefreshCw size={16} className="animate-spin" /> Loading...
