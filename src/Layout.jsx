@@ -577,7 +577,27 @@ export default function Layout({ children, currentPageName }) {
                 })}
               </nav>
 
-
+              {/* Sidebar footer — user card */}
+              <div className="mt-auto pt-3 border-t px-2 pb-2 shrink-0" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="rounded-lg overflow-hidden relative p-3" style={{
+                  background: "linear-gradient(135deg, rgba(254,221,0,0.06) 0%, rgba(254,221,0,0.02) 100%)",
+                  border: "1px solid rgba(254,221,0,0.15)"
+                }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
+                      style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.2)" }}>
+                      {user?.full_name?.[0] || "?"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "User"}</div>
+                      {isAdmin && (
+                        <div className="text-xs" style={{ color: "var(--mnbc-yellow)", fontSize: 8, letterSpacing: "0.05em" }}>ADMIN</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 9 }}>{user?.email}</div>
+                </div>
+              </div>
             </aside>
 
           {/* ══ MAIN ══ */}
