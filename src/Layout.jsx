@@ -366,7 +366,7 @@ export default function Layout({ children, currentPageName }) {
               <Search size={12} style={{ opacity: 0.6 }} />
               <span className="flex-1 text-left">Quick search...</span>
               <div className="flex items-center gap-0.5">
-                <kbd style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", fontSize: 9, padding: "1px 4px", borderRadius: 3, border: "1px solid var(--border-subtle)", fontFamily: "monospace" }}>⌘K</kbd>
+                <kbd style={{ background: "var(--bg-overlay)", color: "var(--text-secondary)", fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid var(--border-default)", fontFamily: "monospace" }}>Ctrl+K</kbd>
               </div>
             </button>
           </div>
