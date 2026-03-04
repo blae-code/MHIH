@@ -366,7 +366,7 @@ function ScatterPlot({ data, drill, benchmark }) {
           return (
             <div className="rounded p-2 text-xs" style={TOOLTIP_STYLE}>
               <div className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>{d.name}</div>
-              <div style={{ color: "var(--text-muted)" }}>{d.category?.replace(/_/g, " ")} · {d.region} · {d.year}</div>
+              <div style={{ color: "var(--text-secondary)" }}>{d.category?.replace(/_/g, " ")} · {d.region} · {d.year}</div>
               <div style={{ color: "#e6a817" }}>Métis: {d.y}</div>
               <div style={{ color: "#58a6ff" }}>BC: {d.x}</div>
               <div style={{ color: d.y > d.x ? "#f85149" : "#2ea043" }}>Gap: {(d.y - d.x).toFixed(2)}</div>
