@@ -666,37 +666,41 @@ export default function DisparityExplorer({ metrics }) {
         .disparity-explorer-header {
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          margin-bottom: 16px;
-          padding-bottom: 12px;
+          gap: 10px;
+          margin-bottom: 12px;
+          padding-bottom: 10px;
           border-bottom: 1px solid var(--border-subtle);
         }
         .disparity-explorer-title {
           font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif;
           font-weight: 700;
-          font-size: 10px;
+          font-size: 9px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--mnbc-yellow);
+          line-height: 1.2;
         }
         .disparity-explorer-toolbar {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           flex-wrap: wrap;
+          row-gap: 6px;
         }
         .disparity-controls-row {
           display: flex;
           flex-wrap: wrap;
-          gap: 8px;
+          gap: 6px;
           align-items: center;
+          row-gap: 6px;
         }
         .disparity-chart-container {
-          margin: 16px 0;
-          padding: 12px;
+          margin: 12px 0;
+          padding: 14px;
           border-radius: 8px;
           background: rgba(0, 0, 0, 0.1);
           border: 1px solid var(--border-subtle);
+          line-height: 1.4;
         }
       `}</style>
 
