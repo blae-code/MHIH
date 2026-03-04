@@ -107,6 +107,24 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  // Load unread notification count
+  useEffect(() => {
+    if (!user) return;
+    const loadUnreadCount = async () => {
+      try {
+        const notifications = await base44.entities.Notification.filter(
+          { recipient_email: user.email, read: false }
+        );
+        setUnreadCount(notifications.length);
+      } catch (error) {
+        console.error('Failed to load unread count:', error);
+      }
+    };
+    loadUnreadCount();
+    const interval = setInterval(loadUnreadCount, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, [user]);
+
   const addLog = useCallback((type, msg) => {
     setStatusLogs(prev => [
       { type, msg, time: new Date().toLocaleTimeString() },
