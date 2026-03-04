@@ -280,9 +280,10 @@ export default function Dashboard() {
 
 function EmptyChart({ message }) {
   return (
-    <div className="flex flex-col items-center justify-center h-48 gap-2">
-      <AlertCircle size={20} style={{ color: "var(--text-muted)" }} />
+    <div className="flex flex-col items-center justify-center h-40 gap-2 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px dashed var(--border-subtle)" }}>
+      <AlertCircle size={18} style={{ color: "var(--text-muted)" }} />
       <span className="text-xs text-center" style={{ color: "var(--text-muted)" }}>{message}</span>
+      <span className="text-xs text-center" style={{ color: "var(--text-muted)", opacity: 0.6 }}>Add data from the Data Repository to see charts here.</span>
     </div>
   );
 }
