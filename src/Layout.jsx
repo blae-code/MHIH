@@ -115,6 +115,28 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <AppContext.Provider value={{ user, addLog, setContextPanel, contextPanel }}>
+      <style>{`
+        :root {
+          --background: 215 90% 4% !important;
+          --foreground: 214 100% 97% !important;
+          --card: 215 80% 7% !important;
+          --card-foreground: 214 100% 97% !important;
+          --popover: 215 80% 7% !important;
+          --popover-foreground: 214 100% 97% !important;
+          --primary: 52 100% 50% !important;
+          --primary-foreground: 215 90% 4% !important;
+          --secondary: 214 60% 13% !important;
+          --secondary-foreground: 214 100% 97% !important;
+          --muted: 214 60% 13% !important;
+          --muted-foreground: 214 30% 55% !important;
+          --accent: 52 100% 50% !important;
+          --accent-foreground: 215 90% 4% !important;
+          --border: 214 50% 19% !important;
+          --input: 214 50% 19% !important;
+          --ring: 52 100% 50% !important;
+        }
+        body { background-color: #03080f !important; color: #f0f6ff !important; }
+      `}</style>
       <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
 
         {/* ── HEADER / COMMAND BAR ── */}
