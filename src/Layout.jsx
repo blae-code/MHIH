@@ -304,7 +304,7 @@ export default function Layout({ children, currentPageName }) {
             height: "var(--header-height)",
             background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
             borderBottom: "1px solid var(--border-default)",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(254,221,0,0.05)"
+            boxShadow: "0 8px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.08)"
           }}
         >
           {/* Brand */}
