@@ -18,11 +18,11 @@
   --mnbc-cedar: #CD7236;
 
   /* ── Core background palette (high-contrast dark) ── */
-  --bg-base: #03080f;          /* near-black */
-  --bg-surface: #080f1a;       /* very dark blue-black */
-  --bg-elevated: #0c1625;      /* dark surface */
-  --bg-overlay: #111f33;       /* raised overlay */
-  --bg-hover: #162843;         /* hover state */
+  --bg-base: #0a1220;          /* brighter base for contrast */
+  --bg-surface: #0f1829;       /* very dark blue-black */
+  --bg-elevated: #141f2e;      /* dark surface */
+  --bg-overlay: #1a2839;       /* raised overlay */
+  --bg-hover: #1d3047;         /* hover state */
 
   /* Borders — crisper for high contrast */
   --border-subtle: #1a2e48;
