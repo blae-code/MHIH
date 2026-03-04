@@ -340,23 +340,14 @@ export default function Layout({ children, currentPageName }) {
             backgroundSize: "200% 100%",
             animation: "gradientShift 8s ease-in-out infinite"
           }} />
-        </header>
+          
+          <style>{`
+            @keyframes gradientShift {
+              0%, 100% { background-position: 0% center; }
+              50% { background-position: 100% center; }
+            }
+          `}</style>
 
-        <style>{`
-          @keyframes gradientShift {
-            0%, 100% { background-position: 0% center; }
-            50% { background-position: 100% center; }
-          }
-        `}</style>
-
-        <header
-          className="flex items-center justify-between px-5 shrink-0 z-50 relative"
-          style={{
-            height: "var(--header-height)",
-            background: "linear-gradient(90deg, #0a1220 0%, #0f1829 25%, #0d1f2a 50%, #0a1523 75%, #0a1220 100%)",
-            borderBottom: "1px solid var(--border-default)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.15), 0 0 20px rgba(64,196,255,0.08)"
-          }}
           {/* Brand */}
           <div className="flex items-center gap-3 min-w-0" style={{ minWidth: sidebarOpen ? "var(--panel-left)" : "auto" }}>
             <div className="flex items-center gap-2.5 shrink-0">
