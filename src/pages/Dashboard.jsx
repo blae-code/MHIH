@@ -223,14 +223,8 @@ export default function Dashboard() {
        {STAT_CARDS.map((card, idx) => {
          const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
          return (
-           <div key={cardId} className="dashboard-widget-card relative cursor-pointer group/card" title={`Click to remove "${card.label}"`}>
-             <button
-               onClick={() => handleStatCardToggle(cardId)}
-               className="absolute -top-2 -right-2 opacity-0 group-hover/card:opacity-100 transition-opacity w-5 h-5 rounded-full flex items-center justify-center text-xs"
-               style={{ background: "var(--color-error)", color: "white" }}
-               title="Remove this stat card">
-               ✕
-             </button>
+           <div key={cardId} className="dashboard-widget-card relative">
+             
              <div className="flex items-start justify-between mb-2 relative z-10">
                <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
                <div className="p-1.5 rounded-md shrink-0 transition-all" style={{ background: `${card.color}18` }}>
