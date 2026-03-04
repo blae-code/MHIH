@@ -30,6 +30,7 @@ export default function DataAnalyst() {
   const [loadingSources, setLoadingSources] = useState(true);
   const [sampleData, setSampleData] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [chartMsgIdx, setChartMsgIdx] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
