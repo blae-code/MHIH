@@ -22,8 +22,8 @@ function loadPrefs() {
   return null;
 }
 
-function savePrefs(currentLayoutId, widgets, pinnedIds, title) {
-  localStorage.setItem(PREFS_KEY, JSON.stringify({ currentLayoutId, widgets, pinnedIds, title }));
+function savePrefs(currentLayoutId, widgets, pinnedIds, title, visibleStatCards) {
+  localStorage.setItem(PREFS_KEY, JSON.stringify({ currentLayoutId, widgets, pinnedIds, title, visibleStatCards }));
 }
 
 function loadLayouts() {
