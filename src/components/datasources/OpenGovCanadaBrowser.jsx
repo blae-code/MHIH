@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, ExternalLink, Database, FileText, X, ChevronDown, ChevronRight, Plus, Loader } from "lucide-react";
+import { ExternalLink, Database, FileText, X, ChevronDown, ChevronRight, Plus, Loader, Eye, ArrowUpDown } from "lucide-react";
+import SmartSearchBar from "./SmartSearchBar";
+import DataSourcePreview from "./DataSourcePreview";
+
+const QUICK_SEARCHES = ["Indigenous health", "First Nations", "mental health", "chronic disease", "mortality", "substance use", "Métis", "social determinants"];
+const SORT_OPTIONS = [
+  { value: "relevance", label: "Relevance" },
+  { value: "title_asc", label: "Title A–Z" },
+  { value: "title_desc", label: "Title Z–A" },
+  { value: "resources_desc", label: "Most Resources" },
+];
 
 export default function OpenGovCanadaBrowser({ onImport, onClose }) {
   const [query, setQuery] = useState("");
@@ -10,15 +20,18 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
   const [detail, setDetail] = useState({});
   const [detailLoading, setDetailLoading] = useState(null);
   const [imported, setImported] = useState(new Set());
+  const [previewItem, setPreviewItem] = useState(null);
+  const [sortBy, setSortBy] = useState("relevance");
+  const [subjectFilter, setSubjectFilter] = useState("All");
 
-  const search = async (e) => {
-    e?.preventDefault();
-    if (!query.trim()) return;
+  const doSearch = async (q) => {
+    const sq = (q ?? query).trim();
+    if (!sq) return;
     setLoading(true);
     setResults([]);
     setExpanded(null);
     try {
-      const res = await base44.functions.invoke("openGovCanada", { action: "search", query: query.trim(), limit: 20 });
+      const res = await base44.functions.invoke("openGovCanada", { action: "search", query: sq, limit: 30 });
       setResults(res.data?.datasets || []);
     } finally {
       setLoading(false);
@@ -51,63 +64,91 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
     setImported(prev => new Set([...prev, ds.id]));
   };
 
-  const QUICK_SEARCHES = ["Indigenous health", "First Nations", "mental health", "chronic disease", "mortality", "substance use"];
+  const getPreviewItem = (ds) => {
+    const dsDetail = detail[ds.id];
+    const csvResource = dsDetail?.resources?.find(r => r.format?.toLowerCase() === "csv");
+    return {
+      title: ds.title,
+      organization: ds.organization,
+      description: dsDetail?.notes || ds.notes,
+      tags: ds.tags,
+      url: csvResource?.url || ds.url,
+      format: csvResource?.format,
+      license: dsDetail?.license,
+      resources: dsDetail?.resources,
+    };
+  };
+
+  const subjects = ["All", ...Array.from(new Set(results.flatMap(ds => ds.subject || []))).slice(0, 8)];
+
+  const filtered = results
+    .filter(ds => subjectFilter === "All" || (ds.subject || []).includes(subjectFilter))
+    .sort((a, b) => {
+      if (sortBy === "title_asc") return (a.title || "").localeCompare(b.title || "");
+      if (sortBy === "title_desc") return (b.title || "").localeCompare(a.title || "");
+      if (sortBy === "resources_desc") return (b.num_resources || 0) - (a.num_resources || 0);
+      return 0;
+    });
+
+  const filterBar = (
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-1">
+        <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>Sort:</span>
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+          className="text-xs outline-none px-1.5 py-0.5 rounded"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+      {subjects.length > 1 && (
+        <div className="flex items-center gap-1 flex-wrap">
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>Subject:</span>
+          {subjects.map(s => (
+            <button key={s} onClick={() => setSubjectFilter(s)}
+              className="text-xs px-1.5 py-0.5 rounded"
+              style={{
+                background: subjectFilter === s ? "var(--accent-muted)" : "var(--bg-overlay)",
+                color: subjectFilter === s ? "var(--accent-primary)" : "var(--text-muted)",
+                border: `1px solid ${subjectFilter === s ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+              }}>{s}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.65)" }}>
       <div className="flex flex-col rounded-xl shadow-2xl overflow-hidden"
-        style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", width: "min(760px, 96vw)", maxHeight: "85vh" }}>
+        style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", width: "min(800px, 96vw)", maxHeight: "85vh" }}>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b shrink-0"
           style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded flex items-center justify-center"
-              style={{ background: "var(--accent-muted)" }}>
+            <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "var(--accent-muted)" }}>
               <Database size={14} style={{ color: "var(--accent-primary)" }} />
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Open Government Canada</div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>open.canada.ca · CKAN API</div>
+              <div className="text-xs" style={{ color: "var(--text-muted)" }}>open.canada.ca · AI-powered search</div>
             </div>
           </div>
           <button onClick={onClose} className="activity-icon" style={{ width: 28, height: 28 }}><X size={14} /></button>
         </div>
 
-        {/* Search bar */}
         <div className="px-5 py-3 border-b shrink-0" style={{ borderColor: "var(--border-subtle)" }}>
-          <form onSubmit={search} className="flex gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-              <Search size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-              <input
-                autoFocus
-                className="flex-1 bg-transparent outline-none text-xs"
-                style={{ color: "var(--text-primary)" }}
-                placeholder="Search datasets (e.g. 'Indigenous health', 'First Nations mortality')..."
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-              />
-            </div>
-            <button type="submit" disabled={loading}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
-              style={{ background: "var(--accent-primary)", color: "#000" }}>
-              {loading ? <Loader size={12} className="animate-spin" /> : <Search size={12} />}
-              Search
-            </button>
-          </form>
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {QUICK_SEARCHES.map(q => (
-              <button key={q} onClick={() => { setQuery(q); setTimeout(() => search(), 50); }}
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-                {q}
-              </button>
-            ))}
-          </div>
+          <SmartSearchBar
+            value={query}
+            onChange={setQuery}
+            onSearch={doSearch}
+            placeholder="Search federal datasets (e.g. 'Indigenous health', 'First Nations mortality')..."
+            quickSearches={QUICK_SEARCHES}
+            aiContext="Open Government Canada CKAN catalogue — federal health, demographics, Indigenous datasets"
+            filterSlot={results.length > 0 ? filterBar : null}
+          />
         </div>
 
-        {/* Results */}
         <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
           {loading && (
             <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--text-muted)" }}>
@@ -116,19 +157,18 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
             </div>
           )}
           {!loading && results.length === 0 && query && (
-            <div className="text-center py-12 text-xs" style={{ color: "var(--text-muted)" }}>No datasets found. Try different keywords.</div>
+            <div className="text-center py-12 text-xs" style={{ color: "var(--text-muted)" }}>No datasets found. Try different keywords or use AI suggestions.</div>
           )}
           {!loading && results.length === 0 && !query && (
             <div className="text-center py-12 text-xs" style={{ color: "var(--text-muted)" }}>
-              Search the federal Open Government catalogue to find and import health-related datasets.
+              Search the federal Open Government catalogue — AI autocomplete suggests as you type.
             </div>
           )}
 
-          {results.map(ds => {
+          {filtered.map(ds => {
             const isExpanded = expanded === ds.id;
             const isImported = imported.has(ds.id);
             const dsDetail = detail[ds.id];
-
             return (
               <div key={ds.id} className="rounded-lg overflow-hidden"
                 style={{ border: "1px solid var(--border-subtle)", background: "var(--bg-surface)" }}>
@@ -140,13 +180,17 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{ds.title}</div>
-                        <div className="text-xs mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>
+                        <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                           {ds.organization} · {ds.num_resources} resource{ds.num_resources !== 1 ? "s" : ""}
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
+                        <button onClick={() => { toggleExpand(ds); setPreviewItem(getPreviewItem(ds)); }}
+                          className="activity-icon" style={{ width: 24, height: 24 }} title="Preview">
+                          <Eye size={11} style={{ color: "var(--text-muted)" }} />
+                        </button>
                         <a href={ds.url} target="_blank" rel="noopener noreferrer"
-                          className="activity-icon" style={{ width: 24, height: 24 }} title="Open on open.canada.ca">
+                          className="activity-icon" style={{ width: 24, height: 24 }}>
                           <ExternalLink size={11} style={{ color: "var(--text-muted)" }} />
                         </a>
                         <button onClick={() => handleImport(ds)} disabled={isImported}
@@ -163,14 +207,13 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
                     </div>
                     {ds.tags?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1.5">
-                        {ds.tags.slice(0, 5).map(t => (
+                        {ds.tags.slice(0, 6).map(t => (
                           <span key={t} className="tag" style={{ fontSize: 9, padding: "1px 6px" }}>{t}</span>
                         ))}
                       </div>
                     )}
                   </div>
                 </div>
-
                 {isExpanded && (
                   <div className="px-4 pb-3 border-t" style={{ borderColor: "var(--border-subtle)", background: "var(--bg-elevated)" }}>
                     {detailLoading === ds.id ? (
@@ -202,6 +245,11 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
                             </div>
                           </div>
                         )}
+                        <button onClick={() => setPreviewItem(getPreviewItem(ds))}
+                          className="flex items-center gap-1 text-xs mt-2"
+                          style={{ color: "var(--accent-primary)" }}>
+                          <Eye size={11} /> Open full preview with AI analysis
+                        </button>
                       </div>
                     ) : null}
                   </div>
@@ -209,12 +257,21 @@ export default function OpenGovCanadaBrowser({ onImport, onClose }) {
               </div>
             );
           })}
-
-          {results.length > 0 && (
-            <div className="text-center py-2 text-xs" style={{ color: "var(--text-muted)" }}>{results.length} datasets found</div>
+          {filtered.length > 0 && (
+            <div className="text-center py-2 text-xs" style={{ color: "var(--text-muted)" }}>
+              {filtered.length} of {results.length} datasets
+            </div>
           )}
         </div>
       </div>
+
+      {previewItem && (
+        <DataSourcePreview
+          item={previewItem}
+          onClose={() => setPreviewItem(null)}
+          onImport={() => handleImport({ title: previewItem.title, url: previewItem.url, organization: previewItem.organization, notes: previewItem.description, tags: previewItem.tags, id: previewItem.title })}
+        />
+      )}
     </div>
   );
 }

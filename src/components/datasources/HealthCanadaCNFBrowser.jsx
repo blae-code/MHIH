@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, Search, ChevronDown, ChevronRight, Plus, Check, Loader2, FlaskConical } from "lucide-react";
+import { X, ChevronDown, ChevronRight, Plus, Check, Loader2, FlaskConical, Eye, ArrowUpDown } from "lucide-react";
+import SmartSearchBar from "./SmartSearchBar";
+import DataSourcePreview from "./DataSourcePreview";
 
 const QUICK_SEARCHES = [
   { label: "Bannock", query: "bannock" },
@@ -13,6 +15,12 @@ const QUICK_SEARCHES = [
   { label: "Moose", query: "moose" },
 ];
 
+const SORT_OPTIONS = [
+  { value: "relevance", label: "Relevance" },
+  { value: "name_asc", label: "Name A–Z" },
+  { value: "name_desc", label: "Name Z–A" },
+];
+
 export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -21,6 +29,9 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
   const [nutrients, setNutrients] = useState({});
   const [loadingNutrients, setLoadingNutrients] = useState(null);
   const [imported, setImported] = useState({});
+  const [previewItem, setPreviewItem] = useState(null);
+  const [sortBy, setSortBy] = useState("relevance");
+  const [groupFilter, setGroupFilter] = useState("All");
 
   const search = async (q) => {
     const searchQuery = q ?? query;
@@ -55,30 +66,63 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
       category: "other",
       sync_frequency: "manual",
       status: "active",
-      metadata: {
-        food_code: code,
-        food_description: food.food_description,
-        food_group: food.food_group_name,
-        source: "health_canada_cnf",
-      },
+      metadata: { food_code: code, food_description: food.food_description, food_group: food.food_group_name, source: "health_canada_cnf" },
     };
     await onImport(sourceData);
     setImported(prev => ({ ...prev, [code]: true }));
   };
+
+  // Derive groups from results for filter chips
+  const groups = ["All", ...Array.from(new Set(results.map(r => r.food_group_name).filter(Boolean))).sort()];
+
+  const filtered = results
+    .filter(r => groupFilter === "All" || r.food_group_name === groupFilter)
+    .sort((a, b) => {
+      if (sortBy === "name_asc") return (a.food_description || "").localeCompare(b.food_description || "");
+      if (sortBy === "name_desc") return (b.food_description || "").localeCompare(a.food_description || "");
+      return 0;
+    });
+
+  const filterBar = (
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-1">
+        <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>Sort:</span>
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+          className="text-xs outline-none px-1.5 py-0.5 rounded"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+      {groups.length > 2 && (
+        <div className="flex items-center gap-1 flex-wrap">
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>Group:</span>
+          {groups.map(g => (
+            <button key={g} onClick={() => setGroupFilter(g)}
+              className="text-xs px-1.5 py-0.5 rounded"
+              style={{
+                background: groupFilter === g ? "var(--accent-muted)" : "var(--bg-overlay)",
+                color: groupFilter === g ? "var(--accent-primary)" : "var(--text-muted)",
+                border: `1px solid ${groupFilter === g ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+              }}>{g}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
       <div className="flex flex-col w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden"
         style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", maxHeight: "85vh" }}>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b shrink-0"
           style={{ borderColor: "var(--border-subtle)", background: "var(--bg-surface)" }}>
           <div className="flex items-center gap-2">
             <FlaskConical size={15} style={{ color: "var(--accent-primary)" }} />
             <div>
               <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Health Canada — Canadian Nutrient File</div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>Search foods and view nutritional composition data</div>
+              <div className="text-xs" style={{ color: "var(--text-muted)" }}>Search foods · AI-powered autocomplete</div>
             </div>
           </div>
           <button onClick={onClose} className="activity-icon" style={{ width: 28, height: 28 }}>
@@ -86,41 +130,18 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
           </button>
         </div>
 
-        {/* Search bar */}
         <div className="px-4 py-3 border-b shrink-0" style={{ borderColor: "var(--border-subtle)" }}>
-          <div className="flex gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-              <Search size={13} style={{ color: "var(--text-muted)" }} />
-              <input
-                className="flex-1 bg-transparent outline-none text-xs"
-                style={{ color: "var(--text-primary)" }}
-                placeholder="Search food by name or code..."
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && search()}
-              />
-            </div>
-            <button onClick={() => search()}
-              className="px-3 py-1.5 rounded-md text-xs font-medium"
-              style={{ background: "var(--accent-primary)", color: "#000" }}>
-              Search
-            </button>
-          </div>
-          {/* Quick searches */}
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {QUICK_SEARCHES.map(qs => (
-              <button key={qs.query}
-                onClick={() => { setQuery(qs.query); search(qs.query); }}
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-                {qs.label}
-              </button>
-            ))}
-          </div>
+          <SmartSearchBar
+            value={query}
+            onChange={setQuery}
+            onSearch={search}
+            placeholder="Search food by name (e.g. 'salmon', 'wild rice', 'bannock')..."
+            quickSearches={QUICK_SEARCHES}
+            aiContext="Health Canada Canadian Nutrient File — traditional Indigenous foods, game meats, berries, fish"
+            filterSlot={results.length > 0 ? filterBar : null}
+          />
         </div>
 
-        {/* Results */}
         <div className="flex-1 overflow-y-auto">
           {loading && (
             <div className="flex items-center justify-center gap-2 py-12" style={{ color: "var(--text-muted)" }}>
@@ -130,10 +151,10 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
           )}
           {!loading && results.length === 0 && (
             <div className="text-center py-12 text-xs" style={{ color: "var(--text-muted)" }}>
-              Search for a food to see nutritional data from the Canadian Nutrient File.
+              Search for a food — AI will suggest related terms as you type.
             </div>
           )}
-          {results.map(food => {
+          {filtered.map(food => {
             const code = food.food_code;
             const isExpanded = expanded === code;
             const foodNutrients = nutrients[code] || [];
@@ -141,14 +162,12 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
 
             return (
               <div key={code} className="border-b" style={{ borderColor: "var(--border-subtle)" }}>
-                <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-opacity-50 cursor-pointer"
-                  style={{ background: isExpanded ? "var(--bg-overlay)" : "transparent" }}
-                  onMouseOver={e => { if (!isExpanded) e.currentTarget.style.background = "var(--bg-hover)"; }}
-                  onMouseOut={e => { if (!isExpanded) e.currentTarget.style.background = "transparent"; }}>
+                <div className="flex items-center gap-3 px-4 py-2.5"
+                  style={{ background: isExpanded ? "var(--bg-overlay)" : "transparent" }}>
                   <button onClick={() => toggleExpand(food)} className="shrink-0" style={{ color: "var(--text-muted)" }}>
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </button>
-                  <div className="flex-1 min-w-0" onClick={() => toggleExpand(food)}>
+                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleExpand(food)}>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
                         {food.food_description}
@@ -162,19 +181,30 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
                       {food.food_source_name && <span className="text-xs" style={{ color: "var(--text-muted)" }}>{food.food_source_name}</span>}
                     </div>
                   </div>
-                  <button
-                    onClick={() => !isImported && handleImport(food)}
-                    className="shrink-0 flex items-center gap-1 px-2 py-1 rounded text-xs"
-                    style={{
-                      background: isImported ? "rgba(46,160,67,0.15)" : "var(--bg-overlay)",
-                      color: isImported ? "var(--color-success)" : "var(--accent-primary)",
-                      border: `1px solid ${isImported ? "var(--color-success)" : "var(--border-default)"}`,
-                    }}>
-                    {isImported ? <><Check size={11} /> Added</> : <><Plus size={11} /> Add</>}
-                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => setPreviewItem({
+                      title: food.food_description,
+                      organization: "Health Canada",
+                      description: `Food Group: ${food.food_group_name || "N/A"} · Source: ${food.food_source_name || "N/A"} · Code: ${code}`,
+                      tags: [food.food_group_name, food.food_source_name].filter(Boolean),
+                      url: `https://food-nutrition.canada.ca/api/canadian-nutrient-file/food/?lang=en&type=json&id=${code}`,
+                      format: "JSON",
+                    })} className="activity-icon" style={{ width: 24, height: 24 }} title="Preview & AI analysis">
+                      <Eye size={12} style={{ color: "var(--text-muted)" }} />
+                    </button>
+                    <button
+                      onClick={() => !isImported && handleImport(food)}
+                      className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+                      style={{
+                        background: isImported ? "rgba(46,160,67,0.15)" : "var(--bg-overlay)",
+                        color: isImported ? "var(--color-success)" : "var(--accent-primary)",
+                        border: `1px solid ${isImported ? "var(--color-success)" : "var(--border-default)"}`,
+                      }}>
+                      {isImported ? <><Check size={11} /> Added</> : <><Plus size={11} /> Add</>}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Expanded: nutrient table */}
                 {isExpanded && (
                   <div className="px-4 pb-3" style={{ background: "var(--bg-overlay)" }}>
                     {loadingNutrients === code ? (
@@ -216,11 +246,10 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
           })}
         </div>
 
-        {/* Footer */}
         <div className="px-4 py-2 border-t shrink-0 flex items-center justify-between"
           style={{ borderColor: "var(--border-subtle)", background: "var(--bg-surface)" }}>
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {results.length > 0 ? `${results.length} results` : "Source: Health Canada Canadian Nutrient File (CNF)"}
+            {filtered.length > 0 ? `${filtered.length} of ${results.length} results` : "Source: Health Canada CNF"}
           </span>
           <a href="https://food-nutrition.canada.ca/cnf-fce/index-eng.jsp" target="_blank" rel="noopener noreferrer"
             className="text-xs" style={{ color: "var(--color-info)" }}>
@@ -228,6 +257,13 @@ export default function HealthCanadaCNFBrowser({ onClose, onImport }) {
           </a>
         </div>
       </div>
+
+      {previewItem && (
+        <DataSourcePreview
+          item={previewItem}
+          onClose={() => setPreviewItem(null)}
+        />
+      )}
     </div>
   );
 }
