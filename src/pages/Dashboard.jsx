@@ -97,13 +97,14 @@ export default function Dashboard() {
   const handleUnpin = useCallback((id) => {
     const next = pinnedIds.filter(p => p !== id);
     setPinnedIds(next);
-    savePrefs(currentLayoutId, widgets, next, dashboardTitle);
-  }, [currentLayoutId, widgets, dashboardTitle]);
+    savePrefs(currentLayoutId, widgets, next, dashboardTitle, visibleStatCards);
+  }, [currentLayoutId, widgets, dashboardTitle, visibleStatCards]);
 
   const handleResetLayout = useCallback(() => {
     const defaultLayout = DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
     setWidgets(defaultLayout);
-    savePrefs(currentLayoutId, defaultLayout, pinnedIds, dashboardTitle);
+    setVisibleStatCards(["total_metrics", "data_sources", "active_sources", "ai_insights"]);
+    savePrefs(currentLayoutId, defaultLayout, pinnedIds, dashboardTitle, ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
     setHasChanges(false);
     addLog("success", "Dashboard layout reset to default");
   }, [currentLayoutId, pinnedIds, dashboardTitle, addLog]);
