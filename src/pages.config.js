@@ -50,22 +50,22 @@
 import AIInsights from './pages/AIInsights';
 import Admin from './pages/Admin';
 import AgentCenter from './pages/AgentCenter';
+import Alerts from './pages/Alerts';
 import Dashboard from './pages/Dashboard';
+import DataAnalyst from './pages/DataAnalyst';
+import DataGovernance from './pages/DataGovernance';
+import DataPrep from './pages/DataPrep';
 import DataQuality from './pages/DataQuality';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
 import Export from './pages/Export';
+import GeoMap from './pages/GeoMap';
 import MyDataSources from './pages/MyDataSources';
+import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
-import DataAnalyst from './pages/DataAnalyst';
-import Alerts from './pages/Alerts';
 import Workflows from './pages/Workflows';
-import GeoMap from './pages/GeoMap';
-import PredictiveAnalytics from './pages/PredictiveAnalytics';
-import DataGovernance from './pages/DataGovernance';
-import DataPrep from './pages/DataPrep';
 import __Layout from './Layout.jsx';
 
 
@@ -73,22 +73,22 @@ export const PAGES = {
     "AIInsights": AIInsights,
     "Admin": Admin,
     "AgentCenter": AgentCenter,
+    "Alerts": Alerts,
     "Dashboard": Dashboard,
+    "DataAnalyst": DataAnalyst,
+    "DataGovernance": DataGovernance,
+    "DataPrep": DataPrep,
     "DataQuality": DataQuality,
     "DataRepository": DataRepository,
     "DataSources": DataSources,
     "Export": Export,
+    "GeoMap": GeoMap,
     "MyDataSources": MyDataSources,
+    "PredictiveAnalytics": PredictiveAnalytics,
     "Settings": Settings,
     "Team": Team,
     "Visualizations": Visualizations,
-    "DataAnalyst": DataAnalyst,
-    "Alerts": Alerts,
     "Workflows": Workflows,
-    "GeoMap": GeoMap,
-    "PredictiveAnalytics": PredictiveAnalytics,
-    "DataGovernance": DataGovernance,
-    "DataPrep": DataPrep,
 }
 
 export const pagesConfig = {

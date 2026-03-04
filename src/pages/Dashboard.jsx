@@ -128,7 +128,11 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
               <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
               <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-              <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)", fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)", fontSize: 12 }}
+                labelStyle={{ color: "var(--text-primary)" }}
+                itemStyle={{ color: "var(--text-secondary)" }}
+              />
               <Area type="monotone" dataKey="count" stroke="#e6a817" fill="url(#grad1)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
