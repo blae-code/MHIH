@@ -13,6 +13,7 @@ import DisparityExplorer from "../components/dashboard/DisparityExplorer";
 import RegionalPerformance from "../components/dashboard/RegionalPerformance";
 import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 import TrendingMetrics from "../components/dashboard/TrendingMetrics";
+import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
 import { Plus } from "lucide-react";
 
