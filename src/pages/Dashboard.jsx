@@ -306,17 +306,17 @@ export default function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
         ) : <EmptyChart message="No categories yet." />}
-        <div className="mt-2 space-y-1">
-          {categoryData.slice(0, 4).map((c, i) => (
-            <div key={c.name} className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                <span style={{ color: "var(--text-secondary)" }}>{c.name}</span>
-              </div>
-              <span style={{ color: "var(--text-primary)" }}>{c.value}</span>
-            </div>
-          ))}
-        </div>
+        {categoryData.length > 0 && (
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart data={categoryData.slice(0, 6)} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
+              <XAxis type="number" tick={{ fill: "var(--text-secondary)", fontSize: 10 }} />
+              <YAxis dataKey="name" type="category" width={90} tick={{ fill: "var(--text-secondary)", fontSize: 9 }} />
+              <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }} />
+              <Bar dataKey="value" fill="#e6a817" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     ),
     disparity_explorer: isVisible("disparity_explorer") && (
