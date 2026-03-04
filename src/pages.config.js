@@ -60,6 +60,12 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import DataAnalyst from './pages/DataAnalyst';
+import Alerts from './pages/Alerts';
+import Workflows from './pages/Workflows';
+import GeoMap from './pages/GeoMap';
+import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import DataGovernance from './pages/DataGovernance';
+import DataPrep from './pages/DataPrep';
 import __Layout from './Layout.jsx';
 
 
@@ -77,6 +83,12 @@ export const PAGES = {
     "Team": Team,
     "Visualizations": Visualizations,
     "DataAnalyst": DataAnalyst,
+    "Alerts": Alerts,
+    "Workflows": Workflows,
+    "GeoMap": GeoMap,
+    "PredictiveAnalytics": PredictiveAnalytics,
+    "DataGovernance": DataGovernance,
+    "DataPrep": DataPrep,
 }
 
 export const pagesConfig = {
