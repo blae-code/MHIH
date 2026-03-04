@@ -67,7 +67,7 @@ export default function Dashboard() {
   useEffect(() => {
     Promise.all([
       base44.entities.HealthMetric.list("-year", 100),
-      base44.entities.DataSource.list("-updated_date", 20),
+      base44.entities.DataSource.list("-updated_date", 500),
       base44.entities.AIInsight.list("-created_date", 5),
     ]).then(([m, s, i]) => {
       setMetrics(m);
