@@ -39,11 +39,15 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
     });
 
     return Object.values(yearMap)
-      .map(d => ({
-        year: d.year,
-        "Métis": d.metisCount > 0 ? Math.round(d.metisAvg / d.metisCount * 10) / 10 : null,
-        "BC Population": d.bcCount > 0 ? Math.round(d.bcAvg / d.bcCount * 10) / 10 : null,
-      }))
+      .map(d => {
+        const metisAvg = d.metisCount > 0 ? d.metisAvg / d.metisCount : null;
+        const bcAvg = d.bcCount > 0 ? d.bcAvg / d.bcCount : null;
+        const disparity = metisAvg != null && bcAvg != null ? Math.round((metisAvg - bcAvg) * 10) / 10 : null;
+        return {
+          year: d.year,
+          "Health Disparity": disparity,
+        };
+      })
       .sort((a, b) => a.year - b.year)
       .slice(-8);
   }, [metrics, trackedMetricIds, selectedCategory]);
