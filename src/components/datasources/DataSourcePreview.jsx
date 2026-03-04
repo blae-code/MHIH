@@ -24,8 +24,11 @@ export default function DataSourcePreview({ item, onClose, onImport }) {
     setLoading(true);
     setError(null);
     try {
-      // Try CSV preview first (DataBC CSV parser), fallback to fetch
-      const isCsv = item.url.toLowerCase().includes(".csv") || item.format?.toLowerCase() === "csv";
+      const fmt = (item.format || "").toLowerCase();
+      const url = item.url.toLowerCase();
+      const isCsv = url.includes(".csv") || fmt === "csv";
+      const isJson = url.includes(".json") || fmt === "json";
+
       if (isCsv) {
         const res = await base44.functions.invoke("dataBCTools", {
           action: "parse_csv",
@@ -35,6 +38,21 @@ export default function DataSourcePreview({ item, onClose, onImport }) {
         if (res.data?.success) {
           setPreview({ type: "table", rows: res.data.rows, columns: res.data.columns, total: res.data.total });
         } else {
+          setPreview({ type: "unavailable" });
+        }
+      } else if (isJson) {
+        // Fetch JSON and try to render as table or raw
+        try {
+          const resp = await fetch(item.url);
+          const json = await resp.json();
+          const arr = Array.isArray(json) ? json : (json.data || json.results || json.items || json.records || Object.values(json)[0]);
+          if (Array.isArray(arr) && arr.length > 0) {
+            const cols = Object.keys(arr[0]);
+            setPreview({ type: "table", rows: arr.slice(0, 20), columns: cols, total: arr.length });
+          } else {
+            setPreview({ type: "json", raw: JSON.stringify(json, null, 2).slice(0, 3000) });
+          }
+        } catch {
           setPreview({ type: "unavailable" });
         }
       } else {
@@ -83,10 +101,14 @@ Be concise and practical.`,
     setAiLoading(false);
   };
 
-  // Auto-load AI summary on mount
+  // Auto-load AI summary on mount; pre-load preview if CSV or JSON
   React.useEffect(() => {
     loadAISummary();
-    if (item.url?.toLowerCase().includes(".csv")) loadPreview();
+    const fmt = (item.format || "").toLowerCase();
+    const url = (item.url || "").toLowerCase();
+    if (url.includes(".csv") || fmt === "csv" || url.includes(".json") || fmt === "json") {
+      loadPreview();
+    }
   }, []);
 
   const tabs = [
@@ -244,6 +266,15 @@ Be concise and practical.`,
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+              {!loading && !error && preview?.type === "json" && (
+                <div>
+                  <div className="mb-2 text-xs" style={{ color: "var(--text-muted)" }}>JSON response (first 3000 chars)</div>
+                  <pre className="text-xs overflow-auto rounded p-3 max-h-80"
+                    style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)", fontFamily: "monospace" }}>
+                    {preview.raw}
+                  </pre>
                 </div>
               )}
               {!loading && !error && preview?.type === "unavailable" && (
