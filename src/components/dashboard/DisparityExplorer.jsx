@@ -863,10 +863,23 @@ export default function DisparityExplorer({ metrics, trackedMetricIds = [] }) {
       {/* Benchmark performance table */}
       {<BenchmarkTable data={filtered} benchmark={benchmark} />}
 
-      {/* Stats & insights section */}
-      
-
-
+      {/* Export buttons */}
+      <div className="flex gap-1.5 mt-4 pt-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+        <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
+        className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
+        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
+        title="Export filtered data as CSV">
+          <Download size={11} style={{ color: "var(--accent-primary)" }} />
+          <span>Filtered Data</span>
+        </button>
+        <button onClick={() => exportCSV(metrics, "health_metrics_all.csv")}
+        className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
+        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
+        title="Export all data as CSV">
+          <Download size={11} />
+          <span>All Data</span>
+        </button>
+      </div>
 
 
 
