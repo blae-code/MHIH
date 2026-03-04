@@ -220,8 +220,31 @@ h1, h2, h3, h4, h5, h6,
 /* Charts */
 .recharts-text { fill: var(--text-secondary) !important; font-size: 11px !important; }
 .recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line { stroke: var(--border-subtle) !important; }
+.recharts-cartesian-grid-vertical line { stroke: var(--border-subtle) !important; opacity: 0.5; }
 .recharts-tooltip-wrapper { z-index: 100; }
+.recharts-tooltip-cursor { fill: rgba(254,221,0,0.04) !important; }
+
+/* Glow utilities */
+.glow-yellow { box-shadow: 0 0 12px rgba(254,221,0,0.25), 0 0 2px rgba(254,221,0,0.4); }
+.glow-blue  { box-shadow: 0 0 12px rgba(64,196,255,0.2); }
+.glow-green { box-shadow: 0 0 12px rgba(0,230,118,0.2); }
+
+/* High-contrast tag */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--bg-overlay);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+/* Scrollbars — slightly more visible */
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-emphasis); }
 
 /* ── MNBC Brand Utility Classes ── */
 .mnbc-yellow { color: var(--mnbc-yellow); }
