@@ -387,14 +387,71 @@ export default function Dashboard() {
 
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--bg-base)" }}>
+      <style>{`
+        .dashboard-section-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 8px;
+          cursor: pointer;
+          user-select: none;
+          border-radius: 4px;
+          transition: background 0.12s;
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--text-secondary);
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+        .dashboard-section-header:hover {
+          background: rgba(255,255,255,0.03);
+          color: var(--text-primary);
+        }
+        .dashboard-widget-card {
+          border-radius: 8px;
+          border: 1px solid var(--border-subtle);
+          background: linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated));
+          padding: 16px;
+          transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+          position: relative;
+          overflow: hidden;
+        }
+        .dashboard-widget-card:hover {
+          border-color: var(--border-default);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(254,221,0,0.05);
+          transform: translateY(-1px);
+        }
+        .dashboard-widget-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(254,221,0,0.02) 0%, transparent 100%);
+          pointer-events: none;
+        }
+        .dashboard-section-label {
+          font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', 'Arial Narrow', sans-serif;
+          font-weight: 700;
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--mnbc-yellow);
+          margin-bottom: 8px;
+        }
+        .dashboard-section-content {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+      `}</style>
+      
       {/* Main container — no scroll */}
       <div className="flex-1 overflow-hidden flex flex-col p-4">
 
-        {/* Hero header with gradient */}
-        <div className="mb-4 rounded-xl overflow-hidden shrink-0" style={{
-          background: "linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+        {/* Hero header with gradient — nav-panel styled */}
+        <div className="mb-4 rounded-lg overflow-hidden shrink-0" style={{
+          background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
           border: "1px solid var(--border-default)",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.04)"
+          boxShadow: "0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
         }}>
           <div className="p-4 flex items-start justify-between">
             <div className="flex-1 min-w-0">
