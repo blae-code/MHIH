@@ -545,9 +545,9 @@ export default function Layout({ children, currentPageName }) {
                   onClick={() => setRightPanelOpen(false)}
                   className="activity-icon"
                   style={{ width: 22, height: 22 }}
-                  title="Close panel"
+                  title="Collapse panel"
                 >
-                  <X size={12} />
+                  <ChevronRight size={12} />
                 </button>
               </div>
 
