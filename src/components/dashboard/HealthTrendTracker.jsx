@@ -1,62 +1,80 @@
-import React, { useState, useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { TrendingUp, Filter } from "lucide-react";
+import React, { useMemo } from "react";
+import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 
 export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // Build trend data for tracked metrics or top categories
-  const trendData = useMemo(() => {
-    let metricsToUse = metrics;
+  // Calculate individual metric trends
+  const trends = useMemo(() => {
+    let metricsToAnalyze = metrics;
     
-    // If tracking specific metrics, use those; otherwise use all
     if (trackedMetricIds && trackedMetricIds.length > 0) {
-      metricsToUse = metrics.filter(m => trackedMetricIds.includes(m.id));
+      metricsToAnalyze = metrics.filter(m => trackedMetricIds.includes(m.id));
     }
 
-    // Filter by category if selected
-    if (selectedCategory) {
-      metricsToUse = metricsToUse.filter(m => m.category === selectedCategory);
-    }
-
-    // Group by year and calculate averages
-    const yearMap = {};
-    metricsToUse.forEach(m => {
-      if (m.year && m.value != null) {
-        if (!yearMap[m.year]) {
-          yearMap[m.year] = { year: m.year, metisAvg: 0, bcAvg: 0, count: 0, metisCount: 0, bcCount: 0 };
-        }
-        if (m.metis_specific) {
-          yearMap[m.year].metisAvg += m.value;
-          yearMap[m.year].metisCount++;
-        }
-        if (m.comparison_value != null) {
-          yearMap[m.year].bcAvg += m.comparison_value;
-          yearMap[m.year].bcCount++;
-        }
-        yearMap[m.year].count++;
+    // Group by metric name and calculate year-over-year change
+    const metricsByName = {};
+    metricsToAnalyze.forEach(m => {
+      if (!m.name || !m.year) return;
+      if (!metricsByName[m.name]) {
+        metricsByName[m.name] = { 
+          name: m.name, 
+          category: m.category,
+          region: m.region,
+          values: [],
+          hasComparison: false
+        };
       }
+      metricsByName[m.name].values.push({ year: m.year, value: m.value, comparison: m.comparison_value });
+      if (m.comparison_value != null) metricsByName[m.name].hasComparison = true;
     });
 
-    return Object.values(yearMap)
-      .map(d => {
-        const metisAvg = d.metisCount > 0 ? d.metisAvg / d.metisCount : null;
-        const bcAvg = d.bcCount > 0 ? d.bcAvg / d.bcCount : null;
-        const disparity = metisAvg != null && bcAvg != null ? Math.round((metisAvg - bcAvg) * 10) / 10 : null;
+    // Calculate trend direction and disparity
+    const allTrends = Object.values(metricsByName)
+      .map(m => {
+        const sorted = m.values.sort((a, b) => a.year - b.year);
+        if (sorted.length < 2) return null;
+        
+        const recent = sorted[sorted.length - 1];
+        const previous = sorted[sorted.length - 2];
+        const change = recent.value - previous.value;
+        const changePercent = previous.value !== 0 ? ((change / previous.value) * 100) : 0;
+        
+        // Calculate current disparity if comparison available
+        const currentDisparity = recent.comparison != null ? recent.value - recent.comparison : null;
+        const disparityTrend = currentDisparity != null && previous.comparison != null 
+          ? (currentDisparity - (previous.value - previous.comparison))
+          : null;
+
         return {
-          year: d.year,
-          "Health Disparity": disparity,
-          zero: 0,
+          ...m,
+          change,
+          changePercent,
+          recent: recent.value,
+          currentDisparity,
+          disparityTrend,
+          isImproving: change > 0,
+          isAtRisk: change < 0 || (currentDisparity != null && currentDisparity > 5)
         };
       })
-      .sort((a, b) => a.year - b.year)
-      .slice(-8);
-  }, [metrics, trackedMetricIds, selectedCategory]);
+      .filter(Boolean);
 
-  const categories = useMemo(() => {
-    const set = new Set(metrics.map(m => m.category).filter(Boolean));
-    return Array.from(set).sort();
-  }, [metrics]);
+    // Separate positive and risk trends
+    const positivetrends = allTrends
+      .filter(t => t.isImproving)
+      .sort((a, b) => b.changePercent - a.changePercent)
+      .slice(0, 3);
+
+    const riskTrends = allTrends
+      .filter(t => t.isAtRisk)
+      .sort((a, b) => {
+        // Prioritize by largest negative change or largest disparity
+        const aScore = Math.min(a.change, a.currentDisparity || 0);
+        const bScore = Math.min(b.change, b.currentDisparity || 0);
+        return aScore - bScore;
+      })
+      .slice(0, 3);
+
+    return { positivetrends, riskTrends };
+  }, [metrics, trackedMetricIds]);
 
   return (
     <div className="dashboard-widget-card">
