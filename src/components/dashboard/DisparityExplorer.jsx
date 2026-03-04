@@ -576,7 +576,7 @@ export default function DisparityExplorer({ metrics }) {
             {CHART_TYPES.map(ct => (
               <button key={ct.id} onClick={() => { setChartType(ct.id); setDrillItem(null); }}
                 className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
-                style={{ background: chartType === ct.id ? "var(--accent-primary)" : "var(--bg-overlay)", color: chartType === ct.id ? "#000" : "var(--text-secondary)", border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "var(--border-subtle)"}` }}>
+                style={{ background: chartType === ct.id ? "var(--accent-primary)" : "var(--bg-overlay)", color: chartType === ct.id ? "#04245a" : "var(--text-secondary)", border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "var(--border-subtle)"}` }}>
                 <ct.icon size={11} />
                 {ct.label}
               </button>
