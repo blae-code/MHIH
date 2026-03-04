@@ -272,6 +272,18 @@ export default function DataSources() {
         />
       )}
 
+      {/* ArcGIS Hub BC browser */}
+      {showArcGISHub && (
+        <ArcGISHubBCBrowser
+          onClose={() => setShowArcGISHub(false)}
+          onImport={async (sourceData) => {
+            await base44.entities.DataSource.create(sourceData);
+            addLog("success", `Imported from ArcGIS Hub BC: ${sourceData.name}`);
+            load();
+          }}
+        />
+      )}
+
       {/* BC WMS/WFS browser */}
       {showWMSWFS && (
         <BCWMSWFSBrowser
