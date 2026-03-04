@@ -308,9 +308,13 @@ function DisparityBar({ data, drill, benchmark }) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
         <XAxis type="number" tick={{ fill: "#8bafd4", fontSize: 10 }} />
         <YAxis type="category" dataKey="name" width={140} tick={{ fill: "#8bafd4", fontSize: 10 }} />
-        <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE}
-          formatter={(val, name) => [val, name === "metis" ? "Métis" : "BC Population"]}
-          labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label} />
+        <Tooltip 
+          contentStyle={TOOLTIP_STYLE} 
+          labelStyle={TOOLTIP_LABEL_STYLE} 
+          itemStyle={TOOLTIP_ITEM_STYLE}
+          formatter={(val, name) => [val?.toFixed(2), name === "metis" ? "Métis" : name === "bc" ? "BC Population" : name]}
+          labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+          cursor={{ fill: "rgba(254,221,0,0.04)" }} />
         <Legend formatter={n => n === "metis" ? "Métis" : "BC Population"} wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
         <Bar dataKey="metis" fill="#e6a817" radius={[0, 3, 3, 0]} onClick={drill} style={{ cursor: "pointer" }} />
         <Bar dataKey="bc" fill="#58a6ff" radius={[0, 3, 3, 0]} opacity={0.7} onClick={drill} style={{ cursor: "pointer" }} />
@@ -344,7 +348,12 @@ function TrendLine({ data, benchmark }) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
         <XAxis dataKey="year" tick={{ fill: "#8bafd4", fontSize: 11 }} />
         <YAxis tick={{ fill: "#8bafd4", fontSize: 11 }} />
-        <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} formatter={(v, n) => [v, n === "metis" ? "Métis Avg" : "BC Avg"]} />
+        <Tooltip 
+          contentStyle={TOOLTIP_STYLE} 
+          labelStyle={TOOLTIP_LABEL_STYLE} 
+          itemStyle={TOOLTIP_ITEM_STYLE} 
+          formatter={(v, n) => [v?.toFixed(2), n === "metis" ? "Métis Avg" : "BC Avg"]} 
+          cursor={{ fill: "rgba(254,221,0,0.04)" }} />
         <Legend formatter={n => n === "metis" ? "Métis Avg" : "BC Population Avg"} wrapperStyle={{ fontSize: 11, color: "var(--text-secondary)" }} />
         <Line type="monotone" dataKey="metis" stroke="#e6a817" strokeWidth={2} dot={{ r: 3 }} />
         <Line type="monotone" dataKey="bc" stroke="#58a6ff" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3 }} connectNulls />
@@ -373,22 +382,42 @@ function ScatterPlot({ data, drill, benchmark }) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
         <XAxis dataKey="x" name="BC" tick={{ fill: "#8bafd4", fontSize: 11 }} label={{ value: "BC Pop.", position: "insideBottom", offset: -4, fill: "#4a6a8a", fontSize: 10 }} />
         <YAxis dataKey="y" name="Métis" tick={{ fill: "#8bafd4", fontSize: 11 }} label={{ value: "Métis", angle: -90, position: "insideLeft", fill: "#4a6a8a", fontSize: 10 }} />
-        <Tooltip contentStyle={TOOLTIP_STYLE} content={({ payload }) => {
+        <Tooltip content={({ payload }) => {
           const d = payload?.[0]?.payload;
           if (!d) return null;
           return (
-            <div className="rounded p-2 text-xs" style={TOOLTIP_STYLE}>
-              <div className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>{d.name}</div>
-              <div style={{ color: "var(--text-secondary)" }}>{d.category?.replace(/_/g, " ")} · {d.region} · {d.year}</div>
-              <div style={{ color: "#e6a817" }}>Métis: {d.y}</div>
-              <div style={{ color: "#58a6ff" }}>BC: {d.x}</div>
-              <div style={{ color: d.y > d.x ? "#f85149" : "#2ea043" }}>Gap: {(d.y - d.x).toFixed(2)}</div>
-              {benchmark.active && benchmark.value != null && (
-                <div style={{ color: BENCHMARK_COLOR }}>vs Benchmark: {(d.y - benchmark.value).toFixed(2)}</div>
-              )}
+            <div className="rounded-lg p-3 text-xs space-y-2" style={{ ...TOOLTIP_STYLE, minWidth: 200 }}>
+              <div style={{ ...TOOLTIP_LABEL_STYLE, fontSize: 12, marginBottom: 4 }}>{d.name}</div>
+              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-secondary)", fontSize: 10 }}>
+                <span style={{ color: "var(--text-muted)" }}>{d.category?.replace(/_/g, " ")}</span>
+                <span style={{ color: "var(--text-muted)" }}>·</span>
+                <span style={{ color: "var(--text-muted)" }}>{d.region}</span>
+                <span style={{ color: "var(--text-muted)" }}>·</span>
+                <span style={{ color: "var(--text-muted)" }}>{d.year}</span>
+              </div>
+              <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+                <div className="flex justify-between items-center">
+                  <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>Métis Value</span>
+                  <span style={{ color: "#e6a817", fontWeight: 600 }}>{d.y.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>BC Population</span>
+                  <span style={{ color: "#58a6ff", fontWeight: 600 }}>{d.x.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+                  <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>Disparity Gap</span>
+                  <span style={{ color: d.y > d.x ? "#f85149" : "#2ea043", fontWeight: 700 }}>{(d.y - d.x) > 0 ? "+" : ""}{(d.y - d.x).toFixed(2)}</span>
+                </div>
+                {benchmark.active && benchmark.value != null && (
+                  <div className="flex justify-between items-center">
+                    <span style={{ color: "var(--text-secondary)", fontSize: 10 }}>vs Benchmark</span>
+                    <span style={{ color: BENCHMARK_COLOR, fontWeight: 600 }}>{(d.y - benchmark.value) > 0 ? "+" : ""}{(d.y - benchmark.value).toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
             </div>
           );
-        }} />
+        }} cursor={{ fill: "rgba(254,221,0,0.04)" }} />
         <Scatter data={points} onClick={drill} style={{ cursor: "pointer" }}>
           {points.map((p, i) => <Cell key={i} fill={catColors[p.category] || "#e6a817"} fillOpacity={0.8} />)}
         </Scatter>
@@ -557,7 +586,7 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
               <XAxis dataKey="year" tick={{ fontSize: 9, fill: "#8bafd4" }} />
               <YAxis tick={{ fontSize: 9, fill: "#8bafd4" }} />
-              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "rgba(254,221,0,0.04)" }} />
               <Line type="monotone" dataKey="value" stroke="#e6a817" strokeWidth={2} dot={{ r: 2 }} name="Métis" />
               {historicalData.some(d => d.comparison != null) && (
                 <Line type="monotone" dataKey="comparison" stroke="#58a6ff" strokeWidth={2} dot={{ r: 2 }} strokeDasharray="4 3" name="BC" connectNulls />
