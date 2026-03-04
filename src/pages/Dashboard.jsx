@@ -12,6 +12,8 @@ import DisparityExplorer from "../components/dashboard/DisparityExplorer";
 import RegionalPerformance from "../components/dashboard/RegionalPerformance";
 import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 import TrendingMetrics from "../components/dashboard/TrendingMetrics";
+import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
+import { Plus } from "lucide-react";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREFS_KEY = "mhip_dashboard_prefs";
@@ -25,8 +27,8 @@ function loadPrefs() {
   return null;
 }
 
-function savePrefs(currentLayoutId, widgets, pinnedIds, title, visibleStatCards) {
-  localStorage.setItem(PREFS_KEY, JSON.stringify({ currentLayoutId, widgets, pinnedIds, title, visibleStatCards }));
+function savePrefs(currentLayoutId, widgets, pinnedIds, title, visibleStatCards, customStats) {
+  localStorage.setItem(PREFS_KEY, JSON.stringify({ currentLayoutId, widgets, pinnedIds, title, visibleStatCards, customStats }));
 }
 
 function loadLayouts() {
@@ -71,6 +73,8 @@ export default function Dashboard() {
   const [visibleStatCards, setVisibleStatCards] = useState(() => prefs?.visibleStatCards || ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
   const [hasChanges, setHasChanges] = useState(false);
   const [regeneratingInsights, setRegeneratingInsights] = useState(false);
+  const [customStats, setCustomStats] = useState(() => prefs?.customStats || []);
+  const [statBuilderOpen, setStatBuilderOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -88,19 +92,34 @@ export default function Dashboard() {
   const handleWidgetsChange = useCallback((newWidgets) => {
     setWidgets(newWidgets);
     setHasChanges(true);
-    savePrefs(currentLayoutId, newWidgets, pinnedIds, dashboardTitle, visibleStatCards);
+    savePrefs(currentLayoutId, newWidgets, pinnedIds, dashboardTitle, visibleStatCards, customStats);
     addLog("success", "Dashboard layout updated");
-  }, [currentLayoutId, pinnedIds, dashboardTitle, visibleStatCards, addLog]);
+  }, [currentLayoutId, pinnedIds, dashboardTitle, visibleStatCards, customStats, addLog]);
 
   const handleStatCardToggle = useCallback((cardId) => {
     const newVisible = visibleStatCards.includes(cardId)
       ? visibleStatCards.filter(id => id !== cardId)
       : [...visibleStatCards, cardId];
     setVisibleStatCards(newVisible);
-    savePrefs(currentLayoutId, widgets, pinnedIds, dashboardTitle, newVisible);
+    savePrefs(currentLayoutId, widgets, pinnedIds, dashboardTitle, newVisible, customStats);
     setHasChanges(true);
     addLog("success", "Stat cards updated");
-  }, [visibleStatCards, currentLayoutId, widgets, pinnedIds, dashboardTitle, addLog]);
+  }, [visibleStatCards, currentLayoutId, widgets, pinnedIds, dashboardTitle, customStats, addLog]);
+
+  const handleAddCustomStat = useCallback((stat) => {
+    const newStats = [...customStats, stat];
+    setCustomStats(newStats);
+    savePrefs(currentLayoutId, widgets, pinnedIds, dashboardTitle, visibleStatCards, newStats);
+    setStatBuilderOpen(false);
+    addLog("success", "Custom stat added!");
+  }, [customStats, currentLayoutId, widgets, pinnedIds, dashboardTitle, visibleStatCards, addLog]);
+
+  const handleRemoveCustomStat = useCallback((id) => {
+    const newStats = customStats.filter(s => s.id !== id);
+    setCustomStats(newStats);
+    savePrefs(currentLayoutId, widgets, pinnedIds, dashboardTitle, visibleStatCards, newStats);
+    addLog("success", "Custom stat removed");
+  }, [customStats, currentLayoutId, widgets, pinnedIds, dashboardTitle, visibleStatCards, addLog]);
 
   const handleUnpin = useCallback((id) => {
     const next = pinnedIds.filter(p => p !== id);
@@ -278,7 +297,7 @@ export default function Dashboard() {
                  }}>
                  {/* Accent line */}
                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${card.color} 0%, transparent 100%)` }} />
-                 
+
                  <div className="flex items-start justify-between mb-3 relative z-10">
                    <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{card.label}</span>
                    <div className="p-2 rounded-lg shrink-0 transition-all group-hover:scale-110" style={{ background: card.bgColor, boxShadow: `0 0 12px ${card.color}22` }}>
@@ -290,15 +309,36 @@ export default function Dashboard() {
                </div>
              );
            })}
-           {Object.keys(ALL_STAT_CARDS).filter(id => !visibleStatCards.includes(id)).length > 0 && (
-             <button
-               onClick={() => handleStatCardToggle(Object.keys(ALL_STAT_CARDS).find(id => !visibleStatCards.includes(id)))}
-               className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed"
-               style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
-               title="Add a stat card">
-               <span>+ Add Card</span>
-             </button>
-           )}
+           {customStats.map(stat => (
+             <div key={stat.id} className="dashboard-widget-card relative overflow-hidden group"
+               style={{
+                 background: `linear-gradient(135deg, ${stat.color}08 0%, var(--bg-elevated) 100%)`,
+                 border: `1.5px solid ${stat.color}33`
+               }}>
+               {/* Accent line */}
+               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${stat.color} 0%, transparent 100%)` }} />
+
+               <div className="flex items-start justify-between mb-3 relative z-10">
+                 <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{stat.label}</span>
+                 <button
+                   onClick={() => handleRemoveCustomStat(stat.id)}
+                   className="p-1 rounded hover:bg-red-500/20 transition-colors"
+                   title="Remove stat">
+                   ×
+                 </button>
+               </div>
+               <div className="text-2xl font-black mb-2 relative z-10 leading-tight" style={{ color: stat.color }}>Custom</div>
+               <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "11px" }}>{stat.description}</div>
+             </div>
+           ))}
+           <button
+             onClick={() => setStatBuilderOpen(true)}
+             className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed transition-all hover:border-solid hover:border-[#FEDD00]33"
+             style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
+             title="Add a custom stat">
+             <Plus size={16} />
+             <span>Custom Stat</span>
+           </button>
          </div>
        </div>
 
