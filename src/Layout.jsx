@@ -302,9 +302,9 @@ export default function Layout({ children, currentPageName }) {
           className="flex items-center justify-between px-4 shrink-0 z-50"
           style={{
             height: "var(--header-height)",
-            background: "var(--bg-surface)",
-            borderBottom: "1px solid var(--border-subtle)",
-            boxShadow: "0 1px 12px rgba(0,0,0,0.4)"
+            background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+            borderBottom: "1px solid var(--border-default)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(254,221,0,0.05)"
           }}
         >
           {/* Brand */}
