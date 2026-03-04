@@ -443,15 +443,14 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex flex-1 overflow-hidden" onClick={() => userMenuOpen && setUserMenuOpen(false)}>
 
           {/* ══ LEFT SIDEBAR ══ */}
-          {sidebarOpen && (
-            <aside
-              className="flex flex-col shrink-0 overflow-hidden"
-              style={{
-                width: "var(--panel-left)",
-                background: "var(--bg-surface)",
-                borderRight: "1px solid var(--border-subtle)",
-              }}
-            >
+          <aside
+            className={`panel-drawer flex flex-col shrink-0 ${sidebarOpen ? "open" : "closed"}`}
+            style={{
+              width: sidebarOpen ? "var(--panel-left)" : 0,
+              background: "var(--bg-surface)",
+              borderRight: sidebarOpen ? "1px solid var(--border-subtle)" : "none",
+            }}
+          >
               {/* Nav */}
               <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
                 {visibleSections.map(sec => {
