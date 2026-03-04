@@ -82,8 +82,11 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
 
       <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
         {trackedMetricIds && trackedMetricIds.length > 0 
-          ? "Trends for your tracked metrics" 
-          : "Average health outcomes over time"}
+          ? "Health disparity gaps for your tracked metrics" 
+          : "Average health disparity between Métis and BC population"}
+        <span className="block text-xs mt-1" style={{ color: "var(--text-muted)", fontSize: "10px", opacity: 0.7 }}>
+          Positive values = worse Métis outcomes | Negative values = better Métis outcomes
+        </span>
       </div>
 
       {trendData.length > 0 ? (
