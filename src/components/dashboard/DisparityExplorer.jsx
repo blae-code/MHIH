@@ -457,33 +457,149 @@ function EmptyState({ msg }) {
   );
 }
 
-function DrillPanel({ metric, onClose, benchmark }) {
+function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
   if (!metric) return null;
+
   const gap = metric.comparison_value != null ? (metric.value - metric.comparison_value) : null;
   const benchDiff = benchmark.active && benchmark.value != null ? ((metric.metis ?? metric.value) - benchmark.value) : null;
+
+  // Get historical data for this specific metric (same name, region, category)
+  const historicalData = useMemo(() => {
+    if (!allMetrics) return [];
+    return allMetrics
+      .filter(m => m.name === metric.name && m.region === metric.region && m.category === metric.category)
+      .sort((a, b) => a.year - b.year)
+      .map(m => ({ year: m.year, value: m.value, comparison: m.comparison_value }));
+  }, [metric, allMetrics]);
+
+  // Calculate historical average and trend
+  const histAvg = historicalData.length > 0 ? historicalData.reduce((s, d) => s + d.value, 0) / historicalData.length : null;
+  const histChange = historicalData.length >= 2 
+    ? historicalData[historicalData.length - 1].value - historicalData[0].value 
+    : null;
+
+  const exportMetricData = () => {
+    const header = ["Year", "Métis Value", "BC Population", "Gap"].join(",");
+    const rows = historicalData.map(d => [
+      d.year,
+      d.value.toFixed(2),
+      d.comparison ? d.comparison.toFixed(2) : "N/A",
+      d.comparison ? (d.value - d.comparison).toFixed(2) : "N/A"
+    ].join(","));
+    const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${metric.name.replace(/\s+/g, "_")}_history.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="rounded-md p-3 mt-3" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)" }}>Drill-down</span>
+    <div className="rounded-lg p-4 mt-4 space-y-3" style={{ background: "linear-gradient(to bottom, var(--bg-overlay), rgba(254,221,0,0.03))", border: "1px solid var(--border-default)" }}>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)" }}>Metric Details</span>
         <button onClick={onClose} className="activity-icon" style={{ width: 20, height: 20 }}><X size={12} /></button>
       </div>
-      <div className="text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>{metric.fullName || metric.name}</div>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-        {[
-          ["Category", metric.category?.replace(/_/g, " ")],
-          ["Region", metric.region],
-          ["Year", metric.year],
-          ["Métis Value", metric.metis ?? metric.value],
-          ["BC Population", metric.bc ?? metric.comparison_value ?? "N/A"],
-          ["Gap", gap != null ? (gap > 0 ? `+${gap.toFixed(2)} ▲ higher` : `${gap.toFixed(2)} ▼ lower`) : "N/A"],
-          ...(benchDiff != null ? [["vs Benchmark", benchDiff > 0 ? `+${benchDiff.toFixed(2)} above` : `${benchDiff.toFixed(2)} below`]] : []),
-        ].map(([label, val]) => (
-          <div key={label} className="flex justify-between gap-2">
-            <span style={{ color: "var(--text-muted)" }}>{label}</span>
-            <span style={{ color: label === "vs Benchmark" ? BENCHMARK_COLOR : "var(--text-primary)", fontWeight: 500 }}>{val}</span>
-          </div>
-        ))}
+
+      {/* Metric name */}
+      <div>
+        <div className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{metric.fullName || metric.name}</div>
+        <div className="text-xs mt-1 flex gap-3 flex-wrap">
+          <span style={{ color: "var(--text-muted)" }}>{metric.category?.replace(/_/g, " ")}</span>
+          <span style={{ color: "var(--text-muted)" }}>•</span>
+          <span style={{ color: "var(--text-muted)" }}>{metric.region}</span>
+        </div>
       </div>
+
+      {/* Current snapshot */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+          <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Current Year ({metric.year})</div>
+          <div style={{ color: "var(--accent-primary)", fontWeight: 700 }}>{(metric.metis ?? metric.value).toFixed(2)}</div>
+          {metric.comparison_value != null && (
+            <div style={{ color: "var(--text-secondary)", fontSize: 9, marginTop: 2 }}>vs BC: {(metric.comparison_value).toFixed(2)}</div>
+          )}
+        </div>
+        {gap != null && (
+          <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Disparity Gap</div>
+            <div style={{ color: gap > 0 ? "#f85149" : "#2ea043", fontWeight: 700 }}>{gap > 0 ? "+" : ""}{gap.toFixed(2)}</div>
+            <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
+              {gap > 0 ? "Higher" : "Lower"} than BC
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Historical trend mini-chart */}
+      {historicalData.length > 1 && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ fontSize: 9, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Historical Trend
+          </div>
+          <ResponsiveContainer width="100%" height={120}>
+            <LineChart data={historicalData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
+              <XAxis dataKey="year" tick={{ fontSize: 9, fill: "var(--text-secondary)" }} />
+              <YAxis tick={{ fontSize: 9, fill: "var(--text-secondary)" }} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Line type="monotone" dataKey="value" stroke="#e6a817" strokeWidth={2} dot={{ r: 2 }} name="Métis" />
+              {historicalData.some(d => d.comparison != null) && (
+                <Line type="monotone" dataKey="comparison" stroke="#58a6ff" strokeWidth={2} dot={{ r: 2 }} strokeDasharray="4 3" name="BC" connectNulls />
+              )}
+              {benchmark.active && benchmark.value != null && (
+                <ReferenceLine y={benchmark.value} stroke={BENCHMARK_COLOR} strokeDasharray="5 3" strokeWidth={1.5} />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Historical analysis */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        {histAvg != null && (
+          <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Historical Avg</div>
+            <div style={{ color: "var(--text-primary)", fontWeight: 700 }}>{histAvg.toFixed(2)}</div>
+            <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
+              vs Current: {((metric.value - histAvg) > 0 ? "+" : "")}{(metric.value - histAvg).toFixed(2)}
+            </div>
+          </div>
+        )}
+        {histChange != null && (
+          <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Total Trend</div>
+            <div style={{ color: histChange > 0 ? "#2ea043" : "#f85149", fontWeight: 700 }}>
+              {histChange > 0 ? "↑" : "↓"} {Math.abs(histChange).toFixed(2)}
+            </div>
+            <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
+              {historicalData[0]?.year} to {historicalData[historicalData.length - 1]?.year}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Benchmark deviation */}
+      {benchDiff != null && (
+        <div className="rounded-md p-2" style={{ background: `${BENCHMARK_COLOR}11`, border: `1px solid ${BENCHMARK_COLOR}33` }}>
+          <div style={{ fontSize: 9, fontWeight: 600, color: BENCHMARK_COLOR, marginBottom: 2 }}>vs Benchmark ({benchmark.value.toFixed(1)})</div>
+          <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 12 }}>
+            {benchDiff > 0 ? "+" : ""}{benchDiff.toFixed(2)} {benchDiff > 0 ? "above" : "below"}
+          </div>
+        </div>
+      )}
+
+      {/* Export button */}
+      {historicalData.length > 0 && (
+        <button onClick={exportMetricData}
+          className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded text-xs font-medium transition-all"
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+          <Download size={11} style={{ color: "var(--accent-primary)" }} />
+          Export Metric History
+        </button>
+      )}
     </div>
   );
 }
