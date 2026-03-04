@@ -735,76 +735,171 @@ function PanelSection({ title, icon: Icon, iconColor, children, defaultOpen = tr
   );
 }
 
+function MiniSparkline({ values, color }) {
+  const w = 56, h = 22;
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
+    return `${x},${y}`;
+  }).join(" ");
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ overflow: "visible" }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={pts.split(" ").pop().split(",")[0]} cy={pts.split(" ").pop().split(",")[1]} r="2.5" fill={color} />
+    </svg>
+  );
+}
+
+function LiveClock() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.04em" }}>
+      {time.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+    </span>
+  );
+}
+
 function RightPanelDefault({ user, isAdmin }) {
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  // Simulated sparkline data (would be real metrics in production)
+  const sparkData = {
+    metrics: [42, 45, 43, 47, 51, 49, 53, 57, 54, 58],
+    quality: [88, 85, 87, 90, 89, 92, 91, 94, 93, 96],
+    sources: [8, 8, 9, 9, 10, 10, 11, 11, 12, 12],
+  };
+
   return (
     <div className="space-y-3">
-      {/* User greeting card — always visible, no section toggle */}
-      <div className="right-panel-widget" style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.07) 0%, rgba(4,54,115,0.15) 100%)", borderColor: "rgba(254,221,0,0.12)" }}>
-        <div className="flex items-center gap-2.5 mb-2">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-            style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
-            {user?.full_name?.[0] || "?"}
+
+      {/* ── Hero identity card ── */}
+      <div className="rounded-xl overflow-hidden relative" style={{
+        background: "linear-gradient(135deg, #05112a 0%, #081e3d 60%, #0d2a1a 100%)",
+        border: "1px solid rgba(254,221,0,0.14)",
+        boxShadow: "0 0 30px rgba(254,221,0,0.04) inset"
+      }}>
+        {/* Decorative glow orb */}
+        <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "rgba(254,221,0,0.07)", filter: "blur(18px)", pointerEvents: "none" }} />
+        <div className="px-3 pt-3 pb-2.5 relative">
+          <div className="flex items-center gap-2.5 mb-2.5">
+            <div className="relative">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold"
+                style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.2) 0%, rgba(254,221,0,0.08) 100%)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.15)" }}>
+                {user?.full_name?.[0] || "?"}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
+                style={{ background: "var(--color-success)", borderColor: "#05112a", boxShadow: "0 0 6px rgba(0,230,118,0.6)" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "Loading..."}</div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "viewer"}</span>
+                {user?.role === "admin" && (
+                  <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{greeting}</div>
-            <div className="text-xs" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.full_name?.split(" ")[0] || "User"}</div>
+
+          {/* Live clock */}
+          <div className="flex items-end justify-between">
+            <div>
+              <LiveClock />
+              <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 1 }}>
+                {now.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+              </div>
+            </div>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ background: "rgba(0,230,118,0.08)", border: "1px solid rgba(0,230,118,0.2)" }}>
+              <span className="status-dot active pulse-live" style={{ width: 5, height: 5 }} />
+              <span style={{ fontSize: 9, color: "var(--color-success)", fontWeight: 700, letterSpacing: "0.06em" }}>LIVE</span>
+            </div>
           </div>
         </div>
-        <div className="text-xs" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
-          {now.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
+
+        {/* Greeting strip */}
+        <div className="px-3 py-1.5" style={{ background: "rgba(254,221,0,0.04)", borderTop: "1px solid rgba(254,221,0,0.08)" }}>
+          <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{greeting}, <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>{user?.full_name?.split(" ")[0] || "there"}</span></span>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <PanelSection title="Quick Actions" icon={Zap} iconColor="var(--mnbc-yellow)">
+      {/* ── Live platform stats ── */}
+      <PanelSection title="Platform Pulse" icon={Activity} iconColor="#00e676">
         <div className="space-y-1.5">
           {[
-            { icon: Sparkles, label: "Generate AI Insight", page: "AIInsights", color: "#a78bfa" },
-            { icon: Upload, label: "Import Data", page: "DataRepository", color: "#40c4ff" },
-            { icon: BarChart3, label: "New Visualization", page: "Visualizations", color: "#00e676" },
-            { icon: FileDown, label: "Export Report", page: "Export", color: "#ffab40" },
-          ].map(({ icon: Icon, label, page, color }) => (
-            <Link key={page} to={createPageUrl(page)}>
-              <div className="quick-action-btn">
-                <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
-                  <Icon size={12} style={{ color }} />
+            { label: "Active Metrics", value: "58", delta: "+4", trend: sparkData.metrics, color: "#FEDD00" },
+            { label: "Data Quality", value: "96%", delta: "+3%", trend: sparkData.quality, color: "#00e676" },
+            { label: "Live Sources", value: "12", delta: "+1", trend: sparkData.sources, color: "#40c4ff" },
+          ].map(({ label, value, delta, trend, color }) => (
+            <div key={label} className="flex items-center gap-2 px-2.5 py-2 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+              <div className="flex-1 min-w-0">
+                <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 1 }}>{label}</div>
+                <div className="flex items-center gap-1.5">
+                  <span style={{ fontSize: 15, fontWeight: 700, color, lineHeight: 1, fontFamily: "monospace" }}>{value}</span>
+                  <span style={{ fontSize: 9, color: "#00e676", fontWeight: 600 }}>{delta}</span>
                 </div>
-                <span className="flex-1">{label}</span>
-                <ChevronRight size={11} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+              </div>
+              <MiniSparkline values={trend} color={color} />
+            </div>
+          ))}
+        </div>
+      </PanelSection>
+
+      {/* ── Quick Actions ── */}
+      <PanelSection title="Quick Actions" icon={Zap} iconColor="var(--mnbc-yellow)">
+        <div className="grid grid-cols-2 gap-1.5">
+          {[
+            { icon: Sparkles, label: "AI Insight", page: "AIInsights", color: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
+            { icon: Upload, label: "Import", page: "DataRepository", color: "#40c4ff", bg: "rgba(64,196,255,0.08)" },
+            { icon: BarChart3, label: "Visualize", page: "Visualizations", color: "#00e676", bg: "rgba(0,230,118,0.08)" },
+            { icon: FileDown, label: "Export", page: "Export", color: "#ffab40", bg: "rgba(255,171,64,0.08)" },
+          ].map(({ icon: Icon, label, page, color, bg }) => (
+            <Link key={page} to={createPageUrl(page)}>
+              <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-lg cursor-pointer transition-all"
+                style={{ background: bg, border: `1px solid ${color}22`, textAlign: "center" }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = `${color}55`; e.currentTarget.style.background = `${color}14`; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = `${color}22`; e.currentTarget.style.background = bg; }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
+                  <Icon size={13} style={{ color }} />
+                </div>
+                <span style={{ fontSize: 10, color: "var(--text-secondary)", fontWeight: 500 }}>{label}</span>
               </div>
             </Link>
           ))}
         </div>
       </PanelSection>
 
-      {/* Session info */}
-      <PanelSection title="Session" icon={Activity} iconColor="var(--color-success)">
-        <div className="right-panel-widget">
-          <div className="space-y-2">
-            {[
-              { label: "Status", value: "Online", valueColor: "var(--color-success)" },
-              { label: "Role", value: user?.role || "—", valueColor: "var(--accent-primary)" },
-              { label: "Version", value: "MHIP v2.0", valueColor: "var(--text-primary)" },
-            ].map(({ label, value, valueColor }) => (
-              <div key={label} className="flex items-center justify-between">
+      {/* ── Session ── */}
+      <PanelSection title="Session" icon={Activity} iconColor="var(--color-success)" defaultOpen={false}>
+        <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+          {[
+            { label: "Status", value: "Online", dot: "#00e676" },
+            { label: "Role", value: user?.role || "—", dot: "var(--mnbc-yellow)" },
+            { label: "Version", value: "MHIP v2.0", dot: "#40c4ff" },
+          ].map(({ label, value, dot }, i) => (
+            <div key={label} className="flex items-center justify-between px-2.5 py-2"
+              style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none", background: "var(--bg-overlay)" }}>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
                 <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span>
-                <span style={{ fontSize: 11, color: valueColor, fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
               </div>
-            ))}
-          </div>
+              <span style={{ fontSize: 11, color: "var(--text-primary)", fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
+            </div>
+          ))}
         </div>
       </PanelSection>
 
-      {/* Resources */}
+      {/* ── Resources ── */}
       <PanelSection title="Resources" icon={HelpCircle} defaultOpen={false}>
-        <div className="right-panel-widget" style={{ padding: 10 }}>
-          <div className="text-xs" style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
-            BC Métis Health Intelligence Platform — powered by MNBC and AI-driven analytics.
-          </div>
+        <div className="px-2.5 py-2 rounded-lg text-xs" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)", lineHeight: 1.6 }}>
+          BC Métis Health Intelligence Platform — powered by MNBC and AI-driven analytics.
         </div>
       </PanelSection>
     </div>
