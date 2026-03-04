@@ -60,7 +60,11 @@ export default function Dashboard() {
   // Initialize widgets
   const [widgets, setWidgets] = useState(() => {
     if (prefs?.widgets) return prefs.widgets;
-    return DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
+    return [
+      ...DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 })),
+      { id: "regional_performance", visible: true, span: 2 },
+      { id: "category_pie", visible: true, span: 2 }
+    ];
   });
   const [pinnedIds, setPinnedIds] = useState(() => prefs?.pinnedIds || []);
   const [visibleStatCards, setVisibleStatCards] = useState(() => prefs?.visibleStatCards || ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
