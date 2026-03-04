@@ -79,10 +79,10 @@ export default function Dashboard() {
   }, []).sort((a, b) => a.year - b.year).slice(-8);
 
   const STAT_CARDS = [
-    { label: "Total Metrics", value: metrics.length, icon: BarChart3, color: "var(--accent-primary)" },
-    { label: "Data Sources", value: sources.length, icon: Database, color: "var(--color-info)" },
-    { label: "Active Sources", value: sources.filter(s => s.status === "active").length, icon: Activity, color: "var(--color-success)" },
-    { label: "AI Insights", value: insights.length, icon: Brain, color: "#a78bfa" },
+    { label: "Total Metrics", value: metrics.length, icon: BarChart3, color: "var(--accent-primary)", desc: "Health indicators tracked across all categories" },
+    { label: "Data Sources", value: sources.length, icon: Database, color: "var(--color-info)", desc: "Connected external data feeds & repositories" },
+    { label: "Active Sources", value: sources.filter(s => s.status === "active").length, icon: Activity, color: "var(--color-success)", desc: "Sources currently syncing successfully" },
+    { label: "AI Insights", value: insights.length, icon: Brain, color: "#a78bfa", desc: "AI-generated analyses & recommendations" },
   ];
 
   const isVisible = (id) => {
