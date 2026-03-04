@@ -638,8 +638,8 @@ export default function DisparityExplorer({ metrics }) {
           const withGap = filtered.filter(m => m.comparison_value != null);
           const avgGap = withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length;
           return (
-            <span style={{ color: "var(--text-muted)" }}>
-              Avg gap: <span style={{ color: avgGap > 0 ? "#f85149" : "#2ea043" }}>{avgGap > 0 ? "+" : ""}{avgGap.toFixed(2)}</span>
+            <span style={{ color: "var(--text-secondary)" }}>
+              Avg gap: <span style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 600 }}>{avgGap > 0 ? "+" : ""}{avgGap.toFixed(2)}</span>
             </span>
           );
         })()}
