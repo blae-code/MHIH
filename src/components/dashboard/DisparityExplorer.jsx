@@ -662,7 +662,7 @@ function exportCSV(data, filename) {
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function DisparityExplorer({ metrics }) {
+export default function DisparityExplorer({ metrics, trackedMetricIds = [] }) {
   const [chartType, setChartType] = useState("bar");
   const [selCats, setSelCats] = useState([]);
   const [selRegions, setSelRegions] = useState([]);
