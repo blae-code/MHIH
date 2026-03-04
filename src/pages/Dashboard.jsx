@@ -216,19 +216,38 @@ export default function Dashboard() {
   // Ordered widget render map
   const WIDGET_RENDER = {
     stat_cards: isVisible("stat_cards") && (
-      <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        {STAT_CARDS.map(card => (
-          <div key={card.label} className="metric-card" title={card.desc}>
-            <div className="flex items-start justify-between mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
-              <div className="p-1.5 rounded-md shrink-0" style={{ background: `${card.color}18` }}>
-                <card.icon size={13} style={{ color: card.color }} />
+      <div key="stat_cards" className="grid grid-cols-2 xl:grid-cols-4 gap-3 group">
+        {STAT_CARDS.map((card, idx) => {
+          const cardId = Object.keys(ALL_STAT_CARDS).find(k => ALL_STAT_CARDS[k].label === card.label);
+          return (
+            <div key={cardId} className="metric-card relative cursor-pointer hover:ring-1" style={{ "--hover-ring": "rgba(254,221,0,0.3)" }} title={`Click to remove "${card.label}"`}>
+              <button
+                onClick={() => handleStatCardToggle(cardId)}
+                className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                style={{ background: "var(--color-error)", color: "white" }}
+                title="Remove this stat card">
+                ✕
+              </button>
+              <div className="flex items-start justify-between mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-muted)" }}>{card.label}</span>
+                <div className="p-1.5 rounded-md shrink-0" style={{ background: `${card.color}18` }}>
+                  <card.icon size={13} style={{ color: card.color }} />
+                </div>
               </div>
+              <div className="text-3xl font-bold mb-1" style={{ color: card.color }}>{card.value}</div>
+              <div className="text-xs leading-snug" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
             </div>
-            <div className="text-3xl font-bold mb-1" style={{ color: card.color }}>{card.value}</div>
-            <div className="text-xs leading-snug" style={{ color: "var(--text-muted)" }}>{card.desc}</div>
-          </div>
-        ))}
+          );
+        })}
+        {Object.keys(ALL_STAT_CARDS).filter(id => !visibleStatCards.includes(id)).length > 0 && (
+          <button
+            onClick={() => handleStatCardToggle(Object.keys(ALL_STAT_CARDS).find(id => !visibleStatCards.includes(id)))}
+            className="metric-card flex items-center justify-center gap-2 border-dashed"
+            style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
+            title="Add a stat card">
+            <span>+ Add Card</span>
+          </button>
+        )}
       </div>
     ),
     year_trend: isVisible("year_trend") && (
