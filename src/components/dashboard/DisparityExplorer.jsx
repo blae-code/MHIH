@@ -864,108 +864,13 @@ export default function DisparityExplorer({ metrics, trackedMetricIds = [] }) {
       {<BenchmarkTable data={filtered} benchmark={benchmark} />}
 
       {/* Stats & insights section */}
-      <div className="mt-4 pt-4 space-y-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-       {/* Key metrics grid */}
-       {(() => {
-          const withGap = filtered.filter((m) => m.comparison_value != null);
-          const avgGap = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length : 0;
-          const avgValue = filtered.length > 0 ? filtered.reduce((s, m) => s + (m.value || 0), 0) / filtered.length : 0;
-          const minValue = filtered.length > 0 ? Math.min(...filtered.map((m) => m.value || 0)) : 0;
-          const maxValue = filtered.length > 0 ? Math.max(...filtered.map((m) => m.value || 0)) : 0;
-          const uniqueRegions = new Set(filtered.map((m) => m.region)).size;
-          const uniqueCategories = new Set(filtered.map((m) => m.category)).size;
-          const disparityCount = withGap.filter((m) => (m.value || 0) > m.comparison_value).length;
-          const disparityPct = withGap.length > 0 ? (disparityCount / withGap.length * 100).toFixed(0) : 0;
-
-          return (
-            <div className="disparity-stats-grid">
-              {/* Core metrics */}
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Records</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{filtered.length}</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>of {metrics.length}</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Filtered Records</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Shows the count of metrics matching your current filters out of the total available metrics in the system.</div>
-                </div>
-              </div>
-
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Métis Avg</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{avgValue.toFixed(1)}</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>health metric</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Average Value</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>The mean value across all Métis-specific health metrics in your filtered dataset.</div>
-                </div>
-              </div>
+      
 
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Avg Gap</div>
-                <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>
-                  {avgGap > 0 ? "↑" : "↓"} {Math.abs(avgGap).toFixed(2)}
-                </div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>{avgGap > 0 ? "higher" : "lower"} than BC</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Disparity Gap</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Average difference between Métis metrics and BC general population. Positive values indicate higher rates in Métis communities.</div>
-                </div>
-              </div>
 
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Disparity</div>
-                <div style={{ color: disparityPct > 50 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{disparityPct}%</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>exceed BC avg</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Disparity Rate</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Percentage of filtered metrics where Métis values exceed the BC population average, indicating worse health outcomes.</div>
-                </div>
-              </div>
 
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Range</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{(maxValue - minValue).toFixed(1)}</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>spread</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Value Range</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Difference between the highest and lowest metric values in your filtered dataset. Larger ranges indicate greater variability.</div>
-                </div>
-              </div>
 
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Regions</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{uniqueRegions}</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>analyzed</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Geographic Coverage</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Number of distinct BC regions represented in your filtered dataset (e.g., Northern BC, Fraser, Vancouver Island).</div>
-                </div>
-              </div>
 
-              <div className="disparity-stat-card relative z-10 group cursor-help">
-                <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Categories</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{uniqueCategories}</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>health types</div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                  <div style={{ color: "var(--accent-primary)", fontWeight: 600, marginBottom: 1 }}>Health Categories</div>
-                  <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Number of unique health topic areas covered (chronic disease, mental health, substance use, maternal/child health, etc.).</div>
-                </div>
-              </div>
 
-              {benchmark.active && benchmark.value != null && (
-                <div className="disparity-stat-card relative z-10 group cursor-help" style={{ borderColor: `${BENCHMARK_COLOR}44` }}>
-                  <div style={{ color: BENCHMARK_COLOR, fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Benchmark</div>
-                  <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{benchmark.value.toFixed(1)}</div>
-                  <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>target goal</div>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[#0a1220] border border-[#243f60] rounded-lg p-2.5 w-48 text-xs" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                    <div style={{ color: BENCHMARK_COLOR, fontWeight: 600, marginBottom: 1 }}>Target Benchmark</div>
-                    <div style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>Set target value for comparison. Compare your current metrics against this goal to track progress toward health equity objectives.</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })()}
 
 
 
@@ -1051,24 +956,119 @@ export default function DisparityExplorer({ metrics, trackedMetricIds = [] }) {
 
 
 
-        })()}
 
-        {/* Export buttons */}
-        <div className="flex gap-1.5">
-          <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
-          className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-            <Download size={11} style={{ color: "var(--accent-primary)" }} />
-            <span>Filtered</span>
-          </button>
-          <button onClick={() => exportCSV(metrics, "health_metrics_all.csv")}
-          className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-            <Download size={11} />
-            <span>All Data</span>
-          </button>
-        </div>
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       {/* Drill-down panel */}
       <DrillPanel metric={drillItem} onClose={() => setDrillItem(null)} benchmark={benchmark} allMetrics={metrics} />
