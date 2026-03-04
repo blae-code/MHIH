@@ -375,7 +375,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="h-full flex flex-col" style={{ background: "var(--bg-base)" }}>
+    <div className="h-full flex flex-col" style={{ background: "var(--bg-surface)" }}>
       <style>{`
         .dashboard-section-header {
           display: flex;
