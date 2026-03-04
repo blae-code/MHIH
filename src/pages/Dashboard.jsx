@@ -11,6 +11,7 @@ import DashboardLayoutManager, { PRESET_LAYOUTS } from "../components/dashboard/
 import DisparityExplorer from "../components/dashboard/DisparityExplorer";
 import RegionalPerformance from "../components/dashboard/RegionalPerformance";
 import CategoryLeaders from "../components/dashboard/CategoryLeaders";
+import TrendingMetrics from "../components/dashboard/TrendingMetrics";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREFS_KEY = "mhip_dashboard_prefs";
@@ -399,6 +400,9 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+    ),
+    trending_metrics: isVisible("trending_metrics") && (
+      <TrendingMetrics key="trending_metrics" metrics={metrics} />
     ),
   };
 
