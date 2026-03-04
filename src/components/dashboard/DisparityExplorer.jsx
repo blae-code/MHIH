@@ -105,7 +105,7 @@ function ValueFilter({ op, setOp, threshold, setThreshold }) {
       {op !== "any" && (
         <input type="number" value={threshold} onChange={e => setThreshold(e.target.value)} placeholder="0"
           className="text-xs px-2 py-1 rounded outline-none w-20"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }} />
+          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }} />
       )}
     </div>
   );
