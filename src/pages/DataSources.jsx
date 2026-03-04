@@ -11,6 +11,7 @@ import HealthInfobaseBrowser from "@/components/datasources/HealthInfobaseBrowse
 import HealthCanadaDPDBrowser from "@/components/datasources/HealthCanadaDPDBrowser";
 import HealthCanadaCNFBrowser from "@/components/datasources/HealthCanadaCNFBrowser";
 import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
+import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
