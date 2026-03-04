@@ -682,6 +682,33 @@ export default function Layout({ children, currentPageName }) {
   );
 }
 
+function PanelSection({ title, icon: Icon, iconColor, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="sidebar-section-toggle w-full"
+        style={{ padding: "4px 4px" }}
+      >
+        <Icon size={10} style={{ color: iconColor || "var(--text-muted)", flexShrink: 0 }} />
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", flex: 1, textAlign: "left" }}>{title}</span>
+        <ChevronRight
+          size={11}
+          style={{
+            color: "var(--text-muted)",
+            transform: open ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
+            opacity: 0.5,
+            flexShrink: 0
+          }}
+        />
+      </button>
+      {open && <div className="mt-1">{children}</div>}
+    </div>
+  );
+}
+
 function RightPanelDefault({ user, isAdmin }) {
   const now = new Date();
   const hour = now.getHours();
@@ -689,7 +716,7 @@ function RightPanelDefault({ user, isAdmin }) {
 
   return (
     <div className="space-y-3">
-      {/* User greeting card */}
+      {/* User greeting card — always visible, no section toggle */}
       <div className="right-panel-widget" style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.07) 0%, rgba(4,54,115,0.15) 100%)", borderColor: "rgba(254,221,0,0.12)" }}>
         <div className="flex items-center gap-2.5 mb-2">
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
@@ -707,11 +734,7 @@ function RightPanelDefault({ user, isAdmin }) {
       </div>
 
       {/* Quick Actions */}
-      <div>
-        <div className="flex items-center gap-1.5 mb-2 px-1">
-          <Zap size={10} style={{ color: "var(--mnbc-yellow)" }} />
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Quick Actions</span>
-        </div>
+      <PanelSection title="Quick Actions" icon={Zap} iconColor="var(--mnbc-yellow)">
         <div className="space-y-1.5">
           {[
             { icon: Sparkles, label: "Generate AI Insight", page: "AIInsights", color: "#a78bfa" },
@@ -730,40 +753,34 @@ function RightPanelDefault({ user, isAdmin }) {
             </Link>
           ))}
         </div>
-      </div>
+      </PanelSection>
 
       {/* Session info */}
-      <div className="right-panel-widget">
-        <div className="flex items-center gap-1.5 mb-3">
-          <Activity size={10} style={{ color: "var(--color-success)" }} />
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Session</span>
+      <PanelSection title="Session" icon={Activity} iconColor="var(--color-success)">
+        <div className="right-panel-widget">
+          <div className="space-y-2">
+            {[
+              { label: "Status", value: "Online", valueColor: "var(--color-success)" },
+              { label: "Role", value: user?.role || "—", valueColor: "var(--accent-primary)" },
+              { label: "Version", value: "MHIP v2.0", valueColor: "var(--text-primary)" },
+            ].map(({ label, value, valueColor }) => (
+              <div key={label} className="flex items-center justify-between">
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span>
+                <span style={{ fontSize: 11, color: valueColor, fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-2">
-          {[
-            { label: "Status", value: "Online", valueColor: "var(--color-success)" },
-            { label: "Role", value: user?.role || "—", valueColor: "var(--accent-primary)" },
-            { label: "Version", value: "MHIP v2.0", valueColor: "var(--text-primary)" },
-          ].map(({ label, value, valueColor }) => (
-            <div key={label} className="flex items-center justify-between">
-              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span>
-              <span style={{ fontSize: 11, color: valueColor, fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      </PanelSection>
 
-      {/* Help */}
-      <div>
-        <div className="flex items-center gap-1.5 mb-2 px-1">
-          <HelpCircle size={10} style={{ color: "var(--text-muted)" }} />
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Resources</span>
-        </div>
+      {/* Resources */}
+      <PanelSection title="Resources" icon={HelpCircle} defaultOpen={false}>
         <div className="right-panel-widget" style={{ padding: 10 }}>
           <div className="text-xs" style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
             BC Métis Health Intelligence Platform — powered by MNBC and AI-driven analytics.
           </div>
         </div>
-      </div>
+      </PanelSection>
     </div>
   );
 }
