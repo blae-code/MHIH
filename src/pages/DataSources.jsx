@@ -10,6 +10,7 @@ import StatsCanWDSBrowser from "@/components/datasources/StatsCanWDSBrowser";
 import HealthInfobaseBrowser from "@/components/datasources/HealthInfobaseBrowser";
 import HealthCanadaDPDBrowser from "@/components/datasources/HealthCanadaDPDBrowser";
 import HealthCanadaCNFBrowser from "@/components/datasources/HealthCanadaCNFBrowser";
+import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
