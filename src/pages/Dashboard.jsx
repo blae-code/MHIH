@@ -281,13 +281,9 @@ export default function Dashboard() {
       </div>
     ),
     category_pie: isVisible("category_pie") && (
-      <div key="category_pie" className="metric-card">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Metrics by Category</div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Distribution across health indicator categories</div>
-          </div>
-        </div>
+      <div key="category_pie" className="dashboard-widget-card">
+        <div className="dashboard-section-label mb-3">Metrics by Category</div>
+        <div className="text-xs mb-4 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>Distribution across health indicator categories</div>
         {categoryData.length > 0 ? (
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
