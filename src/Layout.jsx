@@ -639,10 +639,6 @@ export default function Layout({ children, currentPageName }) {
             <span style={{ color: "var(--text-muted)", fontSize: 11 }}>
               {new Date().toLocaleDateString("en-CA")}
             </span>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: "rgba(0,230,118,0.06)", border: "1px solid rgba(0,230,118,0.15)" }}>
-              <span className="status-dot active pulse-live" />
-              <span style={{ color: "var(--color-success)", fontSize: 10, fontWeight: 600, letterSpacing: "0.04em" }}>LIVE</span>
-            </div>
           </div>
         </footer>
 
