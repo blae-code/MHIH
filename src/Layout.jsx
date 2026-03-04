@@ -522,15 +522,14 @@ export default function Layout({ children, currentPageName }) {
           </main>
 
           {/* ══ RIGHT PANEL ══ */}
-          {rightPanelOpen ? (
-            <aside
-              className="flex flex-col shrink-0 overflow-hidden"
-              style={{
-                width: "var(--panel-right)",
-                background: "var(--bg-surface)",
-                borderLeft: "1px solid var(--border-subtle)",
-              }}
-            >
+          <aside
+            className={`panel-drawer flex flex-col shrink-0 ${rightPanelOpen ? "open" : "closed"}`}
+            style={{
+              width: rightPanelOpen ? "var(--panel-right)" : 0,
+              background: "var(--bg-surface)",
+              borderLeft: rightPanelOpen ? "1px solid var(--border-subtle)" : "none",
+            }}
+          >
               {/* Panel header */}
               <div className="flex items-center justify-between px-3 py-2 shrink-0"
                 style={{ borderBottom: "1px solid var(--border-subtle)" }}>
