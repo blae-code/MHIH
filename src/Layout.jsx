@@ -871,55 +871,6 @@ function RightPanelDefault({ user, isAdmin }) {
   return (
     <div className="space-y-3">
 
-      {/* ── Hero identity card ── */}
-      <div className="rounded-xl overflow-hidden relative" style={{
-        background: "linear-gradient(135deg, #05112a 0%, #081e3d 60%, #0d2a1a 100%)",
-        border: "1px solid rgba(254,221,0,0.14)",
-        boxShadow: "0 0 30px rgba(254,221,0,0.04) inset"
-      }}>
-        {/* Decorative glow orb */}
-        <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "rgba(254,221,0,0.07)", filter: "blur(18px)", pointerEvents: "none" }} />
-        <div className="px-3 pt-3 pb-2.5 relative">
-          <div className="flex items-center gap-2.5 mb-2.5">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold"
-                style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.2) 0%, rgba(254,221,0,0.08) 100%)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.15)" }}>
-                {user?.full_name?.[0] || "?"}
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
-                style={{ background: "var(--color-success)", borderColor: "#05112a", boxShadow: "0 0 6px rgba(0,230,118,0.6)" }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "Loading..."}</div>
-              {user?.role === "admin" ? (
-                <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
-              ) : (
-                <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "viewer"}</span>
-              )}
-            </div>
-          </div>
-
-          {/* Live clock */}
-          <div className="flex items-end justify-between">
-            <div>
-              <LiveClock />
-              <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 1 }}>
-                {now.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
-              </div>
-            </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ background: "rgba(0,230,118,0.08)", border: "1px solid rgba(0,230,118,0.2)" }}>
-              <span className="status-dot active pulse-live" style={{ width: 5, height: 5 }} />
-              <span style={{ fontSize: 9, color: "var(--color-success)", fontWeight: 700, letterSpacing: "0.06em" }}>LIVE</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Greeting strip */}
-        <div className="px-3 py-1.5" style={{ background: "rgba(254,221,0,0.04)", borderTop: "1px solid rgba(254,221,0,0.08)" }}>
-          <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{greeting}, <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>{user?.full_name?.split(" ")[0] || "there"}</span></span>
-        </div>
-      </div>
-
       {/* ── Live platform stats ── */}
       <PanelSection title="Platform Pulse" icon={Activity} iconColor="#00e676">
         <div className="space-y-1.5">
