@@ -63,6 +63,7 @@ export default function Dashboard() {
   const [pinnedIds, setPinnedIds] = useState(() => prefs?.pinnedIds || []);
   const [visibleStatCards, setVisibleStatCards] = useState(() => prefs?.visibleStatCards || ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [regeneratingInsights, setRegeneratingInsights] = useState(false);
 
   useEffect(() => {
     Promise.all([
