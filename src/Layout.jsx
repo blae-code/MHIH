@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
+import React, { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -7,67 +7,98 @@ import {
   Search, Bell, ChevronRight, Activity, AlertCircle, CheckCircle,
   Info, X, Zap, FileDown, Upload, BookOpen, Shield, HelpCircle,
   FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot,
-  MapPin, TrendingUp, Wrench, BellRing, Workflow
+  MapPin, TrendingUp, Wrench, BellRing, Workflow, PanelLeftClose,
+  PanelLeftOpen, Sparkles, LogOut, User, Circle
 } from "lucide-react";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
 
-const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", section: "main", tooltip: "Platform overview & KPIs" },
-  { icon: Database, label: "Data Repository", page: "DataRepository", section: "main", tooltip: "Browse all health metrics" },
-  { icon: BarChart3, label: "Visualizations", page: "Visualizations", section: "main", tooltip: "Charts, maps & trend views" },
-  { icon: Brain, label: "AI Insights", page: "AIInsights", section: "main", tooltip: "AI-generated health analysis" },
-  { icon: Brain, label: "AI Data Analyst", page: "DataAnalyst", section: "main", tooltip: "Ask questions about your data" },
-  { icon: BookOpen, label: "Data Sources", page: "DataSources", section: "data", tooltip: "Manage external data connections" },
-  { icon: Database, label: "My Data Sources", page: "MyDataSources", section: "data", tooltip: "Your personal data imports" },
-  { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", section: "data", tooltip: "Review flags & quality issues" },
-  { icon: Bot, label: "AI Agents", page: "AgentCenter", section: "data", tooltip: "Automated agent tasks & runs" },
-  { icon: FileDown, label: "Export", page: "Export", section: "data", tooltip: "Download data as CSV or PDF" },
-  { icon: TrendingUp, label: "Predictive Analytics", page: "PredictiveAnalytics", section: "analytics", tooltip: "Forecasts & trend modelling" },
-  { icon: MapPin, label: "Geo Map", page: "GeoMap", section: "analytics", tooltip: "Regional health data map" },
-  { icon: BellRing, label: "Alerts", page: "Alerts", section: "analytics", tooltip: "Threshold alerts & notifications" },
-  { icon: Wrench, label: "Data Prep", page: "DataPrep", section: "analytics", tooltip: "Clean & transform data" },
-  { icon: Workflow, label: "Workflows", page: "Workflows", section: "analytics", tooltip: "Automated data pipelines" },
-  { icon: Shield, label: "Governance", page: "DataGovernance", section: "analytics", tooltip: "Audit logs & data policies" },
-  { icon: Users, label: "Team", page: "Team", adminOnly: true, section: "admin", tooltip: "Manage team members & roles" },
-  { icon: Shield, label: "Admin", page: "Admin", adminOnly: true, section: "admin", tooltip: "System administration panel" },
-  { icon: Settings, label: "Settings", page: "Settings", section: "system", tooltip: "App preferences & configuration" },
+const NAV_SECTIONS = [
+  {
+    key: "main", label: "Workspace", color: "#FEDD00",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", tooltip: "Platform overview & KPIs" },
+      { icon: Database, label: "Data Repository", page: "DataRepository", tooltip: "Browse all health metrics" },
+      { icon: BarChart3, label: "Visualizations", page: "Visualizations", tooltip: "Charts, maps & trend views" },
+      { icon: Brain, label: "AI Insights", page: "AIInsights", tooltip: "AI-generated health analysis" },
+      { icon: Sparkles, label: "AI Analyst", page: "DataAnalyst", tooltip: "Ask questions about your data" },
+    ]
+  },
+  {
+    key: "data", label: "Data", color: "#40c4ff",
+    items: [
+      { icon: BookOpen, label: "Data Sources", page: "DataSources", tooltip: "Manage external data connections" },
+      { icon: Database, label: "My Sources", page: "MyDataSources", tooltip: "Your personal data imports" },
+      { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", tooltip: "Review flags & quality issues" },
+      { icon: Bot, label: "AI Agents", page: "AgentCenter", tooltip: "Automated agent tasks & runs" },
+      { icon: FileDown, label: "Export", page: "Export", tooltip: "Download data as CSV or PDF" },
+    ]
+  },
+  {
+    key: "analytics", label: "Analytics", color: "#00e676",
+    items: [
+      { icon: TrendingUp, label: "Predictive", page: "PredictiveAnalytics", tooltip: "Forecasts & trend modelling" },
+      { icon: MapPin, label: "Geo Map", page: "GeoMap", tooltip: "Regional health data map" },
+      { icon: BellRing, label: "Alerts", page: "Alerts", tooltip: "Threshold alerts & notifications" },
+      { icon: Wrench, label: "Data Prep", page: "DataPrep", tooltip: "Clean & transform data" },
+      { icon: Workflow, label: "Workflows", page: "Workflows", tooltip: "Automated data pipelines" },
+      { icon: Shield, label: "Governance", page: "DataGovernance", tooltip: "Audit logs & data policies" },
+    ]
+  },
+  {
+    key: "admin", label: "Administration", color: "#ffab40", adminOnly: true,
+    items: [
+      { icon: Users, label: "Team", page: "Team", tooltip: "Manage team members & roles" },
+      { icon: Shield, label: "Admin", page: "Admin", tooltip: "System administration panel" },
+    ]
+  },
+  {
+    key: "system", label: "System", color: "#8b8fa8",
+    items: [
+      { icon: Settings, label: "Settings", page: "Settings", tooltip: "App preferences & configuration" },
+    ]
+  },
 ];
 
+const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items.map(i => ({ ...i, section: s.key })));
+
 const COMMAND_ITEMS = [
-  { label: "Go to Dashboard", page: "Dashboard", icon: LayoutDashboard },
-  { label: "Open Data Repository", page: "DataRepository", icon: Database },
-  { label: "Manage Data Sources", page: "DataSources", icon: FolderOpen },
-  { label: "My Data Sources", page: "MyDataSources", icon: Database },
-  { label: "Data Quality Monitor", page: "DataQuality", icon: ShieldCheck },
-  { label: "AI Agent Center", page: "AgentCenter", icon: Bot },
-  { label: "View Visualizations", page: "Visualizations", icon: LineChart },
-  { label: "AI Insights & Analysis", page: "AIInsights", icon: Brain },
-  { label: "AI Data Analyst", page: "DataAnalyst", icon: Brain },
-  { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp },
-  { label: "Geo Map", page: "GeoMap", icon: MapPin },
-  { label: "Alerts", page: "Alerts", icon: BellRing },
-  { label: "Data Prep", page: "DataPrep", icon: Wrench },
-  { label: "Workflows & Automation", page: "Workflows", icon: Workflow },
-  { label: "Data Governance", page: "DataGovernance", icon: Shield },
-  { label: "Export Data", page: "Export", icon: FileDown },
-  { label: "Team Management", page: "Team", icon: Users },
-  { label: "Admin Panel", page: "Admin", icon: Shield },
-  { label: "Settings", page: "Settings", icon: Settings },
+  { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, desc: "Platform overview & KPIs" },
+  { label: "Data Repository", page: "DataRepository", icon: Database, desc: "Browse all health metrics" },
+  { label: "Data Sources", page: "DataSources", icon: FolderOpen, desc: "Manage external connections" },
+  { label: "My Data Sources", page: "MyDataSources", icon: Database, desc: "Your personal imports" },
+  { label: "Data Quality", page: "DataQuality", icon: ShieldCheck, desc: "Review flags & issues" },
+  { label: "AI Agents", page: "AgentCenter", icon: Bot, desc: "Automated agent tasks" },
+  { label: "Visualizations", page: "Visualizations", icon: LineChart, desc: "Charts & trend views" },
+  { label: "AI Insights", page: "AIInsights", icon: Brain, desc: "AI-generated analysis" },
+  { label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, desc: "Ask questions about data" },
+  { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp, desc: "Forecasts & modelling" },
+  { label: "Geo Map", page: "GeoMap", icon: MapPin, desc: "Regional health map" },
+  { label: "Alerts", page: "Alerts", icon: BellRing, desc: "Threshold notifications" },
+  { label: "Data Prep", page: "DataPrep", icon: Wrench, desc: "Clean & transform data" },
+  { label: "Workflows", page: "Workflows", icon: Workflow, desc: "Automated pipelines" },
+  { label: "Data Governance", page: "DataGovernance", icon: Shield, desc: "Audit logs & policies" },
+  { label: "Export Data", page: "Export", icon: FileDown, desc: "Download CSV or PDF" },
+  { label: "Team Management", page: "Team", icon: Users, desc: "Manage team & roles" },
+  { label: "Admin Panel", page: "Admin", icon: Shield, desc: "System administration" },
+  { label: "Settings", page: "Settings", icon: Settings, desc: "App preferences" },
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const location = useLocation();
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [cmdQuery, setCmdQuery] = useState("");
+  const [cmdIndex, setCmdIndex] = useState(0);
   const [statusLogs, setStatusLogs] = useState([
     { type: "success", msg: "System initialized", time: new Date().toLocaleTimeString() }
   ]);
   const [contextPanel, setContextPanel] = useState(null);
+  const [collapsedSections, setCollapsedSections] = useState({});
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const cmdInputRef = useRef(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -80,38 +111,49 @@ export default function Layout({ children, currentPageName }) {
     ]);
   }, []);
 
-  // Keyboard shortcut: Ctrl/Cmd + P or Ctrl/Cmd + K
   useEffect(() => {
     const handler = (e) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === "p" || e.key === "k")) {
         e.preventDefault();
         setCmdOpen(v => !v);
+        setCmdQuery("");
+        setCmdIndex(0);
       }
-      if (e.key === "Escape") setCmdOpen(false);
+      if (e.key === "Escape") { setCmdOpen(false); setUserMenuOpen(false); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
   const isAdmin = user?.role === "admin";
-  const filteredNav = NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
+  const visibleSections = NAV_SECTIONS.filter(s => !s.adminOnly || isAdmin);
+
   const filteredCmds = COMMAND_ITEMS.filter(c =>
-    c.label.toLowerCase().includes(cmdQuery.toLowerCase())
+    c.label.toLowerCase().includes(cmdQuery.toLowerCase()) ||
+    c.desc.toLowerCase().includes(cmdQuery.toLowerCase())
   );
 
-  const sections = [
-    { key: "main", label: "WORKSPACE" },
-    { key: "data", label: "DATA" },
-    { key: "analytics", label: "ANALYTICS" },
-    ...(isAdmin ? [{ key: "admin", label: "ADMINISTRATION" }] : []),
-    { key: "system", label: "SYSTEM" },
-  ];
+  // Keyboard nav for command palette
+  const handleCmdKey = (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setCmdIndex(i => Math.min(i + 1, filteredCmds.length - 1)); }
+    if (e.key === "ArrowUp") { e.preventDefault(); setCmdIndex(i => Math.max(i - 1, 0)); }
+    if (e.key === "Enter" && filteredCmds[cmdIndex]) {
+      window.location.href = createPageUrl(filteredCmds[cmdIndex].page);
+      setCmdOpen(false);
+    }
+  };
+
+  useEffect(() => { setCmdIndex(0); }, [cmdQuery]);
 
   const lastLog = statusLogs[0];
-  const logColor = lastLog?.type === "error" ? "text-red-400"
-    : lastLog?.type === "warning" ? "text-yellow-400"
-    : lastLog?.type === "success" ? "text-green-400"
-    : "text-blue-400";
+  const logColor = lastLog?.type === "error" ? "#ff4d4f"
+    : lastLog?.type === "warning" ? "#faad14"
+    : lastLog?.type === "success" ? "#52c41a"
+    : "#40c4ff";
+
+  const currentSection = visibleSections.find(s => s.items.some(i => i.page === currentPageName));
+
+  const toggleSection = (key) => setCollapsedSections(p => ({ ...p, [key]: !p[key] }));
 
   return (
     <AppContext.Provider value={{ user, addLog, setContextPanel, contextPanel }}>
@@ -136,225 +178,494 @@ export default function Layout({ children, currentPageName }) {
           --ring: 52 100% 50% !important;
         }
         body { background-color: #03080f !important; color: #f0f6ff !important; }
+
+        .sidebar-nav-item {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 5px 10px 5px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          font-size: 12.5px;
+          font-weight: 500;
+          color: var(--text-secondary);
+          position: relative;
+          overflow: hidden;
+        }
+        .sidebar-nav-item:hover {
+          background: rgba(255,255,255,0.04);
+          color: var(--text-primary);
+        }
+        .sidebar-nav-item.active {
+          background: rgba(254,221,0,0.07);
+          color: #f0f6ff;
+          font-weight: 600;
+        }
+        .sidebar-nav-item.active::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 20%;
+          bottom: 20%;
+          width: 2.5px;
+          border-radius: 0 2px 2px 0;
+          background: var(--mnbc-yellow);
+          box-shadow: 0 0 8px rgba(254,221,0,0.5);
+        }
+        .sidebar-nav-item .nav-icon {
+          opacity: 0.6;
+          transition: opacity 0.15s;
+          flex-shrink: 0;
+        }
+        .sidebar-nav-item:hover .nav-icon,
+        .sidebar-nav-item.active .nav-icon {
+          opacity: 1;
+        }
+
+        .quick-action-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 10px;
+          border-radius: 7px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all 0.15s;
+          border: 1px solid transparent;
+          background: var(--bg-overlay);
+        }
+        .quick-action-btn:hover {
+          background: var(--bg-hover);
+          color: var(--text-primary);
+          border-color: var(--border-default);
+        }
+
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        .pulse-live { animation: pulse-dot 2s ease-in-out infinite; }
+
+        .cmd-item-hover:hover { background: var(--bg-hover) !important; }
+        .cmd-item-selected { background: var(--bg-hover) !important; }
+
+        .sidebar-section-toggle {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 10px;
+          cursor: pointer;
+          user-select: none;
+          border-radius: 4px;
+          transition: background 0.12s;
+        }
+        .sidebar-section-toggle:hover { background: rgba(255,255,255,0.03); }
+
+        .right-panel-widget {
+          border-radius: 8px;
+          border: 1px solid var(--border-subtle);
+          background: var(--bg-elevated);
+          padding: 12px;
+          transition: border-color 0.2s;
+        }
+        .right-panel-widget:hover { border-color: var(--border-default); }
+
+        .header-search-btn {
+          transition: all 0.15s;
+        }
+        .header-search-btn:hover {
+          background: var(--bg-overlay) !important;
+          border-color: var(--border-default) !important;
+        }
       `}</style>
+
       <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
 
-        {/* ── HEADER / COMMAND BAR ── */}
-        <header className="flex items-center justify-between px-3 shrink-0 z-50 border-b"
-          style={{ height: "var(--header-height)", background: "var(--bg-surface)", borderColor: "var(--border-default)", boxShadow: "0 1px 0 rgba(254,221,0,0.06)" }}>
-          {/* Left: Logo + App name */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold"
-                style={{ background: "var(--mnbc-yellow)", color: "var(--mnbc-blue)" }}>M</div>
-              <span className="whitespace-nowrap" style={{ color: "var(--text-primary)", fontFamily: "'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.05em" }}>
-                MHIP
-              </span>
+        {/* ══ HEADER ══ */}
+        <header
+          className="flex items-center justify-between px-4 shrink-0 z-50"
+          style={{
+            height: "var(--header-height)",
+            background: "var(--bg-surface)",
+            borderBottom: "1px solid var(--border-subtle)",
+            boxShadow: "0 1px 12px rgba(0,0,0,0.4)"
+          }}
+        >
+          {/* Brand */}
+          <div className="flex items-center gap-3 min-w-0" style={{ minWidth: sidebarOpen ? "var(--panel-left)" : "auto" }}>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className="relative">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm"
+                  style={{
+                    background: "linear-gradient(135deg, #FEDD00 0%, #e6c000 100%)",
+                    color: "#04245a",
+                    boxShadow: "0 2px 8px rgba(254,221,0,0.35), inset 0 1px 0 rgba(255,255,255,0.3)"
+                  }}>
+                  M
+                </div>
+              </div>
+              <div>
+                <div style={{ fontFamily: "'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif", fontWeight: 800, fontSize: 15, letterSpacing: "0.08em", color: "var(--text-primary)", lineHeight: 1 }}>
+                  MHIP
+                </div>
+                <div style={{ fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.06em", lineHeight: 1, marginTop: 2 }}>
+                  HEALTH INTELLIGENCE
+                </div>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
-              <ChevronRight size={12} />
-              <span style={{ color: "var(--text-secondary)" }}>{currentPageName}</span>
-            </div>
+
+            {/* Sidebar toggle */}
+            <button
+              onClick={() => setSidebarOpen(v => !v)}
+              className="activity-icon shrink-0"
+              style={{ width: 28, height: 28, marginLeft: 4 }}
+              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              {sidebarOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+            </button>
           </div>
 
-          {/* Center: Command palette trigger */}
-          <button
-            onClick={() => setCmdOpen(true)}
-            className="hidden md:flex items-center gap-2 px-3 py-1 rounded-md text-xs transition-colors"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)", width: 260 }}>
-            <Search size={12} />
-            <span className="flex-1 text-left">Search or run command...</span>
-            <span className="text-xs px-1 rounded" style={{ background: "var(--bg-overlay)", fontSize: 10 }}>⌘K</span>
-          </button>
+          {/* Breadcrumb + Search center */}
+          <div className="flex-1 flex items-center justify-center gap-3 mx-4">
+            {/* Breadcrumb pill */}
+            {currentSection && (
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}>
+                <span style={{ color: currentSection.color, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{currentSection.label}</span>
+                <ChevronRight size={10} style={{ opacity: 0.5 }} />
+                <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{currentPageName?.replace(/([A-Z])/g, ' $1').trim()}</span>
+              </div>
+            )}
 
-          {/* Right: Controls */}
-          <div className="flex items-center gap-1">
-            <button onClick={() => setCmdOpen(true)} className="md:hidden activity-icon">
+            {/* Command search */}
+            <button
+              onClick={() => { setCmdOpen(true); setTimeout(() => cmdInputRef.current?.focus(), 50); }}
+              className="header-search-btn hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-muted)",
+                width: 220
+              }}>
+              <Search size={12} style={{ opacity: 0.6 }} />
+              <span className="flex-1 text-left">Quick search...</span>
+              <div className="flex items-center gap-0.5">
+                <kbd style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", fontSize: 9, padding: "1px 4px", borderRadius: 3, border: "1px solid var(--border-subtle)", fontFamily: "monospace" }}>⌘K</kbd>
+              </div>
+            </button>
+          </div>
+
+          {/* Right controls */}
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => setCmdOpen(true)} className="md:hidden activity-icon" title="Search">
               <Search size={15} />
             </button>
-            <button className="activity-icon" title="Notifications">
+
+            <button className="activity-icon relative" title="Notifications">
               <Bell size={15} />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-error)" }} />
             </button>
-            <div className="flex items-center gap-2 px-2 py-1 rounded-md ml-1"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-              <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{ background: "var(--accent-muted)", color: "var(--accent-primary)" }}>
-                {user?.full_name?.[0] || "?"}
-              </div>
-              <span className="text-xs hidden md:block" style={{ color: "var(--text-secondary)" }}>
-                {user?.full_name?.split(" ")[0] || "Loading..."}
-              </span>
-              {isAdmin && (
-                <span className="text-xs px-1 rounded" style={{ background: "var(--accent-muted)", color: "var(--accent-primary)", fontSize: 9 }}>
-                  ADMIN
-                </span>
+
+            {/* User menu */}
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(v => !v)}
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all ml-1"
+                style={{
+                  background: userMenuOpen ? "var(--bg-overlay)" : "var(--bg-elevated)",
+                  border: `1px solid ${userMenuOpen ? "var(--border-default)" : "var(--border-subtle)"}`,
+                  cursor: "pointer"
+                }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
+                  {user?.full_name?.[0] || "?"}
+                </div>
+                <div className="hidden md:block text-left">
+                  <div className="text-xs font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
+                    {user?.full_name?.split(" ")[0] || "Loading"}
+                  </div>
+                  {isAdmin && (
+                    <div className="text-xs leading-tight" style={{ color: "var(--mnbc-yellow)", fontSize: 9, letterSpacing: "0.05em" }}>ADMIN</div>
+                  )}
+                </div>
+                <ChevronRight size={11} style={{ color: "var(--text-muted)", transform: userMenuOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }} />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-50 min-w-44"
+                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+                  <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+                    <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{user?.full_name || "User"}</div>
+                    <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.email || ""}</div>
+                  </div>
+                  <div className="py-1">
+                    <Link to={createPageUrl("Settings")} onClick={() => setUserMenuOpen(false)}>
+                      <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
+                        style={{ color: "var(--text-secondary)" }}
+                        onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                        onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                        <Settings size={12} />
+                        Settings
+                      </div>
+                    </Link>
+                    <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
+                      style={{ color: "var(--color-error)" }}
+                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                      onClick={() => base44.auth.logout()}>
+                      <LogOut size={12} />
+                      Sign out
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </header>
 
-        {/* ── BODY ── */}
-        <div className="flex flex-1 overflow-hidden">
+        {/* ══ BODY ══ */}
+        <div className="flex flex-1 overflow-hidden" onClick={() => userMenuOpen && setUserMenuOpen(false)}>
 
-          {/* ── ACTIVITY BAR (icon strip) ── */}
-          <div className="flex flex-col items-center py-2 gap-0.5 shrink-0 border-r z-40"
-            style={{ width: 48, background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-            {filteredNav.map(item => (
-              <Link key={item.page} to={createPageUrl(item.page)} title={item.tooltip || item.label}>
-                <div className={`activity-icon ${currentPageName === item.page ? "active" : ""}`}>
-                  <item.icon size={17} />
-                </div>
-              </Link>
-            ))}
-            <div className="flex-1" />
-            <button className="activity-icon" title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"} onClick={() => setSidebarOpen(v => !v)}>
-              {sidebarOpen ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
-            </button>
-          </div>
-
-          {/* ── LEFT SIDEBAR ── */}
+          {/* ══ LEFT SIDEBAR ══ */}
           {sidebarOpen && (
-            <aside className="flex flex-col shrink-0 border-r overflow-hidden"
-              style={{ width: "var(--panel-left)", background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-              <div className="flex items-center justify-between px-3 py-2 border-b"
-                style={{ borderColor: "var(--border-subtle)" }}>
-                <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-                  Navigation
-                </span>
-              </div>
-              <nav className="flex-1 overflow-y-auto py-2 px-2">
-                {sections.map(sec => {
-                  const items = filteredNav.filter(n => n.section === sec.key);
-                  if (!items.length) return null;
+            <aside
+              className="flex flex-col shrink-0 overflow-hidden"
+              style={{
+                width: "var(--panel-left)",
+                background: "var(--bg-surface)",
+                borderRight: "1px solid var(--border-subtle)",
+              }}
+            >
+              {/* Nav */}
+              <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+                {visibleSections.map(sec => {
+                  const collapsed = collapsedSections[sec.key];
                   return (
-                    <div key={sec.key} className="mb-3">
-                      <div className="px-2 pt-2 pb-1 text-xs font-semibold tracking-widest uppercase"
-                        style={{ color: "var(--mnbc-yellow)", fontSize: 9, opacity: 0.65, letterSpacing: "0.14em" }}>{sec.label}</div>
-                      {items.map(item => (
-                        <Link key={item.page} to={createPageUrl(item.page)} title={item.tooltip}>
-                          <div className={`nav-item ${currentPageName === item.page ? "active" : ""}`}>
-                            <item.icon size={13} style={{ flexShrink: 0 }} />
-                            <span className="nav-label truncate">{item.label}</span>
-                          </div>
-                        </Link>
-                      ))}
+                    <div key={sec.key} className="mb-1">
+                      {/* Section header */}
+                      <div
+                        className="sidebar-section-toggle"
+                        onClick={() => toggleSection(sec.key)}
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sec.color, boxShadow: `0 0 4px ${sec.color}80` }} />
+                        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", flex: 1 }}>{sec.label}</span>
+                        <ChevronRight
+                          size={11}
+                          style={{
+                            color: "var(--text-muted)",
+                            transform: collapsed ? "rotate(0deg)" : "rotate(90deg)",
+                            transition: "transform 0.15s",
+                            opacity: 0.5
+                          }}
+                        />
+                      </div>
+
+                      {/* Items */}
+                      {!collapsed && (
+                        <div className="mt-0.5 space-y-0.5 pl-1">
+                          {sec.items.map(item => (
+                            <Link key={item.page} to={createPageUrl(item.page)} title={item.tooltip}>
+                              <div className={`sidebar-nav-item ${currentPageName === item.page ? "active" : ""}`}>
+                                <item.icon size={13} className="nav-icon" style={{ color: currentPageName === item.page ? sec.color : undefined }} />
+                                <span className="truncate">{item.label}</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </nav>
-              {/* Sidebar footer — user info */}
-              <div className="px-3 py-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{ background: "var(--accent-muted)", color: "var(--accent-primary)" }}>
-                    {user?.full_name?.[0] || "?"}
-                  </div>
-                  <div className="overflow-hidden">
-                    <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
-                      {user?.full_name || "..."}
+
+              {/* Sidebar footer */}
+              <div className="px-3 py-3 shrink-0" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                <div className="flex items-center gap-2.5">
+                  <div className="relative shrink-0">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={{ background: "rgba(254,221,0,0.12)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.2)" }}>
+                      {user?.full_name?.[0] || "?"}
                     </div>
-                    <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 10 }}>
-                      {user?.role || "viewer"}
-                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border" style={{ background: "var(--color-success)", borderColor: "var(--bg-surface)" }} />
                   </div>
+                  <div className="overflow-hidden flex-1 min-w-0">
+                    <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "..."}</div>
+                    <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 10, textTransform: "capitalize" }}>{user?.role || "viewer"}</div>
+                  </div>
+                  <Link to={createPageUrl("Settings")} title="Settings">
+                    <div className="activity-icon shrink-0" style={{ width: 26, height: 26 }}>
+                      <Settings size={13} />
+                    </div>
+                  </Link>
                 </div>
               </div>
             </aside>
           )}
 
-          {/* ── MAIN WORKSPACE ── */}
+          {/* ══ MAIN ══ */}
           <main className="flex-1 overflow-auto relative" style={{ background: "var(--bg-base)" }}>
             {children}
           </main>
 
-          {/* ── RIGHT PANEL (contextual) ── */}
-          {rightPanelOpen && (
-            <aside className="flex flex-col shrink-0 border-l overflow-hidden"
-              style={{ width: "var(--panel-right)", background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-              <div className="flex items-center justify-between px-3 py-2 border-b"
-                style={{ borderColor: "var(--border-subtle)" }}>
-                <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-                  {contextPanel?.title || "Tools & Options"}
-                </span>
-                <button onClick={() => setRightPanelOpen(false)} className="activity-icon" style={{ width: 24, height: 24 }}>
-                  <X size={13} />
+          {/* ══ RIGHT PANEL ══ */}
+          {rightPanelOpen ? (
+            <aside
+              className="flex flex-col shrink-0 overflow-hidden"
+              style={{
+                width: "var(--panel-right)",
+                background: "var(--bg-surface)",
+                borderLeft: "1px solid var(--border-subtle)",
+              }}
+            >
+              {/* Panel header */}
+              <div className="flex items-center justify-between px-3 py-2 shrink-0"
+                style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded flex items-center justify-center" style={{ background: "rgba(254,221,0,0.1)" }}>
+                    <Zap size={10} style={{ color: "var(--mnbc-yellow)" }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", color: "var(--text-secondary)", textTransform: "uppercase" }}>
+                    {contextPanel?.title || "Tools"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setRightPanelOpen(false)}
+                  className="activity-icon"
+                  style={{ width: 22, height: 22 }}
+                  title="Close panel"
+                >
+                  <X size={12} />
                 </button>
               </div>
+
               <div className="flex-1 overflow-y-auto p-3">
-                {contextPanel?.content || <RightPanelDefault user={user} addLog={addLog} />}
+                {contextPanel?.content || <RightPanelDefault user={user} addLog={addLog} isAdmin={isAdmin} />}
               </div>
             </aside>
-          )}
-          {!rightPanelOpen && (
-            <button onClick={() => setRightPanelOpen(true)}
-              className="shrink-0 flex items-center justify-center border-l"
-              style={{ width: 24, background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
-              title="Open Tools panel">
-              <SlidersHorizontal size={13} style={{ color: "var(--text-muted)" }} />
+          ) : (
+            <button
+              onClick={() => setRightPanelOpen(true)}
+              className="shrink-0 flex items-center justify-center"
+              style={{
+                width: 22,
+                background: "var(--bg-surface)",
+                borderLeft: "1px solid var(--border-subtle)",
+                cursor: "pointer"
+              }}
+              title="Open Tools panel"
+            >
+              <SlidersHorizontal size={11} style={{ color: "var(--text-muted)" }} />
             </button>
           )}
         </div>
 
-        {/* ── FOOTER / STATUS BAR ── */}
-        <footer className="flex items-center px-4 gap-4 shrink-0 border-t overflow-hidden"
-          style={{ height: "var(--footer-height)", background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
+        {/* ══ STATUS BAR ══ */}
+        <footer
+          className="flex items-center px-4 gap-4 shrink-0 overflow-hidden"
+          style={{
+            height: "var(--footer-height)",
+            background: "var(--bg-surface)",
+            borderTop: "1px solid var(--border-subtle)",
+          }}
+        >
+          {/* Log message */}
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            {lastLog?.type === "error" ? <AlertCircle size={10} className="text-red-400 shrink-0" />
-              : lastLog?.type === "success" ? <CheckCircle size={10} className="text-green-400 shrink-0" />
-              : <Info size={10} className="text-blue-400 shrink-0" />}
-            <span className={`truncate ${logColor}`} style={{ fontSize: 11 }} title={lastLog?.msg}>{lastLog?.msg}</span>
-            {lastLog?.time && <span className="shrink-0" style={{ color: "var(--text-muted)", fontSize: 10 }}>{lastLog.time}</span>}
+            <Circle size={6} className="shrink-0 pulse-live" style={{ color: logColor, fill: logColor }} />
+            <span className="truncate" style={{ fontSize: 11, color: logColor, opacity: 0.9 }} title={lastLog?.msg}>{lastLog?.msg}</span>
+            {lastLog?.time && (
+              <span className="shrink-0 ml-1" style={{ color: "var(--text-muted)", fontSize: 10 }}>{lastLog.time}</span>
+            )}
           </div>
+
+          {/* Right side */}
           <div className="flex items-center gap-3 shrink-0">
             <span style={{ color: "var(--text-muted)", fontSize: 11 }}>
               {new Date().toLocaleDateString("en-CA")}
             </span>
-            <div className="flex items-center gap-1.5" title="System online">
-              <span className="status-dot active" />
-              <span style={{ color: "var(--text-muted)", fontSize: 11 }}>MHIP · Online</span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: "rgba(0,230,118,0.06)", border: "1px solid rgba(0,230,118,0.15)" }}>
+              <span className="status-dot active pulse-live" />
+              <span style={{ color: "var(--color-success)", fontSize: 10, fontWeight: 600, letterSpacing: "0.04em" }}>LIVE</span>
             </div>
           </div>
         </footer>
 
-        {/* ── COMMAND PALETTE ── */}
+        {/* ══ COMMAND PALETTE ══ */}
         {cmdOpen && (
-          <div className="cmd-overlay" onClick={() => setCmdOpen(false)}>
-            <div className="w-full max-w-xl rounded-xl overflow-hidden shadow-2xl"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}
-              onClick={e => e.stopPropagation()}>
-              <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-                <Search size={15} style={{ color: "var(--text-muted)" }} />
+          <div
+            className="cmd-overlay"
+            onClick={() => setCmdOpen(false)}
+          >
+            <div
+              className="w-full max-w-lg rounded-2xl overflow-hidden"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-default)",
+                boxShadow: "0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(254,221,0,0.06)"
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Search input */}
+              <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                <Search size={16} style={{ color: "var(--mnbc-yellow)", flexShrink: 0 }} />
                 <input
+                  ref={cmdInputRef}
                   autoFocus
-                  className="flex-1 bg-transparent outline-none text-sm"
-                  style={{ color: "var(--text-primary)" }}
-                  placeholder="Search or run a command..."
+                  className="flex-1 bg-transparent outline-none"
+                  style={{ color: "var(--text-primary)", fontSize: 14 }}
+                  placeholder="Search pages and commands..."
                   value={cmdQuery}
                   onChange={e => setCmdQuery(e.target.value)}
+                  onKeyDown={handleCmdKey}
                 />
-                <kbd className="text-xs px-2 py-0.5 rounded" style={{ background: "var(--bg-overlay)", color: "var(--text-muted)" }}>ESC</kbd>
-              </div>
-              <div className="max-h-80 overflow-y-auto py-1">
-                {filteredCmds.length === 0 && (
-                  <div className="px-4 py-6 text-center text-sm" style={{ color: "var(--text-muted)" }}>No commands found</div>
+                {cmdQuery && (
+                  <button onClick={() => setCmdQuery("")} className="activity-icon" style={{ width: 20, height: 20 }}>
+                    <X size={12} />
+                  </button>
                 )}
-                {filteredCmds.map(cmd => (
-                  <Link key={cmd.page} to={createPageUrl(cmd.page)} onClick={() => { setCmdOpen(false); setCmdQuery(""); }}>
-                    <div className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors hover:bg-opacity-50"
-                      style={{ color: "var(--text-primary)" }}
-                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                      onMouseOut={e => e.currentTarget.style.background = "transparent"}>
-                      <cmd.icon size={14} style={{ color: "var(--accent-primary)" }} />
-                      <span className="text-sm">{cmd.label}</span>
-                      <ChevronRight size={12} className="ml-auto" style={{ color: "var(--text-muted)" }} />
-                    </div>
-                  </Link>
-                ))}
+                <kbd style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", fontSize: 10, padding: "2px 6px", borderRadius: 4, border: "1px solid var(--border-default)", fontFamily: "monospace", flexShrink: 0 }}>ESC</kbd>
               </div>
-              <div className="px-4 py-2 border-t flex items-center gap-4" style={{ borderColor: "var(--border-subtle)" }}>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}>↑↓ navigate</span>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}>↵ select</span>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}>ESC close</span>
+
+              {/* Results */}
+              <div className="py-1.5 max-h-80 overflow-y-auto">
+                {filteredCmds.length === 0 ? (
+                  <div className="px-4 py-8 text-center" style={{ color: "var(--text-muted)", fontSize: 13 }}>
+                    No results for "{cmdQuery}"
+                  </div>
+                ) : (
+                  filteredCmds.map((cmd, i) => (
+                    <Link
+                      key={cmd.page}
+                      to={createPageUrl(cmd.page)}
+                      onClick={() => { setCmdOpen(false); setCmdQuery(""); }}
+                    >
+                      <div
+                        className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer ${i === cmdIndex ? "cmd-item-selected" : "cmd-item-hover"}`}
+                        style={{ transition: "background 0.1s" }}
+                        onMouseEnter={() => setCmdIndex(i)}
+                      >
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ background: i === cmdIndex ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                          <cmd.icon size={13} style={{ color: i === cmdIndex ? "var(--mnbc-yellow)" : "var(--text-secondary)" }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium leading-tight" style={{ color: "var(--text-primary)" }}>{cmd.label}</div>
+                          <div className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{cmd.desc}</div>
+                        </div>
+                        <ChevronRight size={12} style={{ color: "var(--text-muted)", opacity: i === cmdIndex ? 1 : 0, transition: "opacity 0.1s" }} />
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-4 py-2 flex items-center gap-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}><kbd style={{ fontFamily: "monospace" }}>↑↓</kbd> navigate</span>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}><kbd style={{ fontFamily: "monospace" }}>↵</kbd> open</span>
+                <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>{filteredCmds.length} results</span>
               </div>
             </div>
           </div>
@@ -364,50 +675,85 @@ export default function Layout({ children, currentPageName }) {
   );
 }
 
-function RightPanelDefault({ user, addLog }) {
+function RightPanelDefault({ user, isAdmin }) {
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* User greeting card */}
+      <div className="right-panel-widget" style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.07) 0%, rgba(4,54,115,0.15) 100%)", borderColor: "rgba(254,221,0,0.12)" }}>
+        <div className="flex items-center gap-2.5 mb-2">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+            style={{ background: "rgba(254,221,0,0.15)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.25)" }}>
+            {user?.full_name?.[0] || "?"}
+          </div>
+          <div>
+            <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{greeting}</div>
+            <div className="text-xs" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.full_name?.split(" ")[0] || "User"}</div>
+          </div>
+        </div>
+        <div className="text-xs" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
+          {now.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
       <div>
-        <div className="text-xs font-semibold mb-2 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Quick Actions</div>
-        <div className="space-y-1">
+        <div className="flex items-center gap-1.5 mb-2 px-1">
+          <Zap size={10} style={{ color: "var(--mnbc-yellow)" }} />
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Quick Actions</span>
+        </div>
+        <div className="space-y-1.5">
           {[
-            { icon: Zap, label: "Generate AI Insight", page: "AIInsights" },
-            { icon: Upload, label: "Import Data", page: "DataRepository" },
-            { icon: BarChart3, label: "New Visualization", page: "Visualizations" },
-            { icon: FileDown, label: "Export Report", page: "Export" },
-          ].map(({ icon: Icon, label, page }) => (
+            { icon: Sparkles, label: "Generate AI Insight", page: "AIInsights", color: "#a78bfa" },
+            { icon: Upload, label: "Import Data", page: "DataRepository", color: "#40c4ff" },
+            { icon: BarChart3, label: "New Visualization", page: "Visualizations", color: "#00e676" },
+            { icon: FileDown, label: "Export Report", page: "Export", color: "#ffab40" },
+          ].map(({ icon: Icon, label, page, color }) => (
             <Link key={page} to={createPageUrl(page)}>
-              <div className="nav-item">
-                <Icon size={13} style={{ color: "var(--accent-primary)" }} />
-                <span>{label}</span>
+              <div className="quick-action-btn">
+                <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
+                  <Icon size={12} style={{ color }} />
+                </div>
+                <span className="flex-1">{label}</span>
+                <ChevronRight size={11} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
               </div>
             </Link>
           ))}
         </div>
       </div>
-      <div>
-        <div className="text-xs font-semibold mb-2 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Session</div>
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs">
-            <span style={{ color: "var(--text-muted)" }}>User</span>
-            <span style={{ color: "var(--text-primary)" }}>{user?.full_name?.split(" ")[0] || "—"}</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span style={{ color: "var(--text-muted)" }}>Role</span>
-            <span style={{ color: "var(--accent-primary)", textTransform: "capitalize" }}>{user?.role || "—"}</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span style={{ color: "var(--text-muted)" }}>Date</span>
-            <span style={{ color: "var(--text-primary)" }}>{new Date().toLocaleDateString("en-CA")}</span>
-          </div>
+
+      {/* Session info */}
+      <div className="right-panel-widget">
+        <div className="flex items-center gap-1.5 mb-3">
+          <Activity size={10} style={{ color: "var(--color-success)" }} />
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Session</span>
+        </div>
+        <div className="space-y-2">
+          {[
+            { label: "Status", value: "Online", valueColor: "var(--color-success)" },
+            { label: "Role", value: user?.role || "—", valueColor: "var(--accent-primary)" },
+            { label: "Version", value: "MHIP v2.0", valueColor: "var(--text-primary)" },
+          ].map(({ label, value, valueColor }) => (
+            <div key={label} className="flex items-center justify-between">
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span>
+              <span style={{ fontSize: 11, color: valueColor, fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Help */}
       <div>
-        <div className="text-xs font-semibold mb-2 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Help</div>
-        <div className="space-y-1">
-          <div className="nav-item">
-            <HelpCircle size={13} style={{ color: "var(--text-muted)" }} />
-            <span>Documentation</span>
+        <div className="flex items-center gap-1.5 mb-2 px-1">
+          <HelpCircle size={10} style={{ color: "var(--text-muted)" }} />
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Resources</span>
+        </div>
+        <div className="right-panel-widget" style={{ padding: 10 }}>
+          <div className="text-xs" style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
+            BC Métis Health Intelligence Platform — powered by MNBC and AI-driven analytics.
           </div>
         </div>
       </div>
