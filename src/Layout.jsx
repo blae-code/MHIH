@@ -690,6 +690,20 @@ export default function Layout({ children, currentPageName }) {
         </footer>
 
         {/* ══ COMMAND PALETTE ══ */}
+        {/* Notification Center */}
+        <NotificationCenter 
+          isOpen={notifCenterOpen} 
+          onClose={() => setNotifCenterOpen(false)}
+          user={user}
+        />
+
+        {/* Notification Preferences */}
+        <NotificationPreferences 
+          isOpen={notifPrefsOpen}
+          onClose={() => setNotifPrefsOpen(false)}
+          user={user}
+        />
+
         {cmdOpen && (
           <div
             className="cmd-overlay"
