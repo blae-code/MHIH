@@ -583,8 +583,9 @@ export default function Layout({ children, currentPageName }) {
             className={`panel-drawer flex flex-col shrink-0 ${rightPanelOpen ? "open" : "closed"}`}
             style={{
               width: rightPanelOpen ? "var(--panel-right)" : 0,
-              background: "var(--bg-surface)",
-              borderLeft: rightPanelOpen ? "1px solid var(--border-subtle)" : "none",
+              background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+              borderLeft: rightPanelOpen ? "1px solid var(--border-default)" : "none",
+              boxShadow: rightPanelOpen ? "-2px 0 12px rgba(0,0,0,0.3)" : "none"
             }}
           >
               {/* Panel header */}
