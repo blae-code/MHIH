@@ -510,7 +510,7 @@ export default function Dashboard() {
         .dashboard-widget-card {
           border-radius: 8px;
           border: 1px solid var(--border-subtle);
-          background: linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated));
+          background: #0a1220;
           padding: 16px;
           transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
           position: relative;
