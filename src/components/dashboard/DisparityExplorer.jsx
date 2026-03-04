@@ -322,15 +322,18 @@ function DisparityBar({ data, drill, benchmark }) {
 }
 
 function TrendLine({ data, benchmark }) {
-  const yearMap = {};
-  data.forEach(m => {
-    if (!m.year) return;
-    if (!yearMap[m.year]) yearMap[m.year] = { year: m.year, sum: 0, count: 0, bcSum: 0, bcCount: 0 };
-    yearMap[m.year].sum += m.value; yearMap[m.year].count++;
-    if (m.comparison_value != null) { yearMap[m.year].bcSum += m.comparison_value; yearMap[m.year].bcCount++; }
-  });
-  const chartData = Object.values(yearMap).sort((a, b) => a.year - b.year)
-    .map(d => ({ year: d.year, metis: parseFloat((d.sum / d.count).toFixed(2)), bc: d.bcCount ? parseFloat((d.bcSum / d.bcCount).toFixed(2)) : null }));
+  const chartData = useMemo(() => {
+    const yearMap = {};
+    data.forEach(m => {
+      if (!m.year) return;
+      if (!yearMap[m.year]) yearMap[m.year] = { year: m.year, sum: 0, count: 0, bcSum: 0, bcCount: 0 };
+      yearMap[m.year].sum += m.value; yearMap[m.year].count++;
+      if (m.comparison_value != null) { yearMap[m.year].bcSum += m.comparison_value; yearMap[m.year].bcCount++; }
+    });
+    return Object.values(yearMap).sort((a, b) => a.year - b.year)
+      .map(d => ({ year: d.year, metis: parseFloat((d.sum / d.count).toFixed(2)), bc: d.bcCount ? parseFloat((d.bcSum / d.bcCount).toFixed(2)) : null }));
+  }, [data]);
+  
   if (!chartData.length) return <EmptyState />;
   return (
     <ResponsiveContainer width="100%" height={260}>
