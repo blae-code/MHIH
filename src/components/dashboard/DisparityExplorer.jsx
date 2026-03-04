@@ -633,7 +633,7 @@ export default function DisparityExplorer({ metrics }) {
 
       {/* Summary */}
       <div className="flex gap-4 mt-3 pt-3 border-t text-xs flex-wrap" style={{ borderColor: "var(--border-subtle)" }}>
-        <span style={{ color: "var(--text-muted)" }}>Showing <span style={{ color: "var(--text-primary)" }}>{filtered.length}</span> of {metrics.length} metrics</span>
+        <span style={{ color: "var(--text-secondary)" }}>Showing <span style={{ color: "var(--text-primary)" }}>{filtered.length}</span> of <span style={{ color: "var(--text-primary)" }}>{metrics.length}</span> metrics</span>
         {filtered.some(m => m.comparison_value != null) && (() => {
           const withGap = filtered.filter(m => m.comparison_value != null);
           const avgGap = withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length;
