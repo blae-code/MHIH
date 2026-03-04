@@ -58,7 +58,6 @@ import Export from './pages/Export';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
-import MyDataSources from './pages/MyDataSources';
 import __Layout from './Layout.jsx';
 
 
@@ -74,7 +73,6 @@ export const PAGES = {
     "Settings": Settings,
     "Team": Team,
     "Visualizations": Visualizations,
-    "MyDataSources": MyDataSources,
 }
 
 export const pagesConfig = {

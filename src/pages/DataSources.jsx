@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Plus, RefreshCw, Trash2, Edit2, Database, Globe, CheckCircle, AlertCircle, Clock, CalendarClock, ScrollText, BookOpen } from "lucide-react";
+import {
+  Plus, RefreshCw, Trash2, Database, Globe, CheckCircle, AlertCircle,
+  Clock, ScrollText, BookOpen, Search, SlidersHorizontal, Grid3x3,
+  List, ToggleLeft, ToggleRight, ChevronDown, StickyNote, Tag,
+  CalendarClock, ArrowUpDown
+} from "lucide-react";
 import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
+import SourceEditModal from "@/components/datasources/SourceEditModal";
 import BCDataCatalogueBrowser from "@/components/datasources/BCDataCatalogueBrowser";
 import OpenGovCanadaBrowser from "@/components/datasources/OpenGovCanadaBrowser";
 import StatsCanWDSBrowser from "@/components/datasources/StatsCanWDSBrowser";
@@ -14,19 +20,38 @@ import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
 import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
 
-const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
-const SYNC_FREQS = ["manual","daily","weekly","monthly"];
+const CATEGORIES = ["all","chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
+const STATUSES = ["all","active","inactive","pending","error"];
+const SORT_OPTIONS = [
+  { value: "updated_desc", label: "Recently Updated" },
+  { value: "name_asc", label: "Name A–Z" },
+  { value: "name_desc", label: "Name Z–A" },
+  { value: "created_desc", label: "Newest First" },
+  { value: "status", label: "By Status" },
+  { value: "category", label: "By Category" },
+];
+
+const STATUS_COLORS = {
+  active: "var(--color-success)",
+  error: "var(--color-error)",
+  inactive: "var(--text-muted)",
+  pending: "var(--color-warning)",
+};
 
 export default function DataSources() {
   const { addLog } = useApp();
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", type: "statcan", url: "", description: "", category: "demographics", sync_frequency: "manual", status: "pending" });
+  const [editingSource, setEditingSource] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [syncing, setSyncing] = useState(null);
   const [scheduleFor, setScheduleFor] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
+  const [failedCount, setFailedCount] = useState(0);
+  const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // Browsers
   const [showCatalogue, setShowCatalogue] = useState(false);
   const [showOpenGov, setShowOpenGov] = useState(false);
   const [showStatsCanWDS, setShowStatsCanWDS] = useState(false);
@@ -36,10 +61,15 @@ export default function DataSources() {
   const [showWMSWFS, setShowWMSWFS] = useState(false);
   const [showArcGISHub, setShowArcGISHub] = useState(false);
   const [showDataBCTools, setShowDataBCTools] = useState(false);
-  const [failedCount, setFailedCount] = useState(0);
+
+  // Filters / sorting
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("updated_desc");
 
   const load = () => {
-    base44.entities.DataSource.list("-updated_date", 100)
+    base44.entities.DataSource.list("-updated_date", 200)
       .then(data => { setSources(data); addLog("success", `${data.length} data sources loaded`); })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));
@@ -47,26 +77,34 @@ export default function DataSources() {
 
   useEffect(() => {
     load();
-    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 1).then(jobs => setFailedCount(jobs.length)).catch(() => {});
+    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 50)
+      .then(jobs => setFailedCount(jobs.length)).catch(() => {});
   }, []);
 
-  const handleSave = async () => {
-    if (editing) {
-      await base44.entities.DataSource.update(editing.id, form);
-      addLog("success", `Updated source: ${form.name}`);
+  const handleSave = async (form) => {
+    if (editingSource) {
+      await base44.entities.DataSource.update(editingSource.id, form);
+      addLog("success", `Updated: ${form.name}`);
     } else {
       await base44.entities.DataSource.create(form);
-      addLog("success", `Added source: ${form.name}`);
+      addLog("success", `Added: ${form.name}`);
     }
-    setShowForm(false);
-    setEditing(null);
-    setForm({ name: "", type: "statcan", url: "", description: "", category: "demographics", sync_frequency: "manual", status: "pending" });
+    setShowEditModal(false);
+    setEditingSource(null);
     load();
   };
 
-  const handleDelete = async (id) => {
-    await base44.entities.DataSource.delete(id);
-    addLog("success", "Source removed");
+  const handleDelete = async (src) => {
+    await base44.entities.DataSource.delete(src.id);
+    addLog("success", `Deleted: ${src.name}`);
+    setDeleteConfirm(null);
+    load();
+  };
+
+  const handleToggleStatus = async (src) => {
+    const newStatus = src.status === "active" ? "inactive" : "active";
+    await base44.entities.DataSource.update(src.id, { status: newStatus });
+    addLog("info", `${src.name} → ${newStatus}`);
     load();
   };
 
@@ -86,350 +124,389 @@ export default function DataSources() {
     }
     setSyncing(null);
     load();
-    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 1).then(jobs => setFailedCount(jobs.length)).catch(() => {});
   };
 
   const handleSaveSchedule = async (freq) => {
     await base44.entities.DataSource.update(scheduleFor.id, { sync_frequency: freq });
-    addLog("success", `Schedule updated: ${scheduleFor.name} → ${freq}`);
+    addLog("success", `Schedule: ${scheduleFor.name} → ${freq}`);
     setScheduleFor(null);
     load();
   };
 
-  const startEdit = (src) => {
-    setEditing(src);
-    setForm({ name: src.name, type: src.type, url: src.url || "", description: src.description || "", category: src.category || "demographics", sync_frequency: src.sync_frequency || "manual", status: src.status });
-    setShowForm(true);
+  // Computed + filtered list
+  const filtered = useMemo(() => {
+    let list = [...sources];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(s =>
+        s.name?.toLowerCase().includes(q) ||
+        s.description?.toLowerCase().includes(q) ||
+        s.category?.toLowerCase().includes(q) ||
+        s.type?.toLowerCase().includes(q) ||
+        s.notes?.toLowerCase().includes(q)
+      );
+    }
+    if (filterCategory !== "all") list = list.filter(s => s.category === filterCategory);
+    if (filterStatus !== "all") list = list.filter(s => s.status === filterStatus);
+    list.sort((a, b) => {
+      if (sortBy === "name_asc") return (a.name || "").localeCompare(b.name || "");
+      if (sortBy === "name_desc") return (b.name || "").localeCompare(a.name || "");
+      if (sortBy === "created_desc") return new Date(b.created_date) - new Date(a.created_date);
+      if (sortBy === "status") return (a.status || "").localeCompare(b.status || "");
+      if (sortBy === "category") return (a.category || "").localeCompare(b.category || "");
+      return new Date(b.updated_date) - new Date(a.updated_date); // updated_desc
+    });
+    return list;
+  }, [sources, search, filterCategory, filterStatus, sortBy]);
+
+  const importSource = async (sourceData, logMsg) => {
+    await base44.entities.DataSource.create(sourceData);
+    addLog("success", logMsg);
+    load();
   };
 
-  const statusIcon = (status) => {
-    if (status === "active") return <CheckCircle size={13} style={{ color: "var(--color-success)" }} />;
-    if (status === "error") return <AlertCircle size={13} style={{ color: "var(--color-error)" }} />;
-    return <Clock size={13} style={{ color: "var(--text-muted)" }} />;
-  };
+  const selectStyle = { background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)", padding: "5px 8px", borderRadius: 6, fontSize: 11, outline: "none" };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b shrink-0"
-        style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-        <div>
-          <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Data Sources</h2>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Manage connections to Stats Canada, FNHA, BC Health, and other repositories</p>
+      {/* ── HEADER ── */}
+      <div className="shrink-0 border-b" style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
+        <div className="flex items-center justify-between px-4 py-2">
+          <div>
+            <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>My Data Sources</h2>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              {sources.length} sources · {sources.filter(s => s.status === "active").length} active
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <button onClick={() => setShowLogs(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: failedCount > 0 ? "var(--color-error)" : "var(--text-secondary)" }}>
+              <ScrollText size={12} />
+              Sync Logs
+              {failedCount > 0 && (
+                <span className="px-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-error)", color: "#fff" }}>{failedCount}</span>
+              )}
+            </button>
+            {/* Browser buttons */}
+            {[
+              ["DataBC Tools", () => setShowDataBCTools(true)],
+              ["ArcGIS Hub BC", () => setShowArcGISHub(true)],
+              ["BC WMS/WFS", () => setShowWMSWFS(true)],
+              ["CNF", () => setShowCNF(true)],
+              ["DPD", () => setShowDPD(true)],
+              ["Health Infobase", () => setShowHealthInfobase(true)],
+              ["StatsCan WDS", () => setShowStatsCanWDS(true)],
+              ["Open Gov", () => setShowOpenGov(true)],
+              ["BC Catalogue", () => setShowCatalogue(true)],
+            ].map(([label, fn]) => (
+              <button key={label} onClick={fn}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
+                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
+                <BookOpen size={11} style={{ color: "var(--accent-primary)" }} /> {label}
+              </button>
+            ))}
+            <button onClick={() => { setEditingSource(null); setShowEditModal(true); }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold"
+              style={{ background: "var(--accent-primary)", color: "#000" }}>
+              <Plus size={12} /> Add Source
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowLogs(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: failedCount > 0 ? "var(--color-error)" : "var(--text-secondary)" }}>
-            <ScrollText size={12} />
-            Sync Logs
-            {failedCount > 0 && (
-              <span className="px-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-error)", color: "#fff" }}>
-                {failedCount}
-              </span>
-            )}
-          </button>
-          <button onClick={() => setShowDataBCTools(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> DataBC Tools
-          </button>
-          <button onClick={() => setShowArcGISHub(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> ArcGIS Hub BC
-          </button>
-          <button onClick={() => setShowWMSWFS(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> BC WMS/WFS
-          </button>
-          <button onClick={() => setShowCNF(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> Health Canada CNF
-          </button>
-          <button onClick={() => setShowDPD(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> Health Canada DPD
-          </button>
-          <button onClick={() => setShowHealthInfobase(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> Health Infobase
-          </button>
-          <button onClick={() => setShowStatsCanWDS(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> StatsCan WDS
-          </button>
-          <button onClick={() => setShowOpenGov(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> Open Gov Canada
-          </button>
-          <button onClick={() => setShowCatalogue(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-            <BookOpen size={12} style={{ color: "var(--accent-primary)" }} /> BC Data Catalogue
-          </button>
-          <button onClick={() => { setEditing(null); setShowForm(true); }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--accent-primary)", color: "#000" }}>
-            <Plus size={12} /> Add Source
-          </button>
+
+        {/* ── FILTER BAR ── */}
+        <div className="flex items-center gap-2 px-4 py-2 border-t flex-wrap" style={{ borderColor: "var(--border-subtle)" }}>
+          {/* Search */}
+          <div className="flex items-center gap-1.5 rounded-md px-2 py-1 flex-1 min-w-[180px]"
+            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            <Search size={11} style={{ color: "var(--text-muted)" }} />
+            <input
+              value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search sources, notes, categories..."
+              className="bg-transparent outline-none text-xs flex-1"
+              style={{ color: "var(--text-primary)" }}
+            />
+          </div>
+          {/* Category */}
+          <div className="flex items-center gap-1">
+            <Tag size={11} style={{ color: "var(--text-muted)" }} />
+            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={selectStyle}>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c.replace(/_/g, " ")}</option>)}
+            </select>
+          </div>
+          {/* Status */}
+          <div className="flex items-center gap-1">
+            <SlidersHorizontal size={11} style={{ color: "var(--text-muted)" }} />
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selectStyle}>
+              {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
+            </select>
+          </div>
+          {/* Sort */}
+          <div className="flex items-center gap-1">
+            <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
+            <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
+              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          {/* View toggle */}
+          <div className="flex items-center rounded-md overflow-hidden ml-auto" style={{ border: "1px solid var(--border-subtle)" }}>
+            {[["grid", Grid3x3], ["list", List]].map(([mode, Icon]) => (
+              <button key={mode} onClick={() => setViewMode(mode)}
+                className="flex items-center justify-center"
+                style={{
+                  width: 28, height: 28,
+                  background: viewMode === mode ? "var(--bg-hover)" : "var(--bg-overlay)",
+                  color: viewMode === mode ? "var(--text-primary)" : "var(--text-muted)",
+                }}>
+                <Icon size={13} />
+              </button>
+            ))}
+          </div>
+          {/* Results count */}
+          <span className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
+            {filtered.length} of {sources.length}
+          </span>
         </div>
       </div>
 
-      {/* Source cards */}
+      {/* ── CONTENT ── */}
       <div className="flex-1 overflow-auto p-4">
         {loading ? (
           <div className="flex items-center justify-center h-40 gap-2" style={{ color: "var(--text-muted)" }}>
             <RefreshCw size={16} className="animate-spin" />
           </div>
-        ) : (
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40" style={{ color: "var(--text-muted)" }}>
+            <Database size={28} className="mb-3 opacity-30" />
+            <p className="text-sm">{sources.length === 0 ? "No data sources yet." : "No sources match your filters."}</p>
+          </div>
+        ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {sources.map(src => (
-              <div key={src.id} className="metric-card flex flex-col gap-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded flex items-center justify-center"
-                      style={{ background: "var(--bg-overlay)" }}>
-                      <Database size={14} style={{ color: "var(--accent-primary)" }} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{src.name}</div>
-                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>{src.type}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {statusIcon(src.status)}
-                  </div>
-                </div>
-                {src.description && (
-                  <p className="text-xs line-clamp-2" style={{ color: "var(--text-secondary)" }}>{src.description}</p>
-                )}
-                {src.url && (
-                  <a href={src.url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs truncate"
-                    style={{ color: "var(--color-info)" }}>
-                    <Globe size={11} /> {src.url}
-                  </a>
-                )}
-                <div className="flex items-center justify-between pt-1 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-                  <div className="space-y-0.5">
-                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                      {src.last_synced ? `Synced ${new Date(src.last_synced).toLocaleDateString("en-CA")}` : "Never synced"}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={9} style={{ color: "var(--text-muted)" }} />
-                      <span className="text-xs" style={{ color: src.sync_frequency && src.sync_frequency !== "manual" ? "var(--accent-primary)" : "var(--text-muted)" }}>
-                        {src.sync_frequency || "manual"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => handleSync(src)} disabled={syncing === src.id}
-                      className="activity-icon" style={{ width: 26, height: 26 }}
-                      title="Sync now">
-                      <RefreshCw size={12} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
-                    </button>
-                    <button onClick={() => setScheduleFor(src)} className="activity-icon" style={{ width: 26, height: 26 }} title="Set sync schedule">
-                      <CalendarClock size={12} style={{ color: "var(--accent-primary)" }} />
-                    </button>
-                    <button onClick={() => startEdit(src)} className="activity-icon" style={{ width: 26, height: 26 }}>
-                      <Edit2 size={12} />
-                    </button>
-                    <button onClick={() => handleDelete(src.id)} className="activity-icon" style={{ width: 26, height: 26, color: "var(--color-error)" }}>
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {filtered.map(src => (
+              <SourceCard key={src.id} src={src} syncing={syncing}
+                onEdit={() => { setEditingSource(src); setShowEditModal(true); }}
+                onSync={() => handleSync(src)}
+                onToggle={() => handleToggleStatus(src)}
+                onSchedule={() => setScheduleFor(src)}
+                onDelete={() => setDeleteConfirm(src)}
+              />
             ))}
-            {sources.length === 0 && (
-              <div className="col-span-3 text-center py-16" style={{ color: "var(--text-muted)" }}>
-                <Database size={32} className="mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No data sources configured yet.</p>
-                <p className="text-xs mt-1">Add Stats Canada, FNHA, or other BC health data repositories.</p>
-              </div>
-            )}
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {filtered.map(src => (
+              <SourceRow key={src.id} src={src} syncing={syncing}
+                onEdit={() => { setEditingSource(src); setShowEditModal(true); }}
+                onSync={() => handleSync(src)}
+                onToggle={() => handleToggleStatus(src)}
+                onSchedule={() => setScheduleFor(src)}
+                onDelete={() => setDeleteConfirm(src)}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Sync schedule modal */}
+      {/* ── MODALS ── */}
+      {showEditModal && (
+        <SourceEditModal
+          source={editingSource}
+          onSave={handleSave}
+          onClose={() => { setShowEditModal(false); setEditingSource(null); }}
+        />
+      )}
+
       {scheduleFor && (
         <SyncScheduleModal source={scheduleFor} onSave={handleSaveSchedule} onClose={() => setScheduleFor(null)} />
       )}
 
-      {/* Sync logs panel */}
       {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
 
-      {/* StatsCan WDS browser */}
-      {showStatsCanWDS && (
-        <StatsCanWDSBrowser
-          onClose={() => setShowStatsCanWDS(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from StatsCan WDS: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* DataBC Tools browser */}
-      {showDataBCTools && (
-        <DataBCToolsBrowser
-          onClose={() => setShowDataBCTools(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* ArcGIS Hub BC browser */}
-      {showArcGISHub && (
-        <ArcGISHubBCBrowser
-          onClose={() => setShowArcGISHub(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from ArcGIS Hub BC: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* BC WMS/WFS browser */}
-      {showWMSWFS && (
-        <BCWMSWFSBrowser
-          onClose={() => setShowWMSWFS(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported BC WMS/WFS layer: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* Health Canada CNF browser */}
-      {showCNF && (
-        <HealthCanadaCNFBrowser
-          onClose={() => setShowCNF(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from Health Canada CNF: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* Health Canada DPD browser */}
-      {showDPD && (
-        <HealthCanadaDPDBrowser
-          onClose={() => setShowDPD(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from Health Canada DPD: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* Health Infobase browser */}
-      {showHealthInfobase && (
-        <HealthInfobaseBrowser
-          onClose={() => setShowHealthInfobase(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from Health Infobase: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* Open Government Canada browser */}
-      {showOpenGov && (
-        <OpenGovCanadaBrowser
-          onClose={() => setShowOpenGov(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from Open Gov Canada: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* BC Data Catalogue browser */}
-      {showCatalogue && (
-        <BCDataCatalogueBrowser
-          onClose={() => setShowCatalogue(false)}
-          onImport={async (sourceData) => {
-            await base44.entities.DataSource.create(sourceData);
-            addLog("success", `Imported from BC Data Catalogue: ${sourceData.name}`);
-            load();
-          }}
-        />
-      )}
-
-      {/* Form modal */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)" }}>
-          <div className="w-full max-w-md rounded-xl p-6 space-y-4 shadow-2xl"
+      {/* Delete confirm */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.65)" }}>
+          <div className="w-80 rounded-xl p-5 shadow-2xl"
             style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}>
-            <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              {editing ? "Edit Data Source" : "Add Data Source"}
-            </h3>
-            <FormField label="Name" value={form.name} onChange={v => setForm(f => ({ ...f, name: v }))} />
-            <div className="grid grid-cols-2 gap-3">
-              <FormSelect label="Type" value={form.type} onChange={v => setForm(f => ({ ...f, type: v }))} options={SOURCE_TYPES} />
-              <FormSelect label="Sync" value={form.sync_frequency} onChange={v => setForm(f => ({ ...f, sync_frequency: v }))} options={SYNC_FREQS} />
-            </div>
-            <FormField label="URL / Endpoint" value={form.url} onChange={v => setForm(f => ({ ...f, url: v }))} />
-            <FormField label="Description" value={form.description} onChange={v => setForm(f => ({ ...f, description: v }))} multiline />
-            <div className="flex justify-end gap-2 pt-2">
-              <button onClick={() => { setShowForm(false); setEditing(null); }}
+            <div className="text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>Delete Source?</div>
+            <p className="text-xs mb-4" style={{ color: "var(--text-secondary)" }}>
+              "{deleteConfirm.name}" will be permanently removed. This cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setDeleteConfirm(null)}
                 className="px-3 py-1.5 rounded-md text-xs"
                 style={{ background: "var(--bg-overlay)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}>
                 Cancel
               </button>
-              <button onClick={handleSave}
-                className="px-3 py-1.5 rounded-md text-xs font-medium"
-                style={{ background: "var(--accent-primary)", color: "#000" }}>
-                {editing ? "Update" : "Add Source"}
+              <button onClick={() => handleDelete(deleteConfirm)}
+                className="px-3 py-1.5 rounded-md text-xs font-semibold"
+                style={{ background: "var(--color-error)", color: "#fff" }}>
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Browsers */}
+      {showStatsCanWDS && <StatsCanWDSBrowser onClose={() => setShowStatsCanWDS(false)} onImport={d => importSource(d, `Imported from StatsCan WDS: ${d.name}`)} />}
+      {showDataBCTools && <DataBCToolsBrowser onClose={() => setShowDataBCTools(false)} onImport={d => importSource(d, `Imported: ${d.name}`)} />}
+      {showArcGISHub && <ArcGISHubBCBrowser onClose={() => setShowArcGISHub(false)} onImport={d => importSource(d, `Imported from ArcGIS Hub BC: ${d.name}`)} />}
+      {showWMSWFS && <BCWMSWFSBrowser onClose={() => setShowWMSWFS(false)} onImport={d => importSource(d, `Imported BC WMS/WFS layer: ${d.name}`)} />}
+      {showCNF && <HealthCanadaCNFBrowser onClose={() => setShowCNF(false)} onImport={d => importSource(d, `Imported from Health Canada CNF: ${d.name}`)} />}
+      {showDPD && <HealthCanadaDPDBrowser onClose={() => setShowDPD(false)} onImport={d => importSource(d, `Imported from Health Canada DPD: ${d.name}`)} />}
+      {showHealthInfobase && <HealthInfobaseBrowser onClose={() => setShowHealthInfobase(false)} onImport={d => importSource(d, `Imported from Health Infobase: ${d.name}`)} />}
+      {showOpenGov && <OpenGovCanadaBrowser onClose={() => setShowOpenGov(false)} onImport={d => importSource(d, `Imported from Open Gov Canada: ${d.name}`)} />}
+      {showCatalogue && <BCDataCatalogueBrowser onClose={() => setShowCatalogue(false)} onImport={d => importSource(d, `Imported from BC Data Catalogue: ${d.name}`)} />}
     </div>
   );
 }
 
-function FormField({ label, value, onChange, multiline }) {
-  const style = { background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)", width: "100%", padding: "6px 10px", borderRadius: 6, fontSize: 12, outline: "none" };
+function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete }) {
+  const isActive = src.status === "active";
+  const isDisabled = src.status === "inactive";
+
   return (
-    <div>
-      <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{label}</label>
-      {multiline
-        ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={2} style={style} />
-        : <input value={value} onChange={e => onChange(e.target.value)} style={style} />
-      }
+    <div className="metric-card flex flex-col gap-2.5" style={{ opacity: isDisabled ? 0.65 : 1 }}>
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded flex items-center justify-center shrink-0"
+            style={{ background: "var(--bg-overlay)" }}>
+            <Database size={14} style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{src.name}</div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="tag" style={{ fontSize: 10 }}>{src.type?.replace(/_/g, " ")}</span>
+              {src.category && src.category !== "other" && (
+                <span className="tag" style={{ fontSize: 10, background: "var(--accent-muted)", color: "var(--accent-primary)", borderColor: "var(--border-default)" }}>
+                  {src.category.replace(/_/g, " ")}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+          <span className="text-xs capitalize" style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }}>{src.status}</span>
+        </div>
+      </div>
+
+      {/* Description */}
+      {src.description && (
+        <p className="text-xs line-clamp-2" style={{ color: "var(--text-secondary)" }}>{src.description}</p>
+      )}
+
+      {/* Notes */}
+      {src.notes && (
+        <div className="flex items-start gap-1.5 rounded px-2 py-1.5"
+          style={{ background: "var(--accent-muted)", border: "1px solid var(--border-default)" }}>
+          <StickyNote size={10} style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }} />
+          <p className="text-xs line-clamp-2" style={{ color: "var(--accent-text)" }}>{src.notes}</p>
+        </div>
+      )}
+
+      {/* URL */}
+      {src.url && (
+        <a href={src.url} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs truncate"
+          style={{ color: "var(--color-info)" }}>
+          <Globe size={10} /> {src.url}
+        </a>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-1.5 border-t mt-auto" style={{ borderColor: "var(--border-subtle)" }}>
+        <div className="text-xs space-y-0.5">
+          <div style={{ color: "var(--text-muted)" }}>
+            {src.last_synced ? `Synced ${new Date(src.last_synced).toLocaleDateString("en-CA")}` : "Never synced"}
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={9} style={{ color: "var(--text-muted)" }} />
+            <span style={{ color: src.sync_frequency && src.sync_frequency !== "manual" ? "var(--accent-primary)" : "var(--text-muted)" }}>
+              {src.sync_frequency || "manual"}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={onSync} disabled={!!syncing} title="Sync now" className="activity-icon" style={{ width: 26, height: 26 }}>
+            <RefreshCw size={12} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
+          </button>
+          <button onClick={onSchedule} title="Set schedule" className="activity-icon" style={{ width: 26, height: 26 }}>
+            <CalendarClock size={12} style={{ color: "var(--accent-primary)" }} />
+          </button>
+          <button onClick={onToggle} title={isActive ? "Disable" : "Enable"} className="activity-icon" style={{ width: 26, height: 26 }}>
+            {isActive
+              ? <ToggleRight size={14} style={{ color: "var(--color-success)" }} />
+              : <ToggleLeft size={14} style={{ color: "var(--text-muted)" }} />}
+          </button>
+          <button onClick={onEdit} title="Edit" className="activity-icon" style={{ width: 26, height: 26 }}>
+            <SlidersHorizontal size={12} />
+          </button>
+          <button onClick={onDelete} title="Delete" className="activity-icon" style={{ width: 26, height: 26, color: "var(--color-error)" }}>
+            <Trash2 size={12} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-function FormSelect({ label, value, onChange, options }) {
+function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete }) {
+  const isActive = src.status === "active";
+  const isDisabled = src.status === "inactive";
+
   return (
-    <div>
-      <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)", width: "100%", padding: "6px 10px", borderRadius: 6, fontSize: 12, outline: "none" }}>
-        {options.map(o => <option key={o} value={o}>{o.replace(/_/g, " ")}</option>)}
-      </select>
+    <div className="flex items-center gap-3 px-3 py-2 rounded-lg group"
+      style={{
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-subtle)",
+        opacity: isDisabled ? 0.65 : 1,
+      }}>
+      <div className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+        style={{ background: "var(--bg-overlay)" }}>
+        <Database size={12} style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+      </div>
+
+      <div className="flex-1 min-w-0 grid grid-cols-4 gap-3 items-center">
+        <div className="col-span-2 min-w-0">
+          <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{src.name}</div>
+          {src.notes && (
+            <div className="flex items-center gap-1 mt-0.5">
+              <StickyNote size={9} style={{ color: "var(--accent-primary)" }} />
+              <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{src.notes}</span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="tag" style={{ fontSize: 10 }}>{src.category?.replace(/_/g, " ") || "—"}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+          <span className="text-xs capitalize" style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }}>{src.status}</span>
+          <span className="text-xs ml-2" style={{ color: "var(--text-muted)" }}>{src.sync_frequency || "manual"}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button onClick={onSync} disabled={!!syncing} className="activity-icon" style={{ width: 24, height: 24 }}>
+          <RefreshCw size={11} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
+        </button>
+        <button onClick={onSchedule} className="activity-icon" style={{ width: 24, height: 24 }}>
+          <CalendarClock size={11} style={{ color: "var(--accent-primary)" }} />
+        </button>
+        <button onClick={onToggle} className="activity-icon" style={{ width: 24, height: 24 }}>
+          {isActive
+            ? <ToggleRight size={13} style={{ color: "var(--color-success)" }} />
+            : <ToggleLeft size={13} style={{ color: "var(--text-muted)" }} />}
+        </button>
+        <button onClick={onEdit} className="activity-icon" style={{ width: 24, height: 24 }}>
+          <SlidersHorizontal size={11} />
+        </button>
+        <button onClick={onDelete} className="activity-icon" style={{ width: 24, height: 24, color: "var(--color-error)" }}>
+          <Trash2 size={11} />
+        </button>
+      </div>
     </div>
   );
 }
