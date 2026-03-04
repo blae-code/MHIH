@@ -608,6 +608,7 @@ export default function Dashboard() {
                 title="Save, load, and manage layouts">
                 <Layout size={13} />
               </button>
+              <DashboardExportMenu metrics={metrics} />
               <button
                 onClick={() => setCustomizerOpen(true)}
                 className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
