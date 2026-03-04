@@ -78,73 +78,90 @@ export default function HealthTrendTracker({ metrics, trackedMetricIds }) {
 
   return (
     <div className="dashboard-widget-card">
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="dashboard-section-label">Health Outcomes Trend</div>
-        <div className="flex items-center gap-2">
-          <Filter size={13} style={{ color: "var(--text-muted)" }} />
-          <select
-            value={selectedCategory || ""}
-            onChange={(e) => setSelectedCategory(e.target.value || null)}
-            className="text-xs px-2 py-1 rounded-md outline-none"
-            style={{
-              background: "var(--bg-overlay)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-primary)",
-            }}>
-            <option value="">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat.replace(/_/g, " ")}</option>
-            ))}
-          </select>
+      <div className="mb-4 relative z-10">
+        <div className="dashboard-section-label mb-2">Métis Health Trends</div>
+        <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+          Top positive trends and highest-risk indicators
         </div>
       </div>
 
-      <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)" }}>
-        {trackedMetricIds && trackedMetricIds.length > 0 
-          ? "Health disparity gaps for your tracked metrics" 
-          : "Average health disparity between Métis and BC population"}
-        <span className="block text-xs mt-1" style={{ color: "var(--text-muted)", fontSize: "10px", opacity: 0.7 }}>
-          Positive values = worse Métis outcomes | Negative values = better Métis outcomes
-        </span>
-      </div>
-
-      {trendData.length > 0 ? (
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={trendData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
-            <XAxis dataKey="year" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-            <YAxis tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-            <Tooltip
-              contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: "8px", padding: "12px", color: "var(--text-primary)", fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
-              labelStyle={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}
-              itemStyle={{ fontSize: 11 }}
-              cursor={{ fill: "rgba(254,221,0,0.04)" }}
-            />
-            <Legend wrapperStyle={{ paddingTop: "12px", fontSize: 11, color: "var(--text-secondary)" }} />
-            <Line 
-              type="monotone" 
-              dataKey="Health Disparity" 
-              stroke="#FF4757" 
-              strokeWidth={2.5}
-              dot={{ fill: "#FF4757", r: 4 }}
-              connectNulls
-            />
-            <Line 
-              type="monotone" 
-              dataKey="zero" 
-              stroke="var(--border-subtle)" 
-              strokeWidth={1}
-              strokeDasharray="5 5"
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      ) : (
+      {trends.positivetrends.length === 0 && trends.riskTrends.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-40 gap-2 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px dashed var(--border-subtle)" }}>
           <TrendingUp size={18} style={{ color: "var(--text-muted)" }} />
           <span className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-            {selectedCategory ? "No trend data for this category" : "No trend data available"}
+            No trend data available
           </span>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Positive Trends */}
+          {trends.positivetrends.length > 0 && (
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#2ea043", letterSpacing: "0.05em" }}>
+                ↑ Improving Health Outcomes
+              </div>
+              <div className="space-y-2">
+                {trends.positivetrends.map((t, i) => (
+                  <div key={i} className="p-3 rounded-lg" style={{ background: "rgba(46, 213, 115, 0.08)", border: "1px solid rgba(46, 213, 115, 0.2)" }}>
+                    <div className="flex items-start gap-2.5">
+                      <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded" style={{ background: "rgba(46, 213, 115, 0.2)" }}>
+                        <TrendingUp size={12} style={{ color: "#2ea043" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }} title={t.name}>{t.name}</div>
+                        <div className="text-xs mt-1 flex gap-2 flex-wrap" style={{ color: "var(--text-muted)" }}>
+                          <span>{t.category?.replace(/_/g, " ")}</span>
+                          <span>•</span>
+                          <span>{t.region}</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-xs font-bold" style={{ color: "#2ea043" }}>+{t.changePercent.toFixed(1)}%</div>
+                        <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: "9px" }}>improvement</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Risk Trends */}
+          {trends.riskTrends.length > 0 && (
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#f85149", letterSpacing: "0.05em" }}>
+                ⚠ Highest-Risk Indicators
+              </div>
+              <div className="space-y-2">
+                {trends.riskTrends.map((t, i) => (
+                  <div key={i} className="p-3 rounded-lg" style={{ background: "rgba(255, 71, 87, 0.08)", border: "1px solid rgba(255, 71, 87, 0.2)" }}>
+                    <div className="flex items-start gap-2.5">
+                      <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded" style={{ background: "rgba(255, 71, 87, 0.2)" }}>
+                        {t.change < 0 ? <TrendingDown size={12} style={{ color: "#f85149" }} /> : <AlertCircle size={12} style={{ color: "#f85149" }} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }} title={t.name}>{t.name}</div>
+                        <div className="text-xs mt-1 flex gap-2 flex-wrap" style={{ color: "var(--text-muted)" }}>
+                          <span>{t.category?.replace(/_/g, " ")}</span>
+                          <span>•</span>
+                          <span>{t.region}</span>
+                        </div>
+                        {t.currentDisparity != null && (
+                          <div className="text-xs mt-1.5" style={{ color: "var(--color-error)", fontSize: "9px" }}>
+                            {t.currentDisparity > 0 ? "+" : ""}{t.currentDisparity.toFixed(1)} worse than BC population
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-xs font-bold" style={{ color: "#f85149" }}>{t.changePercent.toFixed(1)}%</div>
+                        <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: "9px" }}>decline</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
