@@ -222,6 +222,8 @@ export default function DataRepository() {
         )}
       </div>
 
+      </div>}
+
       {/* Status bar */}
       <div className="px-4 py-1.5 border-t flex items-center gap-4 shrink-0"
         style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
