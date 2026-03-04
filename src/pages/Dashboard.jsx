@@ -248,10 +248,10 @@ export default function Dashboard() {
   })();
 
   const ALL_STAT_CARDS = {
-    metis_metrics: { label: "Métis Health Indicators", value: healthStats.totalMetricsSeries, icon: Activity, color: "var(--accent-primary)", desc: "Métis-specific health metrics tracked" },
-    health_disparity: { label: "Avg Health Disparity", value: healthStats.avgDisparity.toFixed(1), icon: TrendingUp, color: healthStats.avgDisparity > 0 ? "var(--color-error)" : "var(--color-success)", desc: healthStats.avgDisparity > 0 ? "Higher than BC population" : "Better than BC population" },
-    yearly_trend: { label: "Year-over-Year Trend", value: (healthStats.trend > 0 ? "+" : "") + healthStats.trend.toFixed(1), icon: Brain, color: healthStats.trend > 0 ? "var(--color-success)" : "var(--color-error)", desc: healthStats.trend > 0 ? "Improving health outcomes" : "Declining health outcomes" },
-    coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "var(--color-info)", desc: `${healthStats.categories} major health categories tracked` },
+    metis_metrics: { label: "Métis Health Indicators", value: healthStats.totalMetricsSeries, icon: Activity, color: "#FEDD00", bgColor: "rgba(254,221,0,0.08)", desc: "Métis-specific health metrics tracked" },
+    health_disparity: { label: "Avg Health Disparity", value: healthStats.avgDisparity.toFixed(1), icon: TrendingUp, color: healthStats.avgDisparity > 0 ? "#FF4757" : "#2ED573", bgColor: healthStats.avgDisparity > 0 ? "rgba(255,71,87,0.08)" : "rgba(46,213,115,0.08)", desc: healthStats.avgDisparity > 0 ? "Higher than BC population" : "Better than BC population" },
+    yearly_trend: { label: "Year-over-Year Trend", value: (healthStats.trend > 0 ? "+" : "") + healthStats.trend.toFixed(1), icon: Brain, color: healthStats.trend > 0 ? "#2ED573" : "#FF4757", bgColor: healthStats.trend > 0 ? "rgba(46,213,115,0.08)" : "rgba(255,71,87,0.08)", desc: healthStats.trend > 0 ? "Improving health outcomes" : "Declining health outcomes" },
+    coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "#40C4FF", bgColor: "rgba(64,196,255,0.08)", desc: `${healthStats.categories} major health categories tracked` },
   };
 
   const STAT_CARDS = ["metis_metrics", "health_disparity", "yearly_trend", "coverage"].map(id => ALL_STAT_CARDS[id]).filter(Boolean);
