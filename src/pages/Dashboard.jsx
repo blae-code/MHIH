@@ -153,7 +153,11 @@ export default function Dashboard() {
               <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={false}>
                 {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)", fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-primary)", fontSize: 12 }}
+                labelStyle={{ color: "var(--text-primary)" }}
+                itemStyle={{ color: "var(--text-secondary)" }}
+              />
             </PieChart>
           </ResponsiveContainer>
         ) : <EmptyChart message="No categories yet." />}
