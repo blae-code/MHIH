@@ -705,87 +705,122 @@ export default function DisparityExplorer({ metrics }) {
   return (
     <div className="dashboard-widget-card">
       <style>{`
-        .disparity-explorer-header {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          margin-bottom: 12px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid var(--border-subtle);
-        }
-        .disparity-explorer-title {
-          font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif;
-          font-weight: 700;
-          font-size: 9px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--mnbc-yellow);
-          line-height: 1.2;
-        }
-        .disparity-explorer-toolbar {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: wrap;
-          row-gap: 6px;
-        }
-        .disparity-controls-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          align-items: center;
-          row-gap: 6px;
-        }
-        .disparity-chart-container {
-          margin: 12px 0;
-          padding: 14px;
-          border-radius: 8px;
-          background: rgba(0, 0, 0, 0.1);
-          border: 1px solid var(--border-subtle);
-          line-height: 1.4;
-        }
+       .disparity-explorer-header {
+         display: flex;
+         flex-direction: column;
+         gap: 12px;
+         margin-bottom: 16px;
+         padding-bottom: 16px;
+         border-bottom: 1px solid var(--border-subtle);
+       }
+       .disparity-explorer-title {
+         font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif;
+         font-weight: 700;
+         font-size: 12px;
+         letter-spacing: 0.12em;
+         text-transform: uppercase;
+         color: var(--mnbc-yellow);
+         line-height: 1.2;
+       }
+       .disparity-explorer-desc {
+         font-size: 12px;
+         color: var(--text-secondary);
+         line-height: 1.4;
+       }
+       .disparity-explorer-toolbar {
+         display: flex;
+         align-items: center;
+         gap: 8px;
+         flex-wrap: wrap;
+         row-gap: 8px;
+       }
+       .disparity-controls-row {
+         display: flex;
+         flex-wrap: wrap;
+         gap: 8px;
+         align-items: center;
+         row-gap: 8px;
+       }
+       .disparity-chart-container {
+         margin: 16px 0;
+         padding: 16px;
+         border-radius: 10px;
+         background: linear-gradient(135deg, var(--bg-overlay) 0%, rgba(254,221,0,0.02) 100%);
+         border: 1px solid var(--border-subtle);
+         line-height: 1.4;
+       }
+       .disparity-stats-grid {
+         display: grid;
+         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+         gap: 12px;
+         margin-top: 12px;
+       }
+       .disparity-stat-card {
+         padding: 12px;
+         border-radius: 8px;
+         background: linear-gradient(135deg, var(--bg-overlay) 0%, rgba(254,221,0,0.03) 100%);
+         border: 1px solid var(--border-subtle);
+         position: relative;
+         overflow: hidden;
+       }
+       .disparity-stat-card::before {
+         content: '';
+         position: absolute;
+         inset: 0;
+         background: linear-gradient(135deg, rgba(254,221,0,0.05) 0%, transparent 100%);
+         pointer-events: none;
+       }
       `}</style>
 
       {/* Header section */}
       <div className="disparity-explorer-header">
-        <div className="disparity-explorer-title">Health Disparity Explorer</div>
+        <div>
+          <div className="disparity-explorer-title">Health Disparity Explorer</div>
+          <div className="disparity-explorer-desc mt-2">
+            Analyze gaps between Métis health outcomes and BC population benchmarks across regions and categories
+          </div>
+        </div>
         
-        {/* Controls toolbar */}
+        {/* Controls toolbar — improved layout */}
         <div className="disparity-explorer-toolbar">
-          <button onClick={() => setFiltersOpen(o => !o)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
-            style={{
-              background: activeFilterCount > 0 ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
-              border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-              color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)"
-            }}>
-            <Filter size={11} />
-            <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
-            <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
-          </button>
+          {/* Filters and Benchmark controls */}
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => setFiltersOpen(o => !o)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
+              style={{
+                background: activeFilterCount > 0 ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
+                border: `1px solid ${activeFilterCount > 0 ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                color: activeFilterCount > 0 ? "var(--accent-primary)" : "var(--text-secondary)"
+              }}>
+              <Filter size={11} />
+              <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
+              <ChevronDown size={10} style={{ transform: filtersOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+            </button>
 
-          <div ref={benchmarkRef} className="relative">
-            <BenchmarkPanel
-              metrics={filtered}
-              allMetrics={metrics}
-              benchmark={benchmark}
-              setBenchmark={setBenchmark}
-              open={benchmarkOpen}
-              setOpen={setBenchmarkOpen}
-            />
+            <div ref={benchmarkRef} className="relative">
+              <BenchmarkPanel
+                metrics={filtered}
+                allMetrics={metrics}
+                benchmark={benchmark}
+                setBenchmark={setBenchmark}
+                open={benchmarkOpen}
+                setOpen={setBenchmarkOpen}
+              />
+            </div>
           </div>
 
-          <div className="flex gap-1 border-l border-r" style={{ borderColor: "var(--border-subtle)", paddingLeft: 8, paddingRight: 8 }}>
+          {/* Chart type selector */}
+          <div className="flex gap-0.5 px-2 py-1 rounded" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
             {CHART_TYPES.map(ct => (
               <button key={ct.id} onClick={() => { setChartType(ct.id); setDrillItem(null); }}
-                className="flex items-center justify-center w-8 h-8 rounded transition-all"
+                className="flex items-center justify-center w-7 h-7 rounded transition-all text-xs font-medium"
                 style={{
-                  background: chartType === ct.id ? "rgba(254,221,0,0.12)" : "transparent",
+                  background: chartType === ct.id ? "rgba(254,221,0,0.15)" : "transparent",
                   color: chartType === ct.id ? "var(--accent-primary)" : "var(--text-secondary)",
                   border: `1px solid ${chartType === ct.id ? "var(--accent-primary)" : "transparent"}`
                 }}
                 title={ct.label}>
-                <ct.icon size={13} />
+                <ct.icon size={12} />
               </button>
             ))}
           </div>
@@ -825,77 +860,77 @@ export default function DisparityExplorer({ metrics }) {
       {/* Benchmark performance table */}
       {<BenchmarkTable data={filtered} benchmark={benchmark} />}
 
-      {/* Stats & actions footer */}
-      <div className="mt-3 pt-3 space-y-2.5" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-        {/* Compute extended stats */}
-        {(() => {
-          const withGap = filtered.filter(m => m.comparison_value != null);
-          const avgGap = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length : 0;
-          const avgValue = filtered.length > 0 ? filtered.reduce((s, m) => s + (m.value || 0), 0) / filtered.length : 0;
-          const avgComparison = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.comparison_value || 0), 0) / withGap.length : 0;
-          const minValue = filtered.length > 0 ? Math.min(...filtered.map(m => m.value || 0)) : 0;
-          const maxValue = filtered.length > 0 ? Math.max(...filtered.map(m => m.value || 0)) : 0;
-          const uniqueRegions = new Set(filtered.map(m => m.region)).size;
-          const uniqueCategories = new Set(filtered.map(m => m.category)).size;
-          const disparityCount = withGap.filter(m => (m.value || 0) > m.comparison_value).length;
-          const disparityPct = withGap.length > 0 ? ((disparityCount / withGap.length) * 100).toFixed(0) : 0;
+      {/* Stats & insights section */}
+      <div className="mt-4 pt-4 space-y-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+       {/* Key metrics grid */}
+       {(() => {
+         const withGap = filtered.filter(m => m.comparison_value != null);
+         const avgGap = withGap.length > 0 ? withGap.reduce((s, m) => s + (m.value - m.comparison_value), 0) / withGap.length : 0;
+         const avgValue = filtered.length > 0 ? filtered.reduce((s, m) => s + (m.value || 0), 0) / filtered.length : 0;
+         const minValue = filtered.length > 0 ? Math.min(...filtered.map(m => m.value || 0)) : 0;
+         const maxValue = filtered.length > 0 ? Math.max(...filtered.map(m => m.value || 0)) : 0;
+         const uniqueRegions = new Set(filtered.map(m => m.region)).size;
+         const uniqueCategories = new Set(filtered.map(m => m.category)).size;
+         const disparityCount = withGap.filter(m => (m.value || 0) > m.comparison_value).length;
+         const disparityPct = withGap.length > 0 ? ((disparityCount / withGap.length) * 100).toFixed(0) : 0;
 
-          return (
-            <div className="grid grid-cols-4 gap-2 text-xs">
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Showing</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{filtered.length}</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>of {metrics.length}</div>
-              </div>
-              
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Avg Value</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{avgValue.toFixed(1)}</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>Métis</div>
-              </div>
+         return (
+           <div className="disparity-stats-grid">
+             {/* Core metrics */}
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Records</div>
+               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{filtered.length}</div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>of {metrics.length}</div>
+             </div>
 
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Avg Gap</div>
-                <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 12 }}>
-                  {avgGap > 0 ? "+" : ""}{avgGap.toFixed(2)}
-                </div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>vs BC</div>
-              </div>
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Métis Avg</div>
+               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{avgValue.toFixed(1)}</div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>health metric</div>
+             </div>
 
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Disparity %</div>
-                <div style={{ color: disparityPct > 50 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 12 }}>{disparityPct}%</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>Higher than BC</div>
-              </div>
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Avg Gap</div>
+               <div style={{ color: avgGap > 0 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>
+                 {avgGap > 0 ? "↑" : "↓"} {Math.abs(avgGap).toFixed(2)}
+               </div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>{avgGap > 0 ? "higher" : "lower"} than BC</div>
+             </div>
 
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Range</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{(maxValue - minValue).toFixed(1)}</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>{minValue.toFixed(0)}–{maxValue.toFixed(0)}</div>
-              </div>
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Disparity</div>
+               <div style={{ color: disparityPct > 50 ? "#f85149" : "#2ea043", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{disparityPct}%</div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>exceed BC avg</div>
+             </div>
 
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Regions</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{uniqueRegions}</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>covered</div>
-              </div>
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Range</div>
+               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{(maxValue - minValue).toFixed(1)}</div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>spread</div>
+             </div>
 
-              <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Categories</div>
-                <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}>{uniqueCategories}</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>types</div>
-              </div>
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Regions</div>
+               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{uniqueRegions}</div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>analyzed</div>
+             </div>
 
-              {benchmark.active && benchmark.value != null && (
-                <div className="rounded-lg p-2" style={{ background: "var(--bg-overlay)", border: `1px solid ${BENCHMARK_COLOR}33` }}>
-                  <div style={{ color: "var(--text-muted)", fontSize: 8.5, marginBottom: 3 }}>Benchmark</div>
-                  <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 12 }}>{benchmark.value.toFixed(1)}</div>
-                  <div style={{ color: "var(--text-muted)", fontSize: 8, marginTop: 2 }}>target</div>
-                </div>
-              )}
-            </div>
-          );
-        })()}
+             <div className="disparity-stat-card relative z-10">
+               <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Categories</div>
+               <div style={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{uniqueCategories}</div>
+               <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>health types</div>
+             </div>
+
+             {benchmark.active && benchmark.value != null && (
+               <div className="disparity-stat-card relative z-10" style={{ borderColor: `${BENCHMARK_COLOR}44` }}>
+                 <div style={{ color: BENCHMARK_COLOR, fontSize: 9, marginBottom: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Benchmark</div>
+                 <div style={{ color: BENCHMARK_COLOR, fontWeight: 700, fontSize: 18, lineHeight: 1 }}>{benchmark.value.toFixed(1)}</div>
+                 <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 3 }}>target goal</div>
+               </div>
+             )}
+           </div>
+         );
+       })()}
 
         {/* Export buttons */}
         <div className="flex gap-1.5">
