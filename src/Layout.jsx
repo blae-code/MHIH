@@ -577,49 +577,7 @@ export default function Layout({ children, currentPageName }) {
                 })}
               </nav>
 
-              {/* Sidebar footer */}
-              <div className="shrink-0 px-2 py-2" style={{ borderTop: "1px solid var(--border-subtle)", background: "linear-gradient(to top, rgba(254,221,0,0.03) 0%, transparent 100%)" }}>
-                <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                  {/* Avatar with presence ring */}
-                  <div className="relative shrink-0">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold"
-                      style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.2), rgba(254,221,0,0.08))", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.28)", boxShadow: "0 0 8px rgba(254,221,0,0.1)" }}>
-                      {user?.full_name?.[0] || "?"}
-                    </div>
-                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border"
-                      style={{ background: "var(--color-success)", borderColor: "var(--bg-overlay)", boxShadow: "0 0 4px rgba(0,230,118,0.7)" }} />
-                  </div>
 
-                  {/* Name + role */}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold truncate leading-tight" style={{ color: "var(--text-primary)" }}>{user?.full_name || "..."}</div>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--color-success)" }} />
-                      <span style={{ fontSize: 9, color: "var(--text-muted)", textTransform: "capitalize", letterSpacing: "0.02em" }}>{user?.role || "viewer"}</span>
-                    </div>
-                  </div>
-
-                  {/* Settings icon */}
-                  <Link to={createPageUrl("Settings")} title="Settings">
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center transition-all"
-                      style={{ color: "var(--text-muted)" }}
-                      onMouseOver={e => { e.currentTarget.style.background = "var(--bg-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
-                      onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-muted)"; }}>
-                      <Settings size={12} />
-                    </div>
-                  </Link>
-
-                  {/* Sign out icon */}
-                  <div className="w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-all"
-                    style={{ color: "var(--text-muted)" }}
-                    title="Sign out"
-                    onClick={() => base44.auth.logout()}
-                    onMouseOver={e => { e.currentTarget.style.background = "rgba(255,23,68,0.1)"; e.currentTarget.style.color = "var(--color-error)"; }}
-                    onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-muted)"; }}>
-                    <LogOut size={11} />
-                  </div>
-                </div>
-              </div>
             </aside>
 
           {/* ══ MAIN ══ */}
