@@ -61,6 +61,7 @@ export default function Dashboard() {
     return DEFAULT_WIDGETS.map(w => ({ ...w, visible: true, span: 2 }));
   });
   const [pinnedIds, setPinnedIds] = useState(() => prefs?.pinnedIds || []);
+  const [visibleStatCards, setVisibleStatCards] = useState(() => prefs?.visibleStatCards || ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
