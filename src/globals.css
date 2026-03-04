@@ -223,6 +223,10 @@ h1, h2, h3, h4, h5, h6,
 .recharts-cartesian-grid-vertical line { stroke: var(--border-subtle) !important; opacity: 0.5; }
 .recharts-tooltip-wrapper { z-index: 100; }
 .recharts-tooltip-cursor { fill: rgba(254,221,0,0.04) !important; }
+.recharts-default-tooltip { background: var(--bg-elevated) !important; border-color: var(--border-default) !important; color: var(--text-primary) !important; }
+.recharts-tooltip-label { color: var(--text-primary) !important; }
+.recharts-tooltip-item { color: var(--text-secondary) !important; }
+.recharts-legend-item-text { color: var(--text-secondary) !important; fill: var(--text-secondary) !important; }
 
 /* Glow utilities */
 .glow-yellow { box-shadow: 0 0 12px rgba(254,221,0,0.25), 0 0 2px rgba(254,221,0,0.4); }
