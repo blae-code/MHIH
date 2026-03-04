@@ -355,7 +355,24 @@ export default function Dashboard() {
     ),
     ai_insights: isVisible("ai_insights") && (
       <div key="ai_insights" className="dashboard-widget-card">
-        <div className="dashboard-section-label mb-3">Recent AI Insights</div>
+        <div className="flex items-center justify-between mb-3 relative z-10">
+          <div className="dashboard-section-label">Recent AI Insights</div>
+          <button
+            onClick={handleRegenerateInsights}
+            disabled={regeneratingInsights}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
+            style={{
+              background: "rgba(254,221,0,0.08)",
+              border: "1px solid rgba(254,221,0,0.2)",
+              color: "var(--text-secondary)",
+              opacity: regeneratingInsights ? 0.5 : 1,
+              cursor: regeneratingInsights ? "not-allowed" : "pointer"
+            }}
+            title="Regenerate insights">
+            <RefreshCw size={11} style={{ transform: regeneratingInsights ? "rotate(180deg)" : "none", transition: "transform 0.3s linear" }} className={regeneratingInsights ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
         <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
         {insights.length === 0 ? (
           <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
