@@ -665,10 +665,14 @@ export default function Layout({ children, currentPageName }) {
               </div>
 
               {/* Footer */}
-              <div className="px-4 py-2 flex items-center gap-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}><kbd style={{ fontFamily: "monospace" }}>↑↓</kbd> navigate</span>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}><kbd style={{ fontFamily: "monospace" }}>↵</kbd> open</span>
-                <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>{filteredCmds.length} results</span>
+              <div className="px-4 py-2 flex items-center gap-4" style={{ borderTop: "1px solid var(--border-default)", background: "rgba(0,0,0,0.2)" }}>
+                {[["↑↓", "navigate"], ["Enter", "open"], ["Esc", "close"]].map(([key, label]) => (
+                  <span key={key} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                    <kbd style={{ background: "rgba(254,221,0,0.08)", color: "var(--mnbc-yellow)", fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid rgba(254,221,0,0.2)", fontFamily: "monospace" }}>{key}</kbd>
+                    {label}
+                  </span>
+                ))}
+                <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>{filteredCmds.length} result{filteredCmds.length !== 1 ? "s" : ""}</span>
               </div>
             </div>
           </div>
