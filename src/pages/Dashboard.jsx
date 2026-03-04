@@ -244,36 +244,51 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="p-5 space-y-5 h-full overflow-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-1 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-        <div>
-          <h1 className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>BC Métis Health Intelligence</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-            Real-time overview of Métis-specific health metrics across British Columbia
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCustomizerOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}
-            title="Rearrange and show/hide dashboard widgets">
-            <SlidersHorizontal size={12} />
-            Customize Layout
-          </button>
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }} title="Dashboard data is live">
-            <span className="status-dot active" />
-            <span className="text-xs" style={{ color: "var(--color-success)" }}>Live</span>
+    <div className="h-full overflow-auto" style={{ background: "var(--bg-base)", paddingBottom: 0 }}>
+      {/* Main container with edge padding */}
+      <div className="p-4" style={{ maxWidth: "100%", margin: "0 auto" }}>
+
+        {/* Hero header with gradient */}
+        <div className="mb-5 rounded-xl overflow-hidden" style={{
+          background: "linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
+          border: "1px solid var(--border-default)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.04)"
+        }}>
+          <div className="p-4 flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 rounded-full" style={{ background: "var(--color-success)", boxShadow: "0 0 8px rgba(0,230,118,0.5)" }} />
+                <h1 className="text-sm font-bold tracking-wider" style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Dashboard</h1>
+              </div>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
+                Real-time overview of Métis-specific health metrics across British Columbia
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setCustomizerOpen(true)}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
+                style={{ background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.2)", color: "var(--text-secondary)" }}
+                onMouseOver={e => { e.currentTarget.style.background = "rgba(254,221,0,0.14)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                onMouseOut={e => { e.currentTarget.style.background = "rgba(254,221,0,0.08)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                title="Rearrange and show/hide dashboard widgets">
+                <SlidersHorizontal size={13} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Render widgets in user-defined order */}
-      {widgets
-        .filter(w => w.visible !== false)
-        .map(w => WIDGET_RENDER[w.id])
-        .filter(Boolean)}
+        {/* Widgets grid */}
+        <div className="space-y-4">
+          {widgets
+            .filter(w => w.visible !== false)
+            .map(w => WIDGET_RENDER[w.id])
+            .filter(Boolean)}
+        </div>
+
+        {/* Footer spacer */}
+        <div style={{ height: "var(--footer-height)" }} />
+      </div>
 
       {customizerOpen && (
         <DashboardCustomizer
