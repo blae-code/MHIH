@@ -812,7 +812,7 @@ export default function DisparityExplorer({ metrics }) {
         </div>
 
         {/* Export buttons */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <button onClick={() => exportCSV(filtered, "health_metrics_filtered.csv")}
             className="flex items-center justify-center gap-1.5 flex-1 px-2.5 py-2 rounded text-xs font-medium transition-all"
             style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
