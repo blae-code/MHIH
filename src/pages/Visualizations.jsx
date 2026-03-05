@@ -397,7 +397,7 @@ export default function Visualizations() {
       {/* Summary table */}
       {!["heatmap", "sankey", "network"].includes(chartType) && chartData.length > 0 && (
         <div className="metric-card overflow-x-auto">
-          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Data Table</div>
+          <div className="dashboard-section-label">Data Table</div>
           <table className="w-full data-table text-xs">
             <thead>
               <tr>
