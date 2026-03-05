@@ -13,7 +13,8 @@
     "validate:functions": "node scripts/validate-function-integrity.mjs",
     "validate:routes": "node scripts/validate-route-integrity.mjs",
     "validate:roles": "node scripts/validate-role-policy.mjs",
-    "validate:runtime": "npm run validate:functions && npm run validate:routes && npm run validate:roles"
+    "validate:runtime": "npm run validate:functions && npm run validate:routes && npm run validate:roles",
+    "validate:backend": "node scripts/validate-backend.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.18",
