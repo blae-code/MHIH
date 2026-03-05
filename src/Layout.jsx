@@ -475,7 +475,7 @@ export default function Layout({ children, currentPageName }) {
               onClick={() => setFeedbackOpen(true)}
               className="activity-icon" 
               title="Send Feedback">
-              <FeedbackIcon size={15} />
+              <MessageSquare size={15} />
             </button>
             <button onClick={() => setCmdOpen(true)} className="md:hidden activity-icon" title="Search">
               <Search size={15} />
