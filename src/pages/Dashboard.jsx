@@ -351,7 +351,7 @@ export default function Dashboard() {
             const tooltips = {
               "Métis Health Indicators": "Total number of Métis-specific health indicators currently tracked in the system. Includes data on chronic diseases, mental health, substance use, maternal/child health, social determinants, and mortality metrics.",
               "Net Disparity Burden": "Average signed burden where gaps are scored by metric directionality (higher/lower-is-better). Positive means harmful gaps dominate.",
-              "Directional Trend Balance": "Share balance of improving versus worsening metric series, interpreted by each metric's directionality semantics.",
+              "Improving Metrics": "Number of metric series showing improvement based on each metric's directionality semantics (e.g. lower is better for disease rates, higher is better for access indicators).",
               "Health Categories": "Number of major health indicator categories being monitored, including chronic disease, mental health, substance use, maternal/child health, social determinants, demographics, mortality, and access to care."
             };
             return (
