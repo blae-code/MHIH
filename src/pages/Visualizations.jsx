@@ -274,18 +274,19 @@ export default function Visualizations() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setLinkedMode(v => !v)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             title="When enabled, clicking a chart element cross-filters all views"
             style={{
-              background: linkedMode ? "var(--accent-muted)" : "var(--bg-elevated)",
-              border: `1px solid ${linkedMode ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-              color: linkedMode ? "var(--accent-primary)" : "var(--text-secondary)"
+              background: linkedMode ? "rgba(254,221,0,0.1)" : "var(--bg-elevated)",
+              border: `1px solid ${linkedMode ? "rgba(254,221,0,0.4)" : "var(--border-default)"}`,
+              color: linkedMode ? "var(--accent-primary)" : "var(--text-secondary)",
+              boxShadow: linkedMode ? "0 0 12px rgba(254,221,0,0.1)" : "none"
             }}>
             <Link2 size={12} /> Linked {linkedMode ? "On" : "Off"}
           </button>
           <button onClick={handleExportSVG}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
             <Download size={12} /> Export SVG
           </button>
         </div>
