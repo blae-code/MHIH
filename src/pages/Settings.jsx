@@ -108,13 +108,14 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="flex gap-3 pt-6">
+      <div className="flex gap-3 pt-2">
         <button onClick={handleSave} disabled={saving}
           className="flex items-center justify-center gap-2 flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-60"
           style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 8px 24px rgba(254,221,0,0.2)" }}>
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           {saved ? "✓ Saved!" : "Save Settings"}
         </button>
+      </div>
       </div>
     </div>
   );
