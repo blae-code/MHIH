@@ -809,6 +809,7 @@ export default function Layout({ children, currentPageName }) {
           currentPageName={currentPageName}
         />
 
+        <FloatingFeedbackButton user={user} currentPage={currentPageName} />
         <PatchNotesModal />
       </div>
     </AppContext.Provider>
