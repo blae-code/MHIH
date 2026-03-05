@@ -138,6 +138,7 @@ export default function Layout({ children, currentPageName }) {
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const cmdInputRef = useRef(null);
 
   useEffect(() => {
