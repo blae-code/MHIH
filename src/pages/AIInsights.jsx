@@ -232,8 +232,9 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
                   </button>
                 </div>
               </div>
-              <div className="rounded-lg p-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>
+              <div className="rounded-xl p-5 relative overflow-hidden" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.05)" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "linear-gradient(to bottom, var(--accent-primary), transparent)", borderRadius: "8px 0 0 8px" }} />
+                <div className="pl-3 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>
                   {activeInsight.content}
                 </div>
               </div>
