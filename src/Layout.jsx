@@ -125,9 +125,7 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
-  const [cmdOpen, setCmdOpen] = useState(false);
-  const [cmdQuery, setCmdQuery] = useState("");
-  const [cmdIndex, setCmdIndex] = useState(0);
+
   const [statusLogs, setStatusLogs] = useState([
     { type: "success", msg: "System initialized", time: new Date().toLocaleTimeString() }
   ]);
