@@ -247,7 +247,7 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
           </div>
         )}
 
-        <div className="p-6 border-t shrink-0" style={{ background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
+        <div className="p-6 border-t shrink-0" style={{ background: "linear-gradient(to top, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)", boxShadow: "0 -4px 20px rgba(0,0,0,0.3)" }}>
           <div className="max-w-3xl mx-auto space-y-3">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               {INSIGHT_TYPES.map(t => (
