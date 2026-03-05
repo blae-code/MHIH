@@ -82,10 +82,15 @@ export default function DataRepository() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b shrink-0"
-        style={{ background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
+      <div className="px-6 py-4 border-b shrink-0 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+          borderColor: "var(--border-default)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
+        }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 60%, transparent 100%)" }} />
         <div className="dashboard-section-label">Health Metrics Repository</div>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Browse, import, and manage Métis health data</p>
+        <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Browse, import, and manage Métis health data</p>
       </div>
 
       {/* Toolbar */}
