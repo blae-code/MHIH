@@ -102,13 +102,15 @@ export default function DataQuality() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b shrink-0"
-        style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b shrink-0 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+          borderColor: "var(--border-default)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
+        }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #ff4757 0%, #FEDD00 50%, transparent 100%)" }} />
         <div>
-          <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-            <ShieldCheck size={14} style={{ color: "var(--accent-primary)" }} />
-            Data Quality Monitor
-          </h2>
+          <div className="dashboard-section-label" style={{ marginBottom: 2 }}>Data Quality Monitor</div>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             {lastScan ? `Last scan: ${new Date(lastScan).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}` : "No scans run yet"}
           </p>
