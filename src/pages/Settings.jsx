@@ -116,7 +116,7 @@ export default function Settings() {
           {saved ? "✓ Saved!" : "Save Settings"}
         </button>
       </div>
-      </div>
+    </div>
     </div>
   );
 }
