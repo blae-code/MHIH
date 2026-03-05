@@ -54,6 +54,7 @@ import Alerts from './pages/Alerts';
 import AlertsCenter from './pages/AlertsCenter';
 import ApprovalsInbox from './pages/ApprovalsInbox';
 import Backtesting from './pages/Backtesting';
+import Changelog from './pages/Changelog';
 import ConflictWorkbench from './pages/ConflictWorkbench';
 import Dashboard from './pages/Dashboard';
 import DataAnalyst from './pages/DataAnalyst';
@@ -76,15 +77,14 @@ import MyDataSources from './pages/MyDataSources';
 import Onboarding from './pages/Onboarding';
 import PolicyLab from './pages/PolicyLab';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
-import RedRiverOS from './pages/RedRiverOS';
 import Recommendations from './pages/Recommendations';
+import RedRiverOS from './pages/RedRiverOS';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import Watchlists from './pages/Watchlists';
 import Workflows from './pages/Workflows';
-import Changelog from './pages/Changelog';
 import __Layout from './Layout.jsx';
 
 
@@ -96,6 +96,7 @@ export const PAGES = {
     "AlertsCenter": AlertsCenter,
     "ApprovalsInbox": ApprovalsInbox,
     "Backtesting": Backtesting,
+    "Changelog": Changelog,
     "ConflictWorkbench": ConflictWorkbench,
     "Dashboard": Dashboard,
     "DataAnalyst": DataAnalyst,
@@ -118,15 +119,14 @@ export const PAGES = {
     "Onboarding": Onboarding,
     "PolicyLab": PolicyLab,
     "PredictiveAnalytics": PredictiveAnalytics,
-    "RedRiverOS": RedRiverOS,
     "Recommendations": Recommendations,
+    "RedRiverOS": RedRiverOS,
     "Reports": Reports,
     "Settings": Settings,
     "Team": Team,
     "Visualizations": Visualizations,
     "Watchlists": Watchlists,
     "Workflows": Workflows,
-    "Changelog": Changelog,
 }
 
 export const pagesConfig = {

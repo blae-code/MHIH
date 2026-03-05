@@ -17,6 +17,7 @@ import NotificationPreferences from "./components/notifications/NotificationPref
 import FeedbackModal from "./components/feedback/FeedbackModal";
 import CommandPalette from "./components/search/CommandPalette";
 import PatchNotesModal from "./components/changelog/PatchNotesModal";
+import FloatingFeedbackButton from "./components/feedback/FloatingFeedbackButton";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
