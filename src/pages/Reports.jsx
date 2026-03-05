@@ -64,30 +64,41 @@ export default function Reports() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="relative z-10">
-        <div className="dashboard-section-label">Reports Center</div>
-        <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>Create and manage custom health reports</p>
+      <div className="px-6 py-4 border-b shrink-0 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+          borderColor: "var(--border-default)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
+        }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 60%, transparent 100%)" }} />
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="dashboard-section-label">Reports Center</div>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Create and manage custom health reports</p>
+          </div>
+          <div className="flex gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+            {[
+              { key: "reports", label: "Generated", icon: FileText },
+              { key: "schedules", label: "Scheduled", icon: Calendar }
+            ].map(tab => (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all"
+                style={{
+                  background: activeTab === tab.key ? "rgba(254,221,0,0.12)" : "transparent",
+                  color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-muted)",
+                  border: activeTab === tab.key ? "1px solid rgba(254,221,0,0.3)" : "1px solid transparent"
+                }}>
+                <tab.icon size={12} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", width: "fit-content" }}>
-        {[
-          { key: "reports", label: "Generated Reports", icon: FileText },
-          { key: "schedules", label: "Scheduled Reports", icon: Calendar }
-        ].map(tab => (
-          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all"
-            style={{
-              background: activeTab === tab.key ? "var(--bg-elevated)" : "transparent",
-              color: activeTab === tab.key ? "var(--text-primary)" : "var(--text-muted)"
-            }}>
-            <tab.icon size={14} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="flex-1 overflow-auto p-6 max-w-7xl mx-auto w-full space-y-6">
 
       {/* Generated Reports Tab */}
       {activeTab === "reports" && (
