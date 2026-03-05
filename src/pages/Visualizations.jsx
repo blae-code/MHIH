@@ -421,6 +421,7 @@ export default function Visualizations() {
           </table>
         </div>
       )}
+      </div>
     </div>
   );
 }
