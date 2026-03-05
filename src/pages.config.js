@@ -80,6 +80,7 @@ import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import Watchlists from './pages/Watchlists';
 import Workflows from './pages/Workflows';
+import Changelog from './pages/Changelog';
 import __Layout from './Layout.jsx';
 
 
@@ -117,6 +118,7 @@ export const PAGES = {
     "Visualizations": Visualizations,
     "Watchlists": Watchlists,
     "Workflows": Workflows,
+    "Changelog": Changelog,
 }
 
 export const pagesConfig = {
