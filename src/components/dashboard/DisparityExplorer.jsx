@@ -535,24 +535,25 @@ function EmptyState({ msg }) {
 }
 
 function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
-  if (!metric) return null;
+  const activeMetric = metric || null;
 
-  const direction = getMetricDirection(metric);
-  const gap = metric.comparison_value != null ? metric.value - metric.comparison_value : null;
-  const gapIsHarmfulNow = gap != null ? isHarmfulGap(gap, direction) : null;
-  const benchCmp = benchmark.active && benchmark.value != null
-    ? compareToBenchmark((metric.metis ?? metric.value), benchmark.value, direction)
-    : null;
-  const benchDiff = benchCmp ? benchCmp.delta : null;
-
-  // Get historical data for this specific metric (same name, region, category)
   const historicalData = useMemo(() => {
-    if (!allMetrics) return [];
+    if (!allMetrics || !activeMetric) return [];
     return allMetrics.
-    filter((m) => m.name === metric.name && m.region === metric.region && m.category === metric.category).
+    filter((m) => m.name === activeMetric.name && m.region === activeMetric.region && m.category === activeMetric.category).
     sort((a, b) => a.year - b.year).
     map((m) => ({ year: m.year, value: m.value, comparison: m.comparison_value }));
-  }, [metric, allMetrics]);
+  }, [activeMetric, allMetrics]);
+
+  if (!activeMetric) return null;
+
+  const direction = getMetricDirection(activeMetric);
+  const gap = activeMetric.comparison_value != null ? activeMetric.value - activeMetric.comparison_value : null;
+  const gapIsHarmfulNow = gap != null ? isHarmfulGap(gap, direction) : null;
+  const benchCmp = benchmark.active && benchmark.value != null
+    ? compareToBenchmark((activeMetric.metis ?? activeMetric.value), benchmark.value, direction)
+    : null;
+  const benchDiff = benchCmp ? benchCmp.delta : null;
 
   // Calculate historical average and trend
   const histAvg = historicalData.length > 0 ? historicalData.reduce((s, d) => s + d.value, 0) / historicalData.length : null;
@@ -572,7 +573,7 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${metric.name.replace(/\s+/g, "_")}_history.csv`;
+    a.download = `${activeMetric.name.replace(/\s+/g, "_")}_history.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -587,11 +588,11 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
 
       {/* Metric name */}
       <div>
-        <div className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{metric.fullName || metric.name}</div>
+        <div className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{activeMetric.fullName || activeMetric.name}</div>
         <div className="text-xs mt-1 flex gap-3 flex-wrap">
-          <span style={{ color: "var(--text-muted)" }}>{metric.category?.replace(/_/g, " ")}</span>
+          <span style={{ color: "var(--text-muted)" }}>{activeMetric.category?.replace(/_/g, " ")}</span>
           <span style={{ color: "var(--text-muted)" }}>•</span>
-          <span style={{ color: "var(--text-muted)" }}>{metric.region}</span>
+          <span style={{ color: "var(--text-muted)" }}>{activeMetric.region}</span>
           <span style={{ color: "var(--text-muted)" }}>•</span>
           <span style={{ color: "var(--text-muted)" }}>{directionLabel(direction)}</span>
         </div>
@@ -600,10 +601,10 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
       {/* Current snapshot */}
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="rounded-md p-2" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-          <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Current Year ({metric.year})</div>
-          <div style={{ color: "var(--accent-primary)", fontWeight: 700 }}>{(metric.metis ?? metric.value).toFixed(2)}</div>
-          {metric.comparison_value != null &&
-          <div style={{ color: "var(--text-secondary)", fontSize: 9, marginTop: 2 }}>vs BC: {metric.comparison_value.toFixed(2)}</div>
+          <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Current Year ({activeMetric.year})</div>
+          <div style={{ color: "var(--accent-primary)", fontWeight: 700 }}>{(activeMetric.metis ?? activeMetric.value).toFixed(2)}</div>
+          {activeMetric.comparison_value != null &&
+          <div style={{ color: "var(--text-secondary)", fontSize: 9, marginTop: 2 }}>vs BC: {activeMetric.comparison_value.toFixed(2)}</div>
           }
         </div>
         {gap != null &&
@@ -648,7 +649,7 @@ function DrillPanel({ metric, onClose, benchmark, allMetrics }) {
             <div style={{ color: "var(--text-muted)", fontSize: 9, marginBottom: 2 }}>Historical Avg</div>
             <div style={{ color: "var(--text-primary)", fontWeight: 700 }}>{histAvg.toFixed(2)}</div>
             <div style={{ color: "var(--text-secondary)", fontSize: 8, marginTop: 2 }}>
-              vs Current: {metric.value - histAvg > 0 ? "+" : ""}{(metric.value - histAvg).toFixed(2)}
+              vs Current: {activeMetric.value - histAvg > 0 ? "+" : ""}{(activeMetric.value - histAvg).toFixed(2)}
             </div>
           </div>
         }
