@@ -250,3 +250,42 @@ h1, h2, h3, h4, h5, h6,
   text-transform: uppercase;
   color: var(--mnbc-yellow);
 }
+
+/* Dashboard / page-level section label */
+.dashboard-section-label {
+  font-family: 'Sofia Sans Extra Condensed', 'Aptos Narrow', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mnbc-yellow);
+  margin-bottom: 8px;
+}
+
+/* Metric card — unified card treatment */
+.metric-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.metric-card:hover {
+  border-color: rgba(254,221,0,0.25);
+  box-shadow: 0 0 20px rgba(254,221,0,0.07), 0 4px 16px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+}
+
+/* Loading shimmer */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-hover) 50%, var(--bg-elevated) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
