@@ -254,13 +254,23 @@ export default function Visualizations() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-auto p-5 space-y-4">
+    <div className="flex flex-col h-full overflow-auto">
+      {/* Header */}
+      <div className="px-5 py-4 border-b shrink-0 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+          borderColor: "var(--border-default)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(64,196,255,0.08)"
+        }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #40c4ff 0%, #FEDD00 50%, transparent 100%)" }} />
+        <div className="dashboard-section-label">Visualizations</div>
+        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Interactive charts with drill-down and cross-filtering</p>
+      </div>
+
+      <div className="flex-1 overflow-auto p-5 space-y-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Visualizations</h2>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Interactive charts with drill-down and cross-filtering</p>
-        </div>
+      <div className="flex items-center justify-end flex-wrap gap-3">
+        <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setLinkedMode(v => !v)}
