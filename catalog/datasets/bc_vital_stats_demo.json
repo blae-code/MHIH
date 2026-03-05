@@ -1,0 +1,25 @@
+{
+  "dataset_id": "bc_vital_stats_demo",
+  "name": "BC Vital Statistics (Demographics)",
+  "description": "Demographic outputs from BC Vital Statistics feeds.",
+  "steward": "BC Vital Statistics",
+  "license": null,
+  "refresh_interval_days": 30,
+  "schema": {
+    "observation_entity": "HealthMetric",
+    "required_fields": [
+      "year",
+      "value",
+      "name",
+      "region"
+    ],
+    "dimensions": [
+      "region",
+      "sex",
+      "age_group"
+    ]
+  },
+  "projection_policy_id": "default_health_projection_v1",
+  "status": "active",
+  "version": 1
+}

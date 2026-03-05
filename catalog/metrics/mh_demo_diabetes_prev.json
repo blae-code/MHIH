@@ -1,0 +1,40 @@
+{
+  "metric_id": "mh_demo_diabetes_prev",
+  "name": "Diabetes prevalence",
+  "description": "Age-standardized diabetes prevalence rate.",
+  "category": "chronic_disease",
+  "unit": "%",
+  "value_type": "percent",
+  "direction": "lower_is_better",
+  "dataset_ids": [
+    "bc_vital_stats_demo"
+  ],
+  "dimensions": [
+    {
+      "key": "region",
+      "label": "Region",
+      "type": "string"
+    },
+    {
+      "key": "age_group",
+      "label": "Age Group",
+      "type": "string"
+    }
+  ],
+  "default_filters": {
+    "age_group": "all"
+  },
+  "suppression": {
+    "min_n": 5,
+    "rounding": {
+      "mode": "fixed",
+      "decimals": 1
+    },
+    "redact_dims": [
+      "site"
+    ]
+  },
+  "method_notes": "Prevalence is interpreted with lower-is-better semantics.",
+  "status": "active",
+  "version": 1
+}

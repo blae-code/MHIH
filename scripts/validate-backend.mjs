@@ -34,6 +34,16 @@ const ADMIN_OR_USER = [
   "reconcileSourceConflict",
 ];
 
+const SCOPED_API_FUNCTIONS = [
+  "syncCatalog",
+  "api_listDatasets",
+  "api_listMetrics",
+  "api_queryMetricSeries",
+  "api_createEvidenceSnapshot",
+  "api_getEvidenceSnapshot",
+  "api_exportEvidenceSnapshot",
+];
+
 function read(file) {
   return fs.readFileSync(file, "utf8");
 }
@@ -88,6 +98,15 @@ for (const name of ADMIN_OR_USER) {
     /user\?\.role\s*===\s*['"]admin['"][\s\S]{0,80}user\?\.role\s*===\s*['"]user['"]/.test(source) ||
     /user\?\.role\s*===\s*['"]user['"][\s\S]{0,80}user\?\.role\s*===\s*['"]admin['"]/.test(source);
   assert(roleGuard, `functions/${name}.ts: expected admin/user guard`, failures);
+}
+
+for (const name of SCOPED_API_FUNCTIONS) {
+  const file = path.join(FUNCTIONS_DIR, `${name}.ts`);
+  assert(fs.existsSync(file), `Missing function file: functions/${name}.ts`, failures);
+  if (!fs.existsSync(file)) continue;
+  const source = read(file);
+  const hasScopeGuard = /assertScopes\(/.test(source);
+  assert(hasScopeGuard, `functions/${name}.ts: expected scoped auth guard`, failures);
 }
 
 if (failures.length) {

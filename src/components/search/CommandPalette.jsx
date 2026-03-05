@@ -8,7 +8,7 @@ import {
   Shield, Users, Settings, Bot, Workflow, BellRing, FlaskConical,
   AlertCircle, ShieldCheck, FileDown, Wrench, MapPin, Upload,
   Activity, ClipboardCheck, BrainCircuit, GitCompare, Link2,
-  Siren, MapPinned, BookMarked, ListOrdered, FolderOpen
+  Siren, MapPinned, BookMarked, ListOrdered, FolderOpen, SlidersHorizontal, MessageSquare
 } from "lucide-react";
 
 const NAV_COMMANDS = [
@@ -17,6 +17,10 @@ const NAV_COMMANDS = [
   { label: "Visualizations", page: "Visualizations", icon: BarChart3, section: "Workspace", desc: "Charts & trend views" },
   { label: "AI Insights", page: "AIInsights", icon: Brain, section: "Workspace", desc: "AI-generated analysis" },
   { label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, section: "Workspace", desc: "Ask questions about data" },
+  { label: "Red River OS", page: "RedRiverOS", icon: MessageSquare, section: "Red River OS", desc: "Module shell for catalog, forge, and snapshots" },
+  { label: "Metric Catalog", page: "MetricCatalog", icon: Database, section: "Red River OS", desc: "Dataset manifests and metric definitions" },
+  { label: "Metric Forge", page: "MetricForge", icon: SlidersHorizontal, section: "Red River OS", desc: "Projection-safe metric query workspace" },
+  { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: FileText, section: "Red River OS", desc: "Deterministic snapshot and export workspace" },
   { label: "Policy Lab", page: "PolicyLab", icon: FlaskConical, section: "Policy", desc: "Policy scenario simulation" },
   { label: "Recommendations", page: "Recommendations", icon: ListOrdered, section: "Policy", desc: "Ranked policy recommendations" },
   { label: "Watchlists", page: "Watchlists", icon: BellRing, section: "Policy", desc: "Mission thresholds & breach monitoring" },
@@ -51,6 +55,7 @@ const SECTION_COLORS = {
   Policy: "#f472b6",
   Data: "#40c4ff",
   Analytics: "#00e676",
+  "Red River OS": "#7dd3fc",
   Admin: "#ffab40",
   System: "#8b8fa8",
   Results: "#a78bfa",

@@ -6,13 +6,17 @@ import {
   Search, X, Database, BarChart3, Brain, BookOpen, FileText,
   ChevronRight, Activity, Clock, Sparkles, LayoutDashboard,
   TrendingUp, Shield, Users, Settings, Bot, Workflow, BellRing,
-  FlaskConical, AlertCircle, ArrowRight, Tag
+  FlaskConical, AlertCircle, ArrowRight, Tag, SlidersHorizontal, MessageSquare
 } from "lucide-react";
 
 // Static page navigation items
 const PAGES = [
   { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, desc: "Platform overview & KPIs" },
   { label: "Data Repository", page: "DataRepository", icon: Database, desc: "Browse all health metrics" },
+  { label: "Red River OS", page: "RedRiverOS", icon: MessageSquare, desc: "Module shell for Red River OS analytics" },
+  { label: "Metric Catalog", page: "MetricCatalog", icon: Database, desc: "Dataset manifests and metric definitions" },
+  { label: "Metric Forge", page: "MetricForge", icon: SlidersHorizontal, desc: "Projection-safe metric query workspace" },
+  { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: FileText, desc: "Deterministic evidence snapshot exports" },
   { label: "Visualizations", page: "Visualizations", icon: BarChart3, desc: "Charts & trend views" },
   { label: "AI Insights", page: "AIInsights", icon: Brain, desc: "AI-generated analysis" },
   { label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, desc: "Ask questions about data" },

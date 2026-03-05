@@ -16,6 +16,7 @@ const CHART_TYPES = [
 export default function ReportBuilder({ onReportCreated }) {
   const [step, setStep] = useState(1);
   const [metrics, setMetrics] = useState([]);
+  const [metricSourceMode, setMetricSourceMode] = useState("legacy");
   const [selectedMetrics, setSelectedMetrics] = useState([]);
   const [selectedRegions, setSelectedRegions] = useState([]);
   const [selectedCharts, setSelectedCharts] = useState(["bar", "line"]);
@@ -28,8 +29,25 @@ export default function ReportBuilder({ onReportCreated }) {
   useEffect(() => {
     const loadMetrics = async () => {
       try {
+        const catalogRows = await base44.entities.MetricDefinition.list("-updated_date", 1000).catch(() => []);
+        const catalogMetrics = (catalogRows || [])
+          .filter((row) => String(row.status || "active") !== "deprecated")
+          .map((row) => ({
+            id: row.metric_id,
+            name: row.name || row.metric_id,
+            category: row.category || "uncategorized",
+          }));
+
+        if (catalogMetrics.length > 0) {
+          setMetrics(catalogMetrics);
+          setMetricSourceMode("catalog");
+          setLoading(false);
+          return;
+        }
+
         const data = await listAllHealthMetrics();
         setMetrics(data);
+        setMetricSourceMode("legacy");
         setLoading(false);
       } catch (error) {
         console.error("Failed to load metrics:", error);
@@ -127,7 +145,7 @@ export default function ReportBuilder({ onReportCreated }) {
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Add context or notes about this report..."
-              rows="3"
+              rows={3}
               className="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none"
               style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }}
             />
@@ -147,9 +165,14 @@ export default function ReportBuilder({ onReportCreated }) {
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs font-semibold uppercase" style={{ color: "var(--text-muted)" }}>Health Metrics</label>
-              <span className="text-xs px-2 py-1 rounded" style={{ background: "rgba(254,221,0,0.1)", color: "var(--accent-primary)" }}>
-                {selectedMetrics.length} selected
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-1 rounded" style={{ background: "rgba(64,196,255,0.1)", color: "var(--color-info)", border: "1px solid rgba(64,196,255,0.25)" }}>
+                  {metricSourceMode === "catalog" ? "MetricDefinition IDs" : "HealthMetric IDs"}
+                </span>
+                <span className="text-xs px-2 py-1 rounded" style={{ background: "rgba(254,221,0,0.1)", color: "var(--accent-primary)" }}>
+                  {selectedMetrics.length} selected
+                </span>
+              </div>
             </div>
             <div className="max-h-64 overflow-y-auto space-y-2 p-3 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
               {loading ? (

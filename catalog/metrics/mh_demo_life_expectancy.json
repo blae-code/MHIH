@@ -1,0 +1,45 @@
+{
+  "metric_id": "mh_demo_life_expectancy",
+  "name": "Life expectancy at birth",
+  "description": "Life expectancy at birth (years).",
+  "category": "demographics",
+  "unit": "years",
+  "value_type": "number",
+  "direction": "higher_is_better",
+  "dataset_ids": [
+    "bc_vital_stats_demo"
+  ],
+  "dimensions": [
+    {
+      "key": "region",
+      "label": "Region",
+      "type": "string"
+    },
+    {
+      "key": "sex",
+      "label": "Sex",
+      "type": "string",
+      "allowed_values": [
+        "female",
+        "male",
+        "all"
+      ]
+    }
+  ],
+  "default_filters": {
+    "sex": "all"
+  },
+  "suppression": {
+    "min_n": 5,
+    "rounding": {
+      "mode": "fixed",
+      "decimals": 1
+    },
+    "redact_dims": [
+      "site"
+    ]
+  },
+  "method_notes": "Directional semantics are explicit; projected mode applies rounding and min_n suppression.",
+  "status": "active",
+  "version": 1
+}

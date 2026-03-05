@@ -63,16 +63,20 @@ import DataQuality from './pages/DataQuality';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
 import EvidenceExplorer from './pages/EvidenceExplorer';
+import EvidenceSnapshots from './pages/EvidenceSnapshots';
 import Export from './pages/Export';
 import GeoEquityMap from './pages/GeoEquityMap';
 import GeoMap from './pages/GeoMap';
 import HansardIntel from './pages/HansardIntel';
 import Interventions from './pages/Interventions';
 import KnowledgeAdmin from './pages/KnowledgeAdmin';
+import MetricCatalog from './pages/MetricCatalog';
+import MetricForge from './pages/MetricForge';
 import MyDataSources from './pages/MyDataSources';
 import Onboarding from './pages/Onboarding';
 import PolicyLab from './pages/PolicyLab';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
+import RedRiverOS from './pages/RedRiverOS';
 import Recommendations from './pages/Recommendations';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -101,16 +105,20 @@ export const PAGES = {
     "DataRepository": DataRepository,
     "DataSources": DataSources,
     "EvidenceExplorer": EvidenceExplorer,
+    "EvidenceSnapshots": EvidenceSnapshots,
     "Export": Export,
     "GeoEquityMap": GeoEquityMap,
     "GeoMap": GeoMap,
     "HansardIntel": HansardIntel,
     "Interventions": Interventions,
     "KnowledgeAdmin": KnowledgeAdmin,
+    "MetricCatalog": MetricCatalog,
+    "MetricForge": MetricForge,
     "MyDataSources": MyDataSources,
     "Onboarding": Onboarding,
     "PolicyLab": PolicyLab,
     "PredictiveAnalytics": PredictiveAnalytics,
+    "RedRiverOS": RedRiverOS,
     "Recommendations": Recommendations,
     "Reports": Reports,
     "Settings": Settings,

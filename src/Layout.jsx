@@ -33,6 +33,15 @@ const NAV_SECTIONS = [
     ]
   },
   {
+    key: "redriver", label: "Red River OS", color: "#7dd3fc",
+    items: [
+      { icon: MessageSquare, label: "Red River OS", page: "RedRiverOS", tooltip: "Analytics module shell for Red River OS integration" },
+      { icon: Database, label: "Metric Catalog", page: "MetricCatalog", tooltip: "Dataset manifests and metric definitions" },
+      { icon: SlidersHorizontal, label: "Metric Forge", page: "MetricForge", tooltip: "Projection-safe metric series querying" },
+      { icon: FileText, label: "Evidence Snapshots", page: "EvidenceSnapshots", tooltip: "Deterministic snapshot and export workspace" },
+    ]
+  },
+  {
     key: "policy", label: "Policy", color: "#f472b6",
     items: [
       { icon: FlaskConical, label: "Policy Lab", page: "PolicyLab", tooltip: "Scenario and policy experimentation" },
@@ -92,6 +101,10 @@ const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items.map(i => ({ ...i, sectio
 const COMMAND_ITEMS = [
   { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, desc: "Platform overview & KPIs" },
   { label: "Data Repository", page: "DataRepository", icon: Database, desc: "Browse all health metrics" },
+  { label: "Red River OS", page: "RedRiverOS", icon: MessageSquare, desc: "Red River OS analytics module shell" },
+  { label: "Metric Catalog", page: "MetricCatalog", icon: Database, desc: "Dataset and metric definition catalog" },
+  { label: "Metric Forge", page: "MetricForge", icon: SlidersHorizontal, desc: "Projection-safe metric series query workspace" },
+  { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: FileText, desc: "Create and export deterministic evidence snapshots" },
   { label: "Data Sources", page: "DataSources", icon: FolderOpen, desc: "Manage external connections" },
   { label: "My Data Sources", page: "MyDataSources", icon: Database, desc: "Your personal imports" },
   { label: "Data Quality", page: "DataQuality", icon: ShieldCheck, desc: "Review flags & issues" },
