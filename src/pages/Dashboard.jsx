@@ -320,12 +320,14 @@ export default function Dashboard() {
       desc: healthStats.avgDisparityScore > 0 ? "Harmful gaps dominate" : "Protective gaps dominate",
     },
     yearly_trend: {
-      label: "Directional Trend Balance",
-      value: `${healthStats.trendBalance > 0 ? "+" : ""}${healthStats.trendBalance.toFixed(1)}%`,
+      label: "Improving Metrics",
+      value: healthStats.improved,
       icon: Brain,
-      color: healthStats.trendBalance > 0 ? "#2ED573" : "#FF4757",
-      bgColor: healthStats.trendBalance > 0 ? "rgba(46,213,115,0.08)" : "rgba(255,71,87,0.08)",
-      desc: `${healthStats.improved} improving vs ${healthStats.worsened} worsening`,
+      color: "#2ED573",
+      bgColor: "rgba(46,213,115,0.08)",
+      desc: healthStats.directionalCount > 0
+        ? `${healthStats.improved} of ${healthStats.directionalCount} tracked series improving`
+        : "No directional trend data yet",
     },
     coverage: { label: "Health Categories", value: healthStats.categories, icon: BarChart3, color: "#40C4FF", bgColor: "rgba(64,196,255,0.08)", desc: `${healthStats.categories} major health categories tracked` }
   };
