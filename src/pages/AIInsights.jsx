@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { Brain, Pin, Trash2, RefreshCw, Send, MessageSquare, TrendingUp, AlertTriangle, BarChart3, FileText, ShieldCheck } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const INSIGHT_TYPES = [
   { value: "summary", label: "Data Summary", icon: FileText },
@@ -36,7 +37,7 @@ export default function AIInsights() {
   const load = () => {
     Promise.all([
       base44.entities.AIInsight.list("-created_date", 120),
-      base44.entities.HealthMetric.list("-year", 300),
+      listAllHealthMetrics(),
     ]).then(([ins, met]) => {
       setInsights(ins || []);
       setMetrics(met || []);

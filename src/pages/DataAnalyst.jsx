@@ -6,6 +6,7 @@ import {
   MessageSquare, BarChart2, AlertCircle, Info, RefreshCw,
   Lightbulb, X
 } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const EXAMPLE_QUESTIONS = [
   "What are the top 5 highest-calorie foods in this dataset?",
@@ -34,7 +35,7 @@ export default function DataAnalyst() {
   useEffect(() => {
     Promise.all([
       base44.entities.DataSource.list("-updated_date", 100),
-      base44.entities.HealthMetric.list("-year", 500),
+      listAllHealthMetrics(),
     ]).then(([src, met]) => {
       setSources(src.filter(s => s.status !== "inactive"));
       setMetrics(met);

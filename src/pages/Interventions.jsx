@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { Activity, Plus, RefreshCw, Save, Trash2, TrendingUp } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const CATEGORIES = ["chronic_disease", "mental_health", "substance_use", "maternal_child", "social_determinants", "demographics", "mortality", "access_to_care", "other"];
 const STATUSES = ["planned", "active", "paused", "completed", "cancelled"];
@@ -26,13 +27,13 @@ export default function Interventions() {
     notes: "",
   });
 
-  const load = async () => {
+  const load = async (forceRefresh = false) => {
     setLoading(true);
     try {
       const [ints, outs, mets] = await Promise.all([
         base44.entities.Intervention.list("-updated_date", 200).catch(() => []),
         base44.entities.InterventionOutcome.list("-created_date", 500).catch(() => []),
-        base44.entities.HealthMetric.list("-year", 2000).catch(() => []),
+        listAllHealthMetrics({ forceRefresh }).catch(() => []),
       ]);
       setItems(ints || []);
       setOutcomes(outs || []);
@@ -171,7 +172,7 @@ export default function Interventions() {
             Manage intervention lifecycle and track expected vs observed KPI shifts.
           </p>
         </div>
-        <button onClick={load} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+        <button onClick={() => load(true)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
           <RefreshCw size={12} /> Refresh
         </button>
       </div>

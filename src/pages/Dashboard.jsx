@@ -18,6 +18,7 @@ import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
 import { Plus } from "lucide-react";
 import { getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREFS_KEY = "mhip_dashboard_prefs";
@@ -83,7 +84,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-    base44.entities.HealthMetric.list("-year", 100),
+    listAllHealthMetrics(),
     base44.entities.DataSource.list("-updated_date", 500),
     base44.entities.AIInsight.list("-created_date", 5)]
     ).then(([m, s, i]) => {

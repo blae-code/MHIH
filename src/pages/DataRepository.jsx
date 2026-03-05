@@ -5,6 +5,7 @@ import { Search, Upload, Plus, Download, Trash2, Edit2, RefreshCw, Table2, BarCh
 import ImportMetricModal from "@/components/data/ImportMetricModal";
 import MetricForm from "@/components/data/MetricForm";
 import MetricsChartExplorer from "@/components/analyst/MetricsChartExplorer";
+import { invalidateHealthMetricCache, listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
@@ -28,9 +29,9 @@ export default function DataRepository() {
   const [selected, setSelected] = useState(new Set());
   const [viewMode, setViewMode] = useState("table");
 
-  const load = () => {
+  const load = (forceRefresh = false) => {
     setLoading(true);
-    base44.entities.HealthMetric.list("-year", 500)
+    listAllHealthMetrics({ forceRefresh })
       .then(data => { setMetrics(data); addLog("success", `Loaded ${data.length} metrics`); })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));
@@ -47,15 +48,17 @@ export default function DataRepository() {
 
   const handleDelete = async (id) => {
     await base44.entities.HealthMetric.delete(id);
+    invalidateHealthMetricCache();
     addLog("success", "Metric deleted");
-    load();
+    load(true);
   };
 
   const handleBulkDelete = async () => {
     await Promise.all([...selected].map(id => base44.entities.HealthMetric.delete(id)));
     setSelected(new Set());
+    invalidateHealthMetricCache();
     addLog("success", `Deleted ${selected.size} metrics`);
-    load();
+    load(true);
   };
 
   const toggleSelect = (id) => {
@@ -70,9 +73,10 @@ export default function DataRepository() {
       await base44.entities.HealthMetric.create(data);
       addLog("success", `Created metric: ${data.name}`);
     }
+    invalidateHealthMetricCache();
     setShowForm(false);
     setEditing(null);
-    load();
+    load(true);
   };
 
   const handleExportCSV = () => {
@@ -324,7 +328,7 @@ export default function DataRepository() {
         </div>
       )}
 
-      {showImport && <ImportMetricModal onClose={() => setShowImport(false)} onImported={() => { setShowImport(false); load(); addLog("success", "Import complete"); }} />}
+      {showImport && <ImportMetricModal onClose={() => setShowImport(false)} onImported={() => { setShowImport(false); invalidateHealthMetricCache(); load(true); addLog("success", "Import complete"); }} />}
       {showForm && <MetricForm metric={editing} onSave={handleSave} onClose={() => { setShowForm(false); setEditing(null); }} />}
     </div>
   );

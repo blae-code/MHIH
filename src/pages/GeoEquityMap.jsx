@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { MapPinned, RefreshCw, TriangleAlert } from "lucide-react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const REGION_COORDS = {
   "BC": [53.7267, -127.6476],
@@ -20,10 +20,10 @@ export default function GeoEquityMap() {
   const [metrics, setMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = async (forceRefresh = false) => {
     setLoading(true);
     try {
-      const data = await base44.entities.HealthMetric.list("-year", 3000);
+      const data = await listAllHealthMetrics({ forceRefresh });
       setMetrics(data || []);
     } catch (e) {
       addLog("error", e.message);
@@ -79,7 +79,7 @@ export default function GeoEquityMap() {
             Map-first regional burden and disparity hotspots across BC Métis health indicators.
           </p>
         </div>
-        <button onClick={load} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+        <button onClick={() => load(true)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
           <RefreshCw size={12} /> Refresh
         </button>
       </div>

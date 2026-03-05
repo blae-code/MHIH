@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { Link2, RefreshCw, Search, ShieldCheck } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 export default function EvidenceExplorer() {
   const { addLog } = useApp();
@@ -11,12 +12,12 @@ export default function EvidenceExplorer() {
   const [query, setQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  const load = async () => {
+  const load = async (forceRefresh = false) => {
     setLoading(true);
     try {
       const [l, m] = await Promise.all([
         base44.entities.EvidenceLink.list("-created_date", 1000).catch(() => []),
-        base44.entities.HealthMetric.list("-year", 2000).catch(() => []),
+        listAllHealthMetrics({ forceRefresh }).catch(() => []),
       ]);
       setLinks(l || []);
       setMetrics(m || []);
@@ -62,7 +63,7 @@ export default function EvidenceExplorer() {
             Trace AI claims back to metrics, sources, lineage fields, and model versions.
           </p>
         </div>
-        <button onClick={load} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+        <button onClick={() => load(true)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
           <RefreshCw size={12} /> Refresh
         </button>
       </div>

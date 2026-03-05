@@ -5,6 +5,7 @@ import {
   Bell, Plus, Trash2, RefreshCw, AlertTriangle, CheckCircle,
   PauseCircle, PlayCircle, Edit2, X, Zap
 } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const CONDITIONS = [
   { value: "above", label: "Value is above threshold" },
@@ -143,7 +144,7 @@ export default function Alerts() {
   const handleCheckNow = async () => {
     setChecking(true);
     addLog("info", "Checking all alerts against current data...");
-    const metrics = await base44.entities.HealthMetric.list("-year", 500);
+    const metrics = await listAllHealthMetrics({ forceRefresh: true });
     let triggered = 0;
     for (const alert of alerts.filter(a => a.status === "active")) {
       const relevant = metrics.filter(m =>

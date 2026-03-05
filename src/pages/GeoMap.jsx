@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { MapPin, RefreshCw, Filter, Layers, Info, X } from "lucide-react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 // BC region approximate centre coordinates
 const REGION_COORDS = {
@@ -37,7 +37,7 @@ export default function GeoMap() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    base44.entities.HealthMetric.list("-year", 500)
+    listAllHealthMetrics()
       .then(data => { setMetrics(data); addLog("success", `${data.length} metrics loaded for map`); })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));

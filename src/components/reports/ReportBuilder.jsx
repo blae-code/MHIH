@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, X, ChevronDown, FileText } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const REGIONS = ["BC", "Northern BC", "Interior BC", "Fraser", "Vancouver Island", "Vancouver Coastal"];
 const CHART_TYPES = [
@@ -27,7 +28,7 @@ export default function ReportBuilder({ onReportCreated }) {
   useEffect(() => {
     const loadMetrics = async () => {
       try {
-        const data = await base44.entities.HealthMetric.list();
+        const data = await listAllHealthMetrics();
         setMetrics(data);
         setLoading(false);
       } catch (error) {

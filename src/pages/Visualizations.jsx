@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
@@ -13,6 +12,7 @@ import HeatmapChart from "@/components/viz/HeatmapChart";
 import SankeyChart from "@/components/viz/SankeyChart";
 import NetworkGraph from "@/components/viz/NetworkGraph";
 import DrillDownPanel from "@/components/viz/DrillDownPanel";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const COLORS = ["#FEDD00", "#40c4ff", "#00e676", "#a78bfa", "#ff6b6b", "#ffab40", "#34d399", "#fb923c"];
 
@@ -49,7 +49,7 @@ export default function Visualizations() {
   const [linkedMode, setLinkedMode] = useState(true);
 
   useEffect(() => {
-    base44.entities.HealthMetric.list("-year", 500)
+    listAllHealthMetrics()
       .then(data => { setMetrics(data); addLog("success", `${data.length} metrics loaded`); })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));

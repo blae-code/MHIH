@@ -9,6 +9,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart
 } from "recharts";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const FORECAST_HORIZONS = [
   { value: 1, label: "1 Year" },
@@ -35,7 +36,7 @@ export default function PredictiveAnalytics() {
   const [category, setCategory] = useState("all");
 
   useEffect(() => {
-    base44.entities.HealthMetric.list("-year", 500)
+    listAllHealthMetrics()
       .then(data => { setMetrics(data); })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));

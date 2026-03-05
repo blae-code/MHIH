@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { Download, FileText, BarChart3, Table, RefreshCw, CheckCircle, ShieldCheck, Clock } from "lucide-react";
+import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const EXPORT_FORMATS = [
   { id: "csv", label: "CSV", desc: "Comma-separated values — compatible with Excel, SPSS, R", icon: Table },
@@ -25,7 +26,7 @@ export default function Export() {
     setLoading(true);
     try {
       const [metricData, memoData] = await Promise.all([
-        base44.entities.HealthMetric.list("-year", 1000).catch(() => []),
+        listAllHealthMetrics().catch(() => []),
         base44.entities.DecisionMemo.filter({ approval_status: "approved" }, "-approved_date", 50).catch(() => []),
       ]);
       setMetrics(metricData || []);
