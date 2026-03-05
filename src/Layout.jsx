@@ -794,6 +794,8 @@ export default function Layout({ children, currentPageName }) {
           onClose={() => setGlobalSearchOpen(false)}
           currentPageName={currentPageName}
         />
+
+        <PatchNotesModal />
       </div>
     </AppContext.Provider>
   );
