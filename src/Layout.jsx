@@ -806,87 +806,11 @@ export default function Layout({ children, currentPageName }) {
           currentPage={currentPageName}
         />
 
-        {cmdOpen && (
-          <div
-            className="cmd-overlay"
-            onClick={() => setCmdOpen(false)}
-          >
-            <div
-              className="w-full max-w-lg rounded-2xl overflow-hidden"
-              style={{
-                background: "#0d1929",
-                border: "1px solid var(--border-emphasis)",
-                boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(254,221,0,0.15)"
-              }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Search input */}
-              <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
-                <Search size={16} style={{ color: "var(--mnbc-yellow)", flexShrink: 0 }} />
-                <input
-                  ref={cmdInputRef}
-                  autoFocus
-                  className="flex-1 bg-transparent outline-none"
-                  style={{ color: "var(--text-primary)", fontSize: 14 }}
-                  placeholder="Search pages and commands..."
-                  value={cmdQuery}
-                  onChange={e => setCmdQuery(e.target.value)}
-                  onKeyDown={handleCmdKey}
-                />
-                {cmdQuery && (
-                  <button onClick={() => setCmdQuery("")} className="activity-icon" style={{ width: 20, height: 20 }}>
-                    <X size={12} />
-                  </button>
-                )}
-                <kbd style={{ background: "rgba(254,221,0,0.08)", color: "var(--mnbc-yellow)", fontSize: 10, padding: "2px 6px", borderRadius: 4, border: "1px solid rgba(254,221,0,0.25)", fontFamily: "monospace", flexShrink: 0 }}>ESC</kbd>
-              </div>
-
-              {/* Results */}
-              <div className="py-1.5 max-h-80 overflow-y-auto">
-                {filteredCmds.length === 0 ? (
-                  <div className="px-4 py-8 text-center" style={{ color: "var(--text-muted)", fontSize: 13 }}>
-                    No results for "{cmdQuery}"
-                  </div>
-                ) : (
-                  filteredCmds.map((cmd, i) => (
-                    <Link
-                      key={cmd.page}
-                      to={createPageUrl(cmd.page)}
-                      onClick={() => { setCmdOpen(false); setCmdQuery(""); }}
-                    >
-                      <div
-                        className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer ${i === cmdIndex ? "cmd-item-selected" : "cmd-item-hover"}`}
-                        style={{ transition: "background 0.1s" }}
-                        onMouseEnter={() => setCmdIndex(i)}
-                      >
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ background: i === cmdIndex ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                          <cmd.icon size={13} style={{ color: i === cmdIndex ? "var(--mnbc-yellow)" : "var(--text-secondary)" }} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium leading-tight" style={{ color: "var(--text-primary)" }}>{cmd.label}</div>
-                          <div className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{cmd.desc}</div>
-                        </div>
-                        <ChevronRight size={12} style={{ color: "var(--text-muted)", opacity: i === cmdIndex ? 1 : 0, transition: "opacity 0.1s" }} />
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="px-4 py-2 flex items-center gap-4" style={{ borderTop: "1px solid var(--border-default)", background: "rgba(0,0,0,0.2)" }}>
-                {[["↑↓", "navigate"], ["Enter", "open"], ["Esc", "close"]].map(([key, label]) => (
-                  <span key={key} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-                    <kbd style={{ background: "rgba(254,221,0,0.08)", color: "var(--mnbc-yellow)", fontSize: 9, padding: "1px 5px", borderRadius: 3, border: "1px solid rgba(254,221,0,0.2)", fontFamily: "monospace" }}>{key}</kbd>
-                    {label}
-                  </span>
-                ))}
-                <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>{filteredCmds.length} result{filteredCmds.length !== 1 ? "s" : ""}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        <CommandPalette
+          isOpen={globalSearchOpen}
+          onClose={() => setGlobalSearchOpen(false)}
+          currentPageName={currentPageName}
+        />
       </div>
     </AppContext.Provider>
   );
