@@ -477,7 +477,7 @@ export default function Layout({ children, currentPageName }) {
               title="Send Feedback">
               <MessageSquare size={15} />
             </button>
-            <button onClick={() => setCmdOpen(true)} className="md:hidden activity-icon" title="Search">
+            <button onClick={() => setGlobalSearchOpen(true)} className="md:hidden activity-icon" title="Search">
               <Search size={15} />
             </button>
 
