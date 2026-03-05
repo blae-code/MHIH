@@ -25,11 +25,20 @@ export default function Settings() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
-      <div className="relative z-10">
+    <div className="flex flex-col h-full">
+      {/* Page Header */}
+      <div className="px-6 py-4 border-b shrink-0 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+          borderColor: "var(--border-default)",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
+        }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 60%, transparent 100%)" }} />
         <div className="dashboard-section-label">Settings & Preferences</div>
-        <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>Manage your profile and workspace preferences</p>
+        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Manage your profile and workspace preferences</p>
       </div>
+
+    <div className="flex-1 overflow-auto p-6 max-w-3xl mx-auto w-full space-y-6">
 
       {/* Profile Section */}
       <div className="space-y-4">
