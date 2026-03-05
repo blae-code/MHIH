@@ -16,6 +16,7 @@ import NotificationCenter from "./components/notifications/NotificationCenter";
 import NotificationPreferences from "./components/notifications/NotificationPreferences";
 import FeedbackModal from "./components/feedback/FeedbackModal";
 import CommandPalette from "./components/search/CommandPalette";
+import PatchNotesModal from "./components/changelog/PatchNotesModal";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
