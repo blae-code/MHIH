@@ -66,8 +66,10 @@ function MultiSelect({ label, options, selected, onChange }) {
         <ChevronDown size={10} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
       </button>
       {open &&
-      <div className="absolute z-50 mt-1 rounded-md shadow-xl overflow-hidden"
-      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 180, top: "100%", left: 0 }}>
+      <div className="fixed z-[9998] rounded-md shadow-xl overflow-hidden"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", minWidth: 180,
+        top: ref.current ? ref.current.getBoundingClientRect().bottom + 4 : 0,
+        left: ref.current ? ref.current.getBoundingClientRect().left : 0 }}>
           <div className="max-h-52 overflow-y-auto py-1">
             {options.map((opt) => {
             const isSel = selected.includes(opt.value);
