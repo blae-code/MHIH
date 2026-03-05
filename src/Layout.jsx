@@ -81,6 +81,7 @@ const NAV_SECTIONS = [
     key: "system", label: "System", color: "#8b8fa8",
     items: [
       { icon: Settings, label: "Settings", page: "Settings", tooltip: "App preferences & configuration" },
+      { icon: BookOpen, label: "Changelog", page: "Changelog", tooltip: "Version history & release notes" },
     ]
   },
 ];
