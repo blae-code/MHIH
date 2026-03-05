@@ -183,23 +183,6 @@ export default function Layout({ children, currentPageName }) {
   const isAdmin = user?.role === "admin";
   const visibleSections = NAV_SECTIONS.filter(s => !s.adminOnly || isAdmin);
 
-  const filteredCmds = COMMAND_ITEMS.filter(c =>
-    c.label.toLowerCase().includes(cmdQuery.toLowerCase()) ||
-    c.desc.toLowerCase().includes(cmdQuery.toLowerCase())
-  );
-
-  // Keyboard nav for command palette
-  const handleCmdKey = (e) => {
-    if (e.key === "ArrowDown") { e.preventDefault(); setCmdIndex(i => Math.min(i + 1, filteredCmds.length - 1)); }
-    if (e.key === "ArrowUp") { e.preventDefault(); setCmdIndex(i => Math.max(i - 1, 0)); }
-    if (e.key === "Enter" && filteredCmds[cmdIndex]) {
-      window.location.href = createPageUrl(filteredCmds[cmdIndex].page);
-      setCmdOpen(false);
-    }
-  };
-
-  useEffect(() => { setCmdIndex(0); }, [cmdQuery]);
-
   const lastLog = statusLogs[0];
   const logColor = lastLog?.type === "error" ? "#ff4d4f"
     : lastLog?.type === "warning" ? "#faad14"
