@@ -172,13 +172,11 @@ export default function Layout({ children, currentPageName }) {
 
   useEffect(() => {
     const handler = (e) => {
-      if (e.ctrlKey && (e.key === "p" || e.key === "k")) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "k")) {
         e.preventDefault();
-        setCmdOpen(v => !v);
-        setCmdQuery("");
-        setCmdIndex(0);
+        setGlobalSearchOpen(v => !v);
       }
-      if (e.key === "Escape") { setCmdOpen(false); setUserMenuOpen(false); }
+      if (e.key === "Escape") { setCmdOpen(false); setGlobalSearchOpen(false); setUserMenuOpen(false); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
