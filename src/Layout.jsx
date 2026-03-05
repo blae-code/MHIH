@@ -15,6 +15,7 @@ import {
 import NotificationCenter from "./components/notifications/NotificationCenter";
 import NotificationPreferences from "./components/notifications/NotificationPreferences";
 import FeedbackModal from "./components/feedback/FeedbackModal";
+import GlobalSearch from "./components/search/GlobalSearch";
 
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
