@@ -10,7 +10,7 @@ import {
   MapPin, TrendingUp, Wrench, BellRing, Workflow, PanelLeftClose,
   PanelLeftOpen, Sparkles, LogOut, User, Circle,
   FlaskConical, ClipboardCheck, MapPinned, Siren, BookMarked, Link2,
-  BrainCircuit, ListOrdered, GitCompare, FileText
+  BrainCircuit, ListOrdered, GitCompare, FileText, MessageSquare
 } from "lucide-react";
 import NotificationCenter from "./components/notifications/NotificationCenter";
 import NotificationPreferences from "./components/notifications/NotificationPreferences";
