@@ -165,17 +165,16 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
   return (
     <div className="flex h-full overflow-hidden">
       <div className="flex flex-col border-r shrink-0"
-        style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-subtle)" }}>
-        <div className="px-4 py-4 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+        style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)" }}>
+        <div className="px-4 py-4 border-b relative overflow-hidden" style={{ borderColor: "var(--border-default)" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #a78bfa 0%, #FEDD00 60%, transparent 100%)" }} />
           <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent-primary)", letterSpacing: "0.08em" }}>
-              Generated Insights
-            </div>
-            <label className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-              <input type="checkbox" checked={approvedOnly} onChange={e => setApprovedOnly(e.target.checked)} /> approved
+            <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Generated Insights</div>
+            <label className="text-xs flex items-center gap-1.5 cursor-pointer" style={{ color: "var(--text-muted)" }}>
+              <input type="checkbox" checked={approvedOnly} onChange={e => setApprovedOnly(e.target.checked)} style={{ accentColor: "var(--accent-primary)" }} /> approved only
             </label>
           </div>
-          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>AI-powered analysis</p>
+          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>AI-powered policy analysis</p>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {loading ? (
