@@ -10,7 +10,7 @@ import DashboardCustomizer, { DEFAULT_WIDGETS } from "../components/dashboard/Da
 import DashboardLayoutManager, { PRESET_LAYOUTS } from "../components/dashboard/DashboardLayoutManager";
 import WidgetLibrary from "../components/dashboard/WidgetLibrary";
 import DashboardExportMenu from "../components/dashboard/DashboardExportMenu";
-import DisparityExplorer from "../components/dashboard/DisparityExplorer";
+import DisparityExplorer from "../components/dashboard/DisparityExplorer.jsx";
 import RegionalPerformance from "../components/dashboard/RegionalPerformance";
 import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 import TrendingMetrics from "../components/dashboard/TrendingMetrics";
