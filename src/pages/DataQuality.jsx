@@ -129,10 +129,13 @@ export default function DataQuality() {
         {/* Stat cards */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
           {STAT_CARDS.map(s => (
-            <div key={s.label} className="metric-card flex items-center gap-3">
-              <s.icon size={20} style={{ color: s.color, flexShrink: 0 }} />
+            <div key={s.label} className="metric-card flex items-center gap-3 relative overflow-hidden" style={{ borderColor: `${s.color}33` }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color} 0%, transparent 100%)` }} />
+              <div className="p-2.5 rounded-lg shrink-0" style={{ background: `${s.color}12`, border: `1px solid ${s.color}30` }}>
+                <s.icon size={16} style={{ color: s.color }} />
+              </div>
               <div>
-                <div className="text-xl font-bold" style={{ color: s.color }}>{s.value}</div>
+                <div className="text-2xl font-black leading-tight" style={{ color: s.color }}>{s.value}</div>
                 <div className="text-xs" style={{ color: "var(--text-muted)" }}>{s.label}</div>
               </div>
             </div>
