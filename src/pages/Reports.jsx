@@ -227,6 +227,7 @@ export default function Reports() {
           setScheduleModal(false);
         }}
       />
+      </div>
     </div>
   );
 }
