@@ -170,10 +170,11 @@ export default function DataSources() {
   return (
     <div className="flex flex-col h-full">
       {/* ── HEADER ── */}
-      <div className="shrink-0 border-b" style={{ background: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}>
-        <div className="flex items-center justify-between px-4 py-2">
+      <div className="shrink-0 border-b relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)", borderColor: "var(--border-default)", boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(64,196,255,0.08)" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #40c4ff 0%, #00e676 50%, transparent 100%)" }} />
+        <div className="flex items-center justify-between px-4 py-3">
           <div>
-            <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>My Data Sources</h2>
+            <div className="dashboard-section-label" style={{ marginBottom: 2 }}>Data Sources</div>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               {sources.length} sources · {sources.filter(s => s.status === "active").length} active
             </p>
