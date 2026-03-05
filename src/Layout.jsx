@@ -440,7 +440,7 @@ export default function Layout({ children, currentPageName }) {
 
             {/* Command search */}
             <button
-              onClick={() => { setCmdOpen(true); setTimeout(() => cmdInputRef.current?.focus(), 50); }}
+              onClick={() => setGlobalSearchOpen(true)}
               className="header-search-btn hidden md:flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-medium transition-all group"
               style={{
                 background: "linear-gradient(135deg, rgba(64,196,255,0.08) 0%, rgba(254,221,0,0.05) 100%)",
