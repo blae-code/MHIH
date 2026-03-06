@@ -165,8 +165,39 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
 
   const TypeIcon = INSIGHT_TYPES.find(t => t.value === (activeInsight?.type || insightType))?.icon || Brain;
 
+  const handleEngineInvestigate = (prompt, type) => {
+    setActiveTab("insights");
+    setQuery(prompt);
+    setInsightType(type || "trend_analysis");
+  };
+
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Top Tab Bar */}
+      <div className="flex items-center gap-1 px-4 pt-3 pb-0 shrink-0 border-b"
+        style={{ borderColor: "var(--border-default)", background: "var(--bg-surface)" }}>
+        {[
+          { id: "engine", label: "Insights Engine", icon: Zap, color: "#40c4ff" },
+          { id: "insights", label: "Generated Insights", icon: Brain, color: "#a78bfa" },
+        ].map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-lg transition-all"
+            style={{
+              background: activeTab === tab.id ? "var(--bg-elevated)" : "transparent",
+              color: activeTab === tab.id ? tab.color : "var(--text-muted)",
+              borderBottom: activeTab === tab.id ? `2px solid ${tab.color}` : "2px solid transparent",
+              marginBottom: -1,
+            }}>
+            <tab.icon size={13} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "engine" ? (
+        <InsightsEngine metrics={metrics} onGenerateInsight={handleEngineInvestigate} />
+      ) : (
+    <div className="flex flex-1 overflow-hidden">
       <div className="flex flex-col border-r shrink-0"
         style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)" }}>
         <div className="px-4 py-4 border-b relative overflow-hidden" style={{ borderColor: "var(--border-default)" }}>
