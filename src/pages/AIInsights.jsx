@@ -197,7 +197,7 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
       {activeTab === "engine" ? (
         <InsightsEngine metrics={metrics} onGenerateInsight={handleEngineInvestigate} />
       ) : (
-    <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
       <div className="flex flex-col border-r shrink-0"
         style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)" }}>
         <div className="px-4 py-4 border-b relative overflow-hidden" style={{ borderColor: "var(--border-default)" }}>
