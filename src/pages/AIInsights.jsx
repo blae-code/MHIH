@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Brain, Pin, Trash2, RefreshCw, Send, MessageSquare, TrendingUp, AlertTriangle, BarChart3, FileText, ShieldCheck } from "lucide-react";
+import { Brain, Pin, Trash2, RefreshCw, Send, MessageSquare, TrendingUp, AlertTriangle, BarChart3, FileText, ShieldCheck, Zap } from "lucide-react";
 import { listAllHealthMetrics } from "@/lib/healthMetrics";
+import InsightsEngine from "../components/insights/InsightsEngine";
 
 const INSIGHT_TYPES = [
   { value: "summary", label: "Data Summary", icon: FileText },
