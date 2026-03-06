@@ -34,7 +34,7 @@ export default function AIInsights() {
   const [insightType, setInsightType] = useState("summary");
   const [activeInsight, setActiveInsight] = useState(null);
   const [approvedOnly, setApprovedOnly] = useState(false);
-  const [activeTab, setActiveTab] = useState("engine"); // engine | insights
+  const [activeTab, setActiveTab] = useState("engine");
 
   const load = () => {
     Promise.all([
@@ -160,16 +160,16 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
     addLog("success", "Insight removed");
   };
 
-  const pinned = filteredInsights.filter(i => i.pinned);
-  const recent = filteredInsights.filter(i => !i.pinned);
-
-  const TypeIcon = INSIGHT_TYPES.find(t => t.value === (activeInsight?.type || insightType))?.icon || Brain;
-
   const handleEngineInvestigate = (prompt, type) => {
     setActiveTab("insights");
     setQuery(prompt);
     setInsightType(type || "trend_analysis");
   };
+
+  const pinned = filteredInsights.filter(i => i.pinned);
+  const recent = filteredInsights.filter(i => !i.pinned);
+
+  const TypeIcon = INSIGHT_TYPES.find(t => t.value === (activeInsight?.type || insightType))?.icon || Brain;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -198,144 +198,146 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
         <InsightsEngine metrics={metrics} onGenerateInsight={handleEngineInvestigate} />
       ) : (
         <div className="flex flex-1 overflow-hidden">
-      <div className="flex flex-col border-r shrink-0"
-        style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)" }}>
-        <div className="px-4 py-4 border-b relative overflow-hidden" style={{ borderColor: "var(--border-default)" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #a78bfa 0%, #FEDD00 60%, transparent 100%)" }} />
-          <div className="flex items-center justify-between">
-            <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Generated Insights</div>
-            <label className="text-xs flex items-center gap-1.5 cursor-pointer" style={{ color: "var(--text-muted)" }}>
-              <input type="checkbox" checked={approvedOnly} onChange={e => setApprovedOnly(e.target.checked)} style={{ accentColor: "var(--accent-primary)" }} /> approved only
-            </label>
-          </div>
-          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>AI-powered policy analysis</p>
-        </div>
-        <div className="flex-1 overflow-y-auto py-2">
-          {loading ? (
-            <div className="flex items-center justify-center h-20 gap-2" style={{ color: "var(--text-muted)" }}>
-              <RefreshCw size={14} className="animate-spin" />
-            </div>
-          ) : (
-            <>
-              {pinned.length > 0 && (
-                <div className="mb-1">
-                  <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--accent-primary)", fontSize: 9, letterSpacing: "0.08em" }}>✓ Pinned</div>
-                  {pinned.map(ins => <InsightListItem key={ins.id} ins={ins} active={activeInsight?.id === ins.id} onClick={setActiveInsight} />)}
-                </div>
-              )}
-              <div>
-                <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--text-muted)", fontSize: 9, letterSpacing: "0.08em" }}>Recent</div>
-                {recent.length === 0 && (
-                  <div className="px-3 py-4 text-xs" style={{ color: "var(--text-muted)" }}>No insights in current filter.</div>
-                )}
-                {recent.map(ins => <InsightListItem key={ins.id} ins={ins} active={activeInsight?.id === ins.id} onClick={setActiveInsight} />)}
+          {/* Left sidebar */}
+          <div className="flex flex-col border-r shrink-0"
+            style={{ width: 320, background: "linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)" }}>
+            <div className="px-4 py-4 border-b relative overflow-hidden" style={{ borderColor: "var(--border-default)" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #a78bfa 0%, #FEDD00 60%, transparent 100%)" }} />
+              <div className="flex items-center justify-between">
+                <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Generated Insights</div>
+                <label className="text-xs flex items-center gap-1.5 cursor-pointer" style={{ color: "var(--text-muted)" }}>
+                  <input type="checkbox" checked={approvedOnly} onChange={e => setApprovedOnly(e.target.checked)} style={{ accentColor: "var(--accent-primary)" }} /> approved only
+                </label>
               </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {activeInsight ? (
-          <div className="flex-1 overflow-auto p-6">
-            <div className="max-w-3xl mx-auto">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: "var(--accent-muted)" }}>
-                    <TypeIcon size={14} style={{ color: "var(--accent-primary)" }} />
-                  </div>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>AI-powered policy analysis</p>
+            </div>
+            <div className="flex-1 overflow-y-auto py-2">
+              {loading ? (
+                <div className="flex items-center justify-center h-20 gap-2" style={{ color: "var(--text-muted)" }}>
+                  <RefreshCw size={14} className="animate-spin" />
+                </div>
+              ) : (
+                <>
+                  {pinned.length > 0 && (
+                    <div className="mb-1">
+                      <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--accent-primary)", fontSize: 9, letterSpacing: "0.08em" }}>✓ Pinned</div>
+                      {pinned.map(ins => <InsightListItem key={ins.id} ins={ins} active={activeInsight?.id === ins.id} onClick={setActiveInsight} />)}
+                    </div>
+                  )}
                   <div>
-                    <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{activeInsight.title}</h2>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="tag">{activeInsight.type?.replace(/_/g, " ")}</span>
-                      <span className="tag" style={{ color: "var(--accent-primary)", borderColor: "var(--accent-primary)" }}>
-                        confidence {(Number(activeInsight.confidence_score || 0) * 100).toFixed(0)}%
-                      </span>
-                      <span className="tag" style={{ color: activeInsight.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)", borderColor: activeInsight.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)" }}>
-                        {activeInsight.approval_status || "pending"}
-                      </span>
+                    <div className="px-4 py-2 text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--text-muted)", fontSize: 9, letterSpacing: "0.08em" }}>Recent</div>
+                    {recent.length === 0 && (
+                      <div className="px-3 py-4 text-xs" style={{ color: "var(--text-muted)" }}>No insights in current filter.</div>
+                    )}
+                    {recent.map(ins => <InsightListItem key={ins.id} ins={ins} active={activeInsight?.id === ins.id} onClick={setActiveInsight} />)}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Main content */}
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {activeInsight ? (
+              <div className="flex-1 overflow-auto p-6">
+                <div className="max-w-3xl mx-auto">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: "var(--accent-muted)" }}>
+                        <TypeIcon size={14} style={{ color: "var(--accent-primary)" }} />
+                      </div>
+                      <div>
+                        <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{activeInsight.title}</h2>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="tag">{activeInsight.type?.replace(/_/g, " ")}</span>
+                          <span className="tag" style={{ color: "var(--accent-primary)", borderColor: "var(--accent-primary)" }}>
+                            confidence {(Number(activeInsight.confidence_score || 0) * 100).toFixed(0)}%
+                          </span>
+                          <span className="tag" style={{ color: activeInsight.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)", borderColor: activeInsight.approval_status === "approved" ? "var(--color-success)" : "var(--color-warning)" }}>
+                            {activeInsight.approval_status || "pending"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => handlePin(activeInsight)} className="activity-icon" title="Pin insight">
+                        <Pin size={14} style={{ color: activeInsight.pinned ? "var(--accent-primary)" : "var(--text-muted)" }} />
+                      </button>
+                      <button onClick={() => handleDelete(activeInsight.id)} className="activity-icon" style={{ color: "var(--color-error)" }}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rounded-xl p-5 relative overflow-hidden" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.05)" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "linear-gradient(to bottom, var(--accent-primary), transparent)", borderRadius: "8px 0 0 8px" }} />
+                    <div className="pl-3 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>
+                      {activeInsight.content}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => handlePin(activeInsight)} className="activity-icon" title="Pin insight">
-                    <Pin size={14} style={{ color: activeInsight.pinned ? "var(--accent-primary)" : "var(--text-muted)" }} />
-                  </button>
-                  <button onClick={() => handleDelete(activeInsight.id)} className="activity-icon" style={{ color: "var(--color-error)" }}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
               </div>
-              <div className="rounded-xl p-5 relative overflow-hidden" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.05)" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "linear-gradient(to bottom, var(--accent-primary), transparent)", borderRadius: "8px 0 0 8px" }} />
-                <div className="pl-3 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>
-                  {activeInsight.content}
-                </div>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center" style={{ color: "var(--text-muted)" }}>
+                <Brain size={40} className="mb-3 opacity-30" />
+                <p className="text-sm">Select an insight or generate a new one below</p>
               </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center" style={{ color: "var(--text-muted)" }}>
-            <Brain size={40} className="mb-3 opacity-30" />
-            <p className="text-sm">Select an insight or generate a new one below</p>
-          </div>
-        )}
+            )}
 
-        <div className="p-6 border-t shrink-0" style={{ background: "linear-gradient(to top, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)", boxShadow: "0 -4px 20px rgba(0,0,0,0.3)" }}>
-          <div className="max-w-3xl mx-auto space-y-3">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              {INSIGHT_TYPES.map(t => (
-                <button key={t.value} onClick={() => setInsightType(t.value)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-                  style={{
-                    background: insightType === t.value ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
-                    color: insightType === t.value ? "var(--accent-primary)" : "var(--text-muted)",
-                    border: `1px solid ${insightType === t.value ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-                  }}>
-                  <t.icon size={12} />
-                  <span className="hidden sm:inline">{t.label}</span>
-                </button>
-              ))}
-              <span className="text-xs ml-auto flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-                <ShieldCheck size={11} /> Human gate enabled
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
-                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
-                <MessageSquare size={16} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-                <input
-                  className="flex-1 bg-transparent outline-none text-sm"
-                  style={{ color: "var(--text-primary)" }}
-                  placeholder={`Ask about Metis health data (policy-focused insight)...`}
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleGenerate()}
-                  disabled={generating}
-                />
+            <div className="p-6 border-t shrink-0" style={{ background: "linear-gradient(to top, var(--bg-surface), var(--bg-elevated))", borderColor: "var(--border-default)", boxShadow: "0 -4px 20px rgba(0,0,0,0.3)" }}>
+              <div className="max-w-3xl mx-auto space-y-3">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  {INSIGHT_TYPES.map(t => (
+                    <button key={t.value} onClick={() => setInsightType(t.value)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                      style={{
+                        background: insightType === t.value ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
+                        color: insightType === t.value ? "var(--accent-primary)" : "var(--text-muted)",
+                        border: `1px solid ${insightType === t.value ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                      }}>
+                      <t.icon size={12} />
+                      <span className="hidden sm:inline">{t.label}</span>
+                    </button>
+                  ))}
+                  <span className="text-xs ml-auto flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                    <ShieldCheck size={11} /> Human gate enabled
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-lg transition-all"
+                    style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
+                    <MessageSquare size={16} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                    <input
+                      className="flex-1 bg-transparent outline-none text-sm"
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="Ask about Metis health data (policy-focused insight)..."
+                      value={query}
+                      onChange={e => setQuery(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleGenerate()}
+                      disabled={generating}
+                    />
+                  </div>
+                  <button onClick={handleGenerate} disabled={generating || !query.trim()}
+                    className="flex items-center gap-1.5 px-4 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-60 shrink-0"
+                    style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 4px 12px rgba(254,221,0,0.25)" }}>
+                    {generating ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                    <span className="hidden sm:inline">{generating ? "Generating..." : "Generate"}</span>
+                  </button>
+                </div>
               </div>
-              <button onClick={handleGenerate} disabled={generating || !query.trim()}
-                className="flex items-center gap-1.5 px-4 py-3 rounded-lg text-sm font-semibold transition-all disabled:opacity-60 shrink-0"
-                style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 4px 12px rgba(254,221,0,0.25)" }}>
-                {generating ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
-                <span className="hidden sm:inline">{generating ? "Generating..." : "Generate"}</span>
-              </button>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-
 }
-
 
 function InsightListItem({ ins, active, onClick }) {
   const IconComp = INSIGHT_TYPES.find(t => t.value === ins.type)?.icon || Brain;
   return (
     <button onClick={() => onClick(ins)}
       className="w-full text-left px-3 py-2.5 mx-1 transition-all rounded-lg"
-      style={{ 
+      style={{
         background: active ? "rgba(254,221,0,0.08)" : "transparent",
         borderLeft: active ? "2px solid var(--accent-primary)" : "2px solid transparent"
       }}
