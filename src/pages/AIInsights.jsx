@@ -34,6 +34,7 @@ export default function AIInsights() {
   const [insightType, setInsightType] = useState("summary");
   const [activeInsight, setActiveInsight] = useState(null);
   const [approvedOnly, setApprovedOnly] = useState(false);
+  const [activeTab, setActiveTab] = useState("engine"); // engine | insights
 
   const load = () => {
     Promise.all([
