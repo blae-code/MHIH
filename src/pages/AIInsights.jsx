@@ -330,6 +330,7 @@ Return: title, executive summary, findings, caveats, actions, and confidence(0-1
   );
 }
 
+
 function InsightListItem({ ins, active, onClick }) {
   const IconComp = INSIGHT_TYPES.find(t => t.value === ins.type)?.icon || Brain;
   return (
