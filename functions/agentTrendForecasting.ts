@@ -24,9 +24,13 @@ Deno.serve(async (req) => {
     }
 
     // ── Group metrics by (name + region) to build time series ──
+    const currentYear = new Date().getFullYear();
     const seriesMap = {};
     for (const m of metrics) {
       if (m.value == null || !m.year || !m.name) continue;
+      // Guard against non-finite values and implausible years to prevent NaN propagation
+      if (!Number.isFinite(m.value)) continue;
+      if (!Number.isInteger(m.year) || m.year < 1900 || m.year > currentYear + 10) continue;
       const key = `${m.name.toLowerCase().trim()}|${m.region || 'BC'}`;
       if (!seriesMap[key]) seriesMap[key] = { name: m.name, category: m.category, region: m.region || 'BC', unit: m.unit || '', points: [] };
       seriesMap[key].points.push({ year: m.year, value: m.value, comparison_value: m.comparison_value ?? null });
@@ -53,8 +57,10 @@ Deno.serve(async (req) => {
       const ys = s.points.map(p => p.value);
       const xMean = xs.reduce((a, b) => a + b, 0) / n;
       const yMean = ys.reduce((a, b) => a + b, 0) / n;
-      const slope = xs.reduce((acc, x, i) => acc + (x - xMean) * (ys[i] - yMean), 0) /
-                    xs.reduce((acc, x) => acc + (x - xMean) ** 2, 0);
+      const numerator = xs.reduce((acc, x, i) => acc + (x - xMean) * (ys[i] - yMean), 0);
+      const denominator = xs.reduce((acc, x) => acc + (x - xMean) ** 2, 0);
+      // Guard against division-by-zero when all x values are identical (constant year)
+      const slope = denominator !== 0 ? numerator / denominator : 0;
       const lastPoint = s.points[s.points.length - 1];
       const lastYear = lastPoint.year;
       const projected1yr = lastPoint.value + slope;
@@ -76,10 +82,8 @@ Deno.serve(async (req) => {
         ? `, BC avg=${s.lastComparison}${s.unit} (gap: ${(s.lastValue - s.lastComparison).toFixed(1)})`
         : '';
       const historyStr = s.points.map(p => `${p.year}:${p.value}${s.unit}`).join(', ');
-      return `"${s.name}" (${s.category}, ${s.region}): [${historyStr}] — ${dir} at ${Math.abs(s.slope.toFixed(2))}${s.unit}/yr. 1-yr projection: ${s.projected1yr.toFixed(1)}${s.unit}, 3-yr: ${s.projected3yr.toFixed(1)}${s.unit}${disparityNote}`;
+      return `"${s.name}" (${s.category}, ${s.region}): [${historyStr}] — ${dir} at ${Math.abs(s.slope).toFixed(2)}${s.unit}/yr. 1-yr projection: ${s.projected1yr.toFixed(1)}${s.unit}, 3-yr: ${s.projected3yr.toFixed(1)}${s.unit}${disparityNote}`;
     }).join('\n');
-
-    const currentYear = new Date().getFullYear();
 
     const prompt = `You are a senior epidemiologist and health equity analyst for the BC Métis Health Intelligence Platform.
 
