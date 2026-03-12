@@ -1,52 +1,19 @@
 /**
- * pages.config.js - Page routing configuration
- * 
- * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
- * Pages are auto-registered when you create files in the ./pages/ folder.
- * 
- * THE ONLY EDITABLE VALUE: mainPage
- * This controls which page is the landing page (shown when users visit the app).
- * 
- * Example file structure:
- * 
- *   import HomePage from './pages/HomePage';
- *   import Dashboard from './pages/Dashboard';
- *   import Settings from './pages/Settings';
- *   
- *   export const PAGES = {
- *       "HomePage": HomePage,
- *       "Dashboard": Dashboard,
- *       "Settings": Settings,
- *   }
- *   
- *   export const pagesConfig = {
- *       mainPage: "HomePage",
- *       Pages: PAGES,
- *   };
- * 
- * Example with Layout (wraps all pages):
+ * pages.config.js — Red River OS Page Registry
  *
- *   import Home from './pages/Home';
- *   import Settings from './pages/Settings';
- *   import __Layout from './Layout.jsx';
+ * Auto-registers all pages from ./pages/ and wires them into the React Router
+ * route table. The mainPage is the default landing experience — set to the
+ * Red River OS Home page.
  *
- *   export const PAGES = {
- *       "Home": Home,
- *       "Settings": Settings,
- *   }
- *
- *   export const pagesConfig = {
- *       mainPage: "Home",
- *       Pages: PAGES,
- *       Layout: __Layout,
- *   };
- *
- * To change the main page from HomePage to Dashboard, use find_replace:
- *   Old: mainPage: "HomePage",
- *   New: mainPage: "Dashboard",
- *
- * The mainPage value must match a key in the PAGES object exactly.
+ * NOTE: When adding a new app module page, add it here AND register it in
+ * src/platform/appRegistry.js so the OS shell navigation reflects it.
  */
+
+// ── OS-level pages ─────────────────────────────────────────────────────────
+import RedRiverOSHome from './pages/RedRiverOSHome';
+import MinistryOverview from './pages/MinistryOverview';
+
+// ── MHIH app pages ─────────────────────────────────────────────────────────
 import AIInsights from './pages/AIInsights';
 import Admin from './pages/Admin';
 import AgentCenter from './pages/AgentCenter';
@@ -85,10 +52,24 @@ import Team from './pages/Team';
 import Visualizations from './pages/Visualizations';
 import Watchlists from './pages/Watchlists';
 import Workflows from './pages/Workflows';
+
+// ── Platform app module pages ──────────────────────────────────────────────
+import PolicyStudio from './pages/PolicyStudio';
+import HealthEquity from './pages/HealthEquity';
+import ResearchEvaluation from './pages/ResearchEvaluation';
+import ProvincialWellness from './pages/ProvincialWellness';
+import ContractsReporting from './pages/ContractsReporting';
+import PlanningKPI from './pages/PlanningKPI';
+
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    // ── OS home ──────────────────────────────────────────────────────
+    "RedRiverOSHome": RedRiverOSHome,
+    "MinistryOverview": MinistryOverview,
+
+    // ── MHIH app ──────────────────────────────────────────────────────
     "AIInsights": AIInsights,
     "Admin": Admin,
     "AgentCenter": AgentCenter,
@@ -127,10 +108,21 @@ export const PAGES = {
     "Visualizations": Visualizations,
     "Watchlists": Watchlists,
     "Workflows": Workflows,
+
+    // ── Platform app modules ──────────────────────────────────────────
+    "PolicyStudio": PolicyStudio,
+    "HealthEquity": HealthEquity,
+    "ResearchEvaluation": ResearchEvaluation,
+    "ProvincialWellness": ProvincialWellness,
+    "ContractsReporting": ContractsReporting,
+    "PlanningKPI": PlanningKPI,
 }
 
 export const pagesConfig = {
-    mainPage: "Dashboard",
+    // Red River OS Home is the platform landing experience.
+    // Users who want to land directly in MHIH can navigate via the app switcher
+    // or bookmark /Dashboard.
+    mainPage: "RedRiverOSHome",
     Pages: PAGES,
     Layout: __Layout,
 };
