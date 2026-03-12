@@ -22,7 +22,8 @@ export async function logApiAudit(base44: any, payload: {
         ...(payload.details || {}),
       }),
     });
-  } catch {
-    // Best-effort audit logging only.
+  } catch (err: unknown) {
+    // Best-effort audit logging only — do not interrupt the request.
+    console.warn('[audit] Failed to write audit log:', (err as any)?.message ?? String(err));
   }
 }

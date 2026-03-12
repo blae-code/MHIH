@@ -267,7 +267,9 @@ function LayoutInner({ children, currentPageName }) {
   const userMenuRef = useRef(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch((err) => {
+      console.warn("Layout: failed to load current user", err?.message ?? err);
+    });
   }, []);
 
   // Refresh unread notification count every 30 s

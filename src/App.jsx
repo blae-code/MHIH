@@ -7,6 +7,7 @@
  * Legacy /{PageName} paths are kept as redirects for backward compatibility.
  */
 
+import { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -34,11 +35,16 @@ const AuthenticatedApp = () => {
     );
   }
 
+  useEffect(() => {
+    if (authError?.type === 'auth_required') {
+      navigateToLogin();
+    }
+  }, [authError?.type]);
+
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      navigateToLogin();
       return null;
     }
   }

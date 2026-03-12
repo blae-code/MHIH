@@ -4,16 +4,21 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Allow admins or service role (for scheduled runs)
+    // Allow admins or scheduled service-role invocations only.
+    // 'user' role is intentionally excluded — this is a privileged write operation.
     let authorized = false;
+    let hasUserSession = false;
     try {
       const user = await base44.auth.me();
-      if (user?.role === 'admin' || user?.role === 'user') authorized = true;
+      if (user?.id) hasUserSession = true;
+      if (user?.role === 'admin') authorized = true;
     } catch (_) {}
 
-    if (!authorized) {
+    if (!authorized && !hasUserSession) {
+      // Accept service-role invocations (scheduled runs) where there is no user
+      // session — these arrive with a backend-embedded service-role credential.
       try {
-        await base44.asServiceRole.entities.DataQualityFlag.list(); // probe service role
+        await base44.asServiceRole.entities.DataQualityFlag.list({}, '-created_date', 1);
         authorized = true;
       } catch (_) {}
     }
@@ -213,10 +218,13 @@ Deno.serve(async (req) => {
     const existing = await base44.asServiceRole.entities.DataQualityFlag.filter({ auto_detected: true, status: 'open' }, '-created_date', 2000);
     await Promise.all(existing.map(f => base44.asServiceRole.entities.DataQualityFlag.delete(f.id)));
 
+    // Batch inserts in parallel (max 20 concurrent) to avoid serial latency
+    const BATCH_SIZE = 20;
     let inserted = 0;
-    for (const flag of flags) {
-      await base44.asServiceRole.entities.DataQualityFlag.create(flag);
-      inserted++;
+    for (let i = 0; i < flags.length; i += BATCH_SIZE) {
+      const batch = flags.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(flag => base44.asServiceRole.entities.DataQualityFlag.create(flag)));
+      inserted += batch.length;
     }
 
     return Response.json({
