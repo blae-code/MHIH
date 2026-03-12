@@ -1,16 +1,36 @@
-import React, { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
+/**
+ * Red River OS — Application Shell
+ *
+ * The persistent shell wrapping all application modules. Provides:
+ *   - OS header bar (identity, global search, app switcher, user menu)
+ *   - Left sidebar (OS-level navigation + active-app navigation)
+ *   - App context (addLog, contextPanel) preserved for backward compatibility
+ *   - Notification, feedback, and command-palette systems
+ *   - Status footer bar
+ *
+ * AppContext is exported for backward compatibility with existing pages that
+ * call `useApp()` to access `addLog` and `setContextPanel`.
+ */
+
+import React, {
+  createContext, useCallback, useContext, useEffect, useRef, useState,
+} from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
-  LayoutDashboard, Database, LineChart, Brain, Settings, Users,
-  Search, Bell, ChevronRight, Activity, AlertCircle, CheckCircle,
-  Info, X, Zap, FileDown, Upload, BookOpen, Shield, HelpCircle,
-  FolderOpen, BarChart3, ChevronLeft, SlidersHorizontal, ShieldCheck, Bot,
-  MapPin, TrendingUp, Wrench, BellRing, Workflow, PanelLeftClose,
-  PanelLeftOpen, Sparkles, LogOut, User, Circle,
-  FlaskConical, ClipboardCheck, MapPinned, Siren, BookMarked, Link2,
-  BrainCircuit, ListOrdered, GitCompare, FileText, MessageSquare
+  LayoutDashboard, Database, Brain, Settings, Users,
+  Search, Bell, ChevronRight, ChevronDown, X,
+  FileDown, BookOpen, Shield, BarChart3,
+  SlidersHorizontal, ShieldCheck, Bot,
+  MapPin, TrendingUp, Wrench, BellRing, Workflow,
+  PanelLeftClose, PanelLeftOpen, Sparkles,
+  LogOut, User, Activity, FlaskConical, ClipboardCheck,
+  BrainCircuit, MapPinned, Siren, BookMarked, Link2,
+  ListOrdered, GitCompare, FileText, MessageSquare,
+  Command, Building2, Target, HeartPulse, Scale,
+  HeartHandshake, Leaf, FileSignature, Camera,
+  Layers3, ChevronLeft, MoreHorizontal, Grid3x3,
 } from "lucide-react";
 import NotificationCenter from "./components/notifications/NotificationCenter";
 import NotificationPreferences from "./components/notifications/NotificationPreferences";
@@ -18,199 +38,294 @@ import FeedbackModal from "./components/feedback/FeedbackModal";
 import CommandPalette from "./components/search/CommandPalette";
 import PatchNotesModal from "./components/changelog/PatchNotesModal";
 import FloatingFeedbackButton from "./components/feedback/FloatingFeedbackButton";
+import { PlatformProvider, usePlatform } from "./platform/platformContext";
+import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
+import { isAdmin as checkAdmin, getRoleLabel } from "./platform/permissions";
 
+// ── AppContext — backward-compat for existing pages ────────────────────────
 export const AppContext = createContext({});
 export const useApp = () => useContext(AppContext);
 
-const NAV_SECTIONS = [
-  {
-    key: "main", label: "Workspace", color: "#FEDD00",
-    items: [
-      { icon: LayoutDashboard, label: "Dashboard", page: "Dashboard", tooltip: "Platform overview & KPIs" },
-      { icon: Database, label: "Data Repository", page: "DataRepository", tooltip: "Browse all health metrics" },
-      { icon: BarChart3, label: "Visualizations", page: "Visualizations", tooltip: "Charts, maps & trend views" },
-      { icon: Brain, label: "AI Insights", page: "AIInsights", tooltip: "AI-generated health analysis" },
-      { icon: Sparkles, label: "AI Analyst", page: "DataAnalyst", tooltip: "Ask questions about your data" },
-    ]
-  },
-  {
-    key: "redriver", label: "Red River OS", color: "#7dd3fc",
-    items: [
-      { icon: MessageSquare, label: "Red River OS", page: "RedRiverOS", tooltip: "Analytics module shell for Red River OS integration" },
-      { icon: Database, label: "Metric Catalog", page: "MetricCatalog", tooltip: "Dataset manifests and metric definitions" },
-      { icon: SlidersHorizontal, label: "Metric Forge", page: "MetricForge", tooltip: "Projection-safe metric series querying" },
-      { icon: FileText, label: "Evidence Snapshots", page: "EvidenceSnapshots", tooltip: "Deterministic snapshot and export workspace" },
-    ]
-  },
-  {
-    key: "policy", label: "Policy", color: "#f472b6",
-    items: [
-      { icon: FlaskConical, label: "Policy Lab", page: "PolicyLab", tooltip: "Scenario and policy experimentation" },
-      { icon: ListOrdered, label: "Recommendations", page: "Recommendations", tooltip: "Confidence-ranked recommendation queue" },
-      { icon: BellRing, label: "Watchlists", page: "Watchlists", tooltip: "KPI missions and threshold watches" },
-      { icon: Activity, label: "Interventions", page: "Interventions", tooltip: "Intervention registry and outcomes" },
-      { icon: ClipboardCheck, label: "Approvals Inbox", page: "ApprovalsInbox", tooltip: "Human gate for high-impact outputs" },
-      { icon: BrainCircuit, label: "Backtesting", page: "Backtesting", tooltip: "Forecast error and drift monitoring" },
-      { icon: GitCompare, label: "Conflict Workbench", page: "ConflictWorkbench", tooltip: "Adjudicate conflicting source values" },
-      { icon: Link2, label: "Evidence Explorer", page: "EvidenceExplorer", tooltip: "Trace claims to evidence links" },
-      { icon: Siren, label: "Alerts Center", page: "AlertsCenter", tooltip: "Sentinel and conflict alert operations" },
-      { icon: MapPinned, label: "Geo Equity Map", page: "GeoEquityMap", tooltip: "Regional burden and disparity hotspots" },
-      { icon: BookMarked, label: "Knowledge Admin", page: "KnowledgeAdmin", tooltip: "Policy knowledge indexing and query" },
-      { icon: FileText, label: "Hansard Intel", page: "HansardIntel", tooltip: "BC/Federal Hansard intelligence feed" },
-    ]
-  },
-  {
-    key: "data", label: "Data", color: "#40c4ff",
-    items: [
-      { icon: BookOpen, label: "Data Sources", page: "DataSources", tooltip: "Manage external data connections" },
-      { icon: Database, label: "My Sources", page: "MyDataSources", tooltip: "Your personal data imports" },
-      { icon: ShieldCheck, label: "Data Quality", page: "DataQuality", tooltip: "Review flags & quality issues" },
-      { icon: Bot, label: "AI Agents", page: "AgentCenter", tooltip: "Automated agent tasks & runs" },
-      { icon: FileDown, label: "Export", page: "Export", tooltip: "Download data as CSV or PDF" },
-    ]
-  },
-  {
-    key: "analytics", label: "Analytics", color: "#00e676",
-    items: [
-      { icon: TrendingUp, label: "Predictive", page: "PredictiveAnalytics", tooltip: "Forecasts & trend modelling" },
-      { icon: MapPin, label: "Geo Map", page: "GeoMap", tooltip: "Regional health data map" },
-      { icon: BellRing, label: "Alerts", page: "Alerts", tooltip: "Threshold alerts & notifications" },
-      { icon: Wrench, label: "Data Prep", page: "DataPrep", tooltip: "Clean & transform data" },
-      { icon: Workflow, label: "Workflows", page: "Workflows", tooltip: "Automated data pipelines" },
-      { icon: Shield, label: "Governance", page: "DataGovernance", tooltip: "Audit logs & data policies" },
-      { icon: FileDown, label: "Reports", page: "Reports", tooltip: "Custom report builder" },
-    ]
-  },
-  {
-    key: "admin", label: "Administration", color: "#ffab40", adminOnly: true,
-    items: [
-      { icon: Users, label: "Team", page: "Team", tooltip: "Manage team members & roles" },
-      { icon: Shield, label: "Admin", page: "Admin", tooltip: "System administration panel" },
-    ]
-  },
-  {
-    key: "system", label: "System", color: "#8b8fa8",
-    items: [
-      { icon: Settings, label: "Settings", page: "Settings", tooltip: "App preferences & configuration" },
-      { icon: BookOpen, label: "Changelog", page: "Changelog", tooltip: "Version history & release notes" },
-    ]
-  },
-];
+// ── Icon resolver ──────────────────────────────────────────────────────────
+const ICON_MAP = {
+  LayoutDashboard, Database, Brain, Settings, Users, Search, Bell,
+  FileDown, BookOpen, Shield, BarChart3, SlidersHorizontal, ShieldCheck, Bot,
+  MapPin, TrendingUp, Wrench, BellRing, Workflow, Sparkles, LogOut, User,
+  Activity, FlaskConical, ClipboardCheck, BrainCircuit, MapPinned, Siren,
+  BookMarked, Link2, ListOrdered, GitCompare, FileText, MessageSquare,
+  Command, Building2, Target, HeartPulse, Scale, HeartHandshake, Leaf,
+  FileSignature, Camera, Layers3, ChevronLeft,
+};
 
-const ALL_NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items.map(i => ({ ...i, section: s.key })));
+function Icon({ name, size = 14, ...rest }) {
+  const Comp = ICON_MAP[name];
+  if (!Comp) return null;
+  return <Comp size={size} {...rest} />;
+}
 
-const COMMAND_ITEMS = [
-  { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, desc: "Platform overview & KPIs" },
-  { label: "Data Repository", page: "DataRepository", icon: Database, desc: "Browse all health metrics" },
-  { label: "Red River OS", page: "RedRiverOS", icon: MessageSquare, desc: "Red River OS analytics module shell" },
-  { label: "Metric Catalog", page: "MetricCatalog", icon: Database, desc: "Dataset and metric definition catalog" },
-  { label: "Metric Forge", page: "MetricForge", icon: SlidersHorizontal, desc: "Projection-safe metric series query workspace" },
-  { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: FileText, desc: "Create and export deterministic evidence snapshots" },
-  { label: "Data Sources", page: "DataSources", icon: FolderOpen, desc: "Manage external connections" },
-  { label: "My Data Sources", page: "MyDataSources", icon: Database, desc: "Your personal imports" },
-  { label: "Data Quality", page: "DataQuality", icon: ShieldCheck, desc: "Review flags & issues" },
-  { label: "AI Agents", page: "AgentCenter", icon: Bot, desc: "Automated agent tasks" },
-  { label: "Visualizations", page: "Visualizations", icon: LineChart, desc: "Charts & trend views" },
-  { label: "AI Insights", page: "AIInsights", icon: Brain, desc: "AI-generated analysis" },
-  { label: "AI Analyst", page: "DataAnalyst", icon: Sparkles, desc: "Ask questions about data" },
-  { label: "Policy Lab", page: "PolicyLab", icon: FlaskConical, desc: "Intervention scenarios and simulation runs" },
-  { label: "Recommendations", page: "Recommendations", icon: ListOrdered, desc: "Ranked policy recommendations" },
-  { label: "Watchlists", page: "Watchlists", icon: BellRing, desc: "Mission thresholds and breach monitoring" },
-  { label: "Interventions Registry", page: "Interventions", icon: Activity, desc: "Track planned and active interventions" },
-  { label: "Approvals Inbox", page: "ApprovalsInbox", icon: ClipboardCheck, desc: "Human approvals for sensitive outputs" },
-  { label: "Forecast Backtesting", page: "Backtesting", icon: BrainCircuit, desc: "MAPE drift and holdout checks" },
-  { label: "Conflict Workbench", page: "ConflictWorkbench", icon: GitCompare, desc: "Reconcile source conflicts" },
-  { label: "Evidence Explorer", page: "EvidenceExplorer", icon: Link2, desc: "Trace claims to source evidence" },
-  { label: "Alerts Center", page: "AlertsCenter", icon: Siren, desc: "Sentinel and source conflict alerts" },
-  { label: "Geo Equity Map", page: "GeoEquityMap", icon: MapPinned, desc: "Map-first disparity exploration" },
-  { label: "Knowledge Admin", page: "KnowledgeAdmin", icon: BookMarked, desc: "Policy knowledge document management" },
-  { label: "Hansard Intelligence", page: "HansardIntel", icon: FileText, desc: "BC and Federal Hansard intelligence" },
-  { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp, desc: "Forecasts & modelling" },
-  { label: "Geo Map", page: "GeoMap", icon: MapPin, desc: "Regional health map" },
-  { label: "Alerts", page: "Alerts", icon: BellRing, desc: "Threshold notifications" },
-  { label: "Data Prep", page: "DataPrep", icon: Wrench, desc: "Clean & transform data" },
-  { label: "Workflows", page: "Workflows", icon: Workflow, desc: "Automated pipelines" },
-  { label: "Data Governance", page: "DataGovernance", icon: Shield, desc: "Audit logs & policies" },
-  { label: "Export Data", page: "Export", icon: FileDown, desc: "Download CSV or PDF" },
-  { label: "Team Management", page: "Team", icon: Users, desc: "Manage team & roles" },
-  { label: "Admin Panel", page: "Admin", icon: Shield, desc: "System administration" },
-  { label: "Settings", page: "Settings", icon: Settings, desc: "App preferences" },
-];
+// ── App accent color pills ─────────────────────────────────────────────────
+const STATUS_LABEL = {
+  [APP_STATUS.ACTIVE]: null,
+  [APP_STATUS.SCAFFOLD]: "beta",
+  [APP_STATUS.PLANNED]: "soon",
+};
 
+// ── App Switcher overlay ───────────────────────────────────────────────────
+function AppSwitcher({ onClose, onSelect, activeAppId }) {
+  const apps = getApps();
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-24"
+      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(3px)" }}
+      onClick={onClose}
+    >
+      <div
+        className="rounded-2xl p-6 w-full max-w-2xl"
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid var(--border-default)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <div className="section-label">Red River OS</div>
+            <h2 style={{ color: "var(--text-primary)", fontSize: 18, fontWeight: 700 }}>
+              Applications
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="activity-icon"
+            style={{ width: 32, height: 32 }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {apps.map((app) => {
+            const isActive = app.id === activeAppId;
+            const statusBadge = STATUS_LABEL[app.status];
+            return (
+              <button
+                key={app.id}
+                onClick={() => onSelect(app)}
+                className="text-left rounded-xl p-4 transition-all"
+                style={{
+                  background: isActive
+                    ? `rgba(${hexToRgb(app.accent)},0.08)`
+                    : "var(--bg-overlay)",
+                  border: `1px solid ${isActive ? app.accent + "44" : "var(--border-subtle)"}`,
+                }}
+              >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: app.accent + "18", border: `1px solid ${app.accent}33` }}
+                  >
+                    <Icon name={app.icon} size={15} style={{ color: app.accent }} />
+                  </div>
+                  {statusBadge && (
+                    <span
+                      className="text-xs rounded px-1.5 py-0.5 font-semibold uppercase"
+                      style={{ background: "var(--bg-hover)", color: "var(--text-muted)", fontSize: 9 }}
+                    >
+                      {statusBadge}
+                    </span>
+                  )}
+                </div>
+                <div
+                  className="font-semibold text-sm mb-1"
+                  style={{ color: isActive ? app.accent : "var(--text-primary)" }}
+                >
+                  {app.shortName}
+                </div>
+                <div
+                  className="text-xs leading-snug"
+                  style={{ color: "var(--text-muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                >
+                  {app.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}`
+    : "64,196,255";
+}
+
+// ── Sidebar nav section ────────────────────────────────────────────────────
+function NavSection({ section, items, collapsed, onToggle, currentPage, accent }) {
+  return (
+    <div className="mb-1">
+      {section && (
+        <button
+          className="w-full flex items-center gap-1.5 px-3 py-1.5 mb-0.5 rounded"
+          onClick={onToggle}
+          style={{ cursor: "pointer" }}
+        >
+          <span
+            className="flex-1 text-left"
+            style={{
+              fontSize: 9.5,
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+            }}
+          >
+            {section}
+          </span>
+          <ChevronDown
+            size={10}
+            style={{
+              color: "var(--text-muted)",
+              transform: collapsed ? "rotate(-90deg)" : "none",
+              transition: "transform 0.15s",
+            }}
+          />
+        </button>
+      )}
+      {!collapsed &&
+        items.map((item) => {
+          const isActive = currentPage === item.page;
+          return (
+            <Link
+              key={`${item.page}-${item.label}`}
+              to={createPageUrl(item.page)}
+              className="sidebar-nav-item"
+              style={isActive ? {
+                background: `rgba(${hexToRgb(accent)},0.08)`,
+                color: "var(--text-primary)",
+                fontWeight: 600,
+              } : {}}
+            >
+              {isActive && (
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: "20%",
+                    bottom: "20%",
+                    width: 2.5,
+                    borderRadius: "0 2px 2px 0",
+                    background: accent,
+                    boxShadow: `0 0 8px ${accent}88`,
+                  }}
+                />
+              )}
+              <Icon name={item.icon} size={13} style={{ color: isActive ? accent : "var(--text-muted)", flexShrink: 0 }} />
+              <span style={{ color: isActive ? "var(--text-primary)" : undefined }}>
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+    </div>
+  );
+}
+
+// ── Main Layout ────────────────────────────────────────────────────────────
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  return (
+    <PlatformProvider>
+      <LayoutInner currentPageName={currentPageName}>
+        {children}
+      </LayoutInner>
+    </PlatformProvider>
+  );
+}
 
-  const [statusLogs, setStatusLogs] = useState([
-    { type: "success", msg: "System initialized", time: new Date().toLocaleTimeString() }
-  ]);
-  const [contextPanel, setContextPanel] = useState(null);
-  const [collapsedSections, setCollapsedSections] = useState({});
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+function LayoutInner({ children, currentPageName }) {
+  const platform = usePlatform();
+  const location = useLocation();
+
+  // ── User state (preserved from original layout) ──────────────────────
+  const [user, setUser] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // ── Panel / modal state ──────────────────────────────────────────────
   const [notifCenterOpen, setNotifCenterOpen] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
-  const cmdInputRef = useRef(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [patchNotesOpen, setPatchNotesOpen] = useState(false);
+  const [contextPanel, setContextPanel] = useState(null);
+
+  // ── Sidebar collapsed sections ───────────────────────────────────────
+  const [collapsedSections, setCollapsedSections] = useState({});
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  // Load unread notification count
+  // Refresh unread notification count every 30 s
   useEffect(() => {
     if (!user) return;
-    const loadUnreadCount = async () => {
+    const load = async () => {
       try {
-        const notifications = await base44.entities.Notification.filter(
+        const n = await base44.entities.Notification.filter(
           { recipient_email: user.email, read: false }
         );
-        setUnreadCount(notifications.length);
-      } catch (error) {
-        console.error('Failed to load unread count:', error);
-      }
+        setUnreadCount(n.length);
+      } catch { /* silent */ }
     };
-    loadUnreadCount();
-    const interval = setInterval(loadUnreadCount, 30000); // Refresh every 30s
-    return () => clearInterval(interval);
+    load();
+    const t = setInterval(load, 30000);
+    return () => clearInterval(t);
   }, [user]);
 
-  const addLog = useCallback((type, msg) => {
-    setStatusLogs(prev => [
-      { type, msg, time: new Date().toLocaleTimeString() },
-      ...prev.slice(0, 49)
-    ]);
-  }, []);
-
+  // Close user menu on outside click
   useEffect(() => {
+    if (!userMenuOpen) return;
     const handler = (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "p")) {
-        e.preventDefault();
-        setGlobalSearchOpen(v => !v);
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
       }
-      if (e.key === "Escape") { setGlobalSearchOpen(false); setUserMenuOpen(false); }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [userMenuOpen]);
 
-  const isAdmin = user?.role === "admin";
-  const visibleSections = NAV_SECTIONS.filter(s => !s.adminOnly || isAdmin);
+  // ── Backward-compat addLog ────────────────────────────────────────────
+  const addLog = useCallback((type, msg) => {
+    platform.addLog(type, msg);
+  }, [platform]);
 
-  const lastLog = statusLogs[0];
-  const logColor = lastLog?.type === "error" ? "#ff4d4f"
-    : lastLog?.type === "warning" ? "#faad14"
-    : lastLog?.type === "success" ? "#52c41a"
-    : "#40c4ff";
+  // ── Derived state ─────────────────────────────────────────────────────
+  const adminUser = user?.role === "admin";
+  const activeApp = platform.activeApp;
+  const accent = activeApp?.accent ?? "#FEDD00";
 
-  const currentSection = visibleSections.find(s => s.items.some(i => i.page === currentPageName));
+  // Build nav sections for the active app
+  const navSections = activeApp?.navItems ?? [];
+  const adminNavItems = activeApp?.adminNavItems ?? [];
 
-  const toggleSection = (key) => setCollapsedSections(p => ({ ...p, [key]: !p[key] }));
+  // OS-level nav items (always shown above app nav)
+  const osApp = getApp("os-home");
+  const osNavItems = osApp?.navItems ?? [];
+
+  const lastLog = platform.statusLogs[0];
+  const logColor =
+    lastLog?.type === "error" ? "#ff4d4f" :
+    lastLog?.type === "warning" ? "#faad14" :
+    lastLog?.type === "success" ? "#52c41a" :
+    "#40c4ff";
 
   return (
     <AppContext.Provider value={{ user, addLog, setContextPanel, contextPanel }}>
+      {/* Theme CSS variables */}
       <style>{`
         :root {
           --background: 215 90% 4% !important;
@@ -230,736 +345,453 @@ export default function Layout({ children, currentPageName }) {
           --border: 214 50% 19% !important;
           --input: 214 50% 19% !important;
           --ring: 52 100% 50% !important;
+          --radius: 8px;
         }
         body { background-color: #03080f !important; color: #f0f6ff !important; }
-
         .sidebar-nav-item {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          padding: 5px 10px 5px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          font-size: 12.5px;
-          font-weight: 500;
-          color: var(--text-secondary);
-          position: relative;
-          overflow: hidden;
+          display: flex; align-items: center; gap: 9px;
+          padding: 5px 10px 5px 12px; border-radius: 6px;
+          cursor: pointer; transition: all 0.15s ease;
+          font-size: 12.5px; font-weight: 500;
+          color: var(--text-secondary); position: relative; overflow: hidden;
+          text-decoration: none;
         }
-        .sidebar-nav-item:hover {
-          background: rgba(255,255,255,0.04);
-          color: var(--text-primary);
-        }
-        .sidebar-nav-item.active {
-          background: rgba(254,221,0,0.07);
-          color: #f0f6ff;
-          font-weight: 600;
-        }
-        .sidebar-nav-item.active::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 20%;
-          bottom: 20%;
-          width: 2.5px;
-          border-radius: 0 2px 2px 0;
-          background: var(--mnbc-yellow);
-          box-shadow: 0 0 8px rgba(254,221,0,0.5);
-        }
-        .sidebar-nav-item .nav-icon {
-          opacity: 0.6;
-          transition: opacity 0.15s;
-          flex-shrink: 0;
-        }
-        .sidebar-nav-item:hover .nav-icon,
-        .sidebar-nav-item.active .nav-icon {
-          opacity: 1;
-        }
-
-        .quick-action-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 7px 10px;
-          border-radius: 7px;
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--text-secondary);
-          cursor: pointer;
-          transition: all 0.15s;
-          border: 1px solid transparent;
-          background: var(--bg-overlay);
-        }
-        .quick-action-btn:hover {
-          background: var(--bg-hover);
-          color: var(--text-primary);
-          border-color: var(--border-default);
-        }
-
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-        .pulse-live { animation: pulse-dot 2s ease-in-out infinite; }
-
-        .cmd-item-hover:hover { background: var(--bg-hover) !important; }
-        .cmd-item-selected { background: var(--bg-hover) !important; }
-
-        .sidebar-section-toggle {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 10px;
-          cursor: pointer;
-          user-select: none;
-          border-radius: 4px;
-          transition: background 0.12s;
-        }
-        .sidebar-section-toggle:hover { background: rgba(255,255,255,0.03); }
-
-        .right-panel-widget {
-          border-radius: 8px;
-          border: 1px solid var(--border-subtle);
-          background: var(--bg-elevated);
-          padding: 12px;
-          transition: border-color 0.2s;
-        }
-        .right-panel-widget:hover { border-color: var(--border-default); }
-
-        .panel-drawer {
-          transition: width 0.22s cubic-bezier(0.4,0,0.2,1), opacity 0.18s ease;
-          overflow: hidden;
-        }
-        .panel-drawer.closed {
-          width: 0 !important;
-          opacity: 0;
-          pointer-events: none;
-        }
-        .panel-drawer.open {
-          opacity: 1;
-        }
-
-        .header-search-btn {
-          transition: all 0.15s;
-        }
-        .header-search-btn:hover {
-          background: var(--bg-overlay) !important;
-          border-color: var(--border-default) !important;
-        }
+        .sidebar-nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
       `}</style>
 
-      <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
-
-        {/* ══ HEADER ══ */}
+      <div
+        className="fixed inset-0 flex flex-col"
+        style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
+      >
+        {/* ── OS Header Bar ─────────────────────────────────────────────── */}
         <header
-          className="flex items-center justify-between px-5 shrink-0 z-50 relative overflow-hidden"
+          className="flex items-center gap-3 px-3 shrink-0"
           style={{
             height: "var(--header-height)",
-            background: "linear-gradient(90deg, #0a1220 0%, #0f1829 25%, #0d1f2a 50%, #0a1523 75%, #0a1220 100%)",
-            borderBottom: "1px solid var(--border-default)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(254,221,0,0.15), 0 0 20px rgba(64,196,255,0.08)"
-          }}>
-          {/* Dynamic accent bar top */}
-          <div style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "2px",
-            background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 33%, #2ed573 66%, #FEDD00 100%)",
-            backgroundSize: "200% 100%",
-            animation: "gradientShift 8s ease-in-out infinite"
-          }} />
-          
-          <style>{`
-            @keyframes gradientShift {
-              0%, 100% { background-position: 0% center; }
-              50% { background-position: 100% center; }
-            }
-          `}</style>
-
-          {/* Brand */}
-          <div className="flex items-center gap-3 min-w-0" style={{ minWidth: sidebarOpen ? "var(--panel-left)" : "auto" }}>
-            <div className="flex items-center gap-2.5 shrink-0">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: "radial-gradient(circle at top-left, rgba(254,221,0,0.3), rgba(64,196,255,0.1))",
-                    filter: "blur(16px)"
-                  }} />
-                <div className="relative w-8 h-8 rounded-lg flex items-center justify-center font-extrabold text-sm group-hover:scale-110 transition-transform duration-300"
-                  style={{
-                    background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 50%, #e6c000 100%)",
-                    color: "#04245a",
-                    boxShadow: "0 0 16px rgba(254,221,0,0.5), 0 4px 12px rgba(254,221,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.2)",
-                    border: "1.5px solid rgba(255,255,255,0.2)"
-                  }}>
-                  M
-                </div>
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Sofia Sans Extra Condensed', 'Aptos Narrow', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: "0.1em", color: "var(--text-primary)", lineHeight: 1, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
-                  MHIP
-                </div>
-                <div style={{ fontSize: 8.5, color: "var(--text-muted)", letterSpacing: "0.08em", lineHeight: 1, marginTop: 2, fontWeight: 600 }}>
-                  HEALTH INTELLIGENCE
-                </div>
-              </div>
+            background: "var(--bg-surface)",
+            borderBottom: "1px solid var(--border-subtle)",
+            zIndex: 30,
+          }}
+        >
+          {/* Logo / OS identity */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className="w-6 h-6 rounded flex items-center justify-center"
+              style={{ background: "#FEDD00", flexShrink: 0 }}
+            >
+              <span style={{ fontSize: 10, fontWeight: 900, color: "#043673", lineHeight: 1 }}>RR</span>
             </div>
+            <div className="hidden sm:flex items-center gap-1.5">
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                  fontFamily: "'Sofia Sans Extra Condensed', sans-serif",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Red River OS
+              </span>
+            </div>
+          </div>
 
+          {/* Separator */}
+          <div style={{ width: 1, height: 16, background: "var(--border-subtle)" }} />
+
+          {/* App badge / switcher trigger */}
+          <button
+            onClick={() => platform.setAppSwitcherOpen(true)}
+            className="flex items-center gap-2 px-2.5 py-1 rounded-md transition-all"
+            style={{
+              background: "var(--bg-elevated)",
+              border: `1px solid ${accent}33`,
+              fontSize: 12,
+              color: accent,
+              fontWeight: 600,
+            }}
+          >
+            <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
+            <span className="hidden sm:inline">{activeApp?.shortName ?? "Apps"}</span>
+            <Grid3x3 size={10} style={{ color: "var(--text-muted)" }} />
+          </button>
+
+          {/* Global search */}
+          <button
+            className="flex items-center gap-2 flex-1 max-w-xs px-3 py-1.5 rounded-md transition-all"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-muted)",
+              fontSize: 12,
+            }}
+            onClick={() => platform.setCommandPaletteOpen(true)}
+          >
+            <Search size={12} />
+            <span className="hidden sm:inline flex-1 text-left">Search or jump to…</span>
+            <kbd
+              style={{
+                fontSize: 10,
+                color: "var(--text-muted)",
+                background: "var(--bg-overlay)",
+                padding: "1px 5px",
+                borderRadius: 3,
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              ⌘K
+            </kbd>
+          </button>
+
+          <div className="ml-auto flex items-center gap-1">
             {/* Sidebar toggle */}
             <button
-              onClick={() => setSidebarOpen(v => !v)}
-              className="activity-icon shrink-0"
-              style={{ width: 28, height: 28, marginLeft: 4 }}
-              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+              onClick={platform.toggleSidebar}
+              className="activity-icon"
+              title={platform.sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             >
-              {sidebarOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+              {platform.sidebarOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
             </button>
-          </div>
 
-          {/* Breadcrumb + Search center */}
-          <div className="flex-1 flex items-center justify-center gap-3 mx-6">
-            {/* Breadcrumb pill */}
-            {currentSection && (
-              <div className="hidden lg:flex items-center gap-2.5 px-3 py-2 rounded-full text-xs backdrop-blur-md transition-all duration-300 hover:scale-105"
-                style={{
-                  background: `linear-gradient(135deg, ${currentSection.color}12 0%, ${currentSection.color}08 100%)`,
-                  border: `1.5px solid ${currentSection.color}44`,
-                  boxShadow: `0 4px 16px ${currentSection.color}15, inset 0 1px 0 ${currentSection.color}22`
-                }}>
-                <span style={{ color: currentSection.color, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{currentSection.label}</span>
-                <ChevronRight size={9} style={{ color: currentSection.color, opacity: 0.7 }} />
-                <span style={{ color: "var(--text-primary)", fontWeight: 600, fontSize: 11 }}>{currentPageName?.replace(/([A-Z])/g, ' $1').trim()}</span>
-              </div>
-            )}
-
-            {/* Command search */}
+            {/* Notifications */}
             <button
-              onClick={() => setGlobalSearchOpen(true)}
-              className="header-search-btn hidden md:flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-medium transition-all group"
-              style={{
-                background: "linear-gradient(135deg, rgba(64,196,255,0.08) 0%, rgba(254,221,0,0.05) 100%)",
-                border: "1px solid rgba(64,196,255,0.3)",
-                color: "var(--text-secondary)",
-                width: 260,
-                position: "relative",
-                overflow: "hidden",
-                boxShadow: "0 4px 16px rgba(64,196,255,0.08), inset 0 1px 0 rgba(64,196,255,0.15)"
-              }}
-              onMouseOver={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(64,196,255,0.15) 0%, rgba(254,221,0,0.1) 100%)";
-                e.currentTarget.style.borderColor = "rgba(64,196,255,0.6)";
-                e.currentTarget.style.color = "var(--text-primary)";
-                e.currentTarget.style.boxShadow = "0 8px 28px rgba(64,196,255,0.2), inset 0 1px 0 rgba(64,196,255,0.25)";
-              }}
-              onMouseOut={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, rgba(64,196,255,0.08) 0%, rgba(254,221,0,0.05) 100%)";
-                e.currentTarget.style.borderColor = "rgba(64,196,255,0.3)";
-                e.currentTarget.style.color = "var(--text-secondary)";
-                e.currentTarget.style.boxShadow = "0 4px 16px rgba(64,196,255,0.08), inset 0 1px 0 rgba(64,196,255,0.15)";
-              }}>
-              <Search size={13} style={{ color: "#40c4ff", flexShrink: 0, opacity: 0.9 }} />
-              <span className="flex-1 text-left opacity-80">Search workspace...</span>
-              <kbd style={{ background: "rgba(64,196,255,0.15)", color: "#40c4ff", fontSize: 8, padding: "3px 7px", borderRadius: 3, border: "1px solid rgba(64,196,255,0.4)", fontFamily: "monospace", flexShrink: 0, fontWeight: 600, letterSpacing: "0.05em" }}>⌘K</kbd>
-            </button>
-          </div>
-
-          {/* Right controls */}
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setFeedbackOpen(true)}
-              className="activity-icon" 
-              title="Send Feedback">
-              <MessageSquare size={15} />
-            </button>
-            <button onClick={() => setGlobalSearchOpen(true)} className="md:hidden activity-icon" title="Search">
-              <Search size={15} />
-            </button>
-
-            <button 
-              onClick={() => setNotifCenterOpen(true)}
-              className="activity-icon relative group" 
-              title="Notifications">
-              <Bell size={15} style={{ transition: "all 0.3s", color: unreadCount > 0 ? "#ff6b6b" : "inherit" }} />
+              className="activity-icon"
+              style={notifCenterOpen ? { color: "#FEDD00", background: "rgba(254,221,0,0.08)" } : {}}
+              onClick={() => setNotifCenterOpen(v => !v)}
+              title="Notifications"
+            >
+              <Bell size={14} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold animate-pulse" 
-                  style={{ background: "linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%)", color: "white", fontSize: 9, boxShadow: "0 0 12px rgba(255,107,107,0.5)" }}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                <span
+                  className="absolute rounded-full text-center"
+                  style={{
+                    top: 4, right: 4,
+                    width: 14, height: 14,
+                    background: "#ff4d4f",
+                    fontSize: 8, fontWeight: 700,
+                    color: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
 
-            <button
-              onClick={() => setRightPanelOpen(v => !v)}
-              className="activity-icon transition-all group"
-              title={rightPanelOpen ? "Collapse tools panel" : "Expand tools panel"}
-              style={{ color: rightPanelOpen ? "#40c4ff" : "inherit" }}
-            >
-              <SlidersHorizontal size={15} style={{ transition: "all 0.3s" }} />
-            </button>
-
             {/* User menu */}
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
+                className="activity-icon"
                 onClick={() => setUserMenuOpen(v => !v)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all ml-2 group hover:scale-105"
-                style={{
-                  background: userMenuOpen ? "linear-gradient(135deg, rgba(254,221,0,0.12) 0%, rgba(64,196,255,0.08) 100%)" : "linear-gradient(135deg, rgba(254,221,0,0.04) 0%, rgba(64,196,255,0.04) 100%)",
-                  border: `1.5px solid ${userMenuOpen ? "rgba(254,221,0,0.4)" : "rgba(64,196,255,0.2)"}`,
-                  cursor: "pointer",
-                  boxShadow: userMenuOpen ? `0 0 16px rgba(254,221,0,0.15), inset 0 1px 0 rgba(254,221,0,0.2)` : "0 0 8px rgba(64,196,255,0.08)"
-                }}
-                onMouseOver={e => {
-                  if (!userMenuOpen) {
-                    e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.1) 0%, rgba(64,196,255,0.08) 100%)";
-                    e.currentTarget.style.borderColor = "rgba(64,196,255,0.4)";
-                  }
-                }}
-                onMouseOut={e => {
-                  if (!userMenuOpen) {
-                    e.currentTarget.style.background = "linear-gradient(135deg, rgba(254,221,0,0.04) 0%, rgba(64,196,255,0.04) 100%)";
-                    e.currentTarget.style.borderColor = "rgba(64,196,255,0.2)";
-                  }
-                }}>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 group-hover:shadow-lg"
-                  style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.25) 0%, rgba(64,196,255,0.15) 100%)", color: "var(--mnbc-yellow)", border: "1.5px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.2)" }}>
-                  {user?.full_name?.[0] || "?"}
-                </div>
-                <div className="hidden md:block text-left">
-                  <div className="text-xs font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
-                    {user?.full_name?.split(" ")[0] || "Loading"}
-                  </div>
-                  {isAdmin && (
-                    <div className="text-xs leading-tight" style={{ color: "var(--mnbc-yellow)", fontSize: 9, letterSpacing: "0.05em" }}>ADMIN</div>
-                  )}
-                </div>
-                <ChevronRight size={11} style={{ color: "var(--text-muted)", transform: userMenuOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }} />
+                title={user?.full_name ?? user?.email ?? "User"}
+              >
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                ) : (
+                  <User size={14} />
+                )}
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-1.5 rounded-xl overflow-hidden z-50 min-w-44"
-                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
-                  <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-                    <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{user?.full_name || "User"}</div>
-                    <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.email || ""}</div>
-                  </div>
-                  <div className="py-1">
-                    <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
-                      style={{ color: "var(--text-secondary)" }}
-                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
-                      onClick={() => { setNotifPrefsOpen(true); setUserMenuOpen(false); }}>
-                      <Bell size={12} />
-                      Notification Prefs
-                    </div>
-                    <Link to={createPageUrl("Settings")} onClick={() => setUserMenuOpen(false)}>
-                      <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
-                        style={{ color: "var(--text-secondary)" }}
-                        onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                        onMouseOut={e => e.currentTarget.style.background = "transparent"}>
-                        <Settings size={12} />
-                        Settings
+                <div
+                  className="absolute right-0 top-full mt-1 rounded-xl py-1 w-56 z-50"
+                  style={{
+                    background: "var(--bg-elevated)",
+                    border: "1px solid var(--border-default)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  {user && (
+                    <div className="px-3 py-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+                      <div style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600 }}>
+                        {user.full_name || user.email}
                       </div>
-                    </Link>
-                    <div className="flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer transition-colors"
-                      style={{ color: "var(--color-error)" }}
-                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
-                      onClick={() => base44.auth.logout()}>
-                      <LogOut size={12} />
-                      Sign out
+                      <div style={{ color: "var(--text-muted)", fontSize: 11 }}>
+                        {getRoleLabel(user.role)}
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  <Link
+                    to={createPageUrl("Settings")}
+                    className="flex items-center gap-2 px-3 py-2 transition-colors"
+                    style={{ color: "var(--text-secondary)", fontSize: 12 }}
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <Settings size={13} />
+                    Settings
+                  </Link>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-2 transition-colors"
+                    style={{ color: "var(--text-secondary)", fontSize: 12 }}
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                    onClick={() => { setFeedbackOpen(true); setUserMenuOpen(false); }}
+                  >
+                    <MessageSquare size={13} />
+                    Feedback
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-2 transition-colors"
+                    style={{ color: "#ff4d4f", fontSize: 12 }}
+                    onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                    onClick={() => base44.auth.logout(window.location.href)}
+                  >
+                    <LogOut size={13} />
+                    Sign out
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </header>
 
-        {/* ══ BODY ══ */}
-        <div className="flex flex-1 overflow-hidden" onClick={() => userMenuOpen && setUserMenuOpen(false)}>
-
-          {/* ══ LEFT SIDEBAR ══ */}
-          <aside
-            className={`panel-drawer flex flex-col shrink-0 ${sidebarOpen ? "open" : "closed"}`}
-            style={{
-              width: sidebarOpen ? "var(--panel-left)" : 0,
-              background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
-              borderRight: sidebarOpen ? "1px solid var(--border-default)" : "none",
-              boxShadow: sidebarOpen ? "2px 0 12px rgba(0,0,0,0.3)" : "none"
-            }}
-          >
-              {/* Nav — file-tree style */}
-              <nav className="flex-1 overflow-y-auto py-2 px-2 flex flex-col">
-                {visibleSections.map(sec => {
-                  const collapsed = collapsedSections[sec.key];
-                  return (
-                    <div key={sec.key} className="mb-0.5">
-                      {/* Folder row */}
-                      <div
-                        className="sidebar-section-toggle"
-                        onClick={() => toggleSection(sec.key)}
-                        style={{ padding: "3px 6px", gap: 5 }}
-                      >
-                        {/* Folder icon */}
-                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, color: sec.color }}>
-                          {collapsed
-                            ? <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1"/>
-                            : <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V3.5z" fill="currentColor" fillOpacity="0.4" stroke="currentColor" strokeWidth="1"/>
-                          }
-                        </svg>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: collapsed ? "var(--text-secondary)" : "var(--text-primary)", flex: 1, letterSpacing: "0.01em" }}>{sec.label}</span>
-                        <ChevronRight
-                          size={10}
-                          style={{
-                            color: "var(--text-muted)",
-                            transform: collapsed ? "rotate(0deg)" : "rotate(90deg)",
-                            transition: "transform 0.15s",
-                            opacity: 0.4,
-                            flexShrink: 0
-                          }}
-                        />
-                      </div>
-
-                      {/* File items with tree lines */}
-                      {!collapsed && (
-                        <div className="relative ml-3 mt-0.5" style={{ paddingLeft: 12 }}>
-                          {/* Vertical tree line */}
-                          <div className="absolute top-0 bottom-2 left-0" style={{ width: 1, background: `${sec.color}30` }} />
-
-                          {sec.items.map((item, idx) => {
-                            const isLast = idx === sec.items.length - 1;
-                            const isActive = currentPageName === item.page;
-                            return (
-                              <div key={item.page} className="relative" style={{ marginBottom: 1 }}>
-                                {/* Horizontal connector */}
-                                <div className="absolute top-1/2 -translate-y-1/2" style={{ left: -12, width: 10, height: 1, background: `${sec.color}30` }} />
-                                {/* Cap the vertical line at last item */}
-                                {isLast && <div className="absolute" style={{ left: -13, top: "50%", bottom: 0, width: 3, background: "var(--bg-surface)" }} />}
-
-                                <Link to={createPageUrl(item.page)} title={item.tooltip}>
-                                  <div className={`sidebar-nav-item ${isActive ? "active" : ""}`} style={{ paddingLeft: 6, paddingRight: 6 }}>
-                                    <item.icon
-                                      size={12}
-                                      className="nav-icon"
-                                      style={{ color: isActive ? sec.color : undefined, flexShrink: 0 }}
-                                    />
-                                    <span className="truncate" style={{ fontSize: 12 }}>{item.label}</span>
-                                  </div>
-                                </Link>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+        {/* ── Body: sidebar + main ─────────────────────────────────────── */}
+        <div className="flex flex-1 min-h-0">
+          {/* ── Left Sidebar ─────────────────────────────────────────── */}
+          {platform.sidebarOpen && (
+            <aside
+              className="flex flex-col shrink-0 overflow-hidden"
+              style={{
+                width: "var(--panel-left)",
+                background: "var(--bg-surface)",
+                borderRight: "1px solid var(--border-subtle)",
+                zIndex: 20,
+              }}
+            >
+              {/* App identity strip */}
+              <div
+                className="px-3 py-2.5 shrink-0"
+                style={{
+                  borderBottom: `1px solid ${accent}22`,
+                  background: `linear-gradient(135deg, var(--bg-surface) 0%, ${accent}08 100%)`,
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                    style={{ background: accent + "18", border: `1px solid ${accent}33` }}
+                  >
+                    <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
+                  </div>
+                  <div className="min-w-0">
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.2 }}>
+                      {activeApp?.shortName ?? "Red River OS"}
                     </div>
+                    {activeApp?.status === APP_STATUS.SCAFFOLD && (
+                      <span style={{ fontSize: 9, color: "var(--text-muted)" }}>beta module</span>
+                    )}
+                  </div>
+                  <button
+                    className="ml-auto activity-icon"
+                    style={{ width: 24, height: 24 }}
+                    onClick={() => platform.setAppSwitcherOpen(true)}
+                    title="Switch app"
+                  >
+                    <Grid3x3 size={11} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Nav scroll area */}
+              <nav className="flex-1 overflow-y-auto py-2 px-2" style={{ scrollbarWidth: "thin" }}>
+                {/* OS-level nav items */}
+                {osNavItems.map((item, i) => {
+                  if (Array.isArray(item.items)) {
+                    return item.items.map((sub) => {
+                      const isActive = currentPageName === sub.page;
+                      return (
+                        <Link
+                          key={sub.page}
+                          to={createPageUrl(sub.page)}
+                          className="sidebar-nav-item"
+                          style={isActive ? {
+                            background: "rgba(254,221,0,0.07)",
+                            color: "var(--text-primary)",
+                            fontWeight: 600,
+                          } : {}}
+                        >
+                          {isActive && (
+                            <span style={{
+                              position: "absolute", left: 0, top: "20%", bottom: "20%",
+                              width: 2.5, borderRadius: "0 2px 2px 0",
+                              background: "#FEDD00", boxShadow: "0 0 8px #FEDD0088",
+                            }} />
+                          )}
+                          <Icon name={sub.icon} size={13} style={{ color: isActive ? "#FEDD00" : "var(--text-muted)", flexShrink: 0 }} />
+                          <span>{sub.label}</span>
+                        </Link>
+                      );
+                    });
+                  }
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.page ?? i}
+                      to={createPageUrl(item.page)}
+                      className="sidebar-nav-item"
+                      style={isActive ? { background: "rgba(254,221,0,0.07)", color: "var(--text-primary)", fontWeight: 600 } : {}}
+                    >
+                      <Icon name={item.icon} size={13} style={{ color: isActive ? "#FEDD00" : "var(--text-muted)", flexShrink: 0 }} />
+                      <span>{item.label}</span>
+                    </Link>
                   );
                 })}
+
+                {/* Separator between OS nav and app nav */}
+                {osNavItems.length > 0 && navSections.length > 0 && (
+                  <div style={{ height: 1, background: "var(--border-subtle)", margin: "6px 4px 8px" }} />
+                )}
+
+                {/* Active app nav sections */}
+                {navSections.map((section) => {
+                  if (Array.isArray(section.items)) {
+                    // Sectioned nav
+                    const sectionKey = section.section;
+                    const collapsed = collapsedSections[sectionKey];
+                    return (
+                      <NavSection
+                        key={sectionKey}
+                        section={sectionKey}
+                        items={section.items}
+                        collapsed={collapsed}
+                        onToggle={() => setCollapsedSections(p => ({ ...p, [sectionKey]: !p[sectionKey] }))}
+                        currentPage={currentPageName}
+                        accent={accent}
+                      />
+                    );
+                  } else {
+                    // Flat nav item
+                    const isActive = currentPageName === section.page;
+                    return (
+                      <Link
+                        key={section.page}
+                        to={createPageUrl(section.page)}
+                        className="sidebar-nav-item"
+                        style={isActive ? { background: `rgba(${hexToRgb(accent)},0.08)`, color: "var(--text-primary)", fontWeight: 600 } : {}}
+                      >
+                        <Icon name={section.icon} size={13} style={{ color: isActive ? accent : "var(--text-muted)", flexShrink: 0 }} />
+                        <span>{section.label}</span>
+                      </Link>
+                    );
+                  }
+                })}
+
+                {/* Admin section */}
+                {adminUser && adminNavItems.length > 0 && (
+                  <>
+                    <div style={{ height: 1, background: "var(--border-subtle)", margin: "6px 4px 8px" }} />
+                    <NavSection
+                      section="Administration"
+                      items={adminNavItems}
+                      collapsed={collapsedSections["admin"]}
+                      onToggle={() => setCollapsedSections(p => ({ ...p, admin: !p.admin }))}
+                      currentPage={currentPageName}
+                      accent="#ffab40"
+                    />
+                  </>
+                )}
               </nav>
 
-              {/* Sidebar footer — user card */}
-              <div className="mt-auto pt-3 border-t px-2 pb-2 shrink-0" style={{ borderColor: "var(--border-subtle)" }}>
-                <div className="rounded-xl overflow-hidden relative" style={{
-                  background: "linear-gradient(135deg, #05112a 0%, #081e3d 60%, #0d2a1a 100%)",
-                  border: "1px solid rgba(254,221,0,0.14)",
-                  boxShadow: "0 0 30px rgba(254,221,0,0.04) inset"
-                }}>
-                  {/* Decorative glow orb */}
-                  <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "rgba(254,221,0,0.07)", filter: "blur(18px)", pointerEvents: "none" }} />
-                  <div className="px-3 pt-3 pb-2.5 relative">
-                    <div className="flex items-center gap-2.5 mb-2.5">
-                      <div className="relative">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold"
-                          style={{ background: "linear-gradient(135deg, rgba(254,221,0,0.2) 0%, rgba(254,221,0,0.08) 100%)", color: "var(--mnbc-yellow)", border: "1px solid rgba(254,221,0,0.3)", boxShadow: "0 0 12px rgba(254,221,0,0.15)" }}>
-                          {user?.full_name?.[0] || "?"}
-                        </div>
-                        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
-                          style={{ background: "var(--color-success)", borderColor: "#05112a", boxShadow: "0 0 6px rgba(0,230,118,0.6)" }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{user?.full_name || "Loading..."}</div>
-                        {user?.role === "admin" ? (
-                          <span className="px-1.5 py-0.5 rounded-full text-xs" style={{ background: "rgba(254,221,0,0.1)", color: "var(--mnbc-yellow)", fontSize: 9, fontWeight: 700, letterSpacing: "0.06em" }}>ADMIN</span>
-                        ) : (
-                          <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>{user?.role || "user"}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Live clock */}
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <LiveClock />
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 1 }}>
-                          {new Date().toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ background: "rgba(0,230,118,0.08)", border: "1px solid rgba(0,230,118,0.2)" }}>
-                        <span className="status-dot active pulse-live" style={{ width: 5, height: 5 }} />
-                        <span style={{ fontSize: 9, color: "var(--color-success)", fontWeight: 700, letterSpacing: "0.06em" }}>LIVE</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Greeting strip */}
-                  <div className="px-3 py-1.5" style={{ background: "rgba(254,221,0,0.04)", borderTop: "1px solid rgba(254,221,0,0.08)" }}>
-                    <span style={{ fontSize: 10, color: "var(--text-muted)" }}>Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>{user?.full_name?.split(" ")[0] || "there"}</span></span>
-                  </div>
-                </div>
+              {/* Sidebar footer */}
+              <div
+                className="px-3 py-2 shrink-0 flex items-center gap-2"
+                style={{
+                  borderTop: "1px solid var(--border-subtle)",
+                  background: "var(--bg-surface)",
+                }}
+              >
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: logColor, boxShadow: `0 0 4px ${logColor}` }} />
+                <span style={{ fontSize: 10, color: "var(--text-muted)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {platform.statusLogs[0]?.msg ?? "Ready"}
+                </span>
               </div>
             </aside>
+          )}
 
-          {/* ══ MAIN ══ */}
-          <main className="flex-1 overflow-auto relative" style={{ background: "var(--bg-base)" }}>
-            {children}
+          {/* ── Main content area ─────────────────────────────────────── */}
+          <main
+            className="flex-1 min-w-0 overflow-hidden flex flex-col"
+            style={{ background: "var(--bg-base)" }}
+          >
+            {/* Content */}
+            <div className="flex-1 overflow-auto">
+              {children}
+            </div>
           </main>
 
-          {/* ══ RIGHT PANEL ══ */}
-          <aside
-            className={`panel-drawer flex flex-col shrink-0 ${rightPanelOpen ? "open" : "closed"}`}
-            style={{
-              width: rightPanelOpen ? "var(--panel-right)" : 0,
-              background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
-              borderLeft: rightPanelOpen ? "1px solid var(--border-default)" : "none",
-              boxShadow: rightPanelOpen ? "-2px 0 12px rgba(0,0,0,0.3)" : "none"
-            }}
-          >
-              {/* Panel header */}
-              <div className="flex items-center justify-between px-3 py-2 shrink-0"
-                style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded flex items-center justify-center" style={{ background: "rgba(254,221,0,0.1)" }}>
-                    <Zap size={10} style={{ color: "var(--mnbc-yellow)" }} />
-                  </div>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", color: "var(--text-secondary)", textTransform: "uppercase" }}>
-                    {contextPanel?.title || "Tools"}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setRightPanelOpen(false)}
-                  className="activity-icon"
-                  style={{ width: 22, height: 22 }}
-                  title="Collapse panel"
-                >
-                  <ChevronRight size={12} />
+          {/* ── Context panel (right) ─────────────────────────────────── */}
+          {contextPanel && (
+            <aside
+              className="shrink-0 overflow-auto"
+              style={{
+                width: "var(--panel-right)",
+                background: "var(--bg-surface)",
+                borderLeft: "1px solid var(--border-subtle)",
+              }}
+            >
+              <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {contextPanel.title ?? "Context"}
+                </span>
+                <button className="activity-icon" style={{ width: 24, height: 24 }} onClick={() => setContextPanel(null)}>
+                  <X size={12} />
                 </button>
               </div>
-
-              <div className="flex-1 overflow-y-auto p-3">
-                {contextPanel?.content || <RightPanelDefault user={user} addLog={addLog} isAdmin={isAdmin} />}
-              </div>
+              <div className="p-3">{contextPanel.content}</div>
             </aside>
+          )}
         </div>
-
-        {/* ══ STATUS BAR ══ */}
-        <footer
-          className="flex items-center px-4 gap-4 shrink-0 overflow-hidden"
-          style={{
-            height: "var(--footer-height)",
-            background: "linear-gradient(to top, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
-            borderTop: "1px solid var(--border-default)",
-            boxShadow: "0 -4px 16px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(254,221,0,0.05)"
-          }}
-        >
-          {/* Log message */}
-          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <Circle size={6} className="shrink-0 pulse-live" style={{ color: logColor, fill: logColor }} />
-            <span className="truncate" style={{ fontSize: 11, color: logColor, opacity: 0.9 }} title={lastLog?.msg}>{lastLog?.msg}</span>
-            {lastLog?.time && (
-              <span className="shrink-0 ml-1" style={{ color: "var(--text-muted)", fontSize: 10 }}>{lastLog.time}</span>
-            )}
-          </div>
-
-          {/* Right side */}
-          <div className="flex items-center gap-3 shrink-0">
-            <span style={{ color: "var(--text-muted)", fontSize: 11 }}>
-              {new Date().toLocaleDateString("en-CA")}
-            </span>
-          </div>
-        </footer>
-
-        {/* ══ COMMAND PALETTE ══ */}
-        {/* Notification Center */}
-        <NotificationCenter 
-          isOpen={notifCenterOpen} 
-          onClose={() => setNotifCenterOpen(false)}
-          user={user}
-        />
-
-        {/* Notification Preferences */}
-        <NotificationPreferences 
-          isOpen={notifPrefsOpen}
-          onClose={() => setNotifPrefsOpen(false)}
-          user={user}
-        />
-
-        {/* Feedback Modal */}
-        <FeedbackModal 
-          isOpen={feedbackOpen}
-          onClose={() => setFeedbackOpen(false)}
-          user={user}
-          currentPage={currentPageName}
-        />
-
-        <CommandPalette
-          isOpen={globalSearchOpen}
-          onClose={() => setGlobalSearchOpen(false)}
-          currentPageName={currentPageName}
-        />
-
-        <FloatingFeedbackButton user={user} currentPage={currentPageName} />
-        <PatchNotesModal />
       </div>
-    </AppContext.Provider>
-  );
-}
 
-function PanelSection({ title, icon: Icon, iconColor, children, defaultOpen = true }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div>
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="sidebar-section-toggle w-full"
-        style={{ padding: "4px 4px" }}
-      >
-        <Icon size={10} style={{ color: iconColor || "var(--text-muted)", flexShrink: 0 }} />
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", flex: 1, textAlign: "left" }}>{title}</span>
-        <ChevronRight
-          size={11}
-          style={{
-            color: "var(--text-muted)",
-            transform: open ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 0.15s",
-            opacity: 0.5,
-            flexShrink: 0
+      {/* ── App Switcher overlay ───────────────────────────────────────── */}
+      {platform.appSwitcherOpen && (
+        <AppSwitcher
+          activeAppId={platform.activeAppId}
+          onClose={() => platform.setAppSwitcherOpen(false)}
+          onSelect={(app) => {
+            platform.switchApp(app.id);
+            // Navigate to the app's landing page
+            window.location.href = createPageUrl(app.landingPage);
           }}
         />
-      </button>
-      {open && <div className="mt-1">{children}</div>}
-    </div>
-  );
-}
+      )}
 
-function MiniSparkline({ values, color }) {
-  const w = 56, h = 22;
-  const min = Math.min(...values), max = Math.max(...values);
-  const range = max - min || 1;
-  const pts = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * w;
-    const y = h - ((v - min) / range) * h;
-    return `${x},${y}`;
-  }).join(" ");
-  return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ overflow: "visible" }}>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={pts.split(" ").pop().split(",")[0]} cy={pts.split(" ").pop().split(",")[1]} r="2.5" fill={color} />
-    </svg>
-  );
-}
+      {/* ── Command palette ────────────────────────────────────────────── */}
+      {platform.commandPaletteOpen && (
+        <CommandPalette onClose={() => platform.setCommandPaletteOpen(false)} />
+      )}
 
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.04em" }}>
-      {time.toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
-    </span>
-  );
-}
+      {/* ── Notification center ────────────────────────────────────────── */}
+      {notifCenterOpen && (
+        <NotificationCenter
+          user={user}
+          onClose={() => setNotifCenterOpen(false)}
+          onOpenPrefs={() => { setNotifCenterOpen(false); setNotifPrefsOpen(true); }}
+        />
+      )}
 
-function RightPanelDefault({ user, isAdmin }) {
-  const now = new Date();
-  const hour = now.getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+      {/* ── Notification preferences ───────────────────────────────────── */}
+      {notifPrefsOpen && (
+        <NotificationPreferences
+          user={user}
+          onClose={() => setNotifPrefsOpen(false)}
+        />
+      )}
 
-  // Simulated sparkline data (would be real metrics in production)
-  const sparkData = {
-    metrics: [42, 45, 43, 47, 51, 49, 53, 57, 54, 58],
-    quality: [88, 85, 87, 90, 89, 92, 91, 94, 93, 96],
-    sources: [8, 8, 9, 9, 10, 10, 11, 11, 12, 12],
-  };
+      {/* ── Feedback ───────────────────────────────────────────────────── */}
+      {feedbackOpen && (
+        <FeedbackModal user={user} onClose={() => setFeedbackOpen(false)} />
+      )}
+      <FloatingFeedbackButton onClick={() => setFeedbackOpen(true)} />
 
-  return (
-    <div className="space-y-3">
-
-      {/* ── Live platform stats ── */}
-      <PanelSection title="Platform Pulse" icon={Activity} iconColor="#00e676">
-        <div className="space-y-1.5">
-          {[
-            { label: "Active Metrics", value: "58", delta: "+4", trend: sparkData.metrics, color: "#FEDD00" },
-            { label: "Data Quality", value: "96%", delta: "+3%", trend: sparkData.quality, color: "#00e676" },
-            { label: "Live Sources", value: "12", delta: "+1", trend: sparkData.sources, color: "#40c4ff" },
-          ].map(({ label, value, delta, trend, color }) => (
-            <div key={label} className="flex items-center gap-2 px-2.5 py-2 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-              <div className="flex-1 min-w-0">
-                <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 1 }}>{label}</div>
-                <div className="flex items-center gap-1.5">
-                  <span style={{ fontSize: 15, fontWeight: 700, color, lineHeight: 1, fontFamily: "monospace" }}>{value}</span>
-                  <span style={{ fontSize: 9, color: "#00e676", fontWeight: 600 }}>{delta}</span>
-                </div>
-              </div>
-              <MiniSparkline values={trend} color={color} />
-            </div>
-          ))}
-        </div>
-      </PanelSection>
-
-      {/* ── Quick Actions ── */}
-      <PanelSection title="Quick Actions" icon={Zap} iconColor="var(--mnbc-yellow)">
-        <div className="grid grid-cols-2 gap-1.5">
-          {[
-            { icon: Sparkles, label: "AI Insight", page: "AIInsights", color: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
-            { icon: Upload, label: "Import", page: "DataRepository", color: "#40c4ff", bg: "rgba(64,196,255,0.08)" },
-            { icon: BarChart3, label: "Visualize", page: "Visualizations", color: "#00e676", bg: "rgba(0,230,118,0.08)" },
-            { icon: FileDown, label: "Export", page: "Export", color: "#ffab40", bg: "rgba(255,171,64,0.08)" },
-          ].map(({ icon: Icon, label, page, color, bg }) => (
-            <Link key={page} to={createPageUrl(page)}>
-              <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-lg cursor-pointer transition-all"
-                style={{ background: bg, border: `1px solid ${color}22`, textAlign: "center" }}
-                onMouseOver={e => { e.currentTarget.style.borderColor = `${color}55`; e.currentTarget.style.background = `${color}14`; }}
-                onMouseOut={e => { e.currentTarget.style.borderColor = `${color}22`; e.currentTarget.style.background = bg; }}>
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
-                  <Icon size={13} style={{ color }} />
-                </div>
-                <span style={{ fontSize: 10, color: "var(--text-secondary)", fontWeight: 500 }}>{label}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </PanelSection>
-
-      {/* ── Session ── */}
-      <PanelSection title="Session" icon={Activity} iconColor="var(--color-success)" defaultOpen={false}>
-        <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
-          {[
-            { label: "Status", value: "Online", dot: "#00e676" },
-            { label: "Role", value: user?.role || "—", dot: "var(--mnbc-yellow)" },
-            { label: "Version", value: "MHIP v2.0", dot: "#40c4ff" },
-          ].map(({ label, value, dot }, i) => (
-            <div key={label} className="flex items-center justify-between px-2.5 py-2"
-              style={{ borderTop: i > 0 ? "1px solid var(--border-subtle)" : "none", background: "var(--bg-overlay)" }}>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
-                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span>
-              </div>
-              <span style={{ fontSize: 11, color: "var(--text-primary)", fontWeight: 500, textTransform: "capitalize" }}>{value}</span>
-            </div>
-          ))}
-        </div>
-      </PanelSection>
-
-      {/* ── Resources ── */}
-      <PanelSection title="Resources" icon={HelpCircle} defaultOpen={false}>
-        <div className="px-2.5 py-2 rounded-lg text-xs" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)", lineHeight: 1.6 }}>
-          BC Métis Health Intelligence Platform — powered by MNBC and AI-driven analytics.
-        </div>
-      </PanelSection>
-    </div>
+      {/* ── Patch notes ────────────────────────────────────────────────── */}
+      {patchNotesOpen && (
+        <PatchNotesModal onClose={() => setPatchNotesOpen(false)} />
+      )}
+    </AppContext.Provider>
   );
 }

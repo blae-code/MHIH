@@ -1,39 +1,112 @@
-**Welcome to your Base44 project** 
+# Red River OS
 
-**About**
+**Sovereign governance workspace for MNBC Health & Wellness**
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+Red River OS is a modular ministry operating environment for Métis Nation BC Health & Wellness. It provides a unified platform for health governance, policy development, data analytics, equity work, research, and reporting — with the Métis Health Implementation Hub (MHIH) as its first and primary application module.
 
-This project contains everything you need to run your app locally.
+---
 
-**Edit the code in your local development environment**
+## Platform Overview
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+Red River OS is structured as a shell with pluggable application modules:
 
-**Prerequisites:** 
+| Module | Route | Status |
+|---|---|---|
+| **OS Home** | `/os` | Active |
+| **Ministry Overview** | `/os/ministry` | Active |
+| **MHIH** | `/os/apps/mhih` | Active |
+| **Policy Studio** | `/os/apps/policy-studio` | Beta |
+| **Health Equity** | `/os/apps/health-equity` | Beta |
+| **Research & Evaluation** | `/os/apps/research-evaluation` | Beta |
+| **Provincial Wellness** | `/os/apps/provincial-wellness` | Beta |
+| **Contracts & Reporting** | `/os/apps/contracts-reporting` | Beta |
+| **Planning & KPIs** | `/os/apps/planning-kpi` | Beta |
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- A Base44 app ID and backend URL
+
+### Local Development
+
+```bash
+# 1. Clone the repo
+git clone <repo-url>
+cd MHIH
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment
+cp .env.example .env.local
+# Edit .env.local with your Base44 app credentials:
+# VITE_BASE44_APP_ID=your_app_id
+# VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
+
+# 4. Start dev server
+npm run dev
+```
+
+### Build & Validate
+
+```bash
+npm run build              # Production build
+npm run validate:runtime   # Validate functions, routes, and roles
+npm test                   # Run tests
+npm run validate:all       # Full validation suite
+```
+
+---
+
+## Architecture
+
+See [docs/architecture.md](docs/architecture.md) for the full architectural overview.
+
+**Key layers:**
 
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+src/
+  platform/          # OS platform layer
+    appRegistry.js   # Central app manifest — add new apps here
+    permissions.js   # RBAC — centralised permission checks
+    platformContext  # Platform-level React context
+    routes.js        # Canonical URL map for all pages
+  pages/             # All page components (OS + MHIH + app modules)
+  components/        # Shared UI components
+    ui/              # Radix/shadcn primitives
+    dashboard/       # Dashboard widgets
+    analyst/         # Analytics components
+    ...
+  api/               # API client layer
+  lib/               # Auth, utilities, config
 ```
 
-Run the app: `npm run dev`
+---
 
-**Publish your changes**
+## Adding a New App Module
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+1. Create your page(s) in `src/pages/MyNewApp.jsx`
+2. Register the app in `src/platform/appRegistry.js`
+3. Add routes to `src/platform/routes.js`
+4. Add page imports to `src/pages.config.js`
 
-**Docs & Support**
+See [docs/app-registry.md](docs/app-registry.md) for the full guide.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+---
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+## Documentation
+
+- [Architecture Overview](docs/architecture.md)
+- [App Registry Guide](docs/app-registry.md)
+- [Migration Notes](docs/migration-notes.md)
+- [Analytics Audit](docs/analytics-audit.md)
+
+---
+
+## Base44 Platform
+
+This app runs on the [Base44](https://base44.com) platform for the backend (auth, entities, cloud functions). See Base44 docs for deployment and publishing.
