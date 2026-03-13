@@ -1,23 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import EvidenceSnapshotsPanel from "@/components/redriver/EvidenceSnapshotsPanel";
-
-function loadProjectionMode() {
-  try {
-    const stored = localStorage.getItem("rr_projection_mode");
-    if (stored === "internal" || stored === "projected") return stored;
-  } catch {}
-  return "projected";
-}
+import { usePlatform } from "@/platform/platformContext";
 
 export default function EvidenceSnapshots() {
-  const [projectionMode, setProjectionMode] = useState(loadProjectionMode);
-
-  const updateMode = (mode) => {
-    setProjectionMode(mode);
-    try {
-      localStorage.setItem("rr_projection_mode", mode);
-    } catch {}
-  };
+  const {
+    latestForgeQuery,
+    evidenceProjectionMode,
+    updateEvidenceProjectionMode,
+  } = usePlatform();
 
   return (
     <div className="h-full flex flex-col">
@@ -37,12 +27,12 @@ export default function EvidenceSnapshots() {
             {["projected", "internal"].map((mode) => (
               <button
                 key={mode}
-                onClick={() => updateMode(mode)}
+                onClick={() => updateEvidenceProjectionMode(mode)}
                 className="px-3 py-1.5 rounded text-xs font-medium capitalize"
                 style={{
-                  background: projectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
-                  color: projectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
-                  border: projectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
+                  background: evidenceProjectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
+                  color: evidenceProjectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
+                  border: evidenceProjectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
                 }}>
                 {mode}
               </button>
@@ -52,7 +42,10 @@ export default function EvidenceSnapshots() {
       </div>
 
       <div className="flex-1 overflow-auto p-6 max-w-6xl mx-auto w-full">
-        <EvidenceSnapshotsPanel projectionMode={projectionMode} />
+        <EvidenceSnapshotsPanel
+          projectionMode={evidenceProjectionMode}
+          latestQuery={latestForgeQuery}
+        />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { Database, SlidersHorizontal, Camera, Layers3 } from "lucide-react";
 import MetricCatalogPanel from "@/components/redriver/MetricCatalogPanel";
 import MetricForgePanel from "@/components/redriver/MetricForgePanel";
 import EvidenceSnapshotsPanel from "@/components/redriver/EvidenceSnapshotsPanel";
+import { usePlatform } from "@/platform/platformContext";
 
 const MODULES = [
   {
@@ -25,27 +26,16 @@ const MODULES = [
   },
 ];
 
-function loadProjectionMode() {
-  try {
-    const stored = localStorage.getItem("rr_projection_mode");
-    if (stored === "internal" || stored === "projected") return stored;
-  } catch {}
-  return "projected";
-}
-
 export default function RedRiverOS() {
   const [activeModule, setActiveModule] = useState("catalog");
-  const [projectionMode, setProjectionMode] = useState(loadProjectionMode);
-  const [latestQuery, setLatestQuery] = useState(null);
+  const {
+    latestForgeQuery,
+    setLatestForgeQuery,
+    evidenceProjectionMode,
+    updateEvidenceProjectionMode,
+  } = usePlatform();
 
   const active = useMemo(() => MODULES.find((m) => m.key === activeModule) || MODULES[0], [activeModule]);
-
-  const updateProjectionMode = (mode) => {
-    setProjectionMode(mode);
-    try {
-      localStorage.setItem("rr_projection_mode", mode);
-    } catch {}
-  };
 
   return (
     <div className="h-full flex flex-col">
@@ -68,12 +58,12 @@ export default function RedRiverOS() {
             {["projected", "internal"].map((mode) => (
               <button
                 key={mode}
-                onClick={() => updateProjectionMode(mode)}
+                onClick={() => updateEvidenceProjectionMode(mode)}
                 className="px-3 py-1.5 rounded text-xs font-medium capitalize"
                 style={{
-                  background: projectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
-                  color: projectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
-                  border: projectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
+                  background: evidenceProjectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
+                  color: evidenceProjectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
+                  border: evidenceProjectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
                 }}>
                 {mode}
               </button>
@@ -119,14 +109,14 @@ export default function RedRiverOS() {
             {activeModule === "catalog" && <MetricCatalogPanel />}
             {activeModule === "forge" && (
               <MetricForgePanel
-                projectionMode={projectionMode}
-                onQueryComplete={({ query }) => setLatestQuery(query)}
+                projectionMode={evidenceProjectionMode}
+                onQueryComplete={({ query }) => setLatestForgeQuery(query)}
               />
             )}
             {activeModule === "snapshots" && (
               <EvidenceSnapshotsPanel
-                projectionMode={projectionMode}
-                latestQuery={latestQuery}
+                projectionMode={evidenceProjectionMode}
+                latestQuery={latestForgeQuery}
               />
             )}
           </div>
