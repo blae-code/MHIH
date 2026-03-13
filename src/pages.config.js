@@ -60,6 +60,12 @@ import ResearchEvaluation from './pages/ResearchEvaluation';
 import ProvincialWellness from './pages/ProvincialWellness';
 import ContractsReporting from './pages/ContractsReporting';
 import PlanningKPI from './pages/PlanningKPI';
+import PlanningGoals from './pages/PlanningGoals';
+import PlanningPlans from './pages/PlanningPlans';
+import PlanningInitiatives from './pages/PlanningInitiatives';
+import PlanningScorecard from './pages/PlanningScorecard';
+import PlanningReports from './pages/PlanningReports';
+import PlanningCalendar from './pages/PlanningCalendar';
 
 import __Layout from './Layout.jsx';
 
@@ -115,7 +121,15 @@ export const PAGES = {
     "ResearchEvaluation": ResearchEvaluation,
     "ProvincialWellness": ProvincialWellness,
     "ContractsReporting": ContractsReporting,
-    "PlanningKPI": PlanningKPI,
+
+    // ── Planning & KPIs ───────────────────────────────────────────────
+    "PlanningKPI":          PlanningKPI,
+    "PlanningGoals":        PlanningGoals,
+    "PlanningPlans":        PlanningPlans,
+    "PlanningInitiatives":  PlanningInitiatives,
+    "PlanningScorecard":    PlanningScorecard,
+    "PlanningReports":      PlanningReports,
+    "PlanningCalendar":     PlanningCalendar,
 }
 
 export const pagesConfig = {

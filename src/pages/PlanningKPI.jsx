@@ -1,288 +1,273 @@
 /**
- * Planning & KPIs — Red River OS
+ * Planning & KPIs — Executive Overview Dashboard
  *
- * Ministry and department goals, action items, milestones,
- * KPI dashboards, and reporting cadence.
- *
- * Status: scaffold — integration with planning cycle data in progress.
+ * High-density executive entry point surfacing key signals across all planning areas.
+ * Replaced the scaffold with a full orchestration overview.
  */
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  Target, Flag, CheckSquare, Milestone, BarChart3,
-  TrendingUp, TrendingDown, Minus, ChevronRight,
-  ArrowRight, Plus, Calendar,
+  Target, Flag, Activity, BarChart3, FileText, Calendar,
+  ArrowRight, AlertTriangle, Clock, TrendingUp,
 } from "lucide-react";
+import {
+  GOALS, KPIS, INITIATIVES, REPORT_CYCLES,
+  getOpenReportCycles, getOverdueMilestones, getOverdueActionItems,
+  computeGoalProgressFromKPIs,
+} from "@/lib/planningData";
+import KPIStatusBadge from "@/components/planning/KPIStatusBadge";
+import ScorecardCard from "@/components/planning/ScorecardCard";
+import InitiativeHealthCard from "@/components/planning/InitiativeHealthCard";
+import ReportingDeadlineList from "@/components/planning/ReportingDeadlineList";
+import GoalChip from "@/components/planning/GoalChip";
 
-// ── Ministry goals with KPIs ───────────────────────────────────────────────
-const MINISTRY_GOALS = [
-  {
-    id: 1,
-    title: "Reduce Chronic Disease Burden",
-    description: "Measurably reduce the prevalence of preventable chronic disease in Métis communities.",
-    kpi: "Chronic disease prevalence rate",
-    baseline: "24.3%",
-    target: "21.0%",
-    current: "23.1%",
-    progress: 45,
-    status: "on-track",
-    color: "#40c4ff",
-  },
-  {
-    id: 2,
-    title: "Improve Culturally Safe Care Access",
-    description: "Increase access to culturally safe, Métis-specific health services across BC.",
-    kpi: "Cultural safety training completion (HA staff)",
-    baseline: "12%",
-    target: "65%",
-    current: "38%",
-    progress: 49,
-    status: "on-track",
-    color: "#34d399",
-  },
-  {
-    id: 3,
-    title: "Advance Data Sovereignty",
-    description: "Establish Métis ownership and governance over health data.",
-    kpi: "Data sharing agreements with Métis governance provisions",
-    baseline: "2",
-    target: "8",
-    current: "4",
-    progress: 33,
-    status: "at-risk",
-    color: "#a78bfa",
-  },
-  {
-    id: 4,
-    title: "Strengthen Mental Health Supports",
-    description: "Expand culturally grounded mental health and wellness programming.",
-    kpi: "Unique service interactions (mental health)",
-    baseline: "680",
-    target: "1,200",
-    current: "890",
-    progress: 40,
-    status: "on-track",
-    color: "#f472b6",
-  },
+const QUICK_NAV = [
+  { label: "Strategic Goals", page: "PlanningGoals", icon: Flag, color: "#34d399", desc: "Goals, objectives, and KPI alignment" },
+  { label: "Plans", page: "PlanningPlans", icon: FileText, color: "#40c4ff", desc: "Strategic and operational plans registry" },
+  { label: "Initiatives", page: "PlanningInitiatives", icon: Activity, color: "#f59e0b", desc: "Active initiatives, milestones, and actions" },
+  { label: "KPI Scorecard", page: "PlanningScorecard", icon: BarChart3, color: "#a78bfa", desc: "KPI registry and quarterly scorecard views" },
+  { label: "Reports", page: "PlanningReports", icon: FileText, color: "#fb923c", desc: "Reporting cadence and deliverable tracking" },
+  { label: "Calendar", page: "PlanningCalendar", icon: Calendar, color: "#f472b6", desc: "Timeline of milestones and deadlines" },
 ];
 
-const ACTION_ITEMS = [
-  { title: "Finalise Mental Health Strategy consultation summary", owner: "Policy Team", due: "Apr 5", status: "in-progress" },
-  { title: "Submit Q3 KPI narrative to executive", owner: "Analytics", due: "Mar 28", status: "overdue" },
-  { title: "Coordinate with Interior Health on training rollout", owner: "Health Equity", due: "Apr 15", status: "pending" },
-  { title: "Update ministry dashboard with Q3 actuals", owner: "MHIH Analytics", due: "Apr 10", status: "in-progress" },
-  { title: "Prepare 2025–26 planning deck for Director review", owner: "Planning Team", due: "Apr 1", status: "at-risk" },
-];
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+}
 
-const STATUS_COLORS = {
-  "on-track": "#00e676",
-  "at-risk": "#ffab40",
-  "overdue": "#ff4d4f",
-  "in-progress": "#40c4ff",
-  pending: "var(--text-muted)",
-};
-
-function ProgressBar({ value, color }) {
-  return (
-    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-overlay)" }}>
-      <div
-        className="h-full rounded-full transition-all"
-        style={{ width: `${Math.min(100, value)}%`, background: color }}
-      />
-    </div>
-  );
+function daysUntil(dateStr) {
+  const due = new Date(dateStr);
+  const now = new Date();
+  return Math.ceil((due - now) / (1000 * 60 * 60 * 24));
 }
 
 export default function PlanningKPI() {
-  const [activeTab, setActiveTab] = useState("goals");
+  const openCycles = getOpenReportCycles();
+  const overdueMilestones = getOverdueMilestones();
+  const overdueActions = getOverdueActionItems();
+
+  // Priority initiatives: amber first, then red
+  const priorityInits = [...INITIATIVES]
+    .sort((a, b) => {
+      const order = { red: 0, amber: 1, green: 2 };
+      return (order[a.health] ?? 3) - (order[b.health] ?? 3);
+    })
+    .slice(0, 4);
+
+  // At-risk KPIs
+  const atRiskKpis = KPIS.filter((k) => k.status === "at-risk" || k.status === "off-track").slice(0, 3);
+
+  // Next report deadline
+  const nextReport = openCycles.find((rc) => rc.status === "open");
+  const nextReportDays = nextReport ? daysUntil(nextReport.dueDate) : null;
+
+  // Stats
+  const onTrackGoals = GOALS.filter((g) => g.status === "on-track").length;
+  const atRiskGoals = GOALS.filter((g) => g.status === "at-risk").length;
+  const activeInits = INITIATIVES.filter((i) => i.status === "active").length;
+  const openActions = INITIATIVES.flatMap((i) => i.actionItems).filter((a) => a.status !== "complete").length;
 
   return (
     <div className="h-full overflow-auto" style={{ background: "var(--bg-base)" }}>
       <div className="max-w-[1200px] mx-auto px-6 py-6">
 
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-start justify-between gap-4 mb-2">
+        <div className="mb-5">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <div className="section-label mb-1">Red River OS · Planning & KPIs</div>
               <h1 className="mnbc-heading" style={{ fontSize: 24, color: "var(--text-primary)", marginBottom: 4 }}>
-                Planning & KPIs
+                Planning & KPIs Overview
               </h1>
               <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-                Ministry goals, action items, milestones, and KPI performance tracking.
+                Ministry goals, active initiatives, KPI performance, and reporting status.
               </p>
             </div>
-            <div
-              className="shrink-0 px-2 py-1 rounded text-xs font-semibold"
-              style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.25)" }}
+            <Link
+              to={createPageUrl("MinistryOverview")}
+              className="text-xs flex items-center gap-1 shrink-0"
+              style={{ color: "var(--text-muted)" }}
             >
-              Beta Module
-            </div>
+              Ministry Overview <ArrowRight size={10} />
+            </Link>
           </div>
-          <div style={{ height: 2, background: "linear-gradient(90deg, #f59e0b, transparent 70%)", borderRadius: 2, marginTop: 12 }} />
+          <div style={{ height: 2, background: "linear-gradient(90deg, #f59e0b, transparent 70%)", borderRadius: 2, marginTop: 10 }} />
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {/* Status banner */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
           {[
-            { label: "Ministry Goals", value: "4", color: "#f59e0b" },
-            { label: "On Track", value: "3", color: "#00e676" },
-            { label: "At Risk", value: "1", color: "#ffab40" },
-            { label: "Open Actions", value: "5", color: "#40c4ff" },
+            { label: "Strategic Goals", value: GOALS.length, color: "#f59e0b" },
+            { label: "On Track", value: onTrackGoals, color: "#00e676" },
+            { label: "Goals At Risk", value: atRiskGoals, color: "#ffab40" },
+            { label: "Active Initiatives", value: activeInits, color: "#40c4ff" },
+            { label: "Open Actions", value: openActions, color: "#a78bfa" },
+            nextReport
+              ? { label: "Next Report Due", value: nextReportDays !== null && nextReportDays > 0 ? `${nextReportDays}d` : "Today", color: nextReportDays !== null && nextReportDays <= 7 ? "#ff4d4f" : "#fb923c" }
+              : { label: "Reports", value: "—", color: "var(--text-muted)" },
           ].map((s) => (
-            <div
-              key={s.label}
-              className="rounded-xl p-3"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", borderTop: `2px solid ${s.color}` }}
-            >
-              <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{s.label}</div>
+            <div key={s.label} className="rounded-xl p-3" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", borderTop: `2px solid ${s.color}` }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 3 }}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-lg" style={{ background: "var(--bg-elevated)", width: "fit-content", border: "1px solid var(--border-subtle)" }}>
-          {["goals", "actions", "milestones", "kpis"].map((tab) => {
-            const labels = { goals: "Ministry Goals", actions: "Action Items", milestones: "Milestones", kpis: "KPI Dashboard" };
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className="px-4 py-1.5 rounded text-xs font-semibold transition-all"
-                style={{
-                  background: activeTab === tab ? "rgba(245,158,11,0.1)" : "transparent",
-                  color: activeTab === tab ? "#f59e0b" : "var(--text-muted)",
-                  border: activeTab === tab ? "1px solid rgba(245,158,11,0.25)" : "1px solid transparent",
-                }}
-              >
-                {labels[tab]}
-              </button>
-            );
-          })}
+        {/* Goals progress strip */}
+        <div className="rounded-xl p-4 mb-5" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>Strategic Goals Progress</h2>
+            <Link to={createPageUrl("PlanningGoals")} className="flex items-center gap-1 text-xs" style={{ color: "#f59e0b" }}>
+              View all goals <ArrowRight size={10} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {GOALS.map((goal) => {
+              const progress = computeGoalProgressFromKPIs(goal.id);
+              return (
+                <Link
+                  key={goal.id}
+                  to={createPageUrl("PlanningGoals")}
+                  style={{ textDecoration: "none" }}
+                >
+                  <div className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: "var(--bg-base)", border: "1px solid var(--border-subtle)", borderLeft: `3px solid ${goal.color}` }}>
+                    <GoalChip goal={goal} size="xs" />
+                    <div className="flex-1 min-w-0">
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {goal.title}
+                      </div>
+                      <div style={{ height: 3, borderRadius: 2, background: "var(--bg-overlay)", overflow: "hidden", marginTop: 4 }}>
+                        <div style={{ height: "100%", width: `${progress}%`, background: goal.color, borderRadius: 2 }} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span style={{ fontSize: 10, fontWeight: 700, color: goal.color }}>{progress}%</span>
+                      <KPIStatusBadge status={goal.status} size="sm" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Goals */}
-        {activeTab === "goals" && (
-          <div className="space-y-4">
-            {MINISTRY_GOALS.map((goal) => {
-              const statusColor = STATUS_COLORS[goal.status] ?? "var(--text-muted)";
-              return (
-                <div
-                  key={goal.id}
-                  className="rounded-xl p-4"
-                  style={{
-                    background: "var(--bg-elevated)",
-                    border: "1px solid var(--border-subtle)",
-                    borderLeft: `3px solid ${goal.color}`,
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div>
-                      <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
-                        {goal.title}
-                      </h3>
-                      <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{goal.description}</p>
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 10, fontWeight: 600, color: statusColor,
-                        background: statusColor + "18", border: `1px solid ${statusColor}33`,
-                        padding: "2px 7px", borderRadius: 4, flexShrink: 0,
-                      }}
-                    >
-                      {goal.status.replace("-", " ")}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 mb-3">
-                    {[
-                      { label: "Baseline", value: goal.baseline },
-                      { label: "Current", value: goal.current },
-                      { label: "Target", value: goal.target },
-                    ].map((kv) => (
-                      <div key={kv.label}>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 2 }}>{kv.label}</div>
-                        <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>{kv.value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{goal.kpi}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: goal.color }}>{goal.progress}%</span>
-                    </div>
-                    <ProgressBar value={goal.progress} color={goal.color} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Action Items */}
-        {activeTab === "actions" && (
-          <div className="space-y-2">
-            {ACTION_ITEMS.map((item) => {
-              const color = STATUS_COLORS[item.status] ?? "var(--text-muted)";
-              return (
-                <div
-                  key={item.title}
-                  className="rounded-xl px-4 py-3 flex items-center gap-4"
-                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
-                >
-                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
-                  <div className="flex-1 min-w-0">
-                    <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>{item.title}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{item.owner} · Due {item.due}</div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 10, fontWeight: 600, color,
-                      background: color + "18", border: `1px solid ${color}33`,
-                      padding: "2px 7px", borderRadius: 4, flexShrink: 0,
-                    }}
-                  >
-                    {item.status.replace("-", " ")}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Milestones / KPIs */}
-        {(activeTab === "milestones" || activeTab === "kpis") && (
-          <div
-            className="rounded-xl p-8 text-center"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
-          >
-            {activeTab === "milestones"
-              ? <Milestone size={32} style={{ color: "var(--text-muted)", margin: "0 auto 12px" }} />
-              : <BarChart3 size={32} style={{ color: "var(--text-muted)", margin: "0 auto 12px" }} />
-            }
-            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>
-              {activeTab === "milestones" ? "Milestone Tracker" : "KPI Dashboard"}
-            </div>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", maxWidth: 440, margin: "0 auto 20px" }}>
-              {activeTab === "milestones"
-                ? "Timeline-based milestone tracking across ministry programs and strategic initiatives."
-                : "Live KPI views connected to MHIH data platform. For detailed analytics, use the MHIH Dashboard."}
-            </p>
-            {activeTab === "kpis" && (
-              <Link
-                to={createPageUrl("Dashboard")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
-                style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.25)" }}
-              >
-                Open MHIH Dashboard <ArrowRight size={13} />
+        {/* Two-column mid section */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
+          {/* Left: Active initiatives (60%) */}
+          <div className="lg:col-span-3">
+            <div className="flex items-center justify-between mb-3">
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>Priority Initiatives</h2>
+              <Link to={createPageUrl("PlanningInitiatives")} className="flex items-center gap-1 text-xs" style={{ color: "#f59e0b" }}>
+                View all <ArrowRight size={10} />
               </Link>
+            </div>
+            <div className="space-y-2">
+              {priorityInits.map((init) => {
+                const goals = init.goalIds.map((id) => GOALS.find((g) => g.id === id)).filter(Boolean);
+                return <InitiativeHealthCard key={init.id} initiative={init} goals={goals} compact />;
+              })}
+            </div>
+          </div>
+
+          {/* Right: KPI spotlight (40%) */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-3">
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>KPIs Needing Attention</h2>
+              <Link to={createPageUrl("PlanningScorecard")} className="flex items-center gap-1 text-xs" style={{ color: "#f59e0b" }}>
+                Scorecard <ArrowRight size={10} />
+              </Link>
+            </div>
+            {atRiskKpis.length === 0 ? (
+              <div className="rounded-xl p-4 text-center" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                <TrendingUp size={20} style={{ color: "#00e676", margin: "0 auto 8px" }} />
+                <div style={{ fontSize: 12, color: "#00e676", fontWeight: 600 }}>All KPIs on track</div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {atRiskKpis.map((kpi) => <ScorecardCard key={kpi.id} kpi={kpi} compact />)}
+              </div>
             )}
           </div>
-        )}
+        </div>
+
+        {/* Bottom row: 3 panels */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+          {/* Reporting deadlines */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>Reporting Deadlines</h2>
+              <Link to={createPageUrl("PlanningReports")} className="flex items-center gap-1 text-xs" style={{ color: "#f59e0b" }}>
+                View all <ArrowRight size={10} />
+              </Link>
+            </div>
+            <ReportingDeadlineList cycles={openCycles} limit={4} />
+          </div>
+
+          {/* Overdue items */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+                Overdue Items
+                {(overdueMilestones.length + overdueActions.length) > 0 && (
+                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: "#ff4d4f", background: "rgba(255,77,79,0.15)", border: "1px solid rgba(255,77,79,0.3)", padding: "1px 6px", borderRadius: 10 }}>
+                    {overdueMilestones.length + overdueActions.length}
+                  </span>
+                )}
+              </h2>
+            </div>
+            <div className="space-y-2">
+              {overdueMilestones.slice(0, 3).map((ms) => (
+                <div key={ms.id} className="flex items-start gap-2 rounded-xl px-3 py-2" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <AlertTriangle size={11} style={{ color: "#ff4d4f", marginTop: 2, flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>{ms.title}</div>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 1 }}>Milestone · {ms.initiativeTitle}</div>
+                  </div>
+                </div>
+              ))}
+              {overdueActions.slice(0, 3 - overdueMilestones.slice(0, 3).length).map((ai) => (
+                <div key={ai.id} className="flex items-start gap-2 rounded-xl px-3 py-2" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <Clock size={11} style={{ color: "#ffab40", marginTop: 2, flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>{ai.title}</div>
+                    <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 1 }}>Action · {ai.owner}</div>
+                  </div>
+                </div>
+              ))}
+              {(overdueMilestones.length + overdueActions.length) === 0 && (
+                <div className="rounded-xl p-4 text-center" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ fontSize: 11, color: "#00e676", fontWeight: 600 }}>No overdue items</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick navigation */}
+          <div>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>Quick Navigation</h2>
+            <div className="space-y-1.5">
+              {QUICK_NAV.map((nav) => {
+                const NavIcon = nav.icon;
+                return (
+                  <Link
+                    key={nav.page}
+                    to={createPageUrl(nav.page)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2"
+                    style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", textDecoration: "none" }}
+                  >
+                    <NavIcon size={13} style={{ color: nav.color, flexShrink: 0 }} />
+                    <div className="flex-1 min-w-0">
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)" }}>{nav.label}</div>
+                    </div>
+                    <ArrowRight size={11} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

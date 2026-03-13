@@ -31,6 +31,7 @@ import {
   Command, Building2, Target, HeartPulse, Scale,
   HeartHandshake, Leaf, FileSignature, Camera,
   Layers3, ChevronLeft, MoreHorizontal, Grid3x3,
+  FolderOpen, Flag, Calendar,
 } from "lucide-react";
 import NotificationCenter from "./components/notifications/NotificationCenter";
 import NotificationPreferences from "./components/notifications/NotificationPreferences";
@@ -55,6 +56,7 @@ const ICON_MAP = {
   BookMarked, Link2, ListOrdered, GitCompare, FileText, MessageSquare,
   Command, Building2, Target, HeartPulse, Scale, HeartHandshake, Leaf,
   FileSignature, Camera, Layers3, ChevronLeft,
+  FolderOpen, Flag, Calendar,
 };
 
 function Icon({ name, size = 14, ...rest }) {

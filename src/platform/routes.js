@@ -84,7 +84,15 @@ export const PAGE_ROUTE_MAP = {
   ResearchEvaluation: "/os/apps/research-evaluation",
   ProvincialWellness: "/os/apps/provincial-wellness",
   ContractsReporting: "/os/apps/contracts-reporting",
-  PlanningKPI: "/os/apps/planning-kpi",
+
+  // ── Planning & KPIs app ───────────────────────────────────────────────
+  PlanningKPI:         "/os/apps/planning-kpi",
+  PlanningGoals:       "/os/apps/planning-kpi/goals",
+  PlanningPlans:       "/os/apps/planning-kpi/plans",
+  PlanningInitiatives: "/os/apps/planning-kpi/initiatives",
+  PlanningScorecard:   "/os/apps/planning-kpi/scorecards",
+  PlanningReports:     "/os/apps/planning-kpi/reports",
+  PlanningCalendar:    "/os/apps/planning-kpi/calendar",
 };
 
 /**
