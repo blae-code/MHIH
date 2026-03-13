@@ -54,6 +54,7 @@ import Watchlists from './pages/Watchlists';
 import Workflows from './pages/Workflows';
 
 // ── Platform app module pages ──────────────────────────────────────────────
+import PersonalPlanner from './pages/PersonalPlanner';
 import PolicyStudio from './pages/PolicyStudio';
 import HealthEquity from './pages/HealthEquity';
 import ResearchEvaluation from './pages/ResearchEvaluation';
@@ -110,6 +111,7 @@ export const PAGES = {
     "Workflows": Workflows,
 
     // ── Platform app modules ──────────────────────────────────────────
+    "PersonalPlanner": PersonalPlanner,
     "PolicyStudio": PolicyStudio,
     "HealthEquity": HealthEquity,
     "ResearchEvaluation": ResearchEvaluation,

@@ -63,6 +63,7 @@ export const APP_REGISTRY = [
       { label: "Home", page: "RedRiverOSHome", icon: "LayoutDashboard" },
       { label: "Ministry Overview", page: "MinistryOverview", icon: "Building2" },
       { label: "Planning & KPIs", page: "PlanningKPI", icon: "Target" },
+      { label: "Personal Planner", page: "PersonalPlanner", icon: "BookUser" },
     ],
   },
 

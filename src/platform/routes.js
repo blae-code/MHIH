@@ -30,6 +30,7 @@ export const PAGE_ROUTE_MAP = {
   Settings: "/os/settings",
   Changelog: "/os/changelog",
   Onboarding: "/os/onboarding",
+  PersonalPlanner: "/os/planner",
 
   // ── MHIH app — workspace ──────────────────────────────────────────────
   Dashboard: "/os/apps/mhih",
