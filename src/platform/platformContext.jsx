@@ -43,6 +43,26 @@ export function PlatformProvider({ children }) {
   // ── Breadcrumb ───────────────────────────────────────────────────────
   const [breadcrumb, setBreadcrumb] = useState([]);
 
+  // ── Shared evidence state (MetricForge → EvidenceSnapshots) ──────────
+  // latestQuery is set whenever MetricForgePanel completes a run; it persists
+  // across page navigation so EvidenceSnapshots can reference it regardless
+  // of where in the app it is rendered.
+  const [latestForgeQuery, setLatestForgeQuery] = useState(null);
+  const [evidenceProjectionMode, setEvidenceProjectionMode] = useState(() => {
+    try {
+      const stored = localStorage.getItem("rr_projection_mode");
+      if (stored === "internal" || stored === "projected") return stored;
+    } catch {}
+    return "projected";
+  });
+
+  const updateEvidenceProjectionMode = useCallback((mode) => {
+    setEvidenceProjectionMode(mode);
+    try {
+      localStorage.setItem("rr_projection_mode", mode);
+    } catch {}
+  }, []);
+
   // Derive active app from current route when it changes
   useEffect(() => {
     const pageName = resolvePageName(location.pathname);
@@ -116,6 +136,12 @@ export function PlatformProvider({ children }) {
     // Activity log
     statusLogs,
     addLog,
+
+    // Shared evidence state
+    latestForgeQuery,
+    setLatestForgeQuery,
+    evidenceProjectionMode,
+    updateEvidenceProjectionMode,
   };
 
   return (
