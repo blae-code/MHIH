@@ -235,7 +235,11 @@ export default function PolicyRequestComments({ policyRequestId }) {
 
       {/* Composer */}
       <div className="shrink-0 rounded-lg p-2.5"
-        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)" }}>
+        style={{
+          background: "rgba(254,221,0,0.04)",
+          border: "1.5px solid #FEDD00",
+          boxShadow: "0 0 0 3px rgba(254,221,0,0.08)",
+        }}>
         <textarea
           style={{ ...inputStyle, minHeight: 60, resize: "vertical", border: "none", background: "transparent", padding: 4 }}
           placeholder="Write a comment… (⌘/Ctrl + Enter to post)"
