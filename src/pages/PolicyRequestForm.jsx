@@ -328,10 +328,10 @@ export default function PolicyRequestForm() {
               <input style={inputStyle} value={form.submitter_name}
                 onChange={(e) => update("submitter_name", e.target.value)} required />
             </Field>
-            <Field label="Your Contact Information *">
-              <input style={inputStyle} value={form.submitter_contact}
+            <Field label="Your Email *">
+              <input type="email" style={inputStyle} value={form.submitter_contact}
                 onChange={(e) => update("submitter_contact", e.target.value)}
-                placeholder="Email or phone" required />
+                placeholder="[email protected]" required />
             </Field>
           </div>
         </Section>
