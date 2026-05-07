@@ -99,6 +99,14 @@ export const APP_REGISTRY = [
         ],
       },
       {
+        section: "Policy Intake and Management",
+        items: [
+          { label: "New Policy Request", page: "PolicyRequestForm", icon: "FileSignature" },
+          { label: "All Requests (Table)", page: "PolicyRequestTable", icon: "ClipboardCheck" },
+          { label: "All Requests (Cards)", page: "PolicyRequestCardView", icon: "Layers3" },
+        ],
+      },
+      {
         section: "Policy",
         items: [
           { label: "Policy Lab", page: "PolicyLab", icon: "FlaskConical" },
