@@ -60,6 +60,7 @@ export default function PolicyRequestForm() {
     department: "",
     contact_person_name: "",
     contact_person_email: "",
+    contact_person_phone: "",
     key_people_involved: "",
     urgency: "medium",
     required_completion_date: "",
@@ -69,15 +70,7 @@ export default function PolicyRequestForm() {
   });
 
   useEffect(() => {
-    base44.auth.me().then((u) => {
-      setUser(u);
-      setForm((f) => ({
-        ...f,
-        contact_person_name: u?.full_name || "",
-        contact_person_email: u?.email || "",
-        department: u?.department || "",
-      }));
-    }).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -221,10 +214,15 @@ export default function PolicyRequestForm() {
                 onChange={(e) => update("preferred_communication_method", e.target.value)}>
                 <option style={optionStyle}>Email</option>
                 <option style={optionStyle}>Phone</option>
-                <option style={optionStyle}>Teams Meeting</option>
-                <option style={optionStyle}>In Person</option>
               </select>
             </Field>
+            {form.preferred_communication_method === "Phone" && (
+              <Field label="Contact Phone Number *">
+                <input type="tel" style={inputStyle} value={form.contact_person_phone}
+                  onChange={(e) => update("contact_person_phone", e.target.value)}
+                  placeholder="e.g. (250) 555-1234" required />
+              </Field>
+            )}
           </div>
           <Field label="Key People Involved (comma separated)">
             <input style={inputStyle} value={form.key_people_involved}

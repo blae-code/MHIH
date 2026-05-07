@@ -43,6 +43,10 @@
       "format": "email",
       "description": "Email of the primary contact person (requester)"
     },
+    "contact_person_phone": {
+      "type": "string",
+      "description": "Phone number of the primary contact person (when preferred comms is Phone)"
+    },
     "key_people_involved": {
       "type": "array",
       "items": {
