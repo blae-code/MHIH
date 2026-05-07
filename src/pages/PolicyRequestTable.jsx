@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
-import { Plus, RefreshCw, Search, LayoutGrid, Table as TableIcon, Filter } from "lucide-react";
+import { Plus, RefreshCw, Search, LayoutGrid, Table as TableIcon, Filter, X } from "lucide-react";
 import PolicyRequestDetailModal from "../components/redriver/PolicyRequestDetailModal";
 
 const STATUS_COLORS = {
@@ -205,6 +205,7 @@ export default function PolicyRequestTable() {
 }
 
 export function Header({ navigate, rows, loading, onReload, search, setSearch, statusFilter, setStatusFilter, view }) {
+  const filtersActive = (search && search.length > 0) || statusFilter !== "all";
   return (
     <div className="px-6 py-4 border-b shrink-0"
       style={{
@@ -285,6 +286,20 @@ export function Header({ navigate, rows, loading, onReload, search, setSearch, s
             <option value="closed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Closed</option>
           </select>
         </div>
+
+        {filtersActive && (
+          <button
+            onClick={() => { setSearch(""); setStatusFilter("all"); }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors"
+            style={{
+              background: "rgba(254,221,0,0.1)",
+              border: "1px solid rgba(254,221,0,0.4)",
+              color: "#FEDD00",
+            }}
+            title="Clear all filters and show all requests">
+            <X size={11} /> Clear filters
+          </button>
+        )}
       </div>
     </div>
   );
