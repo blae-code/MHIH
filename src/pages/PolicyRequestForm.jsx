@@ -77,6 +77,7 @@ export default function PolicyRequestForm() {
     reason_for_urgency: "",
     relevant_documents_urls: "",
     preferred_communication_method: "Email",
+    subscribe_to_updates: true,
     submitter_name: "",
     submitter_contact: "",
   });
@@ -277,6 +278,34 @@ export default function PolicyRequestForm() {
               onChange={(e) => update("key_people_involved", e.target.value)}
               placeholder="e.g. Jane Smith, John Doe" />
           </Field>
+
+          <label
+            className="flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all"
+            style={{
+              background: form.subscribe_to_updates ? "rgba(254,221,0,0.06)" : "var(--bg-overlay)",
+              border: `1.5px solid ${form.subscribe_to_updates ? "rgba(254,221,0,0.45)" : "var(--border-default)"}`,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={form.subscribe_to_updates}
+              onChange={(e) => update("subscribe_to_updates", e.target.checked)}
+              style={{
+                width: 16, height: 16, marginTop: 2,
+                accentColor: "#FEDD00",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            />
+            <div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text-primary)" }}>
+                Subscribe to progress updates
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                The contact person above will receive an email whenever the status of this request changes.
+              </div>
+            </div>
+          </label>
         </Section>
 
         {/* Section: Urgency */}
