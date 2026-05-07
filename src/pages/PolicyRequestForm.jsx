@@ -28,6 +28,13 @@ const inputStyle = {
   outline: "none",
 };
 
+// <option> elements inherit the OS chrome color when unstyled.
+// Forcing dark bg + light text makes options readable in all browsers.
+const optionStyle = {
+  background: "#0f1829",
+  color: "#f0f6ff",
+};
+
 const labelStyle = {
   display: "block",
   fontSize: 11,
@@ -171,7 +178,7 @@ export default function PolicyRequestForm() {
           <Field label="Request Type *">
             <select style={inputStyle} value={form.request_type}
               onChange={(e) => update("request_type", e.target.value)}>
-              {REQUEST_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {REQUEST_TYPES.map((t) => <option key={t.value} value={t.value} style={optionStyle}>{t.label}</option>)}
             </select>
           </Field>
 
@@ -212,10 +219,10 @@ export default function PolicyRequestForm() {
             <Field label="Preferred Communication">
               <select style={inputStyle} value={form.preferred_communication_method}
                 onChange={(e) => update("preferred_communication_method", e.target.value)}>
-                <option>Email</option>
-                <option>Phone</option>
-                <option>Teams Meeting</option>
-                <option>In Person</option>
+                <option style={optionStyle}>Email</option>
+                <option style={optionStyle}>Phone</option>
+                <option style={optionStyle}>Teams Meeting</option>
+                <option style={optionStyle}>In Person</option>
               </select>
             </Field>
           </div>
