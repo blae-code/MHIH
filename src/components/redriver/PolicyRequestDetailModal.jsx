@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, UserCheck, XCircle, Save, Mail, Calendar, Building2, Tag, AlertTriangle, FileText } from "lucide-react";
+import { X, UserCheck, XCircle, Save, Mail, Calendar, Building2, Tag, AlertTriangle, FileText, Trash2 } from "lucide-react";
 
 const STATUS_OPTIONS = [
   { value: "submitted", label: "Submitted", color: "#40c4ff" },
@@ -44,6 +44,21 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
 
   const [rejectionReason, setRejectionReason] = useState(request.rejection_reason || "");
   const [rejectionDetails, setRejectionDetails] = useState(request.rejection_details || "");
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDelete = async () => {
+    setError(null);
+    setSaving(true);
+    try {
+      await base44.entities.PolicyRequest.delete(request.id);
+      onUpdated?.();
+      onClose();
+    } catch (e) {
+      setError(e?.message || "Failed to delete request");
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     base44.entities.User.list("-created_date", 200).then(setUsers).catch(() => {});
@@ -151,9 +166,31 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
               {request.request_title}
             </h2>
           </div>
-          <button onClick={close} className="activity-icon" style={{ width: 30, height: 30 }}>
-            <X size={14} />
-          </button>
+          <div className="flex items-center gap-1.5">
+            {confirmDelete ? (
+              <>
+                <span className="text-xs mr-1" style={{ color: "#ff4d4f" }}>Delete?</span>
+                <button onClick={handleDelete} disabled={saving}
+                  className="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+                  style={{ background: "#ff4d4f", color: "#fff" }}>
+                  <Trash2 size={11} /> {saving ? "Deleting..." : "Yes, delete"}
+                </button>
+                <button onClick={() => setConfirmDelete(false)} disabled={saving}
+                  className="px-2.5 py-1 rounded text-xs font-semibold"
+                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button onClick={() => setConfirmDelete(true)} className="activity-icon" title="Delete request (testing)"
+                style={{ width: 30, height: 30, color: "#ff4d4f" }}>
+                <Trash2 size={13} />
+              </button>
+            )}
+            <button onClick={close} className="activity-icon" style={{ width: 30, height: 30 }}>
+              <X size={14} />
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
