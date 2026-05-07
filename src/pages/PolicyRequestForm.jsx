@@ -10,6 +10,14 @@ const REQUEST_TYPES = [
   { value: "policy_development_and_review", label: "Policy Development & Review" },
 ];
 
+const DEPARTMENTS = [
+  "Mental Health and Harm Reduction",
+  "Social Programs and Administration",
+  "Health",
+  "Veterans",
+  "Elders",
+];
+
 const URGENCY_LEVELS = [
   { value: "low", label: "Low", color: "#52c41a" },
   { value: "medium", label: "Medium", color: "#40c4ff" },
@@ -199,8 +207,11 @@ export default function PolicyRequestForm() {
         <Section title="Contact & Department">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Department *">
-              <input style={inputStyle} value={form.department}
-                onChange={(e) => update("department", e.target.value)} required />
+              <select style={inputStyle} value={form.department} required
+                onChange={(e) => update("department", e.target.value)}>
+                <option value="" style={optionStyle}>Select a department…</option>
+                {DEPARTMENTS.map((d) => <option key={d} value={d} style={optionStyle}>{d}</option>)}
+              </select>
             </Field>
             <Field label="Contact Person *">
               <input style={inputStyle} value={form.contact_person_name}
