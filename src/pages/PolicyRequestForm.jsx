@@ -12,8 +12,8 @@ const REQUEST_TYPES = [
 
 const DEPARTMENTS = [
   "Elders",
-  "Health",
   "Veterans",
+  "Health",
   "Mental Health & Harm Reduction",
   "Social Programs & Administration",
 ];
