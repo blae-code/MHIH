@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, UserCheck, XCircle, Save, Mail, Calendar, Building2, Tag, AlertTriangle, FileText, Trash2 } from "lucide-react";
+import { X, UserCheck, XCircle, Save, Mail, Calendar, Building2, Tag, AlertTriangle, FileText, Trash2, MessageSquare } from "lucide-react";
+import PolicyRequestComments from "./PolicyRequestComments";
 
 const STATUS_OPTIONS = [
   { value: "received", label: "Received", color: "#40c4ff" },
@@ -215,6 +216,7 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
           style={{ borderBottom: "1px solid var(--border-subtle)", background: "var(--bg-surface)" }}>
           {[
             { id: "details", label: "Details", icon: FileText },
+            { id: "comments", label: "Comments", icon: MessageSquare },
             { id: "assign", label: "Assign", icon: UserCheck },
             { id: "progress", label: "Progress", icon: Save },
             { id: "reject", label: "Reject", icon: XCircle },
@@ -242,6 +244,8 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
           )}
 
           {tab === "details" && <DetailsTab request={request} />}
+
+          {tab === "comments" && <PolicyRequestComments policyRequestId={request.id} />}
 
           {tab === "assign" && (
             <div className="space-y-4">

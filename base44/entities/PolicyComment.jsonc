@@ -1,0 +1,31 @@
+{
+  "name": "PolicyComment",
+  "type": "object",
+  "properties": {
+    "policy_request_id": {
+      "type": "string",
+      "description": "ID of the PolicyRequest this comment belongs to"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name of the comment author"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "Email of the comment author"
+    },
+    "content": {
+      "type": "string",
+      "description": "The comment body"
+    },
+    "edited": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if the comment has been edited"
+    }
+  },
+  "required": [
+    "policy_request_id",
+    "content"
+  ]
+}
