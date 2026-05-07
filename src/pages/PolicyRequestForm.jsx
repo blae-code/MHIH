@@ -53,7 +53,7 @@ export default function PolicyRequestForm() {
 
   const [form, setForm] = useState({
     request_title: "",
-    request_type: "legislation_review",
+    request_type: "",
     description: "",
     objective: "",
     policy_areas: "",
@@ -169,8 +169,9 @@ export default function PolicyRequestForm() {
           </Field>
 
           <Field label="Request Type *">
-            <select style={inputStyle} value={form.request_type}
+            <select style={inputStyle} value={form.request_type} required
               onChange={(e) => update("request_type", e.target.value)}>
+              <option value="" style={optionStyle}>Select a request type…</option>
               {REQUEST_TYPES.map((t) => <option key={t.value} value={t.value} style={optionStyle}>{t.label}</option>)}
             </select>
           </Field>
