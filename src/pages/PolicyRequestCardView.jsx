@@ -88,25 +88,39 @@ export default function PolicyRequestCardView() {
         ) : grouped.length === 0 ? (
           <div className="text-center py-12 text-xs" style={{ color: "var(--text-muted)" }}>No requests match your filters.</div>
         ) : (
-          <div className="space-y-6">
-            {grouped.map(([assignee, group]) => (
-              <div key={assignee}>
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <span className="text-xs font-bold uppercase tracking-wider"
-                    style={{ color: assignee === "(Unassigned)" ? "var(--text-muted)" : "#FEDD00", letterSpacing: "0.08em" }}>
-                    {assignee}
-                  </span>
-                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    {group.length} {group.length === 1 ? "request" : "requests"}
-                  </span>
+          <div className="space-y-7">
+            {grouped.map(([assignee, group]) => {
+              const isUnassigned = assignee === "(Unassigned)";
+              return (
+                <div key={assignee}>
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{
+                        background: isUnassigned ? "var(--bg-overlay)" : "rgba(254,221,0,0.15)",
+                        color: isUnassigned ? "var(--text-muted)" : "#FEDD00",
+                        border: `1px solid ${isUnassigned ? "var(--border-default)" : "rgba(254,221,0,0.4)"}`,
+                        fontSize: 10,
+                      }}>
+                      {isUnassigned ? "?" : assignee.split(" ").map(s => s[0]).slice(0, 2).join("").toUpperCase()}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-wider"
+                      style={{ color: isUnassigned ? "var(--text-muted)" : "var(--text-primary)", letterSpacing: "0.08em" }}>
+                      {assignee}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ color: "var(--text-muted)", background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", fontSize: 10 }}>
+                      {group.length} {group.length === 1 ? "request" : "requests"}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {group.map((r) => (
+                      <RequestCard key={r.id} request={r} onClick={() => setActive(r)} />
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {group.map((r) => (
-                    <RequestCard key={r.id} request={r} onClick={() => setActive(r)} />
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -125,49 +139,74 @@ export default function PolicyRequestCardView() {
 function RequestCard({ request, onClick }) {
   const statusColor = STATUS_COLORS[request.current_status] || "#8bafd4";
   const urgencyColor = URGENCY_COLORS[request.urgency] || "#40c4ff";
+  const isHighPriority = request.urgency === "high" || request.urgency === "critical";
 
   return (
     <button onClick={onClick}
-      className="text-left rounded-xl p-4 transition-all hover:translate-y-[-1px]"
+      className="prc-card text-left rounded-xl transition-all relative overflow-hidden group"
       style={{
-        background: "var(--bg-elevated)",
+        background: "linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)",
         border: `1px solid ${statusColor}33`,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
       }}>
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="tag" style={{
-          color: statusColor,
-          borderColor: statusColor + "55",
-          background: statusColor + "15",
-          fontSize: 10,
-        }}>{request.current_status?.replace(/_/g, " ")}</span>
-        {request.urgency === "high" || request.urgency === "critical" ? (
-          <span className="flex items-center gap-1 text-xs" style={{ color: urgencyColor }}>
-            <AlertTriangle size={11} /> {request.urgency}
+      <style>{`
+        .prc-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px ${statusColor}77 !important;
+          border-color: ${statusColor}88 !important;
+        }
+      `}</style>
+      {/* Status accent bar */}
+      <div style={{
+        height: 3,
+        background: `linear-gradient(90deg, ${statusColor} 0%, ${statusColor}66 100%)`,
+      }} />
+
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-2.5">
+          <span className="tag" style={{
+            color: statusColor,
+            borderColor: statusColor + "55",
+            background: statusColor + "18",
+            fontSize: 10,
+            fontWeight: 600,
+            textTransform: "capitalize",
+          }}>{request.current_status?.replace(/_/g, " ")}</span>
+          <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+            style={{
+              color: urgencyColor,
+              background: urgencyColor + "15",
+              border: `1px solid ${urgencyColor}44`,
+              fontSize: 10,
+              fontWeight: 600,
+              textTransform: "capitalize",
+            }}>
+            {isHighPriority && <AlertTriangle size={10} />}
+            {request.urgency}
           </span>
-        ) : (
-          <span className="text-xs" style={{ color: urgencyColor }}>{request.urgency}</span>
-        )}
-      </div>
+        </div>
 
-      <h3 className="text-sm font-bold mb-1.5 line-clamp-2" style={{ color: "var(--text-primary)" }}>
-        {request.request_title}
-      </h3>
+        <h3 className="text-sm font-bold mb-1.5 line-clamp-2 leading-snug" style={{ color: "var(--text-primary)" }}>
+          {request.request_title}
+        </h3>
 
-      <div className="text-xs mb-3 line-clamp-2" style={{ color: "var(--text-muted)" }}>
-        {request.description}
-      </div>
+        <div className="text-xs mb-3 line-clamp-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          {request.description}
+        </div>
 
-      <div className="space-y-1 pt-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
-        <Row icon={UserIcon} text={request.contact_person_name} />
-        <Row icon={Building2} text={request.department} />
-        {request.required_completion_date && (
-          <Row icon={Calendar} text={`Due ${request.required_completion_date}`} />
-        )}
-      </div>
+        <div className="space-y-1.5 pt-2.5 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+          <Row icon={UserIcon} text={request.contact_person_name} />
+          <Row icon={Building2} text={request.department} />
+          {request.required_completion_date && (
+            <Row icon={Calendar} text={`Due ${request.required_completion_date}`} />
+          )}
+        </div>
 
-      <div className="text-xs mt-2 pt-2" style={{ color: "var(--text-muted)", fontSize: 10 }}>
-        {request.request_type?.replace(/_/g, " ")} · {new Date(request.created_date).toLocaleDateString("en-CA")}
+        <div className="flex items-center justify-between mt-3 pt-2.5 border-t"
+          style={{ borderColor: "var(--border-subtle)", fontSize: 10, color: "var(--text-muted)" }}>
+          <span style={{ textTransform: "capitalize" }}>{request.request_type?.replace(/_/g, " ")}</span>
+          <span>{new Date(request.created_date).toLocaleDateString("en-CA")}</span>
+        </div>
       </div>
     </button>
   );

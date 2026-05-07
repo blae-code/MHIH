@@ -80,6 +80,28 @@ export default function PolicyRequestTable() {
         view="table"
       />
 
+      <style>{`
+        .prt-row { transition: background 0.15s ease, box-shadow 0.15s ease; }
+        .prt-row:hover { background: rgba(254,221,0,0.05) !important; }
+        .prt-row:hover td:first-child { box-shadow: inset 3px 0 0 #FEDD00; }
+        .prt-table th {
+          background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+          color: var(--text-secondary);
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 10px 14px;
+          border-bottom: 1px solid var(--border-default);
+        }
+        .prt-table td {
+          padding: 11px 14px;
+          border-bottom: 1px solid var(--border-subtle);
+          font-size: 12px;
+        }
+        .prt-table tbody tr:last-child td { border-bottom: none; }
+      `}</style>
+
       <div className="flex-1 overflow-auto p-6">
         {loading ? (
           <div className="flex items-center justify-center py-12 gap-2" style={{ color: "var(--text-muted)" }}>
@@ -90,63 +112,83 @@ export default function PolicyRequestTable() {
             No requests yet. <button onClick={() => navigate(createPageUrl("PolicyRequestForm"))} className="underline" style={{ color: "#FEDD00" }}>Submit one →</button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {grouped.map(([assignee, group]) => (
-              <div key={assignee}>
-                <div className="flex items-center gap-2 mb-2 px-1">
-                  <span className="text-xs font-bold uppercase tracking-wider"
-                    style={{ color: assignee === "(Unassigned)" ? "var(--text-muted)" : "#FEDD00", letterSpacing: "0.08em" }}>
-                    {assignee}
-                  </span>
-                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    {group.length} {group.length === 1 ? "request" : "requests"}
-                  </span>
-                </div>
-                <div className="rounded-lg overflow-hidden"
-                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-                  <table className="data-table w-full" style={{ borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr>
-                        <th>Title</th>
-                        <th>Type</th>
-                        <th>Department</th>
-                        <th>Requester</th>
-                        <th>Urgency</th>
-                        <th>Status</th>
-                        <th>Required By</th>
-                        <th>Submitted</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {group.map((r) => (
-                        <tr key={r.id} onClick={() => setActive(r)} style={{ cursor: "pointer" }}>
-                          <td style={{ color: "var(--text-primary)", fontWeight: 600 }}>{r.request_title}</td>
-                          <td style={{ color: "var(--text-secondary)" }}>{r.request_type?.replace(/_/g, " ")}</td>
-                          <td>{r.department}</td>
-                          <td>{r.contact_person_name}</td>
-                          <td>
-                            <span className="tag" style={{
-                              color: URGENCY_COLORS[r.urgency],
-                              borderColor: URGENCY_COLORS[r.urgency] + "55",
-                              background: URGENCY_COLORS[r.urgency] + "15",
-                            }}>{r.urgency}</span>
-                          </td>
-                          <td>
-                            <span className="tag" style={{
-                              color: STATUS_COLORS[r.current_status],
-                              borderColor: STATUS_COLORS[r.current_status] + "55",
-                              background: STATUS_COLORS[r.current_status] + "15",
-                            }}>{r.current_status?.replace(/_/g, " ")}</span>
-                          </td>
-                          <td>{r.required_completion_date || "—"}</td>
-                          <td style={{ color: "var(--text-muted)" }}>{new Date(r.created_date).toLocaleDateString("en-CA")}</td>
+          <div className="space-y-7">
+            {grouped.map(([assignee, group]) => {
+              const isUnassigned = assignee === "(Unassigned)";
+              return (
+                <div key={assignee}>
+                  <div className="flex items-center gap-2 mb-2.5 px-1">
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{
+                        background: isUnassigned ? "var(--bg-overlay)" : "rgba(254,221,0,0.15)",
+                        color: isUnassigned ? "var(--text-muted)" : "#FEDD00",
+                        border: `1px solid ${isUnassigned ? "var(--border-default)" : "rgba(254,221,0,0.4)"}`,
+                        fontSize: 10,
+                      }}>
+                      {isUnassigned ? "?" : assignee.split(" ").map(s => s[0]).slice(0, 2).join("").toUpperCase()}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-wider"
+                      style={{ color: isUnassigned ? "var(--text-muted)" : "var(--text-primary)", letterSpacing: "0.08em" }}>
+                      {assignee}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ color: "var(--text-muted)", background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", fontSize: 10 }}>
+                      {group.length} {group.length === 1 ? "request" : "requests"}
+                    </span>
+                  </div>
+                  <div className="rounded-xl overflow-hidden"
+                    style={{
+                      background: "var(--bg-elevated)",
+                      border: "1px solid var(--border-default)",
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
+                    }}>
+                    <table className="prt-table w-full" style={{ borderCollapse: "collapse" }}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: "left" }}>Title</th>
+                          <th style={{ textAlign: "left" }}>Type</th>
+                          <th style={{ textAlign: "left" }}>Department</th>
+                          <th style={{ textAlign: "left" }}>Requester</th>
+                          <th style={{ textAlign: "left" }}>Urgency</th>
+                          <th style={{ textAlign: "left" }}>Status</th>
+                          <th style={{ textAlign: "left" }}>Required By</th>
+                          <th style={{ textAlign: "left" }}>Submitted</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {group.map((r) => (
+                          <tr key={r.id} className="prt-row" onClick={() => setActive(r)} style={{ cursor: "pointer" }}>
+                            <td style={{ color: "var(--text-primary)", fontWeight: 600 }}>{r.request_title}</td>
+                            <td style={{ color: "var(--text-secondary)", textTransform: "capitalize" }}>{r.request_type?.replace(/_/g, " ")}</td>
+                            <td style={{ color: "var(--text-secondary)" }}>{r.department}</td>
+                            <td style={{ color: "var(--text-secondary)" }}>{r.contact_person_name}</td>
+                            <td>
+                              <span className="tag" style={{
+                                color: URGENCY_COLORS[r.urgency],
+                                borderColor: URGENCY_COLORS[r.urgency] + "55",
+                                background: URGENCY_COLORS[r.urgency] + "15",
+                                textTransform: "capitalize",
+                              }}>{r.urgency}</span>
+                            </td>
+                            <td>
+                              <span className="tag" style={{
+                                color: STATUS_COLORS[r.current_status],
+                                borderColor: STATUS_COLORS[r.current_status] + "55",
+                                background: STATUS_COLORS[r.current_status] + "15",
+                                textTransform: "capitalize",
+                              }}>{r.current_status?.replace(/_/g, " ")}</span>
+                            </td>
+                            <td style={{ color: "var(--text-secondary)" }}>{r.required_completion_date || "—"}</td>
+                            <td style={{ color: "var(--text-muted)" }}>{new Date(r.created_date).toLocaleDateString("en-CA")}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -229,14 +271,14 @@ export function Header({ navigate, rows, loading, onReload, search, setSearch, s
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-transparent outline-none text-xs cursor-pointer"
             style={{ color: "var(--text-primary)" }}>
-            <option value="all">All Statuses</option>
-            <option value="submitted">Submitted</option>
-            <option value="in_review">In Review</option>
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="rejected">Rejected</option>
-            <option value="closed">Closed</option>
+            <option value="all" style={{ background: "#0f1829", color: "#f0f6ff" }}>All Statuses</option>
+            <option value="submitted" style={{ background: "#0f1829", color: "#f0f6ff" }}>Submitted</option>
+            <option value="in_review" style={{ background: "#0f1829", color: "#f0f6ff" }}>In Review</option>
+            <option value="assigned" style={{ background: "#0f1829", color: "#f0f6ff" }}>Assigned</option>
+            <option value="in_progress" style={{ background: "#0f1829", color: "#f0f6ff" }}>In Progress</option>
+            <option value="completed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Completed</option>
+            <option value="rejected" style={{ background: "#0f1829", color: "#f0f6ff" }}>Rejected</option>
+            <option value="closed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Closed</option>
           </select>
         </div>
       </div>
