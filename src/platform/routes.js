@@ -40,9 +40,6 @@ export const PAGE_ROUTE_MAP = {
 
   // ── MHIH app — Red River module ───────────────────────────────────────
   RedRiverOS: "/os/apps/mhih/redriver-module",
-  PolicyRequestForm: "/os/apps/mhih/redriver-module/new-request",
-  PolicyRequestTable: "/os/apps/mhih/redriver-module/requests",
-  PolicyRequestCardView: "/os/apps/mhih/redriver-module/requests/cards",
   MetricCatalog: "/os/apps/mhih/metric-catalog",
   MetricForge: "/os/apps/mhih/metric-forge",
   EvidenceSnapshots: "/os/apps/mhih/evidence-snapshots",
@@ -80,6 +77,11 @@ export const PAGE_ROUTE_MAP = {
   // ── MHIH app — admin ─────────────────────────────────────────────────
   Team: "/os/apps/mhih/team",
   Admin: "/os/apps/mhih/admin",
+
+  // ── Policy Intake and Management ──────────────────────────────────────
+  PolicyRequestTable: "/os/apps/policy-intake",
+  PolicyRequestForm: "/os/apps/policy-intake/new",
+  PolicyRequestCardView: "/os/apps/policy-intake/cards",
 
   // ── Platform app modules ──────────────────────────────────────────────
   PolicyStudio: "/os/apps/policy-studio",

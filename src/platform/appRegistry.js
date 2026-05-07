@@ -93,9 +93,6 @@ export const APP_REGISTRY = [
         section: "Red River Module",
         items: [
           { label: "Red River OS", page: "RedRiverOS", icon: "Layers3" },
-          { label: "New Policy Request", page: "PolicyRequestForm", icon: "FileSignature" },
-          { label: "All Requests (Table)", page: "PolicyRequestTable", icon: "ClipboardCheck" },
-          { label: "All Requests (Cards)", page: "PolicyRequestCardView", icon: "Layers3" },
           { label: "Metric Catalog", page: "MetricCatalog", icon: "Database" },
           { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
           { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
@@ -146,6 +143,30 @@ export const APP_REGISTRY = [
       { label: "Admin", page: "Admin", icon: "Shield" },
       { label: "Settings", page: "Settings", icon: "Settings" },
       { label: "Changelog", page: "Changelog", icon: "BookOpen" },
+    ],
+  },
+
+  // ── Policy Intake and Management ──────────────────────────────────────
+  {
+    id: "policy-intake",
+    name: "Policy Intake and Management",
+    shortName: "Policy Intake",
+    description:
+      "Submit, triage, assign, and track policy assistance requests across the ministry.",
+    icon: "FileSignature",
+    accent: "#fbbf24",
+    landingPage: "PolicyRequestTable",
+    status: APP_STATUS.ACTIVE,
+    roles: ALL_ROLES,
+    navItems: [
+      {
+        section: "Policy Intake and Management",
+        items: [
+          { label: "New Policy Request", page: "PolicyRequestForm", icon: "FileSignature" },
+          { label: "All Requests (Table)", page: "PolicyRequestTable", icon: "ClipboardCheck" },
+          { label: "All Requests (Cards)", page: "PolicyRequestCardView", icon: "Layers3" },
+        ],
+      },
     ],
   },
 
