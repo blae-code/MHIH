@@ -93,6 +93,9 @@ export const APP_REGISTRY = [
         section: "Red River Module",
         items: [
           { label: "Red River OS", page: "RedRiverOS", icon: "Layers3" },
+          { label: "New Policy Request", page: "PolicyRequestForm", icon: "FileSignature" },
+          { label: "All Requests (Table)", page: "PolicyRequestTable", icon: "ClipboardCheck" },
+          { label: "All Requests (Cards)", page: "PolicyRequestCardView", icon: "Layers3" },
           { label: "Metric Catalog", page: "MetricCatalog", icon: "Database" },
           { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
           { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },

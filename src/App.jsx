@@ -27,6 +27,12 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
+  useEffect(() => {
+    if (authError?.type === 'auth_required') {
+      navigateToLogin();
+    }
+  }, [authError?.type]);
+
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#0a1220" }}>
@@ -34,12 +40,6 @@ const AuthenticatedApp = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (authError?.type === 'auth_required') {
-      navigateToLogin();
-    }
-  }, [authError?.type]);
 
   if (authError) {
     if (authError.type === 'user_not_registered') {

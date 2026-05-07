@@ -46,6 +46,9 @@ import PolicyLab from './pages/PolicyLab';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Recommendations from './pages/Recommendations';
 import RedRiverOS from './pages/RedRiverOS';
+import PolicyRequestForm from './pages/PolicyRequestForm';
+import PolicyRequestTable from './pages/PolicyRequestTable';
+import PolicyRequestCardView from './pages/PolicyRequestCardView';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
@@ -102,6 +105,9 @@ export const PAGES = {
     "PredictiveAnalytics": PredictiveAnalytics,
     "Recommendations": Recommendations,
     "RedRiverOS": RedRiverOS,
+    "PolicyRequestForm": PolicyRequestForm,
+    "PolicyRequestTable": PolicyRequestTable,
+    "PolicyRequestCardView": PolicyRequestCardView,
     "Reports": Reports,
     "Settings": Settings,
     "Team": Team,

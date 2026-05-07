@@ -1,0 +1,154 @@
+{
+  "name": "PolicyRequest",
+  "type": "object",
+  "properties": {
+    "request_title": {
+      "type": "string",
+      "description": "Brief, descriptive title for the request"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "legislation_review",
+        "document_review",
+        "policy_development_and_review"
+      ],
+      "description": "Main category of assistance needed"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the policy assistance request"
+    },
+    "objective": {
+      "type": "string",
+      "description": "Desired outcome or objective of the assistance"
+    },
+    "policy_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Specific areas of policy the request relates to"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department making the request"
+    },
+    "contact_person_name": {
+      "type": "string",
+      "description": "Name of the primary contact person (requester)"
+    },
+    "contact_person_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the primary contact person (requester)"
+    },
+    "key_people_involved": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Names or roles of key people involved"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Urgency / priority level"
+    },
+    "required_completion_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Desired completion date"
+    },
+    "reason_for_urgency": {
+      "type": "string",
+      "description": "Explanation when urgency is high or critical"
+    },
+    "current_status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "in_review",
+        "assigned",
+        "in_progress",
+        "completed",
+        "rejected",
+        "closed"
+      ],
+      "default": "submitted",
+      "description": "Current status of the policy request"
+    },
+    "relevant_documents_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs of supporting documents"
+    },
+    "preferred_communication_method": {
+      "type": "string",
+      "description": "How the requester prefers to be contacted"
+    },
+    "assigned_to_user_id": {
+      "type": "string",
+      "description": "ID of the user assigned to this request"
+    },
+    "assigned_to_user_name": {
+      "type": "string",
+      "description": "Name of the user assigned to this request"
+    },
+    "assigned_to_user_email": {
+      "type": "string",
+      "description": "Email of the user assigned to this request"
+    },
+    "assigned_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the request was assigned"
+    },
+    "progress_notes": {
+      "type": "string",
+      "description": "Latest progress note from the assignee"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "enum": [
+        "duplicate_request",
+        "out_of_scope",
+        "insufficient_information",
+        "not_a_priority",
+        "resource_constraints",
+        "other"
+      ],
+      "description": "Predefined reason for rejecting the request"
+    },
+    "rejection_details": {
+      "type": "string",
+      "description": "Additional / personalized rejection details"
+    },
+    "rejected_by_name": {
+      "type": "string",
+      "description": "Name of the person who rejected the request"
+    },
+    "rejected_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the request was rejected"
+    }
+  },
+  "required": [
+    "request_title",
+    "request_type",
+    "description",
+    "department",
+    "contact_person_name",
+    "contact_person_email",
+    "urgency"
+  ]
+}

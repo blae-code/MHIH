@@ -40,6 +40,9 @@ export const PAGE_ROUTE_MAP = {
 
   // ── MHIH app — Red River module ───────────────────────────────────────
   RedRiverOS: "/os/apps/mhih/redriver-module",
+  PolicyRequestForm: "/os/apps/mhih/redriver-module/new-request",
+  PolicyRequestTable: "/os/apps/mhih/redriver-module/requests",
+  PolicyRequestCardView: "/os/apps/mhih/redriver-module/requests/cards",
   MetricCatalog: "/os/apps/mhih/metric-catalog",
   MetricForge: "/os/apps/mhih/metric-forge",
   EvidenceSnapshots: "/os/apps/mhih/evidence-snapshots",
