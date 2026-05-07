@@ -13,9 +13,9 @@ const REQUEST_TYPES = [
 const DEPARTMENTS = [
   "Elders",
   "Health",
+  "Veterans",
   "Mental Health & Harm Reduction",
   "Social Programs & Administration",
-  "Veterans",
 ];
 
 const URGENCY_LEVELS = [
