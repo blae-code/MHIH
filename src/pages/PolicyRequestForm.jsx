@@ -77,7 +77,7 @@ export default function PolicyRequestForm() {
     reason_for_urgency: "",
     relevant_documents_urls: "",
     preferred_communication_method: "Email",
-    subscribe_to_updates: true,
+    subscribe_to_updates: false,
     submitter_name: "",
     submitter_contact: "",
   });
