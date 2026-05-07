@@ -109,7 +109,7 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
         assigned_to_user_name: assignee.full_name || assignee.email,
         assigned_to_user_email: assignee.email,
         assigned_date: new Date().toISOString(),
-        current_status: status === "submitted" ? "assigned" : status,
+        current_status: "assigned",
       };
       await base44.entities.PolicyRequest.update(request.id, updated);
       await sendAssignmentEmail(assignee, { ...request, ...updated });
@@ -260,17 +260,6 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
                 <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
                   <Mail size={11} /> The assignee will receive an email notification.
                 </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                  Set Status
-                </label>
-                <select style={inputStyle} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  {STATUS_OPTIONS.filter((s) => s.value !== "rejected").map((s) => (
-                    <option key={s.value} value={s.value} style={optionStyle}>{s.label}</option>
-                  ))}
-                </select>
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
