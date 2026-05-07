@@ -165,14 +165,18 @@ export default function PolicyRequestForm() {
         }
         .prf-field {
           background: var(--bg-surface);
-          border: 1px solid var(--border-subtle);
+          border: 1.5px solid var(--border-default);
           border-radius: 10px;
           padding: 12px 14px;
-          transition: border-color 0.15s ease, background 0.15s ease;
+          transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+        .prf-field:hover {
+          border-color: rgba(254,221,0,0.35);
         }
         .prf-field:focus-within {
-          border-color: rgba(254,221,0,0.4);
+          border-color: #FEDD00;
           background: var(--bg-overlay);
+          box-shadow: 0 0 0 3px rgba(254,221,0,0.12);
         }
       `}</style>
 
