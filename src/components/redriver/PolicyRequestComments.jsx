@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Send, MessageSquare, Trash2, Pencil, X, Check } from "lucide-react";
+import { Send, MessageSquare, Trash2, Pencil, X, Check, Reply } from "lucide-react";
 
 const inputStyle = {
   width: "100%",
@@ -44,7 +44,9 @@ export default function PolicyRequestComments({ policyRequestId }) {
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [replyTo, setReplyTo] = useState(null); // { name, snippet }
   const listEndRef = useRef(null);
+  const composerRef = useRef(null);
 
   useEffect(() => {
     base44.auth.me().then(setMe).catch(() => {});
@@ -83,19 +85,30 @@ export default function PolicyRequestComments({ policyRequestId }) {
     setSubmitting(true);
     setError(null);
     try {
+      const finalContent = replyTo
+        ? `> @${replyTo.name}: ${replyTo.snippet}\n\n${body}`
+        : body;
       await base44.entities.PolicyComment.create({
         policy_request_id: policyRequestId,
         author_name: me?.full_name || me?.email || "Unknown",
         author_email: me?.email || "",
-        content: body,
+        content: finalContent,
       });
       setText("");
+      setReplyTo(null);
       await load();
     } catch (e) {
       setError(e?.message || "Failed to post comment");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleStartReply = (c) => {
+    const name = c.author_name || c.author_email || "Unknown";
+    const snippet = (c.content || "").replace(/\n/g, " ").slice(0, 80);
+    setReplyTo({ name, snippet });
+    setTimeout(() => composerRef.current?.focus(), 0);
   };
 
   const handleDelete = async (id) => {
@@ -180,16 +193,24 @@ export default function PolicyRequestComments({ policyRequestId }) {
                       {formatTimestamp(c.created_date)}
                       {c.edited && " · edited"}
                     </span>
-                    {isMine && !isEditing && (
+                    {!isEditing && (
                       <span className="ml-auto flex items-center gap-1">
-                        <button onClick={() => handleStartEdit(c)} className="activity-icon"
-                          style={{ width: 22, height: 22 }} title="Edit">
-                          <Pencil size={10} />
+                        <button onClick={() => handleStartReply(c)} className="activity-icon"
+                          style={{ width: 22, height: 22 }} title="Reply">
+                          <Reply size={10} />
                         </button>
-                        <button onClick={() => handleDelete(c.id)} className="activity-icon"
-                          style={{ width: 22, height: 22, color: "#ff4d4f" }} title="Delete">
-                          <Trash2 size={10} />
-                        </button>
+                        {isMine && (
+                          <>
+                            <button onClick={() => handleStartEdit(c)} className="activity-icon"
+                              style={{ width: 22, height: 22 }} title="Edit">
+                              <Pencil size={10} />
+                            </button>
+                            <button onClick={() => handleDelete(c.id)} className="activity-icon"
+                              style={{ width: 22, height: 22, color: "#ff4d4f" }} title="Delete">
+                              <Trash2 size={10} />
+                            </button>
+                          </>
+                        )}
                       </span>
                     )}
                   </div>
@@ -240,9 +261,28 @@ export default function PolicyRequestComments({ policyRequestId }) {
           border: "1.5px solid #FEDD00",
           boxShadow: "0 0 0 3px rgba(254,221,0,0.08)",
         }}>
+        {replyTo && (
+          <div className="flex items-start gap-2 rounded-md mb-1.5 p-1.5"
+            style={{ background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.3)" }}>
+            <Reply size={11} style={{ color: "#FEDD00", marginTop: 2, flexShrink: 0 }} />
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold" style={{ color: "#FEDD00", fontSize: 10.5 }}>
+                Replying to {replyTo.name}
+              </div>
+              <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 10.5 }}>
+                {replyTo.snippet}
+              </div>
+            </div>
+            <button onClick={() => setReplyTo(null)} className="activity-icon"
+              style={{ width: 18, height: 18 }} title="Cancel reply">
+              <X size={10} />
+            </button>
+          </div>
+        )}
         <textarea
+          ref={composerRef}
           style={{ ...inputStyle, minHeight: 60, resize: "vertical", border: "none", background: "transparent", padding: 4 }}
-          placeholder="Write a comment… (⌘/Ctrl + Enter to post)"
+          placeholder={replyTo ? `Reply to ${replyTo.name}…` : "Write a comment… (⌘/Ctrl + Enter to post)"}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
