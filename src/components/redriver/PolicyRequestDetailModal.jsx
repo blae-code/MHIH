@@ -32,6 +32,13 @@ const inputStyle = {
   outline: "none",
 };
 
+// <option> inherits OS chrome bg — force dark bg + light text so the
+// dropdown list is readable across browsers.
+const optionStyle = {
+  background: "#0f1829",
+  color: "#f0f6ff",
+};
+
 export default function PolicyRequestDetailModal({ request, onClose, onUpdated }) {
   const [users, setUsers] = useState([]);
   const [tab, setTab] = useState("details");
@@ -233,9 +240,9 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
                   Assign to
                 </label>
                 <select style={inputStyle} value={assignTo} onChange={(e) => setAssignTo(e.target.value)}>
-                  <option value="">— Select a user —</option>
+                  <option value="" style={optionStyle}>— Select a user —</option>
                   {users.map((u) => (
-                    <option key={u.id} value={u.id}>
+                    <option key={u.id} value={u.id} style={optionStyle}>
                       {u.full_name || u.email} ({u.email})
                     </option>
                   ))}
@@ -251,7 +258,7 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
                 </label>
                 <select style={inputStyle} value={status} onChange={(e) => setStatus(e.target.value)}>
                   {STATUS_OPTIONS.filter((s) => s.value !== "rejected").map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
+                    <option key={s.value} value={s.value} style={optionStyle}>{s.label}</option>
                   ))}
                 </select>
               </div>
@@ -331,9 +338,9 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
                   Reason for Rejection *
                 </label>
                 <select style={inputStyle} value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)}>
-                  <option value="">— Select a reason —</option>
+                  <option value="" style={optionStyle}>— Select a reason —</option>
                   {REJECTION_REASONS.map((r) => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
+                    <option key={r.value} value={r.value} style={optionStyle}>{r.label}</option>
                   ))}
                 </select>
               </div>
