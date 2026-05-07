@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Send, MessageSquare, Trash2, Pencil, X, Check, Reply } from "lucide-react";
+import { Send, MessageSquare, Trash2, Pencil, X, Check, Reply, ChevronDown, ChevronRight } from "lucide-react";
 
 const inputStyle = {
   width: "100%",
@@ -45,7 +45,12 @@ export default function PolicyRequestComments({ policyRequestId }) {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [replyTo, setReplyTo] = useState(null); // { id, name, snippet }
+  const [collapsed, setCollapsed] = useState({}); // { [commentId]: true }
   const listEndRef = useRef(null);
+
+  const toggleCollapse = (id) => {
+    setCollapsed((c) => ({ ...c, [id]: !c[id] }));
+  };
   const composerRef = useRef(null);
 
   useEffect(() => {
@@ -177,43 +182,50 @@ export default function PolicyRequestComments({ policyRequestId }) {
               }
               return acc;
             }, {});
-            return topLevel.map((c) => (
-              <div key={c.id}>
-                <CommentItem
-                  comment={c}
-                  me={me}
-                  editingId={editingId}
-                  editText={editText}
-                  setEditText={setEditText}
-                  onStartEdit={handleStartEdit}
-                  onSaveEdit={handleSaveEdit}
-                  onCancelEdit={() => { setEditingId(null); setEditText(""); }}
-                  onDelete={handleDelete}
-                  onReply={handleStartReply}
-                />
-                {(repliesByParent[c.id] || []).length > 0 && (
-                  <div className="mt-2 space-y-2"
-                    style={{ marginLeft: 30, paddingLeft: 12, borderLeft: "2px solid rgba(254,221,0,0.25)" }}>
-                    {repliesByParent[c.id].map((r) => (
-                      <CommentItem
-                        key={r.id}
-                        comment={r}
-                        me={me}
-                        editingId={editingId}
-                        editText={editText}
-                        setEditText={setEditText}
-                        onStartEdit={handleStartEdit}
-                        onSaveEdit={handleSaveEdit}
-                        onCancelEdit={() => { setEditingId(null); setEditText(""); }}
-                        onDelete={handleDelete}
-                        onReply={handleStartReply}
-                        isReply
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ));
+            return topLevel.map((c) => {
+              const replies = repliesByParent[c.id] || [];
+              const isCollapsed = !!collapsed[c.id];
+              return (
+                <div key={c.id}>
+                  <CommentItem
+                    comment={c}
+                    me={me}
+                    editingId={editingId}
+                    editText={editText}
+                    setEditText={setEditText}
+                    onStartEdit={handleStartEdit}
+                    onSaveEdit={handleSaveEdit}
+                    onCancelEdit={() => { setEditingId(null); setEditText(""); }}
+                    onDelete={handleDelete}
+                    onReply={handleStartReply}
+                    replyCount={replies.length}
+                    isCollapsed={isCollapsed}
+                    onToggleCollapse={() => toggleCollapse(c.id)}
+                  />
+                  {replies.length > 0 && !isCollapsed && (
+                    <div className="mt-2 space-y-2"
+                      style={{ marginLeft: 30, paddingLeft: 12, borderLeft: "2px solid rgba(254,221,0,0.25)" }}>
+                      {replies.map((r) => (
+                        <CommentItem
+                          key={r.id}
+                          comment={r}
+                          me={me}
+                          editingId={editingId}
+                          editText={editText}
+                          setEditText={setEditText}
+                          onStartEdit={handleStartEdit}
+                          onSaveEdit={handleSaveEdit}
+                          onCancelEdit={() => { setEditingId(null); setEditText(""); }}
+                          onDelete={handleDelete}
+                          onReply={handleStartReply}
+                          isReply
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            });
           })()
         )}
         <div ref={listEndRef} />
@@ -270,23 +282,53 @@ export default function PolicyRequestComments({ policyRequestId }) {
 function CommentItem({
   comment: c, me, editingId, editText, setEditText,
   onStartEdit, onSaveEdit, onCancelEdit, onDelete, onReply, isReply,
+  replyCount = 0, isCollapsed = false, onToggleCollapse,
 }) {
   const isMine = me?.email && c.author_email === me.email;
   const isEditing = editingId === c.id;
   const avatarSize = isReply ? 24 : 30;
+  const canCollapse = !isReply && !!onToggleCollapse;
 
   return (
     <div className="flex gap-2.5">
-      <div
-        className="shrink-0 rounded-full flex items-center justify-center font-bold"
-        style={{
-          width: avatarSize, height: avatarSize, fontSize: isReply ? 9.5 : 11,
-          background: isMine ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
-          color: isMine ? "#FEDD00" : "var(--text-secondary)",
-          border: `1px solid ${isMine ? "rgba(254,221,0,0.35)" : "var(--border-default)"}`,
-        }}>
-        {initials(c.author_name, c.author_email)}
-      </div>
+      {canCollapse ? (
+        <button
+          onClick={onToggleCollapse}
+          className="shrink-0 flex items-center justify-center rounded-full transition-colors"
+          title={isCollapsed ? "Expand thread" : "Collapse thread"}
+          style={{
+            width: avatarSize, height: avatarSize,
+            background: isMine ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
+            color: isMine ? "#FEDD00" : "var(--text-secondary)",
+            border: `1px solid ${isMine ? "rgba(254,221,0,0.35)" : "var(--border-default)"}`,
+            position: "relative",
+          }}>
+          {isCollapsed
+            ? <ChevronRight size={13} />
+            : <span style={{ fontSize: 11, fontWeight: 700 }}>{initials(c.author_name, c.author_email)}</span>}
+          {replyCount > 0 && isCollapsed && (
+            <span style={{
+              position: "absolute", bottom: -4, right: -4,
+              background: "#FEDD00", color: "#043673",
+              fontSize: 9, fontWeight: 700,
+              minWidth: 14, height: 14, padding: "0 3px",
+              borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center",
+              border: "1px solid var(--bg-elevated)",
+            }}>{replyCount}</span>
+          )}
+        </button>
+      ) : (
+        <div
+          className="shrink-0 rounded-full flex items-center justify-center font-bold"
+          style={{
+            width: avatarSize, height: avatarSize, fontSize: isReply ? 9.5 : 11,
+            background: isMine ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
+            color: isMine ? "#FEDD00" : "var(--text-secondary)",
+            border: `1px solid ${isMine ? "rgba(254,221,0,0.35)" : "var(--border-default)"}`,
+          }}>
+          {initials(c.author_name, c.author_email)}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
           <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -295,9 +337,19 @@ function CommentItem({
           <span className="text-xs" style={{ color: "var(--text-muted)", fontSize: 10.5 }}>
             {formatTimestamp(c.created_date)}
             {c.edited && " · edited"}
+            {canCollapse && replyCount > 0 && (
+              <> · {replyCount} {replyCount === 1 ? "reply" : "replies"}</>
+            )}
           </span>
           {!isEditing && (
             <span className="ml-auto flex items-center gap-1">
+              {canCollapse && (
+                <button onClick={onToggleCollapse} className="activity-icon"
+                  style={{ width: 22, height: 22 }}
+                  title={isCollapsed ? "Expand" : "Collapse"}>
+                  {isCollapsed ? <ChevronRight size={10} /> : <ChevronDown size={10} />}
+                </button>
+              )}
               <button onClick={() => onReply(c)} className="activity-icon"
                 style={{ width: 22, height: 22 }} title="Reply">
                 <Reply size={10} />
@@ -338,6 +390,18 @@ function CommentItem({
               </button>
             </div>
           </div>
+        ) : isCollapsed ? (
+          <button onClick={onToggleCollapse}
+            className="text-xs truncate text-left rounded-md mt-1 px-2.5 py-1.5 w-full"
+            style={{
+              background: "var(--bg-overlay)",
+              border: "1px dashed var(--border-default)",
+              color: "var(--text-muted)",
+              fontStyle: "italic",
+            }}
+            title="Click to expand">
+            {(c.content || "").replace(/\n/g, " ").slice(0, 100)}{(c.content || "").length > 100 ? "…" : ""}
+          </button>
         ) : (
           <div className="text-xs whitespace-pre-wrap rounded-md mt-1 p-2.5"
             style={{
