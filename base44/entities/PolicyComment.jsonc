@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID of the PolicyRequest this comment belongs to"
     },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "ID of the parent PolicyComment if this is a reply; empty for top-level comments"
+    },
     "author_name": {
       "type": "string",
       "description": "Display name of the comment author"

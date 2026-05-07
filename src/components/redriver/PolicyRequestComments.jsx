@@ -44,7 +44,7 @@ export default function PolicyRequestComments({ policyRequestId }) {
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
-  const [replyTo, setReplyTo] = useState(null); // { name, snippet }
+  const [replyTo, setReplyTo] = useState(null); // { id, name, snippet }
   const listEndRef = useRef(null);
   const composerRef = useRef(null);
 
@@ -85,14 +85,12 @@ export default function PolicyRequestComments({ policyRequestId }) {
     setSubmitting(true);
     setError(null);
     try {
-      const finalContent = replyTo
-        ? `> @${replyTo.name}: ${replyTo.snippet}\n\n${body}`
-        : body;
       await base44.entities.PolicyComment.create({
         policy_request_id: policyRequestId,
+        parent_comment_id: replyTo?.id || "",
         author_name: me?.full_name || me?.email || "Unknown",
         author_email: me?.email || "",
-        content: finalContent,
+        content: body,
       });
       setText("");
       setReplyTo(null);
@@ -107,7 +105,9 @@ export default function PolicyRequestComments({ policyRequestId }) {
   const handleStartReply = (c) => {
     const name = c.author_name || c.author_email || "Unknown";
     const snippet = (c.content || "").replace(/\n/g, " ").slice(0, 80);
-    setReplyTo({ name, snippet });
+    // Nest replies one level deep — replying to a reply attaches to its root parent.
+    const rootId = c.parent_comment_id || c.id;
+    setReplyTo({ id: rootId, name, snippet });
     setTimeout(() => composerRef.current?.focus(), 0);
   };
 
@@ -169,87 +169,52 @@ export default function PolicyRequestComments({ policyRequestId }) {
             </div>
           </div>
         ) : (
-          comments.map((c) => {
-            const isMine = me?.email && c.author_email === me.email;
-            const isEditing = editingId === c.id;
-            return (
-              <div key={c.id} className="flex gap-2.5">
-                <div
-                  className="shrink-0 rounded-full flex items-center justify-center font-bold"
-                  style={{
-                    width: 30, height: 30, fontSize: 11,
-                    background: isMine ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
-                    color: isMine ? "#FEDD00" : "var(--text-secondary)",
-                    border: `1px solid ${isMine ? "rgba(254,221,0,0.35)" : "var(--border-default)"}`,
-                  }}>
-                  {initials(c.author_name, c.author_email)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {c.author_name || c.author_email || "Unknown"}
-                    </span>
-                    <span className="text-xs" style={{ color: "var(--text-muted)", fontSize: 10.5 }}>
-                      {formatTimestamp(c.created_date)}
-                      {c.edited && " · edited"}
-                    </span>
-                    {!isEditing && (
-                      <span className="ml-auto flex items-center gap-1">
-                        <button onClick={() => handleStartReply(c)} className="activity-icon"
-                          style={{ width: 22, height: 22 }} title="Reply">
-                          <Reply size={10} />
-                        </button>
-                        {isMine && (
-                          <>
-                            <button onClick={() => handleStartEdit(c)} className="activity-icon"
-                              style={{ width: 22, height: 22 }} title="Edit">
-                              <Pencil size={10} />
-                            </button>
-                            <button onClick={() => handleDelete(c.id)} className="activity-icon"
-                              style={{ width: 22, height: 22, color: "#ff4d4f" }} title="Delete">
-                              <Trash2 size={10} />
-                            </button>
-                          </>
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  {isEditing ? (
-                    <div className="mt-1.5">
-                      <textarea
-                        style={{ ...inputStyle, minHeight: 60, resize: "vertical" }}
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        autoFocus
+          (() => {
+            const topLevel = comments.filter((c) => !c.parent_comment_id);
+            const repliesByParent = comments.reduce((acc, c) => {
+              if (c.parent_comment_id) {
+                (acc[c.parent_comment_id] ||= []).push(c);
+              }
+              return acc;
+            }, {});
+            return topLevel.map((c) => (
+              <div key={c.id}>
+                <CommentItem
+                  comment={c}
+                  me={me}
+                  editingId={editingId}
+                  editText={editText}
+                  setEditText={setEditText}
+                  onStartEdit={handleStartEdit}
+                  onSaveEdit={handleSaveEdit}
+                  onCancelEdit={() => { setEditingId(null); setEditText(""); }}
+                  onDelete={handleDelete}
+                  onReply={handleStartReply}
+                />
+                {(repliesByParent[c.id] || []).length > 0 && (
+                  <div className="mt-2 space-y-2"
+                    style={{ marginLeft: 30, paddingLeft: 12, borderLeft: "2px solid rgba(254,221,0,0.25)" }}>
+                    {repliesByParent[c.id].map((r) => (
+                      <CommentItem
+                        key={r.id}
+                        comment={r}
+                        me={me}
+                        editingId={editingId}
+                        editText={editText}
+                        setEditText={setEditText}
+                        onStartEdit={handleStartEdit}
+                        onSaveEdit={handleSaveEdit}
+                        onCancelEdit={() => { setEditingId(null); setEditText(""); }}
+                        onDelete={handleDelete}
+                        onReply={handleStartReply}
+                        isReply
                       />
-                      <div className="flex justify-end gap-1.5 mt-1.5">
-                        <button onClick={() => { setEditingId(null); setEditText(""); }}
-                          className="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1"
-                          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-                          <X size={11} /> Cancel
-                        </button>
-                        <button onClick={() => handleSaveEdit(c.id)}
-                          className="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1"
-                          style={{ background: "#FEDD00", color: "#043673" }}>
-                          <Check size={11} /> Save
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs whitespace-pre-wrap rounded-md mt-1 p-2.5"
-                      style={{
-                        background: "var(--bg-overlay)",
-                        border: "1px solid var(--border-subtle)",
-                        color: "var(--text-primary)",
-                        lineHeight: 1.5,
-                      }}>
-                      {c.content}
-                    </div>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            );
-          })
+            ));
+          })()
         )}
         <div ref={listEndRef} />
       </div>
@@ -297,6 +262,93 @@ export default function PolicyRequestComments({ policyRequestId }) {
             <Send size={11} /> {submitting ? "Posting…" : "Post"}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CommentItem({
+  comment: c, me, editingId, editText, setEditText,
+  onStartEdit, onSaveEdit, onCancelEdit, onDelete, onReply, isReply,
+}) {
+  const isMine = me?.email && c.author_email === me.email;
+  const isEditing = editingId === c.id;
+  const avatarSize = isReply ? 24 : 30;
+
+  return (
+    <div className="flex gap-2.5">
+      <div
+        className="shrink-0 rounded-full flex items-center justify-center font-bold"
+        style={{
+          width: avatarSize, height: avatarSize, fontSize: isReply ? 9.5 : 11,
+          background: isMine ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
+          color: isMine ? "#FEDD00" : "var(--text-secondary)",
+          border: `1px solid ${isMine ? "rgba(254,221,0,0.35)" : "var(--border-default)"}`,
+        }}>
+        {initials(c.author_name, c.author_email)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+            {c.author_name || c.author_email || "Unknown"}
+          </span>
+          <span className="text-xs" style={{ color: "var(--text-muted)", fontSize: 10.5 }}>
+            {formatTimestamp(c.created_date)}
+            {c.edited && " · edited"}
+          </span>
+          {!isEditing && (
+            <span className="ml-auto flex items-center gap-1">
+              <button onClick={() => onReply(c)} className="activity-icon"
+                style={{ width: 22, height: 22 }} title="Reply">
+                <Reply size={10} />
+              </button>
+              {isMine && (
+                <>
+                  <button onClick={() => onStartEdit(c)} className="activity-icon"
+                    style={{ width: 22, height: 22 }} title="Edit">
+                    <Pencil size={10} />
+                  </button>
+                  <button onClick={() => onDelete(c.id)} className="activity-icon"
+                    style={{ width: 22, height: 22, color: "#ff4d4f" }} title="Delete">
+                    <Trash2 size={10} />
+                  </button>
+                </>
+              )}
+            </span>
+          )}
+        </div>
+        {isEditing ? (
+          <div className="mt-1.5">
+            <textarea
+              style={{ ...inputStyle, minHeight: 60, resize: "vertical" }}
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              autoFocus
+            />
+            <div className="flex justify-end gap-1.5 mt-1.5">
+              <button onClick={onCancelEdit}
+                className="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
+                <X size={11} /> Cancel
+              </button>
+              <button onClick={() => onSaveEdit(c.id)}
+                className="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1"
+                style={{ background: "#FEDD00", color: "#043673" }}>
+                <Check size={11} /> Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-xs whitespace-pre-wrap rounded-md mt-1 p-2.5"
+            style={{
+              background: "var(--bg-overlay)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-primary)",
+              lineHeight: 1.5,
+            }}>
+            {c.content}
+          </div>
+        )}
       </div>
     </div>
   );
