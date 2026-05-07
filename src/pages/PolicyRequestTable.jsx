@@ -273,9 +273,13 @@ export function Header({ navigate, rows, loading, onReload, search, setSearch, s
             style={{ color: "var(--text-primary)" }}>
             <option value="all" style={{ background: "#0f1829", color: "#f0f6ff" }}>All Statuses</option>
             <option value="submitted" style={{ background: "#0f1829", color: "#f0f6ff" }}>Submitted</option>
+            <option value="received" style={{ background: "#0f1829", color: "#f0f6ff" }}>Received</option>
             <option value="in_review" style={{ background: "#0f1829", color: "#f0f6ff" }}>In Review</option>
             <option value="assigned" style={{ background: "#0f1829", color: "#f0f6ff" }}>Assigned</option>
+            <option value="started" style={{ background: "#0f1829", color: "#f0f6ff" }}>Started</option>
             <option value="in_progress" style={{ background: "#0f1829", color: "#f0f6ff" }}>In Progress</option>
+            <option value="proofing" style={{ background: "#0f1829", color: "#f0f6ff" }}>Proofing</option>
+            <option value="sent_for_approval" style={{ background: "#0f1829", color: "#f0f6ff" }}>Sent for Approval</option>
             <option value="completed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Completed</option>
             <option value="rejected" style={{ background: "#0f1829", color: "#f0f6ff" }}>Rejected</option>
             <option value="closed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Closed</option>
