@@ -4,13 +4,19 @@ import { X, UserCheck, XCircle, Save, Mail, Calendar, Building2, Tag, AlertTrian
 
 const STATUS_OPTIONS = [
   { value: "submitted", label: "Submitted", color: "#40c4ff" },
+  { value: "received", label: "Received", color: "#40c4ff" },
   { value: "in_review", label: "In Review", color: "#a78bfa" },
   { value: "assigned", label: "Assigned", color: "#FEDD00" },
+  { value: "started", label: "Started", color: "#fbbf24" },
   { value: "in_progress", label: "In Progress", color: "#fb923c" },
+  { value: "proofing", label: "Proofing", color: "#22d3ee" },
+  { value: "sent_for_approval", label: "Sent for Approval", color: "#c084fc" },
   { value: "completed", label: "Completed", color: "#52c41a" },
   { value: "rejected", label: "Rejected", color: "#ff4d4f" },
   { value: "closed", label: "Closed", color: "#8bafd4" },
 ];
+
+const PROGRESS_PERCENTS = [10, 25, 33, 50, 75, 90];
 
 const REJECTION_REASONS = [
   { value: "duplicate_request", label: "Duplicate Request" },
@@ -48,6 +54,9 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
   const [assignTo, setAssignTo] = useState(request.assigned_to_user_id || "");
   const [status, setStatus] = useState(request.current_status || "submitted");
   const [progressNotes, setProgressNotes] = useState(request.progress_notes || "");
+  const [progressPercent, setProgressPercent] = useState(
+    typeof request.progress_percent === "number" ? request.progress_percent : null
+  );
 
   const [rejectionReason, setRejectionReason] = useState(request.rejection_reason || "");
   const [rejectionDetails, setRejectionDetails] = useState(request.rejection_details || "");
@@ -119,10 +128,17 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
     setError(null);
     setSaving(true);
     try {
-      await base44.entities.PolicyRequest.update(request.id, {
+      const update = {
         current_status: status,
         progress_notes: progressNotes,
-      });
+      };
+      // Only persist progress_percent when status is in_progress; clear otherwise
+      if (status === "in_progress") {
+        update.progress_percent = progressPercent ?? null;
+      } else {
+        update.progress_percent = null;
+      }
+      await base44.entities.PolicyRequest.update(request.id, update);
       onUpdated?.();
       close();
     } catch (e) {
@@ -298,6 +314,39 @@ export default function PolicyRequestDetailModal({ request, onClose, onUpdated }
                   ))}
                 </div>
               </div>
+
+              {status === "in_progress" && (
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+                    Percent Complete
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {PROGRESS_PERCENTS.map((p) => (
+                      <button key={p} onClick={() => setProgressPercent(p)}
+                        className="px-3 py-1.5 rounded-md text-xs font-semibold"
+                        style={{
+                          background: progressPercent === p ? "rgba(251,146,60,0.18)" : "var(--bg-overlay)",
+                          border: `1px solid ${progressPercent === p ? "#fb923c" : "var(--border-default)"}`,
+                          color: progressPercent === p ? "#fb923c" : "var(--text-secondary)",
+                          minWidth: 56,
+                        }}>
+                        {p}%
+                      </button>
+                    ))}
+                  </div>
+                  {progressPercent != null && (
+                    <div className="mt-2 h-1.5 rounded-full overflow-hidden"
+                      style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                      <div style={{
+                        width: `${progressPercent}%`,
+                        height: "100%",
+                        background: "linear-gradient(90deg, #fb923c, #FEDD00)",
+                        transition: "width 0.2s ease",
+                      }} />
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
