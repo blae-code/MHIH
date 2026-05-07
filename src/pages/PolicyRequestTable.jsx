@@ -287,19 +287,18 @@ export function Header({ navigate, rows, loading, onReload, search, setSearch, s
           </select>
         </div>
 
-        {filtersActive && (
-          <button
-            onClick={() => { setSearch(""); setStatusFilter("all"); }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors"
-            style={{
-              background: "rgba(254,221,0,0.1)",
-              border: "1px solid rgba(254,221,0,0.4)",
-              color: "#FEDD00",
-            }}
-            title="Clear all filters and show all requests">
-            <X size={11} /> Clear filters
-          </button>
-        )}
+        <button
+          onClick={() => { setSearch(""); setStatusFilter("all"); }}
+          disabled={!filtersActive}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: filtersActive ? "rgba(254,221,0,0.1)" : "var(--bg-overlay)",
+            border: `1px solid ${filtersActive ? "rgba(254,221,0,0.4)" : "var(--border-default)"}`,
+            color: filtersActive ? "#FEDD00" : "var(--text-muted)",
+          }}
+          title="Clear all filters and show all requests">
+          <X size={11} /> Clear filters
+        </button>
       </div>
     </div>
   );
