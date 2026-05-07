@@ -27,13 +27,14 @@ const URGENCY_LEVELS = [
 
 const inputStyle = {
   width: "100%",
-  padding: "9px 12px",
+  padding: "10px 14px",
   background: "var(--bg-overlay)",
-  border: "1px solid var(--border-default)",
-  borderRadius: 6,
+  border: "1.5px solid var(--border-default)",
+  borderRadius: 8,
   color: "var(--text-primary)",
   fontSize: 13,
   outline: "none",
+  transition: "border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease",
 };
 
 // <option> elements inherit the OS chrome color when unstyled.
@@ -46,10 +47,11 @@ const optionStyle = {
 const labelStyle = {
   display: "block",
   fontSize: 11,
-  fontWeight: 600,
+  fontWeight: 700,
   color: "var(--text-secondary)",
-  marginBottom: 5,
-  letterSpacing: "0.02em",
+  marginBottom: 6,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
 };
 
 export default function PolicyRequestForm() {
@@ -146,22 +148,50 @@ export default function PolicyRequestForm() {
 
   return (
     <div className="h-full overflow-auto">
-      <div className="px-6 py-4 border-b shrink-0"
+      {/* Inline focus styles for inputs/selects/textareas inside the form */}
+      <style>{`
+        .prf-form input:focus,
+        .prf-form select:focus,
+        .prf-form textarea:focus {
+          border-color: #FEDD00 !important;
+          box-shadow: 0 0 0 3px rgba(254,221,0,0.15);
+          background: var(--bg-elevated) !important;
+        }
+        .prf-form input:hover:not(:focus),
+        .prf-form select:hover:not(:focus),
+        .prf-form textarea:hover:not(:focus) {
+          border-color: var(--border-emphasis, #FEDD00) !important;
+          border-color: rgba(254,221,0,0.45) !important;
+        }
+        .prf-field {
+          background: var(--bg-surface);
+          border: 1px solid var(--border-subtle);
+          border-radius: 10px;
+          padding: 12px 14px;
+          transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .prf-field:focus-within {
+          border-color: rgba(254,221,0,0.4);
+          background: var(--bg-overlay);
+        }
+      `}</style>
+
+      <div className="px-6 py-5 border-b shrink-0"
         style={{
           background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 45%, var(--bg-elevated) 100%)",
           borderColor: "var(--border-default)",
         }}>
         <div className="dashboard-section-label">Red River Module · Intake</div>
-        <h1 className="text-base font-bold mt-1 flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-          <FileSignature size={16} style={{ color: "#FEDD00" }} />
+        <h1 className="text-lg font-bold mt-1 flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+          <FileSignature size={18} style={{ color: "#FEDD00" }} />
           Policy Request Form
         </h1>
-        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+        <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
           Submit a request for legislation review, document review, or policy development assistance.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="prf-form max-w-3xl mx-auto p-6 space-y-6">
         {error && (
           <div className="rounded-lg p-3 text-xs flex items-center gap-2"
             style={{ background: "rgba(255,77,79,0.1)", border: "1px solid rgba(255,77,79,0.3)", color: "#ff4d4f" }}>
@@ -307,9 +337,17 @@ export default function PolicyRequestForm() {
 function Section({ title, children }) {
   return (
     <div className="rounded-xl p-5 space-y-4"
-      style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-      <div className="text-xs font-bold uppercase tracking-wider" style={{ color: "#FEDD00", letterSpacing: "0.08em" }}>
-        {title}
+      style={{
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-subtle)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
+      }}>
+      <div className="flex items-center gap-2 pb-3 mb-1"
+        style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+        <span style={{ width: 3, height: 14, background: "#FEDD00", borderRadius: 2, boxShadow: "0 0 6px rgba(254,221,0,0.5)" }} />
+        <div className="text-xs font-bold uppercase" style={{ color: "#FEDD00", letterSpacing: "0.1em" }}>
+          {title}
+        </div>
       </div>
       {children}
     </div>
@@ -318,7 +356,7 @@ function Section({ title, children }) {
 
 function Field({ label, children }) {
   return (
-    <div>
+    <div className="prf-field">
       <label style={labelStyle}>{label}</label>
       {children}
     </div>
