@@ -11,11 +11,11 @@ const REQUEST_TYPES = [
 ];
 
 const DEPARTMENTS = [
-  "Mental Health and Harm Reduction",
-  "Social Programs and Administration",
-  "Health",
-  "Veterans",
   "Elders",
+  "Health",
+  "Mental Health & Harm Reduction",
+  "Social Programs & Administration",
+  "Veterans",
 ];
 
 const URGENCY_LEVELS = [
