@@ -288,6 +288,7 @@ function CommentItem({
   const isEditing = editingId === c.id;
   const avatarSize = isReply ? 24 : 30;
   const canCollapse = !isReply && !!onToggleCollapse;
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
 
   return (
     <div className="flex gap-2.5">
@@ -354,15 +355,34 @@ function CommentItem({
                 style={{ width: 22, height: 22 }} title="Reply">
                 <Reply size={10} />
               </button>
-              {isMine && (
+              {isMine && !confirmDelete && (
                 <>
                   <button onClick={() => onStartEdit(c)} className="activity-icon"
                     style={{ width: 22, height: 22 }} title="Edit">
                     <Pencil size={10} />
                   </button>
-                  <button onClick={() => onDelete(c.id)} className="activity-icon"
+                  <button onClick={() => setConfirmDelete(true)} className="activity-icon"
                     style={{ width: 22, height: 22, color: "#ff4d4f" }} title="Delete">
                     <Trash2 size={10} />
+                  </button>
+                </>
+              )}
+              {isMine && confirmDelete && (
+                <>
+                  <span className="text-xs font-semibold" style={{ color: "#ff4d4f", fontSize: 10.5 }}>
+                    Delete?
+                  </span>
+                  <button onClick={() => { setConfirmDelete(false); onDelete(c.id); }}
+                    className="px-2 py-0.5 rounded text-xs font-semibold flex items-center gap-1"
+                    style={{ background: "#ff4d4f", color: "#fff", fontSize: 10.5 }}
+                    title="Confirm delete">
+                    <Trash2 size={10} /> Yes
+                  </button>
+                  <button onClick={() => setConfirmDelete(false)}
+                    className="px-2 py-0.5 rounded text-xs font-semibold"
+                    style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)", fontSize: 10.5 }}
+                    title="Cancel">
+                    No
                   </button>
                 </>
               )}
