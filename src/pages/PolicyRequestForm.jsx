@@ -77,6 +77,8 @@ export default function PolicyRequestForm() {
     reason_for_urgency: "",
     relevant_documents_urls: "",
     preferred_communication_method: "Email",
+    submitter_name: "",
+    submitter_contact: "",
   });
 
   useEffect(() => {
@@ -318,6 +320,20 @@ export default function PolicyRequestForm() {
               onChange={(e) => update("relevant_documents_urls", e.target.value)}
               placeholder="https://..." />
           </Field>
+        </Section>
+
+        <Section title="Submitted By">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Your Name *">
+              <input style={inputStyle} value={form.submitter_name}
+                onChange={(e) => update("submitter_name", e.target.value)} required />
+            </Field>
+            <Field label="Your Contact Information *">
+              <input style={inputStyle} value={form.submitter_contact}
+                onChange={(e) => update("submitter_contact", e.target.value)}
+                placeholder="Email or phone" required />
+            </Field>
+          </div>
         </Section>
 
         <div className="flex gap-3 justify-end pt-2">
