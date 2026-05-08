@@ -39,8 +39,6 @@ const NAV_COMMANDS = [
   { label: "AI Agents", page: "AgentCenter", icon: Bot, section: "Data", desc: "Automated agent tasks" },
   { label: "Export", page: "Export", icon: FileDown, section: "Data", desc: "Download CSV or PDF" },
   { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: TrendingUp, section: "Analytics", desc: "Forecasts & modelling" },
-  { label: "Geo Map", page: "GeoMap", icon: MapPin, section: "Analytics", desc: "Regional health map" },
-  { label: "Alerts", page: "Alerts", icon: BellRing, section: "Analytics", desc: "Threshold notifications" },
   { label: "Data Prep", page: "DataPrep", icon: Wrench, section: "Analytics", desc: "Clean & transform data" },
   { label: "Workflows", page: "Workflows", icon: Workflow, section: "Analytics", desc: "Automated pipelines" },
   { label: "Governance", page: "DataGovernance", icon: Shield, section: "Analytics", desc: "Audit logs & policies" },

@@ -137,8 +137,6 @@ export const APP_REGISTRY = [
         section: "Analytics",
         items: [
           { label: "Predictive", page: "PredictiveAnalytics", icon: "TrendingUp" },
-          { label: "Geo Map", page: "GeoMap", icon: "MapPin" },
-          { label: "Alerts", page: "Alerts", icon: "BellRing" },
           { label: "Data Prep", page: "DataPrep", icon: "Wrench" },
           { label: "Workflows", page: "Workflows", icon: "Workflow" },
           { label: "Governance", page: "DataGovernance", icon: "Shield" },

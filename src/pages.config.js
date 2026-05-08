@@ -17,7 +17,6 @@ import MinistryOverview from './pages/MinistryOverview';
 import AIInsights from './pages/AIInsights';
 import Admin from './pages/Admin';
 import AgentCenter from './pages/AgentCenter';
-import Alerts from './pages/Alerts';
 import AlertsCenter from './pages/AlertsCenter';
 import ApprovalsInbox from './pages/ApprovalsInbox';
 import Backtesting from './pages/Backtesting';
@@ -34,7 +33,6 @@ import EvidenceExplorer from './pages/EvidenceExplorer';
 import EvidenceSnapshots from './pages/EvidenceSnapshots';
 import Export from './pages/Export';
 import GeoEquityMap from './pages/GeoEquityMap';
-import GeoMap from './pages/GeoMap';
 import HansardIntel from './pages/HansardIntel';
 import Interventions from './pages/Interventions';
 import KnowledgeAdmin from './pages/KnowledgeAdmin';
@@ -76,7 +74,6 @@ export const PAGES = {
     "AIInsights": AIInsights,
     "Admin": Admin,
     "AgentCenter": AgentCenter,
-    "Alerts": Alerts,
     "AlertsCenter": AlertsCenter,
     "ApprovalsInbox": ApprovalsInbox,
     "Backtesting": Backtesting,
@@ -93,7 +90,6 @@ export const PAGES = {
     "EvidenceSnapshots": EvidenceSnapshots,
     "Export": Export,
     "GeoEquityMap": GeoEquityMap,
-    "GeoMap": GeoMap,
     "HansardIntel": HansardIntel,
     "Interventions": Interventions,
     "KnowledgeAdmin": KnowledgeAdmin,

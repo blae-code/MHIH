@@ -67,8 +67,6 @@ export const PAGE_ROUTE_MAP = {
 
   // ── MHIH app — analytics ─────────────────────────────────────────────
   PredictiveAnalytics: "/os/apps/mhih/predictive",
-  GeoMap: "/os/apps/mhih/geo-map",
-  Alerts: "/os/apps/mhih/alerts",
   DataPrep: "/os/apps/mhih/data-prep",
   Workflows: "/os/apps/mhih/workflows",
   DataGovernance: "/os/apps/mhih/data-governance",
