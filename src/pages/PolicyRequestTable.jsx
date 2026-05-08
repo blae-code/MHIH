@@ -370,9 +370,9 @@ export function Header({
             style={{ color: "var(--text-primary)" }} />
         </div>
 
-        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md"
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
           style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
-          <Filter size={11} style={{ color: "var(--text-muted)" }} />
+          <Filter size={10} style={{ color: "var(--text-muted)" }} />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-transparent outline-none text-xs cursor-pointer"
             style={{ color: "var(--text-primary)" }}>
@@ -394,20 +394,20 @@ export function Header({
         <button
           onClick={() => { setSearch(""); setStatusFilter("all"); }}
           disabled={!filtersActive}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             background: filtersActive ? "rgba(254,221,0,0.1)" : "var(--bg-overlay)",
             border: `1px solid ${filtersActive ? "rgba(254,221,0,0.4)" : "var(--border-default)"}`,
             color: filtersActive ? "#FEDD00" : "var(--text-muted)",
           }}
           title="Clear all filters and show all requests">
-          <X size={11} /> Clear filters
+          <X size={10} /> Clear
         </button>
 
-        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md"
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
           style={{ background: "rgba(254,221,0,0.06)", border: "1px solid rgba(254,221,0,0.3)" }}
           title="Group results by">
-          <Layers size={11} style={{ color: "#FEDD00" }} />
+          <Layers size={10} style={{ color: "#FEDD00" }} />
           <span className="text-xs font-semibold" style={{ color: "#FEDD00" }}>Group by</span>
           <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)}
             className="bg-transparent outline-none text-xs cursor-pointer font-semibold"
@@ -418,14 +418,14 @@ export function Header({
           </select>
         </div>
 
-        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md"
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
           style={{
             background: groupBy2 !== "none" ? "rgba(254,221,0,0.06)" : "var(--bg-overlay)",
             border: `1px solid ${groupBy2 !== "none" ? "rgba(254,221,0,0.3)" : "var(--border-default)"}`,
             opacity: 1,
           }}
           title="Then group within each by">
-          <Layers size={11} style={{ color: groupBy2 !== "none" ? "#FEDD00" : "var(--text-muted)" }} />
+          <Layers size={10} style={{ color: groupBy2 !== "none" ? "#FEDD00" : "var(--text-muted)" }} />
           <span className="text-xs font-semibold" style={{ color: groupBy2 !== "none" ? "#FEDD00" : "var(--text-muted)" }}>Then by</span>
           <select value={groupBy2} onChange={(e) => setGroupBy2(e.target.value)}
             className="bg-transparent outline-none text-xs cursor-pointer font-semibold"
