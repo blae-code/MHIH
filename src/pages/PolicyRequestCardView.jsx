@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { RefreshCw, Calendar, Building2, User as UserIcon, AlertTriangle } from "lucide-react";
 import { Header } from "./PolicyRequestTable";
@@ -24,25 +25,23 @@ const URGENCY_COLORS = {
 
 export default function PolicyRequestCardView() {
   const navigate = useNavigate();
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [active, setActive] = useState(null);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await base44.entities.PolicyRequest.list("-created_date", 500);
-      setRows(data || []);
-    } catch (e) {
-      console.warn(e?.message ?? e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: rows = [], isLoading: loading, isFetching, refetch } = useQuery({
+    queryKey: ["policy-requests"],
+    queryFn: () => base44.entities.PolicyRequest.list("-created_date", 500),
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
+    staleTime: 30_000,
+  });
 
-  useEffect(() => { load(); }, []);
+  const load = () => {
+    queryClient.invalidateQueries({ queryKey: ["policy-requests"] });
+    refetch();
+  };
 
   const grouped = useMemo(() => {
     const filtered = rows.filter((r) => {
@@ -71,7 +70,7 @@ export default function PolicyRequestCardView() {
       <Header
         navigate={navigate}
         rows={rows}
-        loading={loading}
+        loading={loading || isFetching}
         onReload={load}
         search={search}
         setSearch={setSearch}
