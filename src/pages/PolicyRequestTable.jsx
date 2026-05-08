@@ -379,7 +379,7 @@ export function Header({
             disabled={!filtersActive}
             className="flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
-              width: 24, height: 24, marginLeft: 5,
+              width: 24, height: 24, marginRight: -5, marginLeft: 10,
               background: filtersActive ? "rgba(255,77,79,0.12)" : "transparent",
               border: `1px solid ${filtersActive ? "rgba(255,77,79,0.5)" : "transparent"}`,
               color: filtersActive ? "#ff4d4f" : "var(--text-muted)",
