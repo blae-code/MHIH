@@ -373,19 +373,19 @@ export function Header({
             style={{ color: "var(--text-primary)" }} />
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => { setSearch(""); setStatusFilter("all"); }}
             disabled={!filtersActive}
-            className="flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed mr-0.5"
             style={{
-              width: 28, height: 28,
-              background: filtersActive ? "rgba(255,77,79,0.12)" : "var(--bg-overlay)",
-              border: `1px solid ${filtersActive ? "rgba(255,77,79,0.5)" : "var(--border-default)"}`,
+              width: 24, height: 24,
+              background: filtersActive ? "rgba(255,77,79,0.12)" : "transparent",
+              border: `1px solid ${filtersActive ? "rgba(255,77,79,0.5)" : "transparent"}`,
               color: filtersActive ? "#ff4d4f" : "var(--text-muted)",
             }}
             title="Clear all filters">
-            <Trash2 size={12} />
+            <Trash2 size={11} />
           </button>
 
           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
