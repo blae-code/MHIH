@@ -104,17 +104,18 @@ export default function DateInputWithPicker({ value, onChange, inputStyle, place
               color: #043673 !important;
               font-weight: 700;
             }
-            .diwp-popover .rdp-day_today:not([aria-selected="true"]) {
+            .diwp-popover button.rdp-day_today,
+            .diwp-popover .rdp-day_today {
               background: transparent !important;
               color: #FEDD00 !important;
-              font-weight: 700;
+              font-weight: 700 !important;
               border: 1px solid rgba(254,221,0,0.5) !important;
             }
-            .diwp-popover .rdp-day_today[aria-selected="true"],
-            .diwp-popover .rdp-day_today.rdp-day_selected {
+            .diwp-popover button.rdp-day_today.rdp-day_selected,
+            .diwp-popover .rdp-day_today[aria-selected="true"] {
               background: #FEDD00 !important;
               color: #043673 !important;
-              font-weight: 700;
+              border-color: #FEDD00 !important;
             }
             .diwp-popover .rdp-head_cell,
             .diwp-popover .rdp-caption_label,
