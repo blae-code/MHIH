@@ -33,9 +33,11 @@ export default function PolicyRequestCardView() {
   const { data: rows = [], isLoading: loading, isFetching, refetch } = useQuery({
     queryKey: ["policy-requests"],
     queryFn: () => base44.entities.PolicyRequest.list("-created_date", 500),
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: "always",
     refetchOnMount: "always",
-    staleTime: 30_000,
+    refetchOnReconnect: "always",
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const load = () => {
