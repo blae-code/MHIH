@@ -65,7 +65,10 @@ export function buildGroups(rows, { search, statusFilter, groupBy, groupBy2 = "n
     const matchesSearch = !search ||
       [r.request_title, r.contact_person_name, r.department, r.assigned_to_user_name]
         .some((v) => (v || "").toLowerCase().includes(search.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || r.current_status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" ? true :
+      statusFilter === "unassigned" ? !r.assigned_to_user_id :
+      r.current_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -370,27 +373,29 @@ export function Header({
             style={{ color: "var(--text-primary)" }} />
         </div>
 
-        <button
-          onClick={() => { setSearch(""); setStatusFilter("all"); }}
-          disabled={!filtersActive}
-          className="flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          style={{
-            width: 28, height: 28,
-            background: filtersActive ? "rgba(255,77,79,0.12)" : "var(--bg-overlay)",
-            border: `1px solid ${filtersActive ? "rgba(255,77,79,0.5)" : "var(--border-default)"}`,
-            color: filtersActive ? "#ff4d4f" : "var(--text-muted)",
-          }}
-          title="Clear all filters">
-          <Trash2 size={12} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => { setSearch(""); setStatusFilter("all"); }}
+            disabled={!filtersActive}
+            className="flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              width: 28, height: 28,
+              background: filtersActive ? "rgba(255,77,79,0.12)" : "var(--bg-overlay)",
+              border: `1px solid ${filtersActive ? "rgba(255,77,79,0.5)" : "var(--border-default)"}`,
+              color: filtersActive ? "#ff4d4f" : "var(--text-muted)",
+            }}
+            title="Clear all filters">
+            <Trash2 size={12} />
+          </button>
 
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
           style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
           <Filter size={10} style={{ color: "var(--text-muted)" }} />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-transparent outline-none text-xs cursor-pointer"
             style={{ color: "var(--text-primary)" }}>
             <option value="all" style={{ background: "#0f1829", color: "#f0f6ff" }}>All Statuses</option>
+            <option value="unassigned" style={{ background: "#0f1829", color: "#f0f6ff" }}>Unassigned</option>
             <option value="submitted" style={{ background: "#0f1829", color: "#f0f6ff" }}>Submitted</option>
             <option value="received" style={{ background: "#0f1829", color: "#f0f6ff" }}>Received</option>
             <option value="in_review" style={{ background: "#0f1829", color: "#f0f6ff" }}>In Review</option>
@@ -403,6 +408,7 @@ export function Header({
             <option value="rejected" style={{ background: "#0f1829", color: "#f0f6ff" }}>Rejected</option>
             <option value="closed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Closed</option>
           </select>
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
