@@ -75,18 +75,51 @@ export default function DateInputWithPicker({ value, onChange, inputStyle, place
 
       {open && (
         <div
+          className="diwp-popover"
           style={{
             position: "absolute",
             top: "calc(100% + 6px)",
             right: 0,
             zIndex: 50,
-            background: "var(--bg-elevated)",
+            background: "#0f1829",
             border: "1px solid var(--border-default)",
             borderRadius: 10,
-            boxShadow: "0 12px 32px rgba(0,0,0,0.5)",
-            padding: 4,
+            boxShadow: "0 12px 32px rgba(0,0,0,0.6)",
+            padding: 8,
           }}
         >
+          <style>{`
+            .diwp-popover { color: #f0f6ff; }
+            .diwp-popover .rdp,
+            .diwp-popover [class*="rdp"] { color: #f0f6ff; --rdp-accent-color: #FEDD00; }
+            .diwp-popover button { color: #f0f6ff; }
+            .diwp-popover button:hover:not([disabled]) {
+              background: rgba(254,221,0,0.12) !important;
+              color: #FEDD00 !important;
+            }
+            .diwp-popover [aria-selected="true"],
+            .diwp-popover .rdp-day_selected,
+            .diwp-popover .rdp-day_selected:hover {
+              background: #FEDD00 !important;
+              color: #043673 !important;
+              font-weight: 700;
+            }
+            .diwp-popover .rdp-day_today:not([aria-selected="true"]) {
+              color: #FEDD00 !important;
+              font-weight: 700;
+            }
+            .diwp-popover .rdp-head_cell,
+            .diwp-popover .rdp-caption_label,
+            .diwp-popover .rdp-weekday {
+              color: #8bafd4 !important;
+              font-weight: 600;
+            }
+            .diwp-popover .rdp-day_outside,
+            .diwp-popover .rdp-day_disabled {
+              color: #4a6a8a !important;
+              opacity: 0.5;
+            }
+          `}</style>
           <Calendar
             mode="single"
             selected={selectedDate}
