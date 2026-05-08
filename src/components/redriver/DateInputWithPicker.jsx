@@ -97,19 +97,28 @@ export default function DateInputWithPicker({ value, onChange, inputStyle, place
               background: rgba(254,221,0,0.12) !important;
               color: #FEDD00 !important;
             }
-            .diwp-popover [aria-selected="true"],
-            .diwp-popover .rdp-day_selected,
-            .diwp-popover .rdp-day_selected:hover {
-              background: #FEDD00 !important;
-              color: #043673 !important;
-              font-weight: 700;
-            }
-            .diwp-popover button.rdp-day_today,
-            .diwp-popover .rdp-day_today {
-              background: #FEDD00 !important;
+            /* Today — yellow bg, dark navy text. High specificity to beat shadcn utilities. */
+            .diwp-popover .rdp .rdp-day_today,
+            .diwp-popover .rdp button.rdp-day_today,
+            .diwp-popover .rdp td button.rdp-day_today,
+            div.diwp-popover button.rdp-day_today {
+              background-color: #FEDD00 !important;
               color: #043673 !important;
               font-weight: 700 !important;
             }
+            div.diwp-popover button.rdp-day_today:not([aria-selected="true"]) {
+              color: #043673 !important;
+            }
+            /* Selected (overrides today if both apply) — yellow bg, dark navy text */
+            .diwp-popover [aria-selected="true"],
+            .diwp-popover .rdp-day_selected,
+            .diwp-popover .rdp-day_selected:hover,
+            .diwp-popover button.rdp-day_selected {
+              background-color: #FEDD00 !important;
+              color: #043673 !important;
+              font-weight: 700 !important;
+            }
+            /* Cell wrapper around today — keep transparent */
             .diwp-popover td:has(.rdp-day_today) {
               background: transparent !important;
             }
