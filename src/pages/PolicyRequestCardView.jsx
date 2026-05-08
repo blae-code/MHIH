@@ -39,7 +39,6 @@ export default function PolicyRequestCardView() {
     refetchOnMount: "always",
     refetchOnReconnect: "always",
     staleTime: 0,
-    gcTime: 0,
   });
 
   const load = () => {

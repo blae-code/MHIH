@@ -114,7 +114,6 @@ export default function PolicyRequestTable() {
     refetchOnMount: "always",
     refetchOnReconnect: "always",
     staleTime: 0,
-    gcTime: 0,
   });
 
   const load = () => {
