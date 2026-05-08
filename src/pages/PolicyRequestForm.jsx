@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { FileSignature, Send, CheckCircle2, X } from "lucide-react";
+import DateInputWithPicker from "../components/redriver/DateInputWithPicker";
 
 const REQUEST_TYPES = [
   { value: "legislation_review", label: "Legislation Review" },
@@ -328,8 +329,11 @@ export default function PolicyRequestForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Required Completion Date">
-              <input type="date" style={inputStyle} value={form.required_completion_date}
-                onChange={(e) => update("required_completion_date", e.target.value)} />
+              <DateInputWithPicker
+                value={form.required_completion_date}
+                onChange={(v) => update("required_completion_date", v)}
+                inputStyle={inputStyle}
+              />
             </Field>
             {(form.urgency === "high" || form.urgency === "critical") && (
               <Field label="Reason for Urgency">
