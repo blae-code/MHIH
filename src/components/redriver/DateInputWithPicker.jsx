@@ -143,6 +143,8 @@ export default function DateInputWithPicker({ value, onChange, inputStyle, place
                 setOpen(false);
               }
             }}
+            modifiersClassNames={{ today: "" }}
+            classNames={{ day_today: "" }}
             initialFocus
           />
         </div>
