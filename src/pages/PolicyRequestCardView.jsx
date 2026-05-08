@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { RefreshCw, Calendar, Building2, User as UserIcon, AlertTriangle } from "lucide-react";
-import { Header } from "./PolicyRequestTable";
+import { Header, buildGroups } from "./PolicyRequestTable";
 import PolicyRequestDetailModal from "../components/redriver/PolicyRequestDetailModal";
 
 const STATUS_COLORS = {
@@ -28,6 +28,8 @@ export default function PolicyRequestCardView() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [urgencyFilter, setUrgencyFilter] = useState("all");
+  const [groupBy, setGroupBy] = useState("assignee");
   const [active, setActive] = useState(null);
 
   const { data: rows = [], isLoading: loading, isFetching, refetch } = useQuery({
@@ -45,27 +47,10 @@ export default function PolicyRequestCardView() {
     refetch();
   };
 
-  const grouped = useMemo(() => {
-    const filtered = rows.filter((r) => {
-      const matchesSearch = !search ||
-        [r.request_title, r.contact_person_name, r.department, r.assigned_to_user_name]
-          .some((v) => (v || "").toLowerCase().includes(search.toLowerCase()));
-      const matchesStatus = statusFilter === "all" || r.current_status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-
-    const groups = {};
-    for (const r of filtered) {
-      const key = r.assigned_to_user_name || "(Unassigned)";
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(r);
-    }
-    return Object.entries(groups).sort(([a], [b]) => {
-      if (a === "(Unassigned)") return -1;
-      if (b === "(Unassigned)") return 1;
-      return a.localeCompare(b);
-    });
-  }, [rows, search, statusFilter]);
+  const grouped = useMemo(
+    () => buildGroups(rows, { search, statusFilter, urgencyFilter, groupBy }),
+    [rows, search, statusFilter, urgencyFilter, groupBy]
+  );
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -78,6 +63,10 @@ export default function PolicyRequestCardView() {
         setSearch={setSearch}
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
+        urgencyFilter={urgencyFilter}
+        setUrgencyFilter={setUrgencyFilter}
+        groupBy={groupBy}
+        setGroupBy={setGroupBy}
         view="cards"
       />
 
@@ -90,24 +79,29 @@ export default function PolicyRequestCardView() {
           <div className="text-center py-12 text-xs" style={{ color: "var(--text-muted)" }}>No requests match your filters.</div>
         ) : (
           <div className="space-y-7">
-            {grouped.map(([assignee, group]) => {
-              const isUnassigned = assignee === "(Unassigned)";
+            {grouped.map(([groupLabel, group]) => {
+              const isPlaceholder = groupLabel.startsWith("(");
+              const accentColor = groupBy === "status" ? STATUS_COLORS[group[0]?.current_status] :
+                groupBy === "urgency" ? URGENCY_COLORS[group[0]?.urgency] : "#FEDD00";
+              const initials = groupBy === "assignee" && !isPlaceholder
+                ? groupLabel.split(" ").map(s => s[0]).slice(0, 2).join("").toUpperCase()
+                : (groupLabel[0] || "?").toUpperCase();
               return (
-                <div key={assignee}>
+                <div key={groupLabel}>
                   <div className="flex items-center gap-2 mb-3 px-1">
                     <span
                       className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                       style={{
-                        background: isUnassigned ? "var(--bg-overlay)" : "rgba(254,221,0,0.15)",
-                        color: isUnassigned ? "var(--text-muted)" : "#FEDD00",
-                        border: `1px solid ${isUnassigned ? "var(--border-default)" : "rgba(254,221,0,0.4)"}`,
+                        background: isPlaceholder ? "var(--bg-overlay)" : `${accentColor || "#FEDD00"}26`,
+                        color: isPlaceholder ? "var(--text-muted)" : (accentColor || "#FEDD00"),
+                        border: `1px solid ${isPlaceholder ? "var(--border-default)" : (accentColor || "#FEDD00") + "66"}`,
                         fontSize: 10,
                       }}>
-                      {isUnassigned ? "?" : assignee.split(" ").map(s => s[0]).slice(0, 2).join("").toUpperCase()}
+                      {isPlaceholder ? "?" : initials}
                     </span>
                     <span className="text-xs font-bold uppercase tracking-wider"
-                      style={{ color: isUnassigned ? "var(--text-muted)" : "var(--text-primary)", letterSpacing: "0.08em" }}>
-                      {assignee}
+                      style={{ color: isPlaceholder ? "var(--text-muted)" : "var(--text-primary)", letterSpacing: "0.08em" }}>
+                      {groupLabel}
                     </span>
                     <span className="text-xs px-2 py-0.5 rounded-full"
                       style={{ color: "var(--text-muted)", background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", fontSize: 10 }}>
