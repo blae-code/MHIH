@@ -1,0 +1,20 @@
+{
+  "name": "Red River OS",
+  "short_name": "Red River OS",
+  "description": "MNBC Health & Wellness operating environment — sovereign governance workspace.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a1220",
+  "theme_color": "#FEDD00",
+  "categories": ["productivity", "government", "health"],
+  "icons": [
+    {
+      "src": "https://media.base44.com/images/public/69a7407c254034e7987ce91e/5998c51b4_generated_image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

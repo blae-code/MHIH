@@ -38,6 +38,7 @@ import FeedbackModal from "./components/feedback/FeedbackModal";
 import CommandPalette from "./components/search/CommandPalette";
 import PatchNotesModal from "./components/changelog/PatchNotesModal";
 import FloatingFeedbackButton from "./components/feedback/FloatingFeedbackButton";
+import PWAStatus from "./components/pwa/PWAStatus";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
 import { isAdmin as checkAdmin, getRoleLabel } from "./platform/permissions";
@@ -794,6 +795,9 @@ function LayoutInner({ children, currentPageName }) {
       {patchNotesOpen && (
         <PatchNotesModal onClose={() => setPatchNotesOpen(false)} />
       )}
+
+      {/* ── PWA install prompt, update toast, offline banner ───────────── */}
+      <PWAStatus />
     </AppContext.Provider>
   );
 }
