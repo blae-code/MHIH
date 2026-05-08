@@ -105,7 +105,15 @@ export default function DateInputWithPicker({ value, onChange, inputStyle, place
               font-weight: 700;
             }
             .diwp-popover .rdp-day_today:not([aria-selected="true"]) {
+              background: transparent !important;
               color: #FEDD00 !important;
+              font-weight: 700;
+              border: 1px solid rgba(254,221,0,0.5) !important;
+            }
+            .diwp-popover .rdp-day_today[aria-selected="true"],
+            .diwp-popover .rdp-day_today.rdp-day_selected {
+              background: #FEDD00 !important;
+              color: #043673 !important;
               font-weight: 700;
             }
             .diwp-popover .rdp-head_cell,
