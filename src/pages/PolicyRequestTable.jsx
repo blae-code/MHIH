@@ -391,6 +391,19 @@ export function Header({
           </select>
         </div>
 
+        <button
+          onClick={() => { setSearch(""); setStatusFilter("all"); }}
+          disabled={!filtersActive}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: filtersActive ? "rgba(254,221,0,0.1)" : "var(--bg-overlay)",
+            border: `1px solid ${filtersActive ? "rgba(254,221,0,0.4)" : "var(--border-default)"}`,
+            color: filtersActive ? "#FEDD00" : "var(--text-muted)",
+          }}
+          title="Clear all filters and show all requests">
+          <X size={11} /> Clear filters
+        </button>
+
         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md"
           style={{ background: "rgba(254,221,0,0.06)", border: "1px solid rgba(254,221,0,0.3)" }}
           title="Group results by">
@@ -423,19 +436,6 @@ export function Header({
             ))}
           </select>
         </div>
-
-        <button
-          onClick={() => { setSearch(""); setStatusFilter("all"); }}
-          disabled={!filtersActive}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{
-            background: filtersActive ? "rgba(254,221,0,0.1)" : "var(--bg-overlay)",
-            border: `1px solid ${filtersActive ? "rgba(254,221,0,0.4)" : "var(--border-default)"}`,
-            color: filtersActive ? "#FEDD00" : "var(--text-muted)",
-          }}
-          title="Clear all filters and show all requests">
-          <X size={11} /> Clear filters
-        </button>
       </div>
     </div>
   );
