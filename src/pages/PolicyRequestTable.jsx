@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
-import { Plus, RefreshCw, Search, LayoutGrid, Table as TableIcon, Filter, X, Layers } from "lucide-react";
+import { Plus, RefreshCw, Search, LayoutGrid, Table as TableIcon, Filter, X, Layers, Trash2 } from "lucide-react";
 import PolicyRequestDetailModal from "../components/redriver/PolicyRequestDetailModal";
 
 const STATUS_COLORS = {
@@ -370,6 +370,20 @@ export function Header({
             style={{ color: "var(--text-primary)" }} />
         </div>
 
+        <button
+          onClick={() => { setSearch(""); setStatusFilter("all"); }}
+          disabled={!filtersActive}
+          className="flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{
+            width: 28, height: 28,
+            background: filtersActive ? "rgba(255,77,79,0.12)" : "var(--bg-overlay)",
+            border: `1px solid ${filtersActive ? "rgba(255,77,79,0.5)" : "var(--border-default)"}`,
+            color: filtersActive ? "#ff4d4f" : "var(--text-muted)",
+          }}
+          title="Clear all filters">
+          <Trash2 size={12} />
+        </button>
+
         <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
           style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }}>
           <Filter size={10} style={{ color: "var(--text-muted)" }} />
@@ -390,19 +404,6 @@ export function Header({
             <option value="closed" style={{ background: "#0f1829", color: "#f0f6ff" }}>Closed</option>
           </select>
         </div>
-
-        <button
-          onClick={() => { setSearch(""); setStatusFilter("all"); }}
-          disabled={!filtersActive}
-          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{
-            background: filtersActive ? "rgba(254,221,0,0.1)" : "var(--bg-overlay)",
-            border: `1px solid ${filtersActive ? "rgba(254,221,0,0.4)" : "var(--border-default)"}`,
-            color: filtersActive ? "#FEDD00" : "var(--text-muted)",
-          }}
-          title="Clear all filters and show all requests">
-          <X size={10} /> Clear
-        </button>
 
         <div className="flex items-center gap-1.5 px-2 py-1 rounded-md"
           style={{ background: "rgba(254,221,0,0.06)", border: "1px solid rgba(254,221,0,0.3)" }}
