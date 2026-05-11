@@ -107,7 +107,10 @@ export default function PolicyRequestTable() {
   const [groupBy2, setGroupBy2] = useState("none");
   const [active, setActive] = useState(null);
 
-  const { data: rows = [], isLoading: loading, isFetching, refetch } = useQuery({
+  const [manualRows, setManualRows] = useState(null);
+  const [manualLoading, setManualLoading] = useState(false);
+
+  const { data: queryRows = [], isLoading: loading, isFetching, refetch } = useQuery({
     queryKey: ["policy-requests"],
     queryFn: () => base44.entities.PolicyRequest.list("-created_date", 500),
     refetchOnWindowFocus: "always",
@@ -116,9 +119,18 @@ export default function PolicyRequestTable() {
     staleTime: 0,
   });
 
-  const load = () => {
-    queryClient.invalidateQueries({ queryKey: ["policy-requests"] });
-    refetch();
+  // Manual rows take precedence once "Show all requests" has been clicked
+  const rows = manualRows ?? queryRows;
+
+  const load = async () => {
+    setManualLoading(true);
+    try {
+      const fresh = await base44.entities.PolicyRequest.list("-created_date", 500);
+      setManualRows(fresh);
+      queryClient.setQueryData(["policy-requests"], fresh);
+    } finally {
+      setManualLoading(false);
+    }
   };
 
   const grouped = useMemo(
@@ -131,7 +143,7 @@ export default function PolicyRequestTable() {
       <Header
         navigate={navigate}
         rows={rows}
-        loading={loading || isFetching}
+        loading={loading || isFetching || manualLoading}
         onReload={load}
         search={search}
         setSearch={setSearch}
