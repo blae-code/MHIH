@@ -327,6 +327,19 @@ export function Header({
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
             {rows.length} total · grouped by assignee
           </p>
+          <button
+            onClick={onReload}
+            disabled={loading}
+            className="mt-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-50"
+            style={{
+              background: "rgba(254,221,0,0.08)",
+              border: "1px solid rgba(254,221,0,0.35)",
+              color: "#FEDD00",
+            }}
+            title="Reload all policy requests">
+            <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
+            Show all requests
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
