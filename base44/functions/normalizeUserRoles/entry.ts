@@ -1,5 +1,20 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import { normalizeEmail, resolveRoleForUser } from './_shared/rolePolicy.ts';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+// Inlined from _shared/rolePolicy.ts — functions cannot use local imports
+// (each function is deployed independently). Keep in sync with the shared
+// module if it ever changes.
+const SYSTEM_ADMIN_EMAIL = 'blae@katrasoluta.com';
+
+function normalizeEmail(email: string | null | undefined) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function resolveRoleForUser(email: string | null | undefined, currentRole: string | null | undefined) {
+  const normalized = normalizeEmail(email);
+  if (normalized === SYSTEM_ADMIN_EMAIL) return 'admin';
+  if (currentRole === 'admin') return 'admin';
+  return 'user';
+}
 
 Deno.serve(async (req) => {
   try {
