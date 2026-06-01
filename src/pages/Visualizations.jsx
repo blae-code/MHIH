@@ -6,12 +6,14 @@ import {
 } from "recharts";
 import {
   BarChart3, LineChartIcon, PieChartIcon, TrendingUp, Grid3X3, GitFork,
-  Network, Download, RefreshCw, X, Filter, Link2, SlidersHorizontal
+  Network, Download, RefreshCw, X, Link2, SlidersHorizontal
 } from "lucide-react";
 import HeatmapChart from "@/components/viz/HeatmapChart";
 import SankeyChart from "@/components/viz/SankeyChart";
 import NetworkGraph from "@/components/viz/NetworkGraph";
 import DrillDownPanel from "@/components/viz/DrillDownPanel";
+import VizStatStrip from "@/components/viz/VizStatStrip";
+import ZoneHeader from "@/components/shell/ZoneHeader";
 import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const COLORS = ["#FEDD00", "#40c4ff", "#00e676", "#a78bfa", "#ff6b6b", "#ffab40", "#34d399", "#fb923c"];
@@ -264,203 +266,370 @@ export default function Visualizations() {
     addLog("success", "Chart exported as SVG");
   };
 
+  if (loading) return (
+    <div className="flex items-center justify-center h-full" style={{ color: "var(--text-muted)" }}>
+      <RefreshCw size={20} className="animate-spin mr-2" /> Loading visualizations...
+    </div>
+  );
+
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-
-      {/* ── Header ── */}
-      <div className="px-6 py-4 shrink-0 relative overflow-hidden"
+    <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
+      {/* Ambient page glow — matches Dashboard depth treatment */}
+      <div
+        aria-hidden
         style={{
-          background: "linear-gradient(135deg, var(--bg-surface) 0%, #091828 50%, var(--bg-elevated) 100%)",
-          borderBottom: "1px solid var(--border-default)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(64,196,255,0.1)"
-        }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #40c4ff 0%, #FEDD00 50%, transparent 100%)" }} />
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, rgba(64,196,255,0.15) 0%, rgba(64,196,255,0.05) 100%)", border: "1px solid rgba(64,196,255,0.25)", boxShadow: "0 0 16px rgba(64,196,255,0.1)" }}>
-              <BarChart3 size={16} style={{ color: "#40c4ff" }} />
-            </div>
-            <div>
-              <div className="dashboard-section-label" style={{ marginBottom: 0, color: "#40c4ff" }}>Visualizations</div>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Interactive charts with drill-down and cross-filtering</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setLinkedMode(v => !v)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-              title="When enabled, clicking a chart element cross-filters all views"
-              style={{
-                background: linkedMode ? "rgba(64,196,255,0.1)" : "var(--bg-overlay)",
-                border: `1px solid ${linkedMode ? "rgba(64,196,255,0.4)" : "var(--border-default)"}`,
-                color: linkedMode ? "#40c4ff" : "var(--text-secondary)",
-              }}>
-              <Link2 size={12} /> Linked {linkedMode ? "On" : "Off"}
-            </button>
-            <button onClick={handleExportSVG}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-              style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}
-              onMouseOver={e => { e.currentTarget.style.borderColor = "var(--border-emphasis)"; e.currentTarget.style.color = "var(--text-primary)"; }}
-              onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border-default)"; e.currentTarget.style.color = "var(--text-secondary)"; }}>
-              <Download size={12} /> Export SVG
-            </button>
-          </div>
-        </div>
-      </div>
+          position: "absolute",
+          top: 0, left: 0, right: 0, height: 260,
+          background: "radial-gradient(ellipse 60% 100% at 50% 0%, rgba(64,196,255,0.06) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0, height: 200,
+          background: "radial-gradient(ellipse 50% 100% at 50% 100%, rgba(254,221,0,0.04) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
 
-      {/* ── Filter / Controls Bar ── */}
-      <div className="px-5 py-2.5 shrink-0 flex items-center gap-3 flex-wrap"
-        style={{ background: "var(--bg-surface)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="flex items-center gap-1.5 text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
-          <SlidersHorizontal size={12} />
-          <span>Filters</span>
-        </div>
+      <style>{`
+        .viz-widget-card {
+          border-radius: 10px;
+          border: 1.5px solid;
+          border-image: linear-gradient(135deg, rgba(64,196,255,0.4) 0%, rgba(254,221,0,0.3) 50%, rgba(64,196,255,0.2) 100%) 1;
+          background: #0a1220;
+          padding: 14px;
+          transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+          position: relative;
+          overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(64,196,255,0.08), 0 0 20px rgba(64,196,255,0.05);
+        }
+        .viz-widget-card:hover {
+          border-image: linear-gradient(135deg, rgba(64,196,255,0.6) 0%, rgba(254,221,0,0.5) 50%, rgba(64,196,255,0.4) 100%) 1;
+          box-shadow: inset 0 1px 0 rgba(64,196,255,0.15), 0 0 32px rgba(64,196,255,0.15), 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .viz-widget-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(64,196,255,0.02) 0%, transparent 100%);
+          pointer-events: none;
+        }
+        .viz-zone {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+      `}</style>
 
-        {/* Category filter */}
-        <select value={filterCat} onChange={e => { setFilterCat(e.target.value); setDrillDown(null); }}
-          className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
-          style={{ background: "var(--bg-overlay)", border: `1px solid ${filterCat !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: filterCat !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 140 }}>
-          <option value="all">All Categories</option>
-          {cats.map(c => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}
-        </select>
+      {/* Main container — page scrolls naturally; widgets use natural heights */}
+      <div className="flex flex-col p-3 relative" style={{ zIndex: 1 }}>
 
-        {/* Region filter */}
-        <select value={filterRegion} onChange={e => { setFilterRegion(e.target.value); setDrillDown(null); }}
-          className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
-          style={{ background: "var(--bg-overlay)", border: `1px solid ${filterRegion !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: filterRegion !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 120 }}>
-          <option value="all">All Regions</option>
-          {regions.map(r => <option key={r} value={r}>{r}</option>)}
-        </select>
-
-        {/* Year filter */}
-        <select value={filterYear} onChange={e => { setFilterYear(e.target.value); setDrillDown(null); }}
-          className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
-          style={{ background: "var(--bg-overlay)", border: `1px solid ${filterYear !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: filterYear !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 100 }}>
-          <option value="all">All Years</option>
-          {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
-        </select>
-
-        {activeFilters.length > 0 && (
-          <button onClick={clearFilters}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all"
-            style={{ background: "rgba(255,23,68,0.08)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.2)" }}>
-            <X size={10} /> Clear
-          </button>
-        )}
-
-        <div className="flex-1" />
-
-        {/* Active filter pills */}
-        {activeFilters.map((f, i) => (
-          <span key={i} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full"
-            style={{ background: "rgba(254,221,0,0.08)", color: "var(--accent-primary)", border: "1px solid rgba(254,221,0,0.25)" }}>
-            {f.label}
-            <button onClick={f.onRemove}><X size={9} /></button>
-          </span>
-        ))}
-
-        <span className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
-          style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", border: "1px solid var(--border-subtle)" }}>
-          {filtered.length} data points
-        </span>
-      </div>
-
-      {/* ── Main Content ── */}
-      <div className="flex-1 overflow-auto p-5 space-y-4">
-
-        {/* Chart type selector + group-by */}
-        <div className="flex flex-wrap gap-3 items-center px-4 py-3 rounded-xl"
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-          <div className="flex items-center gap-1 flex-wrap">
-            {CHART_TYPES.map(ct => (
-              <button key={ct.value} onClick={() => setChartType(ct.value)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+        {/* ── Header strip ───────────────────────────────────────────── */}
+        <div className="rounded-xl px-5 py-3 mb-3 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, var(--bg-surface) 0%, #091828 50%, var(--bg-elevated) 100%)",
+            border: "1px solid var(--border-default)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(64,196,255,0.1)"
+          }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #40c4ff 0%, #FEDD00 50%, transparent 100%)" }} />
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{
-                  background: chartType === ct.value ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
-                  color: chartType === ct.value ? "var(--accent-primary)" : "var(--text-secondary)",
-                  border: `1px solid ${chartType === ct.value ? "rgba(254,221,0,0.35)" : "transparent"}`,
-                  fontWeight: chartType === ct.value ? 600 : 400,
+                  background: "linear-gradient(135deg, rgba(64,196,255,0.15) 0%, rgba(64,196,255,0.05) 100%)",
+                  border: "1px solid rgba(64,196,255,0.25)",
+                  boxShadow: "0 0 16px rgba(64,196,255,0.1)"
                 }}>
-                <ct.icon size={12} />{ct.label}
-              </button>
-            ))}
-          </div>
-
-          {!["heatmap", "sankey", "network"].includes(chartType) && (
-            <>
-              <div className="w-px h-5 shrink-0" style={{ background: "var(--border-subtle)" }} />
-              <div className="flex items-center gap-2">
-                <span className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>Group by</span>
-                <select value={groupBy} onChange={e => setGroupBy(e.target.value)}
-                  className="text-xs px-2.5 py-1.5 rounded-lg outline-none"
-                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
-                  <option value="category">Category</option>
-                  <option value="region">Region</option>
-                  <option value="year">Year</option>
-                  <option value="name">Metric Name</option>
-                </select>
+                <BarChart3 size={16} style={{ color: "#40c4ff" }} />
               </div>
-            </>
-          )}
+              <div>
+                <div className="dashboard-section-label" style={{ marginBottom: 0, color: "#40c4ff" }}>Visualizations</div>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  Interactive charts with drill-down and cross-filtering
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setLinkedMode(v => !v)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                title="When enabled, clicking a chart element cross-filters all views"
+                style={{
+                  background: linkedMode ? "rgba(64,196,255,0.1)" : "var(--bg-overlay)",
+                  border: `1px solid ${linkedMode ? "rgba(64,196,255,0.4)" : "var(--border-default)"}`,
+                  color: linkedMode ? "#40c4ff" : "var(--text-secondary)",
+                }}>
+                <Link2 size={12} /> Linked {linkedMode ? "On" : "Off"}
+              </button>
+              <button onClick={handleExportSVG}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = "var(--border-emphasis)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border-default)"; e.currentTarget.style.color = "var(--text-secondary)"; }}>
+                <Download size={12} /> Export SVG
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Chart card */}
-        <div className="rounded-xl overflow-hidden" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}>
-          <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>{chartTitle}</span>
+        {/* ── Stat strip — dataset overview ──────────────────────────── */}
+        <div className="mb-3">
+          <VizStatStrip filtered={filtered} metrics={metrics} cats={cats} regions={regions} years={years} />
+        </div>
+
+        {/* ── Filter / Controls Bar ──────────────────────────────────── */}
+        <div className="rounded-xl px-4 py-2.5 mb-3 flex items-center gap-3 flex-wrap"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 1px 2px rgba(0,0,0,0.3)",
+          }}>
+          <div className="flex items-center gap-1.5 text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
+            <SlidersHorizontal size={12} />
+            <span>Filters</span>
+          </div>
+
+          <select value={filterCat} onChange={e => { setFilterCat(e.target.value); setDrillDown(null); }}
+            className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ background: "var(--bg-overlay)", border: `1px solid ${filterCat !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: filterCat !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 140 }}>
+            <option value="all">All Categories</option>
+            {cats.map(c => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}
+          </select>
+
+          <select value={filterRegion} onChange={e => { setFilterRegion(e.target.value); setDrillDown(null); }}
+            className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ background: "var(--bg-overlay)", border: `1px solid ${filterRegion !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: filterRegion !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 120 }}>
+            <option value="all">All Regions</option>
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+
+          <select value={filterYear} onChange={e => { setFilterYear(e.target.value); setDrillDown(null); }}
+            className="text-xs px-3 py-2 rounded-lg outline-none transition-all"
+            style={{ background: "var(--bg-overlay)", border: `1px solid ${filterYear !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: filterYear !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 100 }}>
+            <option value="all">All Years</option>
+            {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+          </select>
+
+          {activeFilters.length > 0 && (
+            <button onClick={clearFilters}
+              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all"
+              style={{ background: "rgba(255,23,68,0.08)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.2)" }}>
+              <X size={10} /> Clear
+            </button>
+          )}
+
+          <div className="flex-1" />
+
+          {activeFilters.map((f, i) => (
+            <span key={i} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full"
+              style={{ background: "rgba(254,221,0,0.08)", color: "var(--accent-primary)", border: "1px solid rgba(254,221,0,0.25)" }}>
+              {f.label}
+              <button onClick={f.onRemove}><X size={9} /></button>
+            </span>
+          ))}
+
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full shrink-0"
+            style={{ background: "var(--bg-overlay)", color: "var(--text-muted)", border: "1px solid var(--border-subtle)" }}>
+            {filtered.length} data points
+          </span>
+        </div>
+
+        {/* ── 2-zone cockpit layout ──────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
+
+          {/* ── Left zone: Explorer ─────────────────────────────────── */}
+          <div className="viz-zone flex flex-col">
+            <ZoneHeader
+              label="Explorer"
+              title={chartTitle}
+              count={`${chartData.length || 0} groups`}
+              hint={["heatmap", "sankey", "network"].includes(chartType) ? "interactive — click to filter" : "click bars / segments to drill down"}
+            />
+
+            {/* Chart-type selector + group-by */}
+            <div className="viz-widget-card" style={{ padding: 10 }}>
+              <div className="flex flex-wrap gap-2 items-center relative z-10">
+                <div className="flex items-center gap-1 flex-wrap">
+                  {CHART_TYPES.map(ct => (
+                    <button key={ct.value} onClick={() => setChartType(ct.value)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                      style={{
+                        background: chartType === ct.value ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)",
+                        color: chartType === ct.value ? "var(--accent-primary)" : "var(--text-secondary)",
+                        border: `1px solid ${chartType === ct.value ? "rgba(254,221,0,0.35)" : "transparent"}`,
+                        fontWeight: chartType === ct.value ? 600 : 400,
+                      }}>
+                      <ct.icon size={12} />{ct.label}
+                    </button>
+                  ))}
+                </div>
+
+                {!["heatmap", "sankey", "network"].includes(chartType) && (
+                  <>
+                    <div className="w-px h-5 shrink-0" style={{ background: "var(--border-subtle)" }} />
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>Group by</span>
+                      <select value={groupBy} onChange={e => setGroupBy(e.target.value)}
+                        className="text-xs px-2.5 py-1.5 rounded-lg outline-none"
+                        style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" }}>
+                        <option value="category">Category</option>
+                        <option value="region">Region</option>
+                        <option value="year">Year</option>
+                        <option value="name">Metric Name</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-            {!["heatmap", "sankey", "network"].includes(chartType) && (
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>Click bars/segments to drill down</span>
+
+            {/* Main chart card */}
+            <div className="viz-widget-card">
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="dashboard-section-label" style={{ marginBottom: 0 }}>{chartTitle}</div>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {chartType.toUpperCase()}
+                </span>
+              </div>
+              <div className="relative z-10">
+                {renderChart()}
+              </div>
+            </div>
+
+            {/* Summary table */}
+            {!["heatmap", "sankey", "network"].includes(chartType) && chartData.length > 0 && (
+              <div className="viz-widget-card" style={{ padding: 0 }}>
+                <div className="px-4 py-2.5 border-b relative z-10" style={{ borderColor: "var(--border-subtle)" }}>
+                  <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Summary Table</div>
+                </div>
+                <div className="overflow-x-auto relative z-10">
+                  <table className="w-full data-table text-xs">
+                    <thead>
+                      <tr>
+                        <th className="text-left">{groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}</th>
+                        <th className="text-right">Total Value</th>
+                        <th className="text-right">Count</th>
+                        <th className="text-right">Average</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {chartData.map(row => (
+                        <tr key={row.name} onClick={() => handleChartClick({ name: row.name })}
+                          style={{ cursor: "pointer" }}>
+                          <td style={{ color: "var(--text-primary)", fontWeight: 500 }}>{row.name}</td>
+                          <td className="text-right font-mono" style={{ color: "var(--accent-primary)", fontWeight: 600 }}>{row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                          <td className="text-right" style={{ color: "var(--text-secondary)" }}>{row.count}</td>
+                          <td className="text-right font-mono" style={{ color: "var(--text-secondary)" }}>{row.avg.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
           </div>
-          <div className="p-4">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center h-64 gap-3" style={{ color: "var(--text-muted)" }}>
-                <RefreshCw size={20} className="animate-spin" style={{ color: "var(--accent-primary)" }} />
-                <span className="text-sm">Loading chart data...</span>
+
+          {/* ── Right zone: Insights ────────────────────────────────── */}
+          <div className="viz-zone flex flex-col">
+            <ZoneHeader
+              label="Insights"
+              title="Drill-down & Context"
+              count={drillDown ? "1 active" : "no selection"}
+              hint="click any chart element to focus"
+            />
+
+            {drillDown ? (
+              <div className="viz-widget-card" style={{ padding: 0 }}>
+                <div className="relative z-10">
+                  <DrillDownPanel selection={drillDown} metrics={metrics} onClose={() => setDrillDown(null)} />
+                </div>
               </div>
-            ) : renderChart()}
+            ) : (
+              <div className="viz-widget-card flex flex-col items-center justify-center text-center" style={{ minHeight: 220 }}>
+                <div className="relative z-10 flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ background: "rgba(64,196,255,0.08)", border: "1px solid rgba(64,196,255,0.25)" }}>
+                    <BarChart3 size={20} style={{ color: "#40c4ff" }} />
+                  </div>
+                  <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                    No selection yet
+                  </div>
+                  <p className="text-xs max-w-[240px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    Click any bar, slice, cell, or node in the chart to focus on a specific category, region, or metric.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Active filter summary widget */}
+            <div className="viz-widget-card">
+              <div className="dashboard-section-label relative z-10">Active View</div>
+              <div className="space-y-2 relative z-10">
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Chart type</span>
+                  <span className="font-mono font-semibold" style={{ color: "var(--accent-primary)" }}>
+                    {CHART_TYPES.find(c => c.value === chartType)?.label}
+                  </span>
+                </div>
+                {!["heatmap", "sankey", "network"].includes(chartType) && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span style={{ color: "var(--text-muted)" }}>Grouped by</span>
+                    <span className="font-mono" style={{ color: "var(--text-primary)" }}>
+                      {groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Linked filtering</span>
+                  <span className="font-mono" style={{ color: linkedMode ? "#40c4ff" : "var(--text-muted)" }}>
+                    {linkedMode ? "On" : "Off"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Filters applied</span>
+                  <span className="font-mono font-semibold" style={{ color: activeFilters.length > 0 ? "var(--accent-primary)" : "var(--text-muted)" }}>
+                    {activeFilters.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs pt-2 mt-1" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                  <span style={{ color: "var(--text-muted)" }}>Data points</span>
+                  <span className="font-mono font-bold" style={{ color: "#00e676" }}>
+                    {filtered.length.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips widget */}
+            <div className="viz-widget-card">
+              <div className="dashboard-section-label relative z-10">How to Use</div>
+              <ul className="space-y-1.5 text-xs relative z-10" style={{ color: "var(--text-secondary)" }}>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Click any chart element to drill into a specific dimension.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Toggle <span style={{ color: "var(--accent-primary)" }}>Linked</span> mode to cross-filter all views from a single click.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Switch chart types to compare the same data through different lenses.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Export the current view as an SVG for reports or presentations.</span>
+                </li>
+              </ul>
+            </div>
           </div>
+
         </div>
-
-        {/* Drill-down panel */}
-        {drillDown && (
-          <DrillDownPanel selection={drillDown} metrics={metrics} onClose={() => setDrillDown(null)} />
-        )}
-
-        {/* Summary table */}
-        {!["heatmap", "sankey", "network"].includes(chartType) && chartData.length > 0 && (
-          <div className="rounded-xl overflow-hidden" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}>
-            <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-              <span className="dashboard-section-label" style={{ marginBottom: 0 }}>Summary Table</span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full data-table text-xs">
-                <thead>
-                  <tr>
-                    <th className="text-left">{groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}</th>
-                    <th className="text-right">Total Value</th>
-                    <th className="text-right">Count</th>
-                    <th className="text-right">Average</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chartData.map(row => (
-                    <tr key={row.name} onClick={() => handleChartClick({ name: row.name })}
-                      style={{ cursor: "pointer" }}>
-                      <td style={{ color: "var(--text-primary)", fontWeight: 500 }}>{row.name}</td>
-                      <td className="text-right font-mono" style={{ color: "var(--accent-primary)", fontWeight: 600 }}>{row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                      <td className="text-right" style={{ color: "var(--text-secondary)" }}>{row.count}</td>
-                      <td className="text-right font-mono" style={{ color: "var(--text-secondary)" }}>{row.avg.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
