@@ -5,7 +5,7 @@ import {
   Plus, RefreshCw, Trash2, Database, Globe, CheckCircle, AlertCircle,
   Clock, ScrollText, BookOpen, Search, SlidersHorizontal, Grid3x3,
   List, ToggleLeft, ToggleRight, ChevronDown, StickyNote, Tag,
-  CalendarClock, ArrowUpDown, Sparkles
+  CalendarClock, ArrowUpDown
 } from "lucide-react";
 import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
@@ -21,6 +21,9 @@ import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
 import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
 import DiscoveryPanel from "@/components/datasources/DiscoveryPanel";
+import RecentSyncsTile from "@/components/datasources/RecentSyncsTile";
+import TopCategoriesTile from "@/components/datasources/TopCategoriesTile";
+import HowToUseTile from "@/components/datasources/HowToUseTile";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
 
@@ -440,88 +443,13 @@ export default function DataSources() {
             <DiscoveryPanel onApproved={load} />
 
             {/* Recent syncs */}
-            <div className="src-widget-card">
-              <div className="dashboard-section-label relative z-10">Recent Syncs</div>
-              <div className="space-y-2 relative z-10">
-                {recentSyncs.length === 0 ? (
-                  <p className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
-                    No sync activity yet.
-                  </p>
-                ) : (
-                  recentSyncs.map(src => (
-                    <div key={src.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-semibold truncate" style={{ color: "var(--color-info)" }}>{src.name}</div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
-                            <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>
-                              {src.status} · {src.sync_frequency || "manual"}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-xs shrink-0" style={{ color: "var(--text-muted)", fontSize: 10 }}>
-                          {new Date(src.last_synced).toLocaleDateString("en-CA")}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <RecentSyncsTile recentSyncs={recentSyncs} />
 
             {/* Top categories */}
-            <div className="src-widget-card">
-              <div className="dashboard-section-label relative z-10">Top Categories</div>
-              <div className="space-y-2 relative z-10">
-                {topCategories.length === 0 ? (
-                  <p className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
-                    No categorized sources yet.
-                  </p>
-                ) : (
-                  topCategories.map(([cat, count]) => {
-                    const pct = sources.length ? (count / sources.length) * 100 : 0;
-                    return (
-                      <div key={cat}>
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="capitalize" style={{ color: "var(--text-secondary)" }}>{cat.replace(/_/g, " ")}</span>
-                          <span className="font-mono" style={{ color: "var(--color-info)" }}>{count}</span>
-                        </div>
-                        <div style={{ height: 4, background: "var(--bg-overlay)", borderRadius: 2, overflow: "hidden" }}>
-                          <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg, #40c4ff 0%, #00e676 100%)", borderRadius: 2 }} />
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+            <TopCategoriesTile topCategories={topCategories} totalSources={sources.length} />
 
             {/* How to use */}
-            <div className="src-widget-card">
-              <div className="dashboard-section-label flex items-center gap-1.5 relative z-10">
-                <Sparkles size={11} style={{ color: "var(--color-info)" }} />
-                How to Use
-              </div>
-              <ul className="space-y-1.5 text-xs relative z-10" style={{ color: "var(--text-secondary)" }}>
-                <li className="flex gap-2">
-                  <span style={{ color: "#40c4ff" }}>·</span>
-                  <span>Click <span style={{ color: "var(--color-info)" }}>Connect Source</span> to browse external catalogs (BC, StatsCan, Health Canada, ArcGIS, etc.).</span>
-                </li>
-                <li className="flex gap-2">
-                  <span style={{ color: "#40c4ff" }}>·</span>
-                  <span>Use <span style={{ color: "var(--accent-primary)" }}>Add Source</span> for a manual entry (e.g. API endpoint or custom upload).</span>
-                </li>
-                <li className="flex gap-2">
-                  <span style={{ color: "#40c4ff" }}>·</span>
-                  <span>Each source can be synced now, paused, or set to a recurring cadence with the schedule icon.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span style={{ color: "#40c4ff" }}>·</span>
-                  <span>Check <span style={{ color: "var(--color-error)" }}>Sync Logs</span> to inspect failures and re-run errored jobs.</span>
-                </li>
-              </ul>
-            </div>
+            <HowToUseTile />
           </div>
 
         </div>
@@ -583,82 +511,154 @@ export default function DataSources() {
 function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete }) {
   const isActive = src.status === "active";
   const isDisabled = src.status === "inactive";
+  const statusColor = STATUS_COLORS[src.status] || "var(--text-muted)";
+  const isAuto = src.sync_frequency && src.sync_frequency !== "manual";
 
   return (
-    <div className="metric-card flex flex-col gap-2.5" style={{ opacity: isDisabled ? 0.65 : 1 }}>
+    <div
+      className="metric-card flex flex-col gap-2.5 relative"
+      style={{ opacity: isDisabled ? 0.65 : 1, overflow: "hidden" }}
+    >
+      {/* Status accent bar — top edge, color-coded by status */}
+      <span
+        aria-hidden
+        style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 2,
+          background: `linear-gradient(90deg, ${statusColor} 0%, ${statusColor}33 100%)`,
+          boxShadow: `0 0 8px ${statusColor}44`,
+        }}
+      />
+
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded flex items-center justify-center shrink-0"
-            style={{ background: "var(--bg-overlay)" }}>
-            <Database size={14} style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: `linear-gradient(135deg, ${statusColor}1f 0%, ${statusColor}08 100%)`,
+              border: `1px solid ${statusColor}33`,
+              boxShadow: `0 0 12px ${statusColor}1a`,
+            }}
+          >
+            <Database size={14} style={{ color: statusColor, strokeWidth: 2.25 }} />
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{src.name}</div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="tag" style={{ fontSize: 10 }}>{src.type?.replace(/_/g, " ")}</span>
+            <div className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+              {src.name}
+            </div>
+            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+              <span className="tag" style={{ fontSize: 9.5, padding: "1px 6px" }}>
+                {src.type?.replace(/_/g, " ")}
+              </span>
               {src.category && src.category !== "other" && (
-                <span className="tag" style={{ fontSize: 10, background: "var(--accent-muted)", color: "var(--accent-primary)", borderColor: "var(--border-default)" }}>
+                <span
+                  className="tag capitalize"
+                  style={{
+                    fontSize: 9.5, padding: "1px 6px",
+                    background: "var(--accent-muted)", color: "var(--accent-primary)",
+                    borderColor: "rgba(254,221,0,0.25)",
+                  }}
+                >
                   {src.category.replace(/_/g, " ")}
                 </span>
               )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
-          <span className="text-xs capitalize" style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }}>{src.status}</span>
+        {/* Pill-shaped status badge */}
+        <div
+          className="flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full"
+          style={{
+            background: `${statusColor}14`,
+            border: `1px solid ${statusColor}40`,
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: statusColor, boxShadow: `0 0 6px ${statusColor}` }}
+          />
+          <span
+            className="text-xs capitalize font-semibold"
+            style={{ color: statusColor, fontSize: 9.5, letterSpacing: "0.02em" }}
+          >
+            {src.status}
+          </span>
         </div>
       </div>
 
       {src.description && (
-        <p className="text-xs line-clamp-2" style={{ color: "var(--text-secondary)" }}>{src.description}</p>
+        <p className="text-xs line-clamp-2 leading-snug" style={{ color: "var(--text-secondary)" }}>
+          {src.description}
+        </p>
       )}
 
       {src.notes && (
-        <div className="flex items-start gap-1.5 rounded px-2 py-1.5"
-          style={{ background: "var(--accent-muted)", border: "1px solid var(--border-default)" }}>
+        <div
+          className="flex items-start gap-1.5 rounded-md px-2 py-1.5"
+          style={{
+            background: "rgba(254,221,0,0.06)",
+            border: "1px solid rgba(254,221,0,0.2)",
+          }}
+        >
           <StickyNote size={10} style={{ color: "var(--accent-primary)", flexShrink: 0, marginTop: 1 }} />
-          <p className="text-xs line-clamp-2" style={{ color: "var(--accent-text)" }}>{src.notes}</p>
+          <p className="text-xs line-clamp-2 leading-snug" style={{ color: "var(--accent-text)" }}>
+            {src.notes}
+          </p>
         </div>
       )}
 
       {src.url && (
-        <a href={src.url} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs truncate"
-          style={{ color: "var(--color-info)" }}>
-          <Globe size={10} /> {src.url}
+        <a
+          href={src.url} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs truncate hover:underline"
+          style={{ color: "var(--color-info)" }}
+        >
+          <Globe size={10} className="shrink-0" /> {src.url}
         </a>
       )}
 
-      <div className="flex items-center justify-between pt-1.5 border-t mt-auto" style={{ borderColor: "var(--border-subtle)" }}>
-        <div className="text-xs space-y-0.5">
-          <div style={{ color: "var(--text-muted)" }}>
-            {src.last_synced ? `Synced ${new Date(src.last_synced).toLocaleDateString("en-CA")}` : "Never synced"}
+      <div
+        className="flex items-center justify-between pt-2 border-t mt-auto"
+        style={{ borderColor: "var(--border-subtle)" }}
+      >
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="flex items-center gap-1 shrink-0" title={src.last_synced ? new Date(src.last_synced).toLocaleString("en-CA") : "Never synced"}>
+            <RefreshCw size={9} style={{ color: "var(--text-muted)" }} />
+            <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+              {src.last_synced ? new Date(src.last_synced).toLocaleDateString("en-CA") : "—"}
+            </span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock size={9} style={{ color: "var(--text-muted)" }} />
-            <span style={{ color: src.sync_frequency && src.sync_frequency !== "manual" ? "var(--accent-primary)" : "var(--text-muted)" }}>
+          <span style={{ color: "var(--border-default)" }}>·</span>
+          <div className="flex items-center gap-1 shrink-0">
+            <Clock size={9} style={{ color: isAuto ? "var(--accent-primary)" : "var(--text-muted)" }} />
+            <span
+              className="text-xs capitalize"
+              style={{
+                color: isAuto ? "var(--accent-primary)" : "var(--text-muted)",
+                fontSize: 10,
+                fontWeight: isAuto ? 600 : 400,
+              }}
+            >
               {src.sync_frequency || "manual"}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={onSync} disabled={!!syncing} title="Sync now" className="activity-icon" style={{ width: 26, height: 26 }}>
-            <RefreshCw size={12} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button onClick={onSync} disabled={!!syncing} title="Sync now" className="activity-icon" style={{ width: 24, height: 24 }}>
+            <RefreshCw size={11} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
           </button>
-          <button onClick={onSchedule} title="Set schedule" className="activity-icon" style={{ width: 26, height: 26 }}>
-            <CalendarClock size={12} style={{ color: "var(--accent-primary)" }} />
+          <button onClick={onSchedule} title="Set schedule" className="activity-icon" style={{ width: 24, height: 24 }}>
+            <CalendarClock size={11} style={{ color: "var(--accent-primary)" }} />
           </button>
-          <button onClick={onToggle} title={isActive ? "Disable" : "Enable"} className="activity-icon" style={{ width: 26, height: 26 }}>
+          <button onClick={onToggle} title={isActive ? "Disable" : "Enable"} className="activity-icon" style={{ width: 24, height: 24 }}>
             {isActive
-              ? <ToggleRight size={14} style={{ color: "var(--color-success)" }} />
-              : <ToggleLeft size={14} style={{ color: "var(--text-muted)" }} />}
+              ? <ToggleRight size={13} style={{ color: "var(--color-success)" }} />
+              : <ToggleLeft size={13} style={{ color: "var(--text-muted)" }} />}
           </button>
-          <button onClick={onEdit} title="Edit" className="activity-icon" style={{ width: 26, height: 26 }}>
-            <SlidersHorizontal size={12} />
+          <button onClick={onEdit} title="Edit" className="activity-icon" style={{ width: 24, height: 24 }}>
+            <SlidersHorizontal size={11} />
           </button>
-          <button onClick={onDelete} title="Delete" className="activity-icon" style={{ width: 26, height: 26, color: "var(--color-error)" }}>
-            <Trash2 size={12} />
+          <button onClick={onDelete} title="Delete" className="activity-icon" style={{ width: 24, height: 24, color: "var(--color-error)" }}>
+            <Trash2 size={11} />
           </button>
         </div>
       </div>
