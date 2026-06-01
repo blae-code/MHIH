@@ -21,6 +21,11 @@ const COLORS = ["#e6a817", "#58a6ff", "#2ea043", "#d29922", "#f85149"];
 const PREFS_KEY = "mhip_dashboard_prefs";
 const LAYOUTS_KEY = "mhip_dashboard_layouts";
 
+// Zone partitioning — matches Home page's cockpit layout pattern.
+// stat_cards is pinned to the top strip (above the zones).
+const ANALYTICS_IDS = ["year_trend", "disparity_explorer", "regional_performance", "category_pie"];
+const INTELLIGENCE_IDS = ["ai_insights", "trending_metrics", "weekly_reports"];
+
 function loadPrefs() {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
@@ -159,9 +164,23 @@ export default function Dashboard() {
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
+    // Find the moved widget via its draggableId so reorder works across zones,
+    // since each zone's source.index is relative to its filtered subset.
+    const movedId = result.draggableId;
     const items = Array.from(widgets);
-    const [moved] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, moved);
+    const fromIdx = items.findIndex((w) => w.id === movedId);
+    if (fromIdx === -1) return;
+    const [moved] = items.splice(fromIdx, 1);
+    // Translate destination.index (within zone) back to the flat array by
+    // looking up the destination zone's filtered widget list.
+    const destZone = result.destination.droppableId;
+    const destZoneIds = destZone === "zone-intelligence" ? INTELLIGENCE_IDS : ANALYTICS_IDS;
+    const destZoneWidgets = items.filter((w) => destZoneIds.includes(w.id) && w.visible !== false);
+    const targetSibling = destZoneWidgets[result.destination.index];
+    const insertAt = targetSibling
+      ? items.findIndex((w) => w.id === targetSibling.id)
+      : items.length;
+    items.splice(insertAt, 0, moved);
     handleWidgetsChange(items);
   };
 
@@ -581,38 +600,22 @@ export default function Dashboard() {
           background: rgba(255,255,255,0.03);
           color: var(--text-primary);
         }
-        .dashboard-cell {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          min-height: 0;
-        }
-        .dashboard-cell > * {
-          flex: 1 1 auto;
-          min-height: 0;
-          height: 100%;
-        }
         .dashboard-widget-card {
           border-radius: 10px;
           border: 1.5px solid;
           border-image: linear-gradient(135deg, rgba(254,221,0,0.4) 0%, rgba(64,196,255,0.3) 50%, rgba(254,221,0,0.2) 100%) 1;
           background: #0a1220;
-          padding: 16px;
+          padding: 14px;
           transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
           position: relative;
           overflow: hidden;
           box-shadow: inset 0 1px 0 rgba(254,221,0,0.08), 0 0 20px rgba(254,221,0,0.05);
-          /* Flex column so internal content can fill + scroll within fixed cell */
           display: flex;
           flex-direction: column;
           min-height: 0;
         }
-        /* Direct children of widget cards: the first non-header block becomes the
-           scroll container, so headers stay fixed and content scrolls internally. */
-        .dashboard-widget-card > *:not(:first-child):not(style):not(::before) {
-          min-height: 0;
-        }
-        .dashboard-widget-card > :last-child {
+        /* The cocktail layout: each widget body is flex-1 & scrollable, matching Home */
+        .dashboard-widget-card > :last-child:not(:first-child) {
           flex: 1 1 auto;
           min-height: 0;
           overflow-y: auto;
@@ -620,9 +623,18 @@ export default function Dashboard() {
           margin-right: -4px;
           padding-right: 4px;
         }
-        /* When the last child is a chart/empty-state, don't let it scroll itself */
         .dashboard-widget-card > .recharts-responsive-container:last-child {
           overflow: visible;
+        }
+        /* Zone column wrapper — matches Home's home-widget-card stack pattern */
+        .dashboard-zone {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          min-height: 0;
+        }
+        .dashboard-zone .dashboard-widget-card {
+          flex: 1 1 0;
         }
         .dashboard-widget-card:hover {
           border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
@@ -669,58 +681,106 @@ export default function Dashboard() {
           onResetLayout={handleResetLayout}
         />
 
-        {/* Zone header — gives the dashboard the same ordered band-look as Home */}
-        <ZoneHeader
-          label="Operational View"
-          title="Health Indicators Workspace"
-          count={`${visibleCount} widgets`}
-          hint={hasChanges ? "unsaved layout changes" : "drag to rearrange"}
-        />
+        {/* Cockpit layout — matches Home page: stat strip on top, 2-zone cockpit below.
+            Widgets keep their gradient-card visual detail; zones provide ordered hierarchy.
+            No outer scroll — each widget body scrolls internally (matches Home). */}
+        <div className="flex-1 min-h-0 flex flex-col gap-3">
 
-        {/* Widgets grid — 3-column priority layout, drag-and-drop enabled.
-            stat_cards & ai_insights span their natural width; other widgets
-            each occupy a single column for higher density. */}
-        <div className="flex-1 overflow-hidden">
+          {/* Stat strip — always at top, full width, not draggable */}
+          {isVisible("stat_cards") && (
+            <div className="shrink-0">
+              {WIDGET_RENDER.stat_cards}
+            </div>
+          )}
+
+          {/* 2-zone cockpit grid — Analytics (wider) + Intelligence (narrower) */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="dashboard-widgets" type="WIDGET">
-              {(provided, snapshot) =>
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="h-full gap-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-                style={{
-                  overflowY: "auto",
-                  paddingRight: "4px",
-                  gridAutoRows: "minmax(280px, auto)",
-                  alignItems: "stretch",
-                  background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent"
-                }}>
-                  {widgets.
-                filter((w) => w.visible !== false).
-                map((w, index) => {
-                  // stat_cards always spans full width; AI insights spans 1 col on xl
-                  const fullSpan = w.id === "stat_cards";
-                  return (
-                <Draggable key={w.id} draggableId={w.id} index={index}>
-                        {(provided, snapshot) =>
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className={`${fullSpan ? "md:col-span-2 xl:col-span-3" : ""} min-w-0 dashboard-cell`}
-                    style={{
-                      ...provided.draggableProps.style,
-                      opacity: snapshot.isDragging ? 0.5 : 1
-                    }}>
-                            {WIDGET_RENDER[w.id]}
-                          </div>
-                  }
-                      </Draggable>);
-                })}
-                  {provided.placeholder}
-                </div>
-              }
-            </Droppable>
+            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3">
+
+              {/* ── Left zone: Analytics ─────────────────────────── */}
+              <Droppable droppableId="zone-analytics" type="WIDGET">
+                {(provided, snapshot) => (
+                  <div className="dashboard-zone min-h-0 flex flex-col">
+                    <ZoneHeader
+                      label="Analytics"
+                      title="Health Indicators"
+                      count={`${ANALYTICS_IDS.filter(isVisible).length} widgets`}
+                      hint={hasChanges ? "unsaved changes" : "drag to reorder"}
+                    />
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="flex-1 min-h-0 flex flex-col gap-2.5"
+                      style={{ background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
+                    >
+                      {widgets
+                        .filter((w) => ANALYTICS_IDS.includes(w.id) && w.visible !== false)
+                        .map((w, index) => (
+                          <Draggable key={w.id} draggableId={w.id} index={index}>
+                            {(prov, snap) => (
+                              <div
+                                ref={prov.innerRef}
+                                {...prov.draggableProps}
+                                {...prov.dragHandleProps}
+                                className="min-w-0 flex flex-col"
+                                style={{
+                                  ...prov.draggableProps.style,
+                                  opacity: snap.isDragging ? 0.5 : 1,
+                                }}
+                              >
+                                {WIDGET_RENDER[w.id]}
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      {provided.placeholder}
+                    </div>
+                  </div>
+                )}
+              </Droppable>
+
+              {/* ── Right zone: Intelligence ─────────────────────── */}
+              <Droppable droppableId="zone-intelligence" type="WIDGET">
+                {(provided, snapshot) => (
+                  <div className="dashboard-zone min-h-0 flex flex-col">
+                    <ZoneHeader
+                      label="Intelligence"
+                      title="Insights & Activity"
+                      count={`${INTELLIGENCE_IDS.filter(isVisible).length} widgets`}
+                      hint="AI + trends"
+                    />
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="flex-1 min-h-0 flex flex-col gap-2.5"
+                      style={{ background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
+                    >
+                      {widgets
+                        .filter((w) => INTELLIGENCE_IDS.includes(w.id) && w.visible !== false)
+                        .map((w, index) => (
+                          <Draggable key={w.id} draggableId={w.id} index={index}>
+                            {(prov, snap) => (
+                              <div
+                                ref={prov.innerRef}
+                                {...prov.draggableProps}
+                                {...prov.dragHandleProps}
+                                className="min-w-0 flex flex-col"
+                                style={{
+                                  ...prov.draggableProps.style,
+                                  opacity: snap.isDragging ? 0.5 : 1,
+                                }}
+                              >
+                                {WIDGET_RENDER[w.id]}
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      {provided.placeholder}
+                    </div>
+                  </div>
+                )}
+              </Droppable>
+            </div>
           </DragDropContext>
         </div>
       </div>
