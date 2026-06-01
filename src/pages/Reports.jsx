@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, FileText, Calendar, Download, Trash2, Play } from "lucide-react";
+import { Plus, FileText, Calendar, Download, Trash2, Play, RefreshCw, Sparkles } from "lucide-react";
 import ReportBuilder from "../components/reports/ReportBuilder";
 import ScheduleReportModal from "../components/reports/ScheduleReportModal";
+import ReportsStatStrip from "../components/reports/ReportsStatStrip";
+import ZoneHeader from "../components/shell/ZoneHeader";
 
 export default function Reports() {
   const [reports, setReports] = useState([]);
@@ -63,176 +65,423 @@ export default function Reports() {
     }
   };
 
+  // Recent activity items for the Insights zone
+  const recentActivity = [...reports]
+    .sort((a, b) => new Date(b.created_date || 0) - new Date(a.created_date || 0))
+    .slice(0, 4);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-full" style={{ color: "var(--text-muted)" }}>
+      <RefreshCw size={20} className="animate-spin mr-2" /> Loading reports...
+    </div>
+  );
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-6 py-4 border-b shrink-0 relative overflow-hidden"
+    <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
+      {/* Ambient page glow — matches Dashboard depth treatment */}
+      <div
+        aria-hidden
         style={{
-          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
-          borderColor: "var(--border-default)",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
-        }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 60%, transparent 100%)" }} />
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="dashboard-section-label">Reports Center</div>
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Create and manage custom health reports</p>
-          </div>
-          <div className="flex gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-            {[
-              { key: "reports", label: "Generated", icon: FileText },
-              { key: "schedules", label: "Scheduled", icon: Calendar }
-            ].map(tab => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all"
+          position: "absolute",
+          top: 0, left: 0, right: 0, height: 260,
+          background: "radial-gradient(ellipse 60% 100% at 50% 0%, rgba(254,221,0,0.05) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0, height: 200,
+          background: "radial-gradient(ellipse 50% 100% at 50% 100%, rgba(64,196,255,0.04) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      <style>{`
+        .reports-widget-card {
+          border-radius: 10px;
+          border: 1.5px solid;
+          border-image: linear-gradient(135deg, rgba(254,221,0,0.4) 0%, rgba(64,196,255,0.3) 50%, rgba(254,221,0,0.2) 100%) 1;
+          background: #0a1220;
+          padding: 14px;
+          transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+          position: relative;
+          overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(254,221,0,0.08), 0 0 20px rgba(254,221,0,0.05);
+        }
+        .reports-widget-card:hover {
+          border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
+          box-shadow: inset 0 1px 0 rgba(254,221,0,0.15), 0 0 32px rgba(254,221,0,0.15), 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .reports-widget-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(254,221,0,0.02) 0%, transparent 100%);
+          pointer-events: none;
+        }
+        .reports-zone {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .report-list-item {
+          background: var(--bg-overlay);
+          border: 1px solid var(--border-subtle);
+          border-radius: 8px;
+          padding: 12px;
+          transition: all 0.15s ease;
+          position: relative;
+          overflow: hidden;
+        }
+        .report-list-item:hover {
+          border-color: rgba(254,221,0,0.3);
+          background: rgba(254,221,0,0.03);
+          transform: translateY(-1px);
+        }
+      `}</style>
+
+      <div className="flex flex-col p-3 relative" style={{ zIndex: 1 }}>
+
+        {/* ── Header strip ───────────────────────────────────────────── */}
+        <div className="rounded-xl px-5 py-3 mb-3 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+            border: "1px solid var(--border-default)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(254,221,0,0.1)"
+          }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #FEDD00 0%, #40c4ff 60%, transparent 100%)" }} />
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{
-                  background: activeTab === tab.key ? "rgba(254,221,0,0.12)" : "transparent",
-                  color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-muted)",
-                  border: activeTab === tab.key ? "1px solid rgba(254,221,0,0.3)" : "1px solid transparent"
+                  background: "linear-gradient(135deg, rgba(254,221,0,0.15) 0%, rgba(254,221,0,0.05) 100%)",
+                  border: "1px solid rgba(254,221,0,0.25)",
+                  boxShadow: "0 0 16px rgba(254,221,0,0.1)"
                 }}>
-                <tab.icon size={12} />
-                {tab.label}
-              </button>
-            ))}
+                <FileText size={16} style={{ color: "var(--accent-primary)" }} />
+              </div>
+              <div>
+                <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Reports Center</div>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  Create, generate, and schedule custom health reports
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                {[
+                  { key: "reports", label: "Generated", icon: FileText },
+                  { key: "schedules", label: "Scheduled", icon: Calendar }
+                ].map(tab => (
+                  <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all"
+                    style={{
+                      background: activeTab === tab.key ? "rgba(254,221,0,0.12)" : "transparent",
+                      color: activeTab === tab.key ? "var(--accent-primary)" : "var(--text-muted)",
+                      border: activeTab === tab.key ? "1px solid rgba(254,221,0,0.3)" : "1px solid transparent"
+                    }}>
+                    <tab.icon size={12} />
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* ── Stat strip ─────────────────────────────────────────────── */}
+        <div className="mb-3">
+          <ReportsStatStrip reports={reports} configs={configs} />
+        </div>
+
+        {/* ── 2-zone cockpit ─────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
+
+          {/* ── Left zone: Library ──────────────────────────────────── */}
+          <div className="reports-zone flex flex-col">
+            <ZoneHeader
+              label="Library"
+              title={activeTab === "reports" ? "Generated Reports" : "Scheduled Reports"}
+              count={activeTab === "reports" ? `${reports.length} reports` : `${configs.length} schedules`}
+              hint={activeTab === "reports" ? "create, download, or remove" : "automated cadences"}
+            />
+
+            {/* Action card */}
+            <div className="reports-widget-card" style={{ padding: 10 }}>
+              <div className="flex flex-wrap items-center gap-2 relative z-10">
+                {activeTab === "reports" ? (
+                  <button onClick={() => setShowBuilder(!showBuilder)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={{
+                      background: showBuilder
+                        ? "var(--bg-overlay)"
+                        : "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)",
+                      color: showBuilder ? "var(--text-primary)" : "#04245a",
+                      border: showBuilder ? "1px solid var(--border-default)" : "none",
+                    }}>
+                    <Plus size={14} />
+                    {showBuilder ? "Close Builder" : "Create Custom Report"}
+                  </button>
+                ) : (
+                  <button onClick={() => setScheduleModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                    style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a" }}>
+                    <Plus size={14} />
+                    Schedule Report
+                  </button>
+                )}
+                <span className="text-xs ml-1" style={{ color: "var(--text-muted)" }}>
+                  {activeTab === "reports"
+                    ? "Build a one-off report with the metrics, regions, and chart types you need."
+                    : "Set a recurring delivery — daily, weekly, or monthly — to recipient email lists."
+                  }
+                </span>
+              </div>
+            </div>
+
+            {/* Report Builder (inline) */}
+            {activeTab === "reports" && showBuilder && (
+              <div className="reports-widget-card">
+                <div className="relative z-10">
+                  <ReportBuilder onReportCreated={handleReportCreated} />
+                </div>
+              </div>
+            )}
+
+            {/* Generated reports list */}
+            {activeTab === "reports" && (
+              <div className="reports-widget-card">
+                <div className="dashboard-section-label relative z-10">All Reports</div>
+                <div className="relative z-10">
+                  {reports.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 gap-2">
+                      <FileText size={28} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>No reports yet.</p>
+                      <p className="text-xs" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                        Click <span style={{ color: "var(--accent-primary)" }}>Create Custom Report</span> to build your first one.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-2.5">
+                      {reports.map(r => (
+                        <div key={r.id} className="report-list-item">
+                          <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "linear-gradient(180deg, #FEDD00 0%, transparent 100%)" }} />
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="p-2 rounded-lg shrink-0" style={{ background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.2)" }}>
+                                <FileText size={14} style={{ color: "var(--accent-primary)" }} />
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{r.title}</h3>
+                                {r.description && (
+                                  <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>{r.description}</p>
+                                )}
+                                <div className="flex flex-wrap gap-2 mt-1.5 items-center">
+                                  <span className="tag" style={{ background: "rgba(254,221,0,0.08)", color: "var(--accent-primary)", borderColor: "rgba(254,221,0,0.25)", fontSize: 10 }}>
+                                    {r.metric_ids?.length || 0} metrics
+                                  </span>
+                                  {r.generated_at && (
+                                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                                      {new Date(r.generated_at).toLocaleDateString("en-CA")}
+                                    </span>
+                                  )}
+                                  <span className="tag" style={{
+                                    background: r.status === "generated" ? "rgba(0,230,118,0.08)" : "var(--bg-overlay)",
+                                    color: r.status === "generated" ? "var(--color-success)" : "var(--text-muted)",
+                                    fontSize: 10
+                                  }}>
+                                    {r.status || "draft"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <button className="activity-icon" title="Download" style={{ width: 30, height: 30 }}>
+                                <Download size={14} />
+                              </button>
+                              <button onClick={() => handleDeleteReport(r.id)} className="activity-icon" title="Delete" style={{ width: 30, height: 30, color: "var(--color-error)" }}>
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Scheduled reports list */}
+            {activeTab === "schedules" && (
+              <div className="reports-widget-card">
+                <div className="dashboard-section-label relative z-10">All Schedules</div>
+                <div className="relative z-10">
+                  {configs.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 gap-2">
+                      <Calendar size={28} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>No scheduled reports yet.</p>
+                      <p className="text-xs" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                        Create a schedule to auto-deliver reports on a recurring cadence.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-2.5">
+                      {configs.map(c => (
+                        <div key={c.id} className="report-list-item">
+                          <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "linear-gradient(180deg, #40c4ff 0%, transparent 100%)" }} />
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="p-2 rounded-lg shrink-0" style={{ background: "rgba(64,196,255,0.08)", border: "1px solid rgba(64,196,255,0.2)" }}>
+                                <Calendar size={14} style={{ color: "var(--color-info)" }} />
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{c.title}</h3>
+                                <div className="flex flex-wrap gap-2 mt-1.5">
+                                  <span className="tag capitalize" style={{ background: "rgba(64,196,255,0.08)", color: "var(--color-info)", borderColor: "rgba(64,196,255,0.25)", fontSize: 10 }}>
+                                    {c.schedule}
+                                  </span>
+                                  <span className="tag" style={{
+                                    background: c.status === "active" ? "rgba(0,230,118,0.08)" : "rgba(255,23,68,0.08)",
+                                    color: c.status === "active" ? "var(--color-success)" : "var(--color-error)",
+                                    borderColor: c.status === "active" ? "rgba(0,230,118,0.25)" : "rgba(255,23,68,0.25)",
+                                    fontSize: 10
+                                  }}>
+                                    {c.status === "active" ? "Active" : "Paused"}
+                                  </span>
+                                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                                    {c.recipients?.length || 0} recipients
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <button className="activity-icon" title="Run now" style={{ width: 30, height: 30 }}>
+                                <Play size={14} />
+                              </button>
+                              <button onClick={() => handleDeleteConfig(c.id)} className="activity-icon" title="Delete" style={{ width: 30, height: 30, color: "var(--color-error)" }}>
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Right zone: Insights ────────────────────────────────── */}
+          <div className="reports-zone flex flex-col">
+            <ZoneHeader
+              label="Insights"
+              title="Recent Activity"
+              count={`${recentActivity.length} this week`}
+              hint="latest reports + tips"
+            />
+
+            {/* Recent activity */}
+            <div className="reports-widget-card">
+              <div className="dashboard-section-label relative z-10">Recent Reports</div>
+              <div className="space-y-2 relative z-10">
+                {recentActivity.length === 0 ? (
+                  <p className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
+                    No activity yet — create your first report to see it here.
+                  </p>
+                ) : (
+                  recentActivity.map(r => (
+                    <div key={r.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-semibold truncate" style={{ color: "var(--accent-primary)" }}>{r.title}</div>
+                          <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                            {r.metric_ids?.length || 0} metrics · {r.status || "draft"}
+                          </div>
+                        </div>
+                        <span className="text-xs shrink-0" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                          {new Date(r.created_date || Date.now()).toLocaleDateString("en-CA")}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Quick stats summary */}
+            <div className="reports-widget-card">
+              <div className="dashboard-section-label relative z-10">At a Glance</div>
+              <div className="space-y-2 relative z-10">
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Total reports</span>
+                  <span className="font-mono font-semibold" style={{ color: "var(--accent-primary)" }}>
+                    {reports.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Drafts</span>
+                  <span className="font-mono" style={{ color: "var(--text-primary)" }}>
+                    {reports.filter(r => !r.status || r.status === "draft").length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Generated</span>
+                  <span className="font-mono" style={{ color: "var(--color-success)" }}>
+                    {reports.filter(r => r.status === "generated" || r.status === "exported").length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-muted)" }}>Active schedules</span>
+                  <span className="font-mono" style={{ color: "var(--color-info)" }}>
+                    {configs.filter(c => c.status === "active").length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs pt-2 mt-1" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+                  <span style={{ color: "var(--text-muted)" }}>Paused schedules</span>
+                  <span className="font-mono" style={{ color: "var(--text-muted)" }}>
+                    {configs.filter(c => c.status !== "active").length}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* How to use widget */}
+            <div className="reports-widget-card">
+              <div className="dashboard-section-label flex items-center gap-1.5 relative z-10">
+                <Sparkles size={11} style={{ color: "var(--accent-primary)" }} />
+                How to Use
+              </div>
+              <ul className="space-y-1.5 text-xs relative z-10" style={{ color: "var(--text-secondary)" }}>
+                <li className="flex gap-2">
+                  <span style={{ color: "#FEDD00" }}>·</span>
+                  <span>Use the <span style={{ color: "var(--accent-primary)" }}>Generated</span> tab to create one-off custom reports with selected metrics and charts.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#FEDD00" }}>·</span>
+                  <span>Switch to <span style={{ color: "#40c4ff" }}>Scheduled</span> to set up recurring deliveries to email recipients.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#FEDD00" }}>·</span>
+                  <span>Generated reports can be downloaded as PDF or CSV from the action bar on each row.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#FEDD00" }}>·</span>
+                  <span>Schedules can be paused or run on demand using the play button next to each configuration.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-6 max-w-7xl mx-auto w-full space-y-6">
-
-      {/* Generated Reports Tab */}
-      {activeTab === "reports" && (
-        <div className="space-y-4">
-          <button onClick={() => setShowBuilder(!showBuilder)}
-            className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all"
-            style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a" }}>
-            <Plus size={16} />
-            Create Custom Report
-          </button>
-
-          {showBuilder && (
-            <div className="p-6 rounded-xl" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-              <ReportBuilder onReportCreated={handleReportCreated} />
-            </div>
-          )}
-
-          {loading ? (
-            <p style={{ color: "var(--text-muted)" }}>Loading...</p>
-          ) : reports.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px dashed var(--border-subtle)" }}>
-              <FileText size={28} style={{ color: "var(--text-muted)", marginBottom: 8 }} />
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>No reports yet. Create one to get started.</p>
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              {reports.map(r => (
-                <div key={r.id} className="metric-card relative overflow-hidden" style={{ borderColor: "rgba(254,221,0,0.2)" }}>
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #FEDD00 0%, transparent 100%)" }} />
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg shrink-0" style={{ background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.2)" }}>
-                        <FileText size={14} style={{ color: "var(--accent-primary)" }} />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{r.title}</h3>
-                        {r.description && (
-                          <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>{r.description}</p>
-                        )}
-                        <div className="flex flex-wrap gap-2 mt-1.5">
-                          <span className="tag" style={{ background: "rgba(254,221,0,0.08)", color: "var(--accent-primary)", borderColor: "rgba(254,221,0,0.25)", fontSize: 10 }}>
-                            {r.metric_ids?.length || 0} metrics
-                          </span>
-                          {r.generated_at && (
-                            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                              {new Date(r.generated_at).toLocaleDateString("en-CA")}
-                            </span>
-                          )}
-                          <span className="tag" style={{ background: r.status === "generated" ? "rgba(0,230,118,0.08)" : "var(--bg-overlay)", color: r.status === "generated" ? "var(--color-success)" : "var(--text-muted)", fontSize: 10 }}>
-                            {r.status || "draft"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <button className="activity-icon" title="Download" style={{ width: 30, height: 30 }}>
-                        <Download size={14} />
-                      </button>
-                      <button onClick={() => handleDeleteReport(r.id)} className="activity-icon" title="Delete" style={{ width: 30, height: 30, color: "var(--color-error)" }}>
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Scheduled Reports Tab */}
-      {activeTab === "schedules" && (
-        <div className="space-y-4">
-          <button onClick={() => setScheduleModal(true)}
-            className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all"
-            style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a" }}>
-            <Plus size={16} />
-            Schedule Report
-          </button>
-
-          {loading ? (
-            <p style={{ color: "var(--text-muted)" }}>Loading...</p>
-          ) : configs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px dashed var(--border-subtle)" }}>
-              <Calendar size={28} style={{ color: "var(--text-muted)", marginBottom: 8 }} />
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>No scheduled reports yet.</p>
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              {configs.map(c => (
-                <div key={c.id} className="metric-card relative overflow-hidden" style={{ borderColor: "rgba(64,196,255,0.2)" }}>
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #40c4ff 0%, transparent 100%)" }} />
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg shrink-0" style={{ background: "rgba(64,196,255,0.08)", border: "1px solid rgba(64,196,255,0.2)" }}>
-                        <Calendar size={14} style={{ color: "var(--color-info)" }} />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{c.title}</h3>
-                        <div className="flex flex-wrap gap-2 mt-1.5">
-                          <span className="tag capitalize" style={{ background: "rgba(64,196,255,0.08)", color: "var(--color-info)", borderColor: "rgba(64,196,255,0.25)", fontSize: 10 }}>
-                            {c.schedule}
-                          </span>
-                          <span className="tag" style={{ 
-                            background: c.status === "active" ? "rgba(0,230,118,0.08)" : "rgba(255,23,68,0.08)", 
-                            color: c.status === "active" ? "var(--color-success)" : "var(--color-error)",
-                            borderColor: c.status === "active" ? "rgba(0,230,118,0.25)" : "rgba(255,23,68,0.25)",
-                            fontSize: 10
-                          }}>
-                            {c.status === "active" ? "Active" : "Paused"}
-                          </span>
-                          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                            {c.recipients?.length || 0} recipients
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <button className="activity-icon" title="Run now" style={{ width: 30, height: 30 }}>
-                        <Play size={14} />
-                      </button>
-                      <button onClick={() => handleDeleteConfig(c.id)} className="activity-icon" title="Delete" style={{ width: 30, height: 30, color: "var(--color-error)" }}>
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <ScheduleReportModal 
+      <ScheduleReportModal
         isOpen={scheduleModal}
         onClose={() => setScheduleModal(false)}
         onConfigCreated={(config) => {
@@ -240,7 +489,6 @@ export default function Reports() {
           setScheduleModal(false);
         }}
       />
-      </div>
     </div>
   );
 }
