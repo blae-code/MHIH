@@ -38,6 +38,14 @@
         "other"
       ]
     },
+    "region": {
+      "type": "string",
+      "description": "Primary BC region the source covers (used by filters and ingest tagging)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form analyst notes attached to the source"
+    },
     "last_synced": {
       "type": "string",
       "format": "date-time"

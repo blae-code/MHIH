@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 type SourceRecord = Record<string, any>;
 
@@ -214,25 +214,32 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    let isAuthorized = false;
-    try {
-      const user = await base44.auth.me();
-      isAuthorized = user?.role === 'admin' || user?.role === 'user';
-    } catch {
-      isAuthorized = true;
-    }
-
-    if (!isAuthorized) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     const body = await req.json().catch(() => ({}));
     const { source_id, dry_run = false } = body;
 
+    // Auth: require a signed-in admin/user for manual (source_id) invocations.
+    // Scheduled invocations (no source_id) may run unauthenticated (cron path).
+    let user: any = null;
+    try {
+      user = await base44.auth.me();
+    } catch {
+      user = null;
+    }
+    if (source_id) {
+      if (!user || (user.role !== 'admin' && user.role !== 'user')) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    const VALID_AUTO_FREQS = new Set(['daily', 'weekly', 'monthly']);
     const allSources = await base44.asServiceRole.entities.DataSource.list();
     const toSync = source_id
       ? allSources.filter((s: any) => s.id === source_id)
-      : allSources.filter((s: any) => s.status !== 'inactive' && s.sync_frequency !== 'manual' && s.url);
+      : allSources.filter((s: any) =>
+          s.status !== 'inactive' &&
+          VALID_AUTO_FREQS.has(s.sync_frequency) &&
+          s.url
+        );
 
     const results = [];
 
@@ -377,15 +384,15 @@ Deno.serve(async (req) => {
             entity_type: 'DataSource',
             entity_id: src.id,
             entity_name: src.name,
-            user_email: 'system@mhip',
-            user_name: 'Scheduled Ingest',
+            user_email: user?.email || 'system@mhip',
+            user_name: user?.full_name || 'Scheduled Ingest',
             details: `fetched=${fetched}, inserted=${inserted}, updated=${updated}, invalid=${invalid}, dry_run=${dry_run}`,
           });
         }
       } catch (err) {
         status = 'failed';
-        errorMsg = err.message;
-        stageLogs.push(`[ERROR] ${err.message}`);
+        errorMsg = err instanceof Error ? err.message : String(err);
+        stageLogs.push(`[ERROR] ${errorMsg}`);
 
         if (!dry_run) {
           await base44.asServiceRole.entities.DataSource.update(src.id, { status: 'error' }).catch(() => {});
@@ -394,9 +401,9 @@ Deno.serve(async (req) => {
             entity_type: 'DataSource',
             entity_id: src.id,
             entity_name: src.name,
-            user_email: 'system@mhip',
-            user_name: 'Scheduled Ingest',
-            details: err.message,
+            user_email: user?.email || 'system@mhip',
+            user_name: user?.full_name || 'Scheduled Ingest',
+            details: errorMsg,
           }).catch(() => {});
         }
       }
