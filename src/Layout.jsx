@@ -585,7 +585,7 @@ function LayoutInner({ children, currentPageName }) {
                 width: "var(--panel-left)",
                 background: "var(--bg-surface)",
                 borderRight: "1px solid var(--border-subtle)",
-                boxShadow: "inset -1px 0 0 rgba(0,0,0,0.4), 2px 0 8px rgba(0,0,0,0.25)",
+                boxShadow: "inset -1px 0 0 rgba(0,0,0,0.4), 4px 0 16px rgba(0,0,0,0.45), 8px 0 32px rgba(0,0,0,0.25)",
                 zIndex: 20,
               }}
             >
