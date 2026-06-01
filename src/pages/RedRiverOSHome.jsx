@@ -12,8 +12,9 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useAuth } from "@/lib/AuthContext";
 import { APP_STATUS, getApps } from "@/platform/appRegistry";
+import ZoneHeader from "@/components/shell/ZoneHeader";
 import {
-  Calendar, ArrowRight, TrendingUp, TrendingDown,
+  Calendar, TrendingUp, TrendingDown,
   ChevronRight, HeartPulse, Scale, HeartHandshake, Leaf,
   FileSignature, FlaskConical, Target, Building2, BarChart3,
   Activity, AlertTriangle, FileClock, Layers, Clock, Sparkles,
@@ -227,35 +228,6 @@ function PriorityItem({ label, status, app, dueLabel }) {
   );
 }
 
-// ── Zone heading ───────────────────────────────────────────────────────────
-function ZoneHeader({ label, title, linkTo, linkLabel = "View all", count, hint }) {
-  return (
-    <div className="flex items-center justify-between mb-2 shrink-0 gap-2">
-      <div className="flex items-baseline gap-2 min-w-0 flex-1">
-        <div className="dashboard-section-label" style={{ margin: 0 }}>{label}</div>
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap" }}>{title}</h2>
-        {count != null && (
-          <span style={{ fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap" }}>· {count}</span>
-        )}
-        {hint && (
-          <span className="truncate" style={{ fontSize: 10, color: "var(--text-muted)", opacity: 0.7 }}>
-            {hint}
-          </span>
-        )}
-      </div>
-      {linkTo && (
-        <Link
-          to={createPageUrl(linkTo)}
-          className="home-zone-link flex items-center gap-1 shrink-0 transition-colors"
-          style={{ fontSize: 10.5, color: "var(--text-muted)" }}
-        >
-          {linkLabel} <ArrowRight size={10} />
-        </Link>
-      )}
-    </div>
-  );
-}
-
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function RedRiverOSHome() {
   const { user } = useAuth();
@@ -310,7 +282,28 @@ export default function RedRiverOSHome() {
   const firstName = user?.full_name ? user.full_name.split(" ")[0] : "";
 
   return (
-    <div className="h-full flex flex-col overflow-hidden" style={{ background: "var(--bg-base)" }}>
+    <div className="h-full flex flex-col overflow-hidden relative" style={{ background: "var(--bg-base)" }}>
+      {/* Ambient page glow — Dashboard-style depth */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, height: 260,
+          background: "radial-gradient(ellipse 60% 100% at 50% 0%, rgba(254,221,0,0.05) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0, height: 200,
+          background: "radial-gradient(ellipse 50% 100% at 50% 100%, rgba(64,196,255,0.04) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
       <style>{`
         .home-stat-card {
           transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
@@ -351,7 +344,7 @@ export default function RedRiverOSHome() {
           background: var(--bg-hover) !important;
           transform: translateX(2px);
         }
-        .home-zone-link:hover {
+        .zone-header-link:hover {
           color: var(--mnbc-yellow) !important;
         }
         @keyframes pulse-dot {
@@ -361,7 +354,7 @@ export default function RedRiverOSHome() {
         .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
       `}</style>
 
-      <div className="flex-1 min-h-0 flex flex-col px-4 py-3 gap-3">
+      <div className="flex-1 min-h-0 flex flex-col px-4 py-3 gap-3 relative" style={{ zIndex: 1 }}>
 
         {/* ── Hero header — slim greeting strip ──────────────────────── */}
         <div className="shrink-0 rounded-lg overflow-hidden" style={{

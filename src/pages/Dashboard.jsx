@@ -13,6 +13,7 @@ import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 import TrendingMetrics from "../components/dashboard/TrendingMetrics";
 import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
+import ZoneHeader from "../components/shell/ZoneHeader";
 import { getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
 import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
@@ -535,8 +536,31 @@ export default function Dashboard() {
     </div>);
 
 
+  const visibleCount = widgets.filter((w) => w.visible !== false).length;
+
   return (
-    <div className="h-full flex flex-col" style={{ background: "var(--bg-surface)" }}>
+    <div className="h-full flex flex-col relative" style={{ background: "var(--bg-surface)" }}>
+      {/* Ambient page glow — matches Home-page depth treatment */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, height: 260,
+          background: "radial-gradient(ellipse 60% 100% at 50% 0%, rgba(254,221,0,0.05) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0, height: 200,
+          background: "radial-gradient(ellipse 50% 100% at 50% 100%, rgba(64,196,255,0.04) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
       <style>{`
         .dashboard-section-header {
           display: flex;
@@ -597,7 +621,7 @@ export default function Dashboard() {
       `}</style>
       
       {/* Main container — no scroll */}
-      <div className="flex-1 overflow-hidden flex flex-col p-3">
+      <div className="flex-1 overflow-hidden flex flex-col p-3 relative" style={{ zIndex: 1 }}>
 
         <DashboardHeader
           title={dashboardTitle}
@@ -611,6 +635,14 @@ export default function Dashboard() {
           onOpenLayoutManager={() => setLayoutManagerOpen(true)}
           onOpenCustomizer={() => setCustomizerOpen(true)}
           onResetLayout={handleResetLayout}
+        />
+
+        {/* Zone header — gives the dashboard the same ordered band-look as Home */}
+        <ZoneHeader
+          label="Operational View"
+          title="Health Indicators Workspace"
+          count={`${visibleCount} widgets`}
+          hint={hasChanges ? "unsaved layout changes" : "drag to rearrange"}
         />
 
         {/* Widgets grid — 3-column priority layout, drag-and-drop enabled.
