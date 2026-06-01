@@ -37,6 +37,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Candidate already approved', source_id: candidate.approved_source_id }, { status: 409 });
     }
 
+    const approverName = user.full_name || user.email;
+    const approvedAt = new Date().toISOString();
+
     const sourcePayload = {
       name: overrides.name || candidate.name,
       type: overrides.type || candidate.suggested_type || 'other',
@@ -44,9 +47,30 @@ Deno.serve(async (req) => {
       description: overrides.description || candidate.summary,
       category: overrides.category || candidate.suggested_category || 'other',
       region: overrides.region || candidate.suggested_region || 'BC',
-      notes: overrides.notes || `Approved from discovery candidate ${candidate.id}. Relevance: ${candidate.relevance_score}/100. ${candidate.relevance_reason || ''}`.trim(),
+      // Compact note — just who approved it. Full detail lives in metadata.approval.
+      notes: overrides.notes || `Approved by ${approverName}`,
       sync_frequency: overrides.sync_frequency || 'manual',
       status: overrides.status || 'pending',
+      metadata: {
+        ...(overrides.metadata || {}),
+        approval: {
+          approved_by_name: approverName,
+          approved_by_email: user.email,
+          approved_at: approvedAt,
+          candidate_id: candidate.id,
+          relevance_score: candidate.relevance_score ?? null,
+          relevance_reason: candidate.relevance_reason || '',
+          summary: candidate.summary || '',
+          suggested_region: candidate.suggested_region || '',
+          suggested_type: candidate.suggested_type || '',
+          suggested_category: candidate.suggested_category || '',
+          publisher: candidate.publisher || '',
+          publication_date: candidate.publication_date || '',
+          original_url: candidate.url || '',
+          discovered_by: candidate.discovered_by || '',
+          discovery_run_id: candidate.discovery_run_id || '',
+        },
+      },
     };
 
     const created = await base44.asServiceRole.entities.DataSource.create(sourcePayload);

@@ -5,7 +5,7 @@ import {
   Plus, RefreshCw, Trash2, Database, Globe, CheckCircle, AlertCircle,
   Clock, ScrollText, BookOpen, Search, SlidersHorizontal, Grid3x3,
   List, ToggleLeft, ToggleRight, ChevronDown, StickyNote, Tag,
-  CalendarClock, ArrowUpDown
+  CalendarClock, ArrowUpDown, ShieldCheck
 } from "lucide-react";
 import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
@@ -20,6 +20,7 @@ import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
 import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
 import GoogleBigQueryBrowser from "@/components/datasources/GoogleBigQueryBrowser";
+import ApprovalDetailModal from "@/components/datasources/ApprovalDetailModal";
 import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
 import DiscoveryPanel from "@/components/datasources/DiscoveryPanel";
 import RecentSyncsTile from "@/components/datasources/RecentSyncsTile";
@@ -62,6 +63,7 @@ export default function DataSources() {
   const [failedCount, setFailedCount] = useState(0);
   const [viewMode, setViewMode] = useState("grid");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [approvalDetailFor, setApprovalDetailFor] = useState(null);
 
   // Browsers
   const [showCatalogue, setShowCatalogue] = useState(false);
@@ -414,6 +416,7 @@ export default function DataSources() {
                         onToggle={() => handleToggleStatus(src)}
                         onSchedule={() => setScheduleFor(src)}
                         onDelete={() => setDeleteConfirm(src)}
+                        onShowApproval={() => setApprovalDetailFor(src)}
                       />
                     ))}
                   </div>
@@ -426,6 +429,7 @@ export default function DataSources() {
                         onToggle={() => handleToggleStatus(src)}
                         onSchedule={() => setScheduleFor(src)}
                         onDelete={() => setDeleteConfirm(src)}
+                        onShowApproval={() => setApprovalDetailFor(src)}
                       />
                     ))}
                   </div>
@@ -474,6 +478,10 @@ export default function DataSources() {
 
       {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
 
+      {approvalDetailFor && (
+        <ApprovalDetailModal source={approvalDetailFor} onClose={() => setApprovalDetailFor(null)} />
+      )}
+
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.65)" }}>
           <div className="w-80 rounded-xl p-5 shadow-2xl"
@@ -513,7 +521,7 @@ export default function DataSources() {
   );
 }
 
-function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete }) {
+function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete, onShowApproval }) {
   const isActive = src.status === "active";
   const isDisabled = src.status === "inactive";
   const statusColor = STATUS_COLORS[src.status] || "var(--text-muted)";
@@ -521,6 +529,7 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
   const visuals = getSourceVisuals(src);
   const ProviderIcon = visuals.icon;
   const [g1, g2] = visuals.gradient;
+  const approval = src.metadata?.approval;
 
   return (
     <div
@@ -627,7 +636,31 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
         </p>
       )}
 
-      {src.notes && (
+      {approval ? (
+        <button
+          type="button"
+          onClick={onShowApproval}
+          title="View full approval record"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-left transition-all w-fit"
+          style={{
+            background: "rgba(0,230,118,0.08)",
+            border: "1px solid rgba(0,230,118,0.3)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(0,230,118,0.14)";
+            e.currentTarget.style.borderColor = "rgba(0,230,118,0.55)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(0,230,118,0.08)";
+            e.currentTarget.style.borderColor = "rgba(0,230,118,0.3)";
+          }}
+        >
+          <ShieldCheck size={10} style={{ color: "#00e676", flexShrink: 0 }} />
+          <span className="text-xs truncate" style={{ color: "#00e676", fontSize: 10.5, fontWeight: 600 }}>
+            Approved by {approval.approved_by_name || "—"}
+          </span>
+        </button>
+      ) : src.notes ? (
         <div
           className="flex items-start gap-1.5 rounded-md px-2 py-1.5"
           style={{
@@ -640,7 +673,7 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
             {src.notes}
           </p>
         </div>
-      )}
+      ) : null}
 
       {src.url && (
         <a
@@ -702,12 +735,13 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
   );
 }
 
-function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete }) {
+function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete, onShowApproval }) {
   const isActive = src.status === "active";
   const isDisabled = src.status === "inactive";
   const visuals = getSourceVisuals(src);
   const ProviderIcon = visuals.icon;
   const [g1, g2] = visuals.gradient;
+  const approval = src.metadata?.approval;
 
   return (
     <div className="flex items-center gap-3 px-3 py-2 rounded-lg group relative overflow-hidden"
@@ -735,12 +769,24 @@ function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelet
       <div className="flex-1 min-w-0 grid grid-cols-4 gap-3 items-center">
         <div className="col-span-2 min-w-0">
           <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{src.name}</div>
-          {src.notes && (
+          {approval ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onShowApproval?.(); }}
+              title="View full approval record"
+              className="flex items-center gap-1 mt-0.5 hover:underline"
+            >
+              <ShieldCheck size={9} style={{ color: "#00e676" }} />
+              <span className="text-xs truncate" style={{ color: "#00e676", fontWeight: 600 }}>
+                Approved by {approval.approved_by_name || "—"}
+              </span>
+            </button>
+          ) : src.notes ? (
             <div className="flex items-center gap-1 mt-0.5">
               <StickyNote size={9} style={{ color: "var(--accent-primary)" }} />
               <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{src.notes}</span>
             </div>
-          )}
+          ) : null}
         </div>
         <div className="flex items-center gap-1.5">
           <span className="tag" style={{ fontSize: 10 }}>{src.category?.replace(/_/g, " ") || "—"}</span>
