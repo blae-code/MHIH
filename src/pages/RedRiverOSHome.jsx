@@ -7,16 +7,16 @@
  * accent glow, and dashboard-section-label headings.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useAuth } from "@/lib/AuthContext";
 import { APP_STATUS, getApps } from "@/platform/appRegistry";
 import {
-  Calendar, ArrowRight, TrendingUp, TrendingDown, Minus,
+  Calendar, ArrowRight, TrendingUp, TrendingDown,
   ChevronRight, HeartPulse, Scale, HeartHandshake, Leaf,
   FileSignature, FlaskConical, Target, Building2, BarChart3,
-  Activity, AlertTriangle, FileClock, Layers,
+  Activity, AlertTriangle, FileClock, Layers, Clock, Sparkles,
 } from "lucide-react";
 
 // ── Icon mapping for apps ──────────────────────────────────────────────────
@@ -29,18 +29,43 @@ function AppIcon({ name, ...rest }) {
   return Icon ? <Icon {...rest} /> : <BarChart3 {...rest} />;
 }
 
-// ── Gradient stat card (matches Dashboard stat cards) ──────────────────────
-function StatCard({ label, value, desc, icon: Icon, color, bgColor, trend }) {
+// ── Days-until helper ──────────────────────────────────────────────────────
+function daysUntil(monthLabel, dayNum, refDate) {
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const monthIdx = months.indexOf(monthLabel);
+  if (monthIdx === -1) return null;
+  const target = new Date(refDate.getFullYear(), monthIdx, dayNum);
+  // If date is more than 6 months in the past, assume it's next year
+  const diffMs = target - refDate;
+  if (diffMs < -1000 * 60 * 60 * 24 * 30 * 6) {
+    target.setFullYear(target.getFullYear() + 1);
+  }
+  return Math.round((target - refDate) / (1000 * 60 * 60 * 24));
+}
+function formatCountdown(days) {
+  if (days == null) return "";
+  if (days < 0) return `${Math.abs(days)}d overdue`;
+  if (days === 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  if (days < 7) return `${days}d`;
+  if (days < 30) return `${Math.round(days / 7)}w`;
+  return `${Math.round(days / 30)}mo`;
+}
+
+// ── Gradient stat card ─────────────────────────────────────────────────────
+function StatCard({ label, value, desc, icon: Icon, color, bgColor, trend, tooltip }) {
   const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : null;
   return (
     <div
       className="home-stat-card relative overflow-hidden group"
+      title={tooltip}
       style={{
         background: `linear-gradient(135deg, ${bgColor} 0%, var(--bg-elevated) 100%)`,
         border: `1.5px solid ${color}33`,
         borderRadius: 10,
         padding: 12,
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 12px rgba(0,0,0,0.35)",
+        cursor: "help",
       }}
     >
       {/* Accent strip */}
@@ -76,14 +101,17 @@ function StatCard({ label, value, desc, icon: Icon, color, bgColor, trend }) {
   );
 }
 
-// ── Compact app card (single-row) ──────────────────────────────────────────
+// ── Compact app card ───────────────────────────────────────────────────────
 function AppCard({ app }) {
   const isReady = app.status === APP_STATUS.ACTIVE;
   const isScaffold = app.status === APP_STATUS.SCAFFOLD;
+  const isPlanned = app.status === APP_STATUS.PLANNED;
+  const statusBadge = isScaffold ? "beta" : isPlanned ? "soon" : null;
   return (
     <Link
       to={createPageUrl(app.landingPage)}
       className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-all group"
+      title={`${app.name} — ${app.description}`}
       style={{
         background: "var(--bg-elevated)",
         border: `1px solid var(--border-subtle)`,
@@ -115,14 +143,14 @@ function AppCard({ app }) {
           <span className="truncate" style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
             {app.shortName}
           </span>
-          {isScaffold && (
+          {statusBadge && (
             <span style={{
               fontSize: 8, padding: "0 4px", borderRadius: 2,
               background: "var(--bg-overlay)", color: "var(--text-muted)",
               fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
               flexShrink: 0,
             }}>
-              beta
+              {statusBadge}
             </span>
           )}
         </div>
@@ -156,7 +184,8 @@ function PriorityItem({ label, status, app, dueLabel }) {
   const color = statusColors[status] ?? "var(--text-muted)";
   return (
     <div
-      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md transition-all"
+      className="home-priority-row flex items-center gap-2.5 px-2.5 py-1.5 rounded-md"
+      title={`${label}${app ? ` · ${app}` : ""}${dueLabel ? ` · due ${dueLabel}` : ""}`}
       style={{
         background: "var(--bg-overlay)",
         border: "1px solid var(--border-subtle)",
@@ -179,7 +208,10 @@ function PriorityItem({ label, status, app, dueLabel }) {
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         {dueLabel && (
-          <span style={{ fontSize: 9.5, color: "var(--text-muted)" }}>{dueLabel}</span>
+          <span className="flex items-center gap-0.5" style={{ fontSize: 9.5, color: "var(--text-muted)" }}>
+            <Clock size={9} style={{ opacity: 0.7 }} />
+            {dueLabel}
+          </span>
         )}
         <span style={{
           fontSize: 9, fontWeight: 700, color,
@@ -195,24 +227,27 @@ function PriorityItem({ label, status, app, dueLabel }) {
   );
 }
 
-// ── Zone heading (matches Dashboard's section header pattern) ──────────────
-function ZoneHeader({ label, title, linkTo, linkLabel = "View all", count }) {
+// ── Zone heading ───────────────────────────────────────────────────────────
+function ZoneHeader({ label, title, linkTo, linkLabel = "View all", count, hint }) {
   return (
-    <div className="flex items-center justify-between mb-2 shrink-0">
-      <div className="flex items-baseline gap-2 min-w-0">
+    <div className="flex items-center justify-between mb-2 shrink-0 gap-2">
+      <div className="flex items-baseline gap-2 min-w-0 flex-1">
         <div className="dashboard-section-label" style={{ margin: 0 }}>{label}</div>
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>{title}</h2>
+        <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap" }}>{title}</h2>
         {count != null && (
-          <span style={{ fontSize: 10, color: "var(--text-muted)" }}>· {count}</span>
+          <span style={{ fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap" }}>· {count}</span>
+        )}
+        {hint && (
+          <span className="truncate" style={{ fontSize: 10, color: "var(--text-muted)", opacity: 0.7 }}>
+            {hint}
+          </span>
         )}
       </div>
       {linkTo && (
         <Link
           to={createPageUrl(linkTo)}
-          className="flex items-center gap-1 transition-colors"
+          className="home-zone-link flex items-center gap-1 shrink-0 transition-colors"
           style={{ fontSize: 10.5, color: "var(--text-muted)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--mnbc-yellow)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
         >
           {linkLabel} <ArrowRight size={10} />
         </Link>
@@ -240,8 +275,9 @@ export default function RedRiverOSHome() {
   })();
 
   const dateStr = time.toLocaleDateString("en-CA", {
-    weekday: "short", month: "short", day: "numeric",
+    weekday: "long", month: "short", day: "numeric",
   });
+  const timeStr = time.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" });
 
   const priorities = [
     { label: "Q1 Health Equity Report — HA Workplan Review", status: "at-risk", app: "Health Equity", dueLabel: "Mar 28" },
@@ -253,13 +289,25 @@ export default function RedRiverOSHome() {
   ];
 
   const deadlines = [
-    { label: "Q3 HIBC Contribution Report", due: "Mar 31", urgency: "high" },
-    { label: "Annual Health Equity Scan", due: "Apr 15", urgency: "medium" },
-    { label: "Mental Health Strategy Update", due: "Apr 30", urgency: "medium" },
-    { label: "FNHA Partnership Workplan", due: "May 15", urgency: "low" },
+    { label: "Q3 HIBC Contribution Report", due: "Mar 31", urgency: "high", monthDay: ["Mar", 31] },
+    { label: "Annual Health Equity Scan", due: "Apr 15", urgency: "medium", monthDay: ["Apr", 15] },
+    { label: "Mental Health Strategy Update", due: "Apr 30", urgency: "medium", monthDay: ["Apr", 30] },
+    { label: "FNHA Partnership Workplan", due: "May 15", urgency: "low", monthDay: ["May", 15] },
   ];
 
+  // Status roll-ups for header counts
+  const priorityStatusCount = useMemo(() => {
+    return priorities.reduce((acc, p) => {
+      acc[p.status] = (acc[p.status] || 0) + 1;
+      return acc;
+    }, {});
+  }, []);
+  const overdueCount = priorityStatusCount.overdue || 0;
+  const atRiskCount = priorityStatusCount["at-risk"] || 0;
+
   const activeCount = apps.filter(a => a.status === APP_STATUS.ACTIVE).length;
+  const scaffoldCount = apps.filter(a => a.status === APP_STATUS.SCAFFOLD).length;
+  const firstName = user?.full_name ? user.full_name.split(" ")[0] : "";
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: "var(--bg-base)" }}>
@@ -296,6 +344,21 @@ export default function RedRiverOSHome() {
           border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
           box-shadow: inset 0 1px 0 rgba(254,221,0,0.15), 0 0 32px rgba(254,221,0,0.10), 0 8px 24px rgba(0,0,0,0.4);
         }
+        .home-priority-row {
+          transition: background 0.15s, border-color 0.15s, transform 0.15s;
+        }
+        .home-priority-row:hover {
+          background: var(--bg-hover) !important;
+          transform: translateX(2px);
+        }
+        .home-zone-link:hover {
+          color: var(--mnbc-yellow) !important;
+        }
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.85); }
+        }
+        .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
       `}</style>
 
       <div className="flex-1 min-h-0 flex flex-col px-4 py-3 gap-3">
@@ -306,52 +369,71 @@ export default function RedRiverOSHome() {
           border: "1px solid var(--border-default)",
           boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)",
         }}>
-          <div className="px-4 py-2.5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{
-                background: "var(--color-success)",
-                boxShadow: "0 0 8px rgba(0,230,118,0.5)",
-              }} />
+          <div className="px-4 py-2.5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-2.5 h-2.5 rounded-full shrink-0 pulse-dot"
+                style={{ background: "var(--color-success)", boxShadow: "0 0 8px rgba(0,230,118,0.5)" }}
+                title="All systems nominal"
+              />
               <div className="min-w-0">
-                <h1 className="mnbc-heading truncate" style={{
-                  fontSize: 18, color: "var(--text-primary)", lineHeight: 1.1, margin: 0,
-                }}>
-                  {greeting}{user?.full_name ? `, ${user.full_name.split(" ")[0]}` : ""}
+                <h1
+                  className="mnbc-heading truncate"
+                  style={{ fontSize: 18, color: "var(--text-primary)", lineHeight: 1.1, margin: 0 }}
+                  title={user?.full_name ?? "Welcome"}
+                >
+                  {greeting}{firstName ? `, ${firstName}` : ""}
                 </h1>
-                <div className="dashboard-section-label" style={{ margin: 0, marginTop: 2 }}>
-                  MNBC Health &amp; Wellness · Red River OS
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="dashboard-section-label" style={{ margin: 0 }}>
+                    MNBC Health &amp; Wellness · Red River OS
+                  </span>
                 </div>
               </div>
             </div>
-            <span className="shrink-0" style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-              {dateStr}
-            </span>
+            <div className="shrink-0 flex flex-col items-end gap-0.5">
+              <span style={{ fontSize: 11.5, color: "var(--text-secondary)", whiteSpace: "nowrap", fontWeight: 600 }}>
+                {dateStr}
+              </span>
+              <span style={{ fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                {timeStr} · Vancouver
+              </span>
+            </div>
           </div>
         </div>
 
         {/* ── Stat strip — gradient cards matching Dashboard ─────────── */}
         <div className="shrink-0">
-          <div className="dashboard-section-label">Platform Status</div>
+          <div className="flex items-baseline justify-between mb-1.5">
+            <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Platform Status</div>
+            <span style={{ fontSize: 10, color: "var(--text-muted)", opacity: 0.75 }}>
+              hover any card for detail
+            </span>
+          </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
             <StatCard
               label="Active Programs" value="12" trend="up"
               icon={Layers} color="#40c4ff" bgColor="rgba(64,196,255,0.08)"
               desc="Programs in flight across MNBC"
+              tooltip="Total number of active health and wellness programs currently in delivery across the ministry. Trending up reflects two new programs activated this quarter."
             />
             <StatCard
               label="Open Priorities" value="7" trend="up"
               icon={Activity} color="#FEDD00" bgColor="rgba(254,221,0,0.08)"
               desc="Ministry priorities being actioned"
+              tooltip="Strategic priorities currently being worked on across the ministry. Includes anything in 'On Track', 'At Risk', or 'Overdue' status."
             />
             <StatCard
               label="Overdue" value="2" trend="down"
               icon={AlertTriangle} color="#ff4d4f" bgColor="rgba(255,77,79,0.08)"
               desc="Items past their target date"
+              tooltip="Priorities or deliverables that have passed their required completion date. Trending down means overdue volume has decreased week-over-week."
             />
             <StatCard
               label="Reports Due 30d" value="4"
               icon={FileClock} color="#ffab40" bgColor="rgba(255,171,64,0.08)"
               desc="Deliverables coming up this month"
+              tooltip="Reporting deliverables — contracts, contributions, evaluations — due in the next 30 days. Click 'Reporting Deadlines' below for the full list."
             />
           </div>
         </div>
@@ -369,6 +451,9 @@ export default function RedRiverOSHome() {
                 title="Ministry Priorities"
                 linkTo="PlanningKPI"
                 count={`${priorities.length} items`}
+                hint={overdueCount > 0
+                  ? `${overdueCount} overdue · ${atRiskCount} at risk`
+                  : atRiskCount > 0 ? `${atRiskCount} at risk` : "all on track"}
               />
               <div className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 relative z-10">
                 {priorities.map((p, i) => <PriorityItem key={i} {...p} />)}
@@ -382,17 +467,22 @@ export default function RedRiverOSHome() {
                 title="Reporting Deadlines"
                 linkTo="ContractsReporting"
                 linkLabel="All"
+                count={`${deadlines.length} ahead`}
+                hint="next 90 days"
               />
               <div className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1 relative z-10">
                 {deadlines.map((item) => {
                   const urgencyColor =
                     item.urgency === "high" ? "#ff4d4f" :
                     item.urgency === "medium" ? "#ffab40" :
-                    "var(--text-muted)";
+                    "#40c4ff";
+                  const days = daysUntil(item.monthDay[0], item.monthDay[1], time);
+                  const countdown = formatCountdown(days);
                   return (
                     <div
                       key={item.label}
-                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-md"
+                      className="home-priority-row flex items-center gap-2 px-2.5 py-1.5 rounded-md"
+                      title={`${item.label} · due ${item.due}${countdown ? ` · ${countdown}` : ""}`}
                       style={{
                         background: "var(--bg-overlay)",
                         border: "1px solid var(--border-subtle)",
@@ -403,7 +493,17 @@ export default function RedRiverOSHome() {
                       <span className="flex-1 truncate" style={{ fontSize: 11.5, color: "var(--text-secondary)" }}>
                         {item.label}
                       </span>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: urgencyColor, whiteSpace: "nowrap" }}>
+                      {countdown && (
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, color: urgencyColor,
+                          background: urgencyColor + "18", padding: "1.5px 5px",
+                          borderRadius: 3, border: `1px solid ${urgencyColor}33`,
+                          whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums",
+                        }}>
+                          {countdown}
+                        </span>
+                      )}
+                      <span style={{ fontSize: 11, fontWeight: 700, color: urgencyColor, whiteSpace: "nowrap", minWidth: 42, textAlign: "right" }}>
                         {item.due}
                       </span>
                     </div>
@@ -418,12 +518,21 @@ export default function RedRiverOSHome() {
             <ZoneHeader
               label="Platform"
               title="Applications"
-              count={`${activeCount} active`}
+              count={`${activeCount} active${scaffoldCount > 0 ? ` · ${scaffoldCount} beta` : ""}`}
+              hint="click to launch"
             />
             <div className="flex-1 min-h-0 overflow-y-auto grid grid-cols-1 xl:grid-cols-2 gap-1.5 pr-1 content-start relative z-10">
               {apps.map((app) => (
                 <AppCard key={app.id} app={app} />
               ))}
+            </div>
+            <div className="shrink-0 mt-2 pt-2 relative z-10 flex items-center gap-1.5"
+              style={{ borderTop: "1px solid var(--border-subtle)", fontSize: 10, color: "var(--text-muted)" }}>
+              <Sparkles size={10} style={{ color: "var(--mnbc-yellow)", opacity: 0.7 }} />
+              <span>Press <kbd style={{
+                background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)",
+                borderRadius: 3, padding: "1px 5px", fontFamily: "ui-monospace, monospace", fontSize: 9.5,
+              }}>⌘K</kbd> to search across all apps</span>
             </div>
           </section>
         </div>
