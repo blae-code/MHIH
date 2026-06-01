@@ -13,6 +13,7 @@ import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 import TrendingMetrics from "../components/dashboard/TrendingMetrics";
 import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
+import RegionalGapsWidget from "../components/dashboard/RegionalGapsWidget";
 import ZoneHeader from "../components/shell/ZoneHeader";
 import { getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
 import { listAllHealthMetrics } from "@/lib/healthMetrics";
@@ -23,7 +24,7 @@ const LAYOUTS_KEY = "mhip_dashboard_layouts";
 
 // Zone partitioning — matches Home page's cockpit layout pattern.
 // stat_cards is pinned to the top strip (above the zones).
-const ANALYTICS_IDS = ["year_trend", "disparity_explorer", "regional_performance", "category_pie"];
+const ANALYTICS_IDS = ["year_trend", "disparity_explorer", "regional_gaps", "regional_performance", "category_pie"];
 const INTELLIGENCE_IDS = ["ai_insights", "trending_metrics", "weekly_reports"];
 
 function loadPrefs() {
@@ -77,6 +78,7 @@ export default function Dashboard() {
       "stat_cards",
       "year_trend",
       "disparity_explorer",
+      "regional_gaps",
       "ai_insights",
       "regional_performance",
       "category_pie",
@@ -476,6 +478,9 @@ export default function Dashboard() {
 
     disparity_explorer: isVisible("disparity_explorer") &&
     <DisparityExplorer key="disparity_explorer" metrics={metrics} trackedMetricIds={pinnedIds} />,
+
+    regional_gaps: isVisible("regional_gaps") &&
+    <RegionalGapsWidget key="regional_gaps" />,
 
     weekly_reports: isVisible("weekly_reports") && <WeeklyReports key="weekly_reports" />,
 

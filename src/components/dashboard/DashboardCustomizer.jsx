@@ -7,6 +7,7 @@ export const DEFAULT_WIDGETS = [
   { id: "year_trend", label: "Metrics by Year Chart", description: "Area chart of metric volume over time" },
   { id: "category_pie", label: "Category Distribution", description: "Pie chart + legend of metric categories" },
   { id: "disparity_explorer", label: "Health Disparity Explorer", description: "Bar, scatter, trend & heatmap charts with filters" },
+  { id: "regional_gaps", label: "Regional Data Gaps", description: "Acquisition priorities — what to source next, grouped by region" },
   { id: "weekly_reports", label: "Weekly Summary Reports", description: "AI-generated stakeholder reports" },
   { id: "pinned_metrics", label: "Pinned Metrics", description: "Your manually pinned health metrics" },
   { id: "data_sources", label: "Data Sources", description: "Live status of connected data sources" },
