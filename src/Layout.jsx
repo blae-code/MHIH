@@ -15,7 +15,7 @@
 import React, {
   createContext, useCallback, useContext, useEffect, useRef, useState,
 } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
@@ -252,6 +252,7 @@ export default function Layout({ children, currentPageName }) {
 function LayoutInner({ children, currentPageName }) {
   const platform = usePlatform();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // ── User state (preserved from original layout) ──────────────────────
   const [user, setUser] = useState(null);
@@ -426,9 +427,9 @@ function LayoutInner({ children, currentPageName }) {
           {/* Separator */}
           <div style={{ width: 1, height: 16, background: "var(--border-subtle)" }} />
 
-          {/* App badge / switcher trigger */}
+          {/* App badge — opens command palette (primary switch path) */}
           <button
-            onClick={() => platform.setAppSwitcherOpen(true)}
+            onClick={() => platform.setCommandPaletteOpen(true)}
             className="flex items-center gap-2 px-2.5 py-1 rounded-md transition-all"
             style={{
               background: "var(--bg-elevated)",
@@ -437,10 +438,11 @@ function LayoutInner({ children, currentPageName }) {
               color: accent,
               fontWeight: 600,
             }}
+            title="Switch app — ⌘K"
           >
             <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
             <span className="hidden sm:inline">{activeApp?.shortName ?? "Apps"}</span>
-            <Grid3x3 size={10} style={{ color: "var(--text-muted)" }} />
+            <ChevronDown size={10} style={{ color: "var(--text-muted)" }} />
           </button>
 
           {/* Global search */}
@@ -611,15 +613,15 @@ function LayoutInner({ children, currentPageName }) {
                   zIndex: 1,
                 }}
               />
-              {/* App identity strip — slim, current-app context only */}
+              {/* App identity strip — opens command palette (primary switch path) */}
               <button
-                onClick={() => platform.setAppSwitcherOpen(true)}
+                onClick={() => platform.setCommandPaletteOpen(true)}
                 className="flex items-center gap-2 px-3 py-2 shrink-0 transition-colors text-left w-full group"
                 style={{
                   borderBottom: "1px solid var(--border-subtle)",
                   background: "transparent",
                 }}
-                title="Switch app"
+                title="Switch app — ⌘K"
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
@@ -814,22 +816,25 @@ function LayoutInner({ children, currentPageName }) {
         </div>
       </div>
 
-      {/* ── App Switcher overlay ───────────────────────────────────────── */}
+      {/* ── App Switcher overlay (kept for power users / deep-link) ───── */}
       {platform.appSwitcherOpen && (
         <AppSwitcher
           activeAppId={platform.activeAppId}
           onClose={() => platform.setAppSwitcherOpen(false)}
           onSelect={(app) => {
             platform.switchApp(app.id);
-            // Navigate to the app's landing page
-            window.location.href = createPageUrl(app.landingPage);
+            navigate(createPageUrl(app.landingPage));
           }}
         />
       )}
 
       {/* ── Command palette ────────────────────────────────────────────── */}
       {platform.commandPaletteOpen && (
-        <CommandPalette onClose={() => platform.setCommandPaletteOpen(false)} />
+        <CommandPalette
+          isOpen
+          currentPageName={currentPageName}
+          onClose={() => platform.setCommandPaletteOpen(false)}
+        />
       )}
 
       {/* ── Notification center ────────────────────────────────────────── */}

@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { usePlatform } from "@/platform/platformContext";
+import { getApps } from "@/platform/appRegistry";
 import {
   Search, X, Database, BarChart3, Brain, BookOpen, FileText,
   ChevronRight, Clock, Sparkles, LayoutDashboard, TrendingUp,
   Shield, Users, Settings, Bot, Workflow, BellRing, FlaskConical,
   AlertCircle, ShieldCheck, FileDown, Wrench, MapPin, Upload,
   Activity, ClipboardCheck, BrainCircuit, GitCompare, Link2,
-  Siren, MapPinned, BookMarked, ListOrdered, FolderOpen, SlidersHorizontal, MessageSquare
+  Siren, MapPinned, BookMarked, ListOrdered, FolderOpen, SlidersHorizontal, MessageSquare,
+  Command, Building2, Target, HeartPulse, Scale, HeartHandshake, Leaf,
+  FileSignature, Camera, Layers3,
 } from "lucide-react";
+
+const APP_ICONS = {
+  LayoutDashboard, Database, Brain, Settings, Users, Search,
+  FileDown, BookOpen, Shield, BarChart3, SlidersHorizontal, ShieldCheck, Bot,
+  MapPin, TrendingUp, Wrench, BellRing, Workflow, Sparkles,
+  Activity, FlaskConical, ClipboardCheck, BrainCircuit, MapPinned, Siren,
+  BookMarked, Link2, ListOrdered, GitCompare, FileText, MessageSquare,
+  Command, Building2, Target, HeartPulse, Scale, HeartHandshake, Leaf,
+  FileSignature, Camera, Layers3,
+};
 
 const NAV_COMMANDS = [
   { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard, section: "Workspace", desc: "Platform overview & KPIs" },
@@ -57,6 +71,7 @@ const SECTION_COLORS = {
   Admin: "#ffab40",
   System: "#8b8fa8",
   Results: "#a78bfa",
+  Apps: "#a78bfa",
 };
 
 // Highlight matching text
@@ -75,7 +90,7 @@ function Highlight({ text, query }) {
   );
 }
 
-export default function CommandPalette({ isOpen, onClose, currentPageName }) {
+export default function CommandPalette({ isOpen = true, onClose, currentPageName }) {
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -83,15 +98,31 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const debounceRef = useRef(null);
+  const navigate = useNavigate();
+  const platform = usePlatform();
+
+  // Apps available for quick-switch
+  const apps = useMemo(() => getApps().filter(a => !a.isOsLevel), []);
 
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery("");
-      setDataResults([]);
-      setActiveIndex(0);
-    }
-  }, [isOpen]);
+    setTimeout(() => inputRef.current?.focus(), 50);
+    setQuery("");
+    setDataResults([]);
+    setActiveIndex(0);
+  }, []);
+
+  // Switch app + navigate without page reload
+  const goToApp = useCallback((app) => {
+    platform.switchApp(app.id);
+    navigate(createPageUrl(app.landingPage));
+    onClose();
+  }, [platform, navigate, onClose]);
+
+  // Navigate to a page without reload
+  const goToPage = useCallback((page) => {
+    navigate(createPageUrl(page));
+    onClose();
+  }, [navigate, onClose]);
 
   // Live data search (debounced)
   const searchData = useCallback(async (q) => {
@@ -155,6 +186,19 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
     return () => clearTimeout(debounceRef.current);
   }, [query, searchData]);
 
+  // Filter app results — always show when no query (top of list) and on match
+  const appResults = useMemo(() => {
+    if (!query) return apps;
+    const q = query.toLowerCase();
+    return apps.filter(a =>
+      a.shortName?.toLowerCase().includes(q) ||
+      a.name?.toLowerCase().includes(q) ||
+      a.description?.toLowerCase().includes(q) ||
+      "app".includes(q) ||
+      "switch".includes(q)
+    );
+  }, [query, apps]);
+
   // Filter nav commands
   const navResults = useMemo(() => {
     if (!query) return [];
@@ -167,9 +211,10 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
   }, [query]);
 
   const allResults = useMemo(() => [
+    ...appResults.map(a => ({ resultType: "app", app: a })),
     ...navResults.map(r => ({ ...r, resultType: "nav" })),
     ...dataResults.map(r => ({ ...r, resultType: "data" })),
-  ], [navResults, dataResults]);
+  ], [appResults, navResults, dataResults]);
 
   useEffect(() => { setActiveIndex(0); }, [query]);
 
@@ -183,8 +228,9 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
     if (e.key === "ArrowUp") { e.preventDefault(); setActiveIndex(i => Math.max(i - 1, 0)); }
     if (e.key === "Escape") { onClose(); }
     if (e.key === "Enter" && allResults[activeIndex]) {
-      window.location.href = createPageUrl(allResults[activeIndex].page);
-      onClose();
+      const r = allResults[activeIndex];
+      if (r.resultType === "app") goToApp(r.app);
+      else goToPage(r.page);
     }
   };
 
@@ -254,37 +300,80 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
         {/* ── Body ── */}
         <div ref={listRef} className="overflow-y-auto flex-1">
 
-          {/* No query — show quick nav grid */}
+          {/* No query — show apps grid + quick nav */}
           {!query && (
-            <div className="p-3">
-              <div className="text-xs font-bold uppercase tracking-wider mb-2.5 px-1"
-                style={{ color: "var(--text-muted)", letterSpacing: "0.12em" }}>Quick Navigation</div>
-              <div className="grid grid-cols-2 gap-1">
-                {recentPages.map((p) => {
-                  const color = SECTION_COLORS[p.section] || "#40c4ff";
-                  return (
-                    <Link key={p.page} to={createPageUrl(p.page)} onClick={onClose}>
-                      <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all cursor-pointer"
-                        style={{ border: "1px solid transparent" }}
-                        onMouseOver={e => { e.currentTarget.style.background = `${color}08`; e.currentTarget.style.borderColor = `${color}25`; }}
-                        onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}>
-                        <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                          style={{ background: `${color}18`, border: `1px solid ${color}30` }}>
-                          <p.icon size={12} style={{ color }} />
+            <>
+              <div className="px-3 pt-3 pb-1">
+                <div className="text-xs font-bold uppercase tracking-wider mb-2.5 px-1 flex items-center gap-2"
+                  style={{ color: "#a78bfa", letterSpacing: "0.12em" }}>
+                  Switch App
+                  <div className="flex-1 h-px" style={{ background: "rgba(167,139,250,0.15)" }} />
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  {apps.map((app, i) => {
+                    const isActive = app.id === platform.activeAppId;
+                    const idx = i;
+                    const isFocused = idx === activeIndex;
+                    const AppIcon = APP_ICONS[app.icon] || Command;
+                    return (
+                      <button
+                        key={app.id}
+                        data-idx={idx}
+                        onMouseEnter={() => setActiveIndex(idx)}
+                        onClick={() => goToApp(app)}
+                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all cursor-pointer text-left"
+                        style={{
+                          background: isFocused ? `${app.accent}10` : "transparent",
+                          border: `1px solid ${isFocused ? `${app.accent}35` : "transparent"}`,
+                        }}
+                      >
+                        <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+                          style={{ background: `${app.accent}18`, border: `1px solid ${app.accent}33` }}>
+                          <AppIcon size={13} style={{ color: app.accent }} />
                         </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{p.label}</div>
-                          <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 10 }}>{p.section}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{app.shortName}</div>
+                          <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 10 }}>{app.description}</div>
                         </div>
-                        {currentPageName === p.page && (
-                          <div className="ml-auto w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#FEDD00" }} />
+                        {isActive && (
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: app.accent, boxShadow: `0 0 6px ${app.accent}` }} />
                         )}
-                      </div>
-                    </Link>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+
+              <div className="p-3 pt-2">
+                <div className="text-xs font-bold uppercase tracking-wider mb-2.5 px-1"
+                  style={{ color: "var(--text-muted)", letterSpacing: "0.12em" }}>Quick Navigation</div>
+                <div className="grid grid-cols-2 gap-1">
+                  {recentPages.map((p) => {
+                    const color = SECTION_COLORS[p.section] || "#40c4ff";
+                    return (
+                      <button key={p.page} onClick={() => goToPage(p.page)} className="text-left">
+                        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all cursor-pointer"
+                          style={{ border: "1px solid transparent" }}
+                          onMouseOver={e => { e.currentTarget.style.background = `${color}08`; e.currentTarget.style.borderColor = `${color}25`; }}
+                          onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}>
+                          <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                            style={{ background: `${color}18`, border: `1px solid ${color}30` }}>
+                            <p.icon size={12} style={{ color }} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{p.label}</div>
+                            <div className="text-xs truncate" style={{ color: "var(--text-muted)", fontSize: 10 }}>{p.section}</div>
+                          </div>
+                          {currentPageName === p.page && (
+                            <div className="ml-auto w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#FEDD00" }} />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
           )}
 
           {/* No results */}
@@ -299,12 +388,57 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
           {query && allResults.length > 0 && (() => {
             let globalIdx = 0;
 
-            // Group nav results
+            // Group results
+            const appItems = allResults.filter(r => r.resultType === "app");
             const navItems = allResults.filter(r => r.resultType === "nav");
             const dataItems = allResults.filter(r => r.resultType === "data");
 
             return (
               <>
+                {appItems.length > 0 && (
+                  <div className="pt-2 pb-1">
+                    <div className="flex items-center gap-2 px-4 py-1">
+                      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#a78bfa", opacity: 0.8, letterSpacing: "0.1em" }}>Apps</span>
+                      <div className="flex-1 h-px" style={{ background: "rgba(167,139,250,0.15)" }} />
+                    </div>
+                    {appItems.map(({ app }) => {
+                      const idx = globalIdx++;
+                      const isActive = idx === activeIndex;
+                      const isCurrent = app.id === platform.activeAppId;
+                      const AppIcon = APP_ICONS[app.icon] || Command;
+                      return (
+                        <button
+                          key={app.id}
+                          data-idx={idx}
+                          onMouseEnter={() => setActiveIndex(idx)}
+                          onClick={() => goToApp(app)}
+                          className={`cmd-row w-full flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-all text-left ${isActive ? "cmd-row-active" : ""}`}
+                          style={{ borderLeft: "2px solid transparent" }}
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ background: isActive ? `${app.accent}18` : "rgba(255,255,255,0.04)", border: `1px solid ${isActive ? `${app.accent}40` : "rgba(255,255,255,0.06)"}`, transition: "all 0.12s" }}>
+                            <AppIcon size={14} style={{ color: isActive ? app.accent : "var(--text-muted)" }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium leading-tight" style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}>
+                              <Highlight text={app.shortName} query={query} />
+                              {isCurrent && (
+                                <span className="ml-2 text-xs" style={{ color: app.accent, opacity: 0.7 }}>· current</span>
+                              )}
+                            </div>
+                            <div className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{app.description}</div>
+                          </div>
+                          <span className="text-xs px-2 py-0.5 rounded-full shrink-0 hidden sm:block"
+                            style={{ background: `${app.accent}12`, color: app.accent, border: `1px solid ${app.accent}25`, fontSize: 10 }}>
+                            App
+                          </span>
+                          <ChevronRight size={12} style={{ color: "var(--text-muted)", opacity: isActive ? 0.8 : 0, transition: "opacity 0.12s", flexShrink: 0 }} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {navItems.length > 0 && (
                   <div className="pt-2 pb-1">
                     <div className="flex items-center gap-2 px-4 py-1">
@@ -316,7 +450,7 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
                       const isActive = idx === activeIndex;
                       const color = SECTION_COLORS[r.section] || "#FEDD00";
                       return (
-                        <Link key={r.page} to={createPageUrl(r.page)} onClick={onClose}>
+                        <button key={r.page} onClick={() => goToPage(r.page)} className="w-full text-left">
                           <div
                             data-idx={idx}
                             className={`cmd-row flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-all ${isActive ? "cmd-row-active" : ""}`}
@@ -339,7 +473,7 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
                             </span>
                             <ChevronRight size={12} style={{ color: "var(--text-muted)", opacity: isActive ? 0.8 : 0, transition: "opacity 0.12s", flexShrink: 0 }} />
                           </div>
-                        </Link>
+                        </button>
                       );
                     })}
                   </div>
@@ -356,7 +490,7 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
                       const isActive = idx === activeIndex;
                       const color = typeColor[r.type] || "#40c4ff";
                       return (
-                        <Link key={`${r.type}-${r.label}`} to={createPageUrl(r.page)} onClick={onClose}>
+                        <button key={`${r.type}-${r.label}`} onClick={() => goToPage(r.page)} className="w-full text-left">
                           <div
                             data-idx={idx}
                             className={`cmd-row flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-all ${isActive ? "cmd-row-active" : ""}`}
@@ -381,7 +515,7 @@ export default function CommandPalette({ isOpen, onClose, currentPageName }) {
                             )}
                             <ChevronRight size={12} style={{ color: "var(--text-muted)", opacity: isActive ? 0.8 : 0, transition: "opacity 0.12s", flexShrink: 0 }} />
                           </div>
-                        </Link>
+                        </button>
                       );
                     })}
                   </div>
