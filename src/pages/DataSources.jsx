@@ -683,25 +683,27 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
         <button
           type="button"
           onClick={onShowApproval}
-          title="View full approval record"
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-left transition-all w-fit"
+          title={`Approved by ${approval.approved_by_name || "—"}${approval.approved_at ? ` · ${new Date(approval.approved_at).toLocaleDateString("en-CA")}` : ""} — click for full record`}
+          aria-label="View approval record"
+          className="inline-flex items-center justify-center rounded-full w-fit transition-all"
           style={{
-            background: "rgba(0,230,118,0.08)",
-            border: "1px solid rgba(0,230,118,0.3)",
+            width: 22, height: 22,
+            background: "rgba(0,230,118,0.1)",
+            border: "1px solid rgba(0,230,118,0.4)",
+            boxShadow: "0 0 8px rgba(0,230,118,0.2)",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(0,230,118,0.14)";
-            e.currentTarget.style.borderColor = "rgba(0,230,118,0.55)";
+            e.currentTarget.style.background = "rgba(0,230,118,0.2)";
+            e.currentTarget.style.borderColor = "rgba(0,230,118,0.7)";
+            e.currentTarget.style.boxShadow = "0 0 12px rgba(0,230,118,0.4)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(0,230,118,0.08)";
-            e.currentTarget.style.borderColor = "rgba(0,230,118,0.3)";
+            e.currentTarget.style.background = "rgba(0,230,118,0.1)";
+            e.currentTarget.style.borderColor = "rgba(0,230,118,0.4)";
+            e.currentTarget.style.boxShadow = "0 0 8px rgba(0,230,118,0.2)";
           }}
         >
-          <ShieldCheck size={10} style={{ color: "#00e676", flexShrink: 0 }} />
-          <span className="text-xs truncate" style={{ color: "#00e676", fontSize: 10.5, fontWeight: 600 }}>
-            Approved by {approval.approved_by_name || "—"}
-          </span>
+          <ShieldCheck size={11} style={{ color: "#00e676" }} />
         </button>
       ) : src.notes ? (
         <div
@@ -831,13 +833,16 @@ function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelet
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onShowApproval?.(); }}
-              title="View full approval record"
-              className="flex items-center gap-1 mt-0.5 hover:underline"
+              title={`Approved by ${approval.approved_by_name || "—"}${approval.approved_at ? ` · ${new Date(approval.approved_at).toLocaleDateString("en-CA")}` : ""} — click for full record`}
+              aria-label="View approval record"
+              className="inline-flex items-center justify-center rounded-full mt-0.5"
+              style={{
+                width: 18, height: 18,
+                background: "rgba(0,230,118,0.12)",
+                border: "1px solid rgba(0,230,118,0.45)",
+              }}
             >
               <ShieldCheck size={9} style={{ color: "#00e676" }} />
-              <span className="text-xs truncate" style={{ color: "#00e676", fontWeight: 600 }}>
-                Approved by {approval.approved_by_name || "—"}
-              </span>
             </button>
           ) : src.notes ? (
             <div className="flex items-center gap-1 mt-0.5">
