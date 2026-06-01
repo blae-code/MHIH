@@ -20,6 +20,7 @@ import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
 import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
 import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
+import DiscoveryPanel from "@/components/datasources/DiscoveryPanel";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
 
@@ -432,8 +433,11 @@ export default function DataSources() {
               label="Insights"
               title="Sync Intelligence"
               count={`${recentSyncs.length} recent`}
-              hint="activity + tips"
+              hint="discovery · activity · tips"
             />
+
+            {/* AI discovery queue */}
+            <DiscoveryPanel onApproved={load} />
 
             {/* Recent syncs */}
             <div className="src-widget-card">

@@ -1,0 +1,99 @@
+{
+  "name": "SourceCandidate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Title of the dataset, report, or publication"
+    },
+    "url": {
+      "type": "string",
+      "description": "Direct URL to the publication, dataset page, or API endpoint"
+    },
+    "publisher": {
+      "type": "string",
+      "description": "Issuing organization (e.g. Statistics Canada, BC Stats, FNHA)"
+    },
+    "publication_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the publication was released"
+    },
+    "summary": {
+      "type": "string",
+      "description": "AI-generated summary of relevance to M\u00e9tis health policy"
+    },
+    "relevance_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "AI confidence the source is relevant to M\u00e9tis health/policy (0-100)"
+    },
+    "relevance_reason": {
+      "type": "string",
+      "description": "Short rationale explaining why the AI flagged this source"
+    },
+    "suggested_type": {
+      "type": "string",
+      "enum": [
+        "statcan",
+        "bc_health",
+        "fnha",
+        "manual_upload",
+        "api",
+        "other"
+      ],
+      "description": "Suggested DataSource.type for the new entry"
+    },
+    "suggested_category": {
+      "type": "string",
+      "enum": [
+        "chronic_disease",
+        "mental_health",
+        "substance_use",
+        "maternal_child",
+        "social_determinants",
+        "demographics",
+        "mortality",
+        "access_to_care",
+        "other"
+      ],
+      "description": "Suggested DataSource.category for the new entry"
+    },
+    "suggested_region": {
+      "type": "string",
+      "description": "Suggested region (e.g. BC, Provincial, Northern BC)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "duplicate"
+      ],
+      "default": "pending",
+      "description": "Approval state in the discovery review queue"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Why the candidate was rejected (free text)"
+    },
+    "approved_source_id": {
+      "type": "string",
+      "description": "ID of the DataSource created when approved"
+    },
+    "discovered_by": {
+      "type": "string",
+      "description": "Trigger source: 'scheduled' or 'manual'"
+    },
+    "discovery_run_id": {
+      "type": "string",
+      "description": "Group ID for all candidates from a single discovery run"
+    }
+  },
+  "required": [
+    "name",
+    "url"
+  ]
+}
