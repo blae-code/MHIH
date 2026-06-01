@@ -19,6 +19,7 @@ import HealthCanadaCNFBrowser from "@/components/datasources/HealthCanadaCNFBrow
 import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
 import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
+import GoogleBigQueryBrowser from "@/components/datasources/GoogleBigQueryBrowser";
 import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
 import DiscoveryPanel from "@/components/datasources/DiscoveryPanel";
 import RecentSyncsTile from "@/components/datasources/RecentSyncsTile";
@@ -71,6 +72,7 @@ export default function DataSources() {
   const [showWMSWFS, setShowWMSWFS] = useState(false);
   const [showArcGISHub, setShowArcGISHub] = useState(false);
   const [showDataBCTools, setShowDataBCTools] = useState(false);
+  const [showBigQuery, setShowBigQuery] = useState(false);
   const [browseMenuOpen, setBrowseMenuOpen] = useState(false);
   const browseRef = useRef(null);
 
@@ -221,6 +223,7 @@ export default function DataSources() {
   const selectStyle = { background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)", padding: "5px 8px", borderRadius: 6, fontSize: 11, outline: "none" };
 
   const browsers = [
+    ["Google BigQuery", () => setShowBigQuery(true)],
     ["DataBC Tools", () => setShowDataBCTools(true)],
     ["ArcGIS Hub BC", () => setShowArcGISHub(true)],
     ["BC WMS/WFS", () => setShowWMSWFS(true)],
@@ -504,6 +507,7 @@ export default function DataSources() {
       {showHealthInfobase && <HealthInfobaseBrowser onClose={() => setShowHealthInfobase(false)} onImport={d => importSource(d, `Imported from Health Infobase: ${d.name}`)} />}
       {showOpenGov && <OpenGovCanadaBrowser onClose={() => setShowOpenGov(false)} onImport={d => importSource(d, `Imported from Open Gov Canada: ${d.name}`)} />}
       {showCatalogue && <BCDataCatalogueBrowser onClose={() => setShowCatalogue(false)} onImport={d => importSource(d, `Imported from BC Data Catalogue: ${d.name}`)} />}
+      {showBigQuery && <GoogleBigQueryBrowser onClose={() => setShowBigQuery(false)} onImport={d => { addLog("success", `Imported from BigQuery: ${d.name}`); load(); }} />}
     </div>
   );
 }
