@@ -241,6 +241,26 @@ export default function DataSources() {
     }
   };
 
+  const [discoveringBQ, setDiscoveringBQ] = useState(false);
+  const handleDiscoverBigQuery = async () => {
+    setDiscoveringBQ(true);
+    addLog("info", "Scanning connected BigQuery account for health datasets...");
+    try {
+      const res = await base44.functions.invoke("googleBigQuery", { action: "discoverHealthDatasets" });
+      if (res.data?.success) {
+        const { created, skipped, scanned, errors } = res.data;
+        addLog("success", `BigQuery scan complete — ${created} new, ${skipped} already in catalogue (${scanned} projects scanned)`);
+        if (errors?.length) addLog("warning", `${errors.length} errors during scan`);
+        load();
+      } else {
+        addLog("error", res.data?.error || "BigQuery discovery failed");
+      }
+    } catch (e) {
+      addLog("error", `BigQuery discovery error: ${e.message}`);
+    }
+    setDiscoveringBQ(false);
+  };
+
   const browsers = [
     ["Google BigQuery", () => setShowBigQuery(true)],
     ["DataBC Tools", () => setShowDataBCTools(true)],
