@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Database, SlidersHorizontal, Camera, Layers3 } from "lucide-react";
+import CockpitShell from "@/components/shell/CockpitShell";
+import ZoneHeader from "@/components/shell/ZoneHeader";
 import MetricCatalogPanel from "@/components/redriver/MetricCatalogPanel";
 import MetricForgePanel from "@/components/redriver/MetricForgePanel";
 import EvidenceSnapshotsPanel from "@/components/redriver/EvidenceSnapshotsPanel";
@@ -38,90 +40,92 @@ export default function RedRiverOS() {
   const active = useMemo(() => MODULES.find((m) => m.key === activeModule) || MODULES[0], [activeModule]);
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b shrink-0 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 45%, var(--bg-elevated) 100%)",
-          borderColor: "var(--border-default)",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(64,196,255,0.12)",
-        }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #40c4ff 0%, #FEDD00 60%, transparent 100%)" }} />
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="dashboard-section-label">Red River OS Module</div>
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-              Stable analytics boundary for catalog discovery, series forging, and evidence snapshots.
-            </p>
+    <CockpitShell
+      icon={<Layers3 size={16} style={{ color: "var(--color-info)" }} />}
+      title="Red River OS Module"
+      subtitle="Stable analytics boundary for catalog discovery, series forging, and evidence snapshots"
+      topGlow="rgba(64,196,255,0.06)"
+      bottomGlow="rgba(254,221,0,0.04)"
+      actions={
+        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+          {["projected", "internal"].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => updateEvidenceProjectionMode(mode)}
+              className="px-3 py-1.5 rounded text-xs font-medium capitalize transition-all"
+              style={{
+                background: evidenceProjectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
+                color: evidenceProjectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
+                border: evidenceProjectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
+              }}>
+              {mode}
+            </button>
+          ))}
+        </div>
+      }
+    >
+      <div className="cockpit-zone-grid" style={{ gridTemplateColumns: "280px 1fr" }}>
+        {/* Module rail */}
+        <div className="cockpit-zone">
+          <ZoneHeader
+            label="Module"
+            title="Module Rail"
+            count={`${MODULES.length} tools`}
+            hint="select a workspace"
+          />
+          <div className="cockpit-widget-card" style={{ padding: 12 }}>
+            <div className="space-y-2 relative z-10">
+              {MODULES.map((module) => {
+                const isActive = activeModule === module.key;
+                return (
+                  <button
+                    key={module.key}
+                    onClick={() => setActiveModule(module.key)}
+                    className="w-full text-left rounded-lg p-2.5 transition-all"
+                    style={{
+                      background: isActive ? "rgba(64,196,255,0.1)" : "var(--bg-overlay)",
+                      border: `1px solid ${isActive ? "rgba(64,196,255,0.4)" : "var(--border-subtle)"}`,
+                      boxShadow: isActive ? "0 0 16px rgba(64,196,255,0.12)" : "none",
+                    }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <module.icon size={13} style={{ color: isActive ? "var(--color-info)" : "var(--text-muted)" }} />
+                      <span className="text-xs font-semibold" style={{ color: isActive ? "var(--color-info)" : "var(--text-primary)" }}>{module.label}</span>
+                    </div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>{module.description}</div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-            {["projected", "internal"].map((mode) => (
-              <button
-                key={mode}
-                onClick={() => updateEvidenceProjectionMode(mode)}
-                className="px-3 py-1.5 rounded text-xs font-medium capitalize"
-                style={{
-                  background: evidenceProjectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
-                  color: evidenceProjectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
-                  border: evidenceProjectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
-                }}>
-                {mode}
-              </button>
-            ))}
+        {/* Active workspace */}
+        <div className="cockpit-zone">
+          <ZoneHeader
+            label="Workspace"
+            title={active.label}
+            count={evidenceProjectionMode}
+            hint={active.description}
+          />
+          <div className="cockpit-widget-card" style={{ padding: 16 }}>
+            <div className="relative z-10">
+              {activeModule === "catalog" && <MetricCatalogPanel />}
+              {activeModule === "forge" && (
+                <MetricForgePanel
+                  projectionMode={evidenceProjectionMode}
+                  onQueryComplete={({ query }) => setLatestForgeQuery(query)}
+                />
+              )}
+              {activeModule === "snapshots" && (
+                <EvidenceSnapshotsPanel
+                  projectionMode={evidenceProjectionMode}
+                  latestQuery={latestForgeQuery}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="flex-1 overflow-hidden p-6">
-        <div className="grid lg:grid-cols-[280px_1fr] gap-4 h-full">
-          <div className="rounded-xl p-3 overflow-auto" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <Layers3 size={14} style={{ color: "var(--color-info)" }} />
-              <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>Module Rail</span>
-            </div>
-
-            <div className="space-y-2">
-              {MODULES.map((module) => (
-                <button
-                  key={module.key}
-                  onClick={() => setActiveModule(module.key)}
-                  className="w-full text-left rounded-lg p-2.5 transition-all"
-                  style={{
-                    background: activeModule === module.key ? "rgba(64,196,255,0.1)" : "var(--bg-overlay)",
-                    border: `1px solid ${activeModule === module.key ? "rgba(64,196,255,0.28)" : "var(--border-subtle)"}`,
-                  }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <module.icon size={13} style={{ color: activeModule === module.key ? "var(--color-info)" : "var(--text-muted)" }} />
-                    <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{module.label}</span>
-                  </div>
-                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>{module.description}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl overflow-auto p-4" style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)" }}>
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{active.label}</h2>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{active.description}</p>
-            </div>
-
-            {activeModule === "catalog" && <MetricCatalogPanel />}
-            {activeModule === "forge" && (
-              <MetricForgePanel
-                projectionMode={evidenceProjectionMode}
-                onQueryComplete={({ query }) => setLatestForgeQuery(query)}
-              />
-            )}
-            {activeModule === "snapshots" && (
-              <EvidenceSnapshotsPanel
-                projectionMode={evidenceProjectionMode}
-                latestQuery={latestForgeQuery}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    </CockpitShell>
   );
 }

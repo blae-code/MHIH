@@ -1,23 +1,22 @@
 import React from "react";
+import { Database } from "lucide-react";
+import CockpitShell from "@/components/shell/CockpitShell";
 import MetricCatalogPanel from "@/components/redriver/MetricCatalogPanel";
 
 export default function MetricCatalog() {
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b shrink-0"
-        style={{
-          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
-          borderColor: "var(--border-default)",
-        }}>
-        <div className="dashboard-section-label">Red River OS</div>
-        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-          Metric Catalog
-        </p>
+    <CockpitShell
+      icon={<Database size={16} style={{ color: "var(--color-info)" }} />}
+      title="Metric Catalog"
+      subtitle="Dataset manifests, metric definitions, and ownership across the analytics boundary"
+      topGlow="rgba(64,196,255,0.06)"
+      bottomGlow="rgba(254,221,0,0.04)"
+    >
+      <div className="cockpit-widget-card" style={{ padding: 16 }}>
+        <div className="relative z-10">
+          <MetricCatalogPanel />
+        </div>
       </div>
-
-      <div className="flex-1 overflow-auto p-6 max-w-6xl mx-auto w-full">
-        <MetricCatalogPanel />
-      </div>
-    </div>
+    </CockpitShell>
   );
 }
