@@ -232,18 +232,70 @@ Deno.serve(async (req) => {
     }
 
     const VALID_AUTO_FREQS = new Set(['daily', 'weekly', 'monthly']);
+
+    // Provider-backed sources (BigQuery, ArcGIS feature services, BC WMS/WFS, etc.)
+    // refresh through their own connector-aware functions — not the generic URL
+    // fetch path below. Listing them here keeps the manual "Sync now" button from
+    // failing on console/portal URLs that aren't fetchable data endpoints.
+    const PROVIDER_BACKED = new Set([
+      'googlebigquery',
+      'arcgis_hub_bc',
+      'bc_wms_wfs',
+      'databc_tools',
+    ]);
+
+    const isProviderBacked = (s: any) =>
+      PROVIDER_BACKED.has(s?.metadata?.provider);
+
     const allSources = await base44.asServiceRole.entities.DataSource.list();
     const toSync = source_id
       ? allSources.filter((s: any) => s.id === source_id)
       : allSources.filter((s: any) =>
           s.status !== 'inactive' &&
           VALID_AUTO_FREQS.has(s.sync_frequency) &&
-          s.url
+          s.url &&
+          !isProviderBacked(s)
         );
 
     const results = [];
 
     for (const src of toSync) {
+      // Provider-backed sources surfaced through manual "Sync now": record a
+      // friendly skipped job so the UI can show "refresh via dedicated tool"
+      // instead of a confusing fetch failure.
+      if (isProviderBacked(src)) {
+        const provider = src.metadata?.provider;
+        const reason =
+          provider === 'googlebigquery'
+            ? 'BigQuery datasets refresh through the Discover BigQuery action — they cannot be synced via a fetchable URL.'
+            : `Sources with provider "${provider}" refresh through their dedicated connector, not the generic URL ingest path.`;
+        await base44.asServiceRole.entities.SyncJob.create({
+          source_id: src.id,
+          source_name: src.name,
+          source_url: src.url,
+          source_type: src.type,
+          trigger: source_id ? 'manual' : 'scheduled',
+          status: 'skipped',
+          started_at: new Date().toISOString(),
+          finished_at: new Date().toISOString(),
+          duration_ms: 0,
+          records_fetched: 0,
+          records_inserted: 0,
+          log_output: `[INFO] ${reason}`,
+        });
+        results.push({
+          source: src.name,
+          status: 'skipped',
+          fetched: 0,
+          inserted: 0,
+          updated: 0,
+          invalid: 0,
+          durationMs: 0,
+          error: reason,
+        });
+        continue;
+      }
+
       const job = await base44.asServiceRole.entities.SyncJob.create({
         source_id: src.id,
         source_name: src.name,
@@ -435,6 +487,7 @@ Deno.serve(async (req) => {
       success: true,
       synced: results.length,
       succeeded: results.filter((r) => r.status === 'success').length,
+      skipped: results.filter((r) => r.status === 'skipped').length,
       failed: results.filter((r) => r.status === 'failed').length,
       results,
     });

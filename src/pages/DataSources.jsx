@@ -159,6 +159,8 @@ export default function DataSources() {
       const result = res.data?.results?.[0];
       if (result?.status === "failed") {
         addLog("error", `Sync failed: ${src.name} — ${result.error}`);
+      } else if (result?.status === "skipped") {
+        addLog("warning", `${src.name} — ${result.error}`);
       } else {
         addLog("success", `Sync complete: ${src.name}`);
       }
