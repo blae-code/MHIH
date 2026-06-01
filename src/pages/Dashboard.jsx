@@ -558,7 +558,7 @@ export default function Dashboard() {
   const visibleCount = widgets.filter((w) => w.visible !== false).length;
 
   return (
-    <div className="h-full flex flex-col relative" style={{ background: "var(--bg-surface)" }}>
+    <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
       {/* Ambient page glow — matches Home-page depth treatment */}
       <div
         aria-hidden
@@ -610,31 +610,12 @@ export default function Dashboard() {
           position: relative;
           overflow: hidden;
           box-shadow: inset 0 1px 0 rgba(254,221,0,0.08), 0 0 20px rgba(254,221,0,0.05);
-          display: flex;
-          flex-direction: column;
-          min-height: 0;
         }
-        /* The cocktail layout: each widget body is flex-1 & scrollable, matching Home */
-        .dashboard-widget-card > :last-child:not(:first-child) {
-          flex: 1 1 auto;
-          min-height: 0;
-          overflow-y: auto;
-          overflow-x: hidden;
-          margin-right: -4px;
-          padding-right: 4px;
-        }
-        .dashboard-widget-card > .recharts-responsive-container:last-child {
-          overflow: visible;
-        }
-        /* Zone column wrapper — matches Home's home-widget-card stack pattern */
+        /* Zone column wrapper */
         .dashboard-zone {
           display: flex;
           flex-direction: column;
           gap: 10px;
-          min-height: 0;
-        }
-        .dashboard-zone .dashboard-widget-card {
-          flex: 1 1 0;
         }
         .dashboard-widget-card:hover {
           border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
@@ -664,8 +645,8 @@ export default function Dashboard() {
         }
       `}</style>
       
-      {/* Main container — no scroll */}
-      <div className="flex-1 overflow-hidden flex flex-col p-3 relative" style={{ zIndex: 1 }}>
+      {/* Main container — page scrolls naturally; widgets use natural heights */}
+      <div className="flex flex-col p-3 relative" style={{ zIndex: 1 }}>
 
         <DashboardHeader
           title={dashboardTitle}
@@ -681,10 +662,9 @@ export default function Dashboard() {
           onResetLayout={handleResetLayout}
         />
 
-        {/* Cockpit layout — matches Home page: stat strip on top, 2-zone cockpit below.
-            Widgets keep their gradient-card visual detail; zones provide ordered hierarchy.
-            No outer scroll — each widget body scrolls internally (matches Home). */}
-        <div className="flex-1 min-h-0 flex flex-col gap-3">
+        {/* Cockpit layout — stat strip on top, 2-zone cockpit below.
+            Widgets use natural content heights; page scrolls vertically as needed. */}
+        <div className="flex flex-col gap-3 mt-3">
 
           {/* Stat strip — always at top, full width, not draggable */}
           {isVisible("stat_cards") && (
@@ -695,12 +675,12 @@ export default function Dashboard() {
 
           {/* 2-zone cockpit grid — Analytics (wider) + Intelligence (narrower) */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
 
               {/* ── Left zone: Analytics ─────────────────────────── */}
               <Droppable droppableId="zone-analytics" type="WIDGET">
                 {(provided, snapshot) => (
-                  <div className="dashboard-zone min-h-0 flex flex-col">
+                  <div className="dashboard-zone flex flex-col">
                     <ZoneHeader
                       label="Analytics"
                       title="Health Indicators"
@@ -710,7 +690,7 @@ export default function Dashboard() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="flex-1 min-h-0 flex flex-col gap-2.5"
+                      className="flex flex-col gap-2.5"
                       style={{ background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
                     >
                       {widgets
@@ -742,7 +722,7 @@ export default function Dashboard() {
               {/* ── Right zone: Intelligence ─────────────────────── */}
               <Droppable droppableId="zone-intelligence" type="WIDGET">
                 {(provided, snapshot) => (
-                  <div className="dashboard-zone min-h-0 flex flex-col">
+                  <div className="dashboard-zone flex flex-col">
                     <ZoneHeader
                       label="Intelligence"
                       title="Insights & Activity"
@@ -752,7 +732,7 @@ export default function Dashboard() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="flex-1 min-h-0 flex flex-col gap-2.5"
+                      className="flex flex-col gap-2.5"
                       style={{ background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
                     >
                       {widgets
