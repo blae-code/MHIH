@@ -42,6 +42,8 @@ import PWAStatus from "./components/pwa/PWAStatus";
 import AppMenu from "./components/shell/AppMenu";
 import OSHeader from "./components/shell/OSHeader";
 import UserPreferencesPanel from "./components/shell/UserPreferencesPanel";
+import StatusLogDrawer from "./components/shell/StatusLogDrawer";
+import { ChevronUp, Terminal } from "lucide-react";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
 import { isAdmin as checkAdmin, getRoleLabel } from "./platform/permissions";
@@ -275,6 +277,9 @@ function LayoutInner({ children, currentPageName }) {
   // ── Sidebar app dropdown ─────────────────────────────────────────────
   const [sidebarAppMenuOpen, setSidebarAppMenuOpen] = useState(false);
   const sidebarAppBtnRef = useRef(null);
+
+  // ── Status log drawer ────────────────────────────────────────────────
+  const [logDrawerOpen, setLogDrawerOpen] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch((err) => {
@@ -606,18 +611,34 @@ function LayoutInner({ children, currentPageName }) {
             <div className="flex-1 overflow-auto">
               {children}
             </div>
-            {/* Status footer — third horizontal band */}
-            <div
-              className="shrink-0 flex items-center gap-2 px-3"
+            {/* Status log drawer — slides up to reveal terminal-style stream */}
+            <StatusLogDrawer
+              open={logDrawerOpen}
+              logs={platform.statusLogs}
+              onClose={() => setLogDrawerOpen(false)}
+              onClear={platform.clearLogs}
+            />
+
+            {/* Status footer — clickable strip; toggles the log drawer */}
+            <button
+              type="button"
+              onClick={() => setLogDrawerOpen(o => !o)}
+              className="shrink-0 flex items-center gap-2 px-3 text-left transition-colors"
+              title={logDrawerOpen ? "Hide activity log" : "Show activity log"}
               style={{
                 height: "var(--footer-height)",
-                background: "var(--bg-surface)",
+                background: logDrawerOpen ? "var(--bg-hover)" : "var(--bg-surface)",
                 borderTop: "1px solid var(--border-subtle)",
                 fontSize: 10,
                 color: "var(--text-muted)",
                 zIndex: 5,
+                cursor: "pointer",
+                width: "100%",
               }}
+              onMouseEnter={(e) => { if (!logDrawerOpen) e.currentTarget.style.background = "var(--bg-hover)"; }}
+              onMouseLeave={(e) => { if (!logDrawerOpen) e.currentTarget.style.background = "var(--bg-surface)"; }}
             >
+              <Terminal size={10} style={{ color: logDrawerOpen ? "var(--mnbc-yellow)" : "var(--text-muted)", opacity: 0.8 }} />
               <div
                 className="w-1.5 h-1.5 rounded-full"
                 style={{ background: logColor, boxShadow: `0 0 6px ${logColor}` }}
@@ -625,6 +646,15 @@ function LayoutInner({ children, currentPageName }) {
               <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {lastLog?.msg ?? "Ready"}
               </span>
+              {platform.statusLogs?.length > 0 && (
+                <span style={{
+                  background: "var(--bg-overlay)", padding: "0 5px", borderRadius: 3,
+                  fontVariantNumeric: "tabular-nums", fontSize: 9, fontWeight: 600,
+                  border: "1px solid var(--border-subtle)",
+                }}>
+                  {platform.statusLogs.length}
+                </span>
+              )}
               <span style={{ opacity: 0.7 }}>
                 {activeApp?.shortName ?? "Red River OS"}
               </span>
@@ -632,7 +662,15 @@ function LayoutInner({ children, currentPageName }) {
               <span style={{ opacity: 0.7 }}>
                 {user?.full_name ?? user?.email ?? "—"}
               </span>
-            </div>
+              <ChevronUp
+                size={10}
+                style={{
+                  opacity: 0.7,
+                  transform: logDrawerOpen ? "rotate(180deg)" : "none",
+                  transition: "transform 0.15s",
+                }}
+              />
+            </button>
           </main>
 
           {/* ── Context panel (right) ─────────────────────────────────── */}

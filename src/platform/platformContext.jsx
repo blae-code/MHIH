@@ -149,9 +149,13 @@ export function PlatformProvider({ children }) {
   // ── Helpers ───────────────────────────────────────────────────────────
   const addLog = useCallback((type, msg) => {
     setStatusLogs((prev) => [
-      { type, msg, time: new Date().toLocaleTimeString() },
-      ...prev.slice(0, 49),
+      { type, msg, time: new Date().toLocaleTimeString(), timestamp: Date.now() },
+      ...prev.slice(0, 199),
     ]);
+  }, []);
+
+  const clearLogs = useCallback(() => {
+    setStatusLogs([{ type: "info", msg: "Log cleared", time: new Date().toLocaleTimeString(), timestamp: Date.now() }]);
   }, []);
 
   const switchApp = useCallback((appId) => {
@@ -187,6 +191,7 @@ export function PlatformProvider({ children }) {
     // Activity log
     statusLogs,
     addLog,
+    clearLogs,
 
     // Shared evidence state
     latestForgeQuery,
