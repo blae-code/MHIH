@@ -2,11 +2,13 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import {
-  AlertTriangle, CheckCircle, RefreshCw, X, ChevronDown, ChevronRight,
-  User, MessageSquare, Filter, Zap, ShieldCheck, AlertCircle, Info,
-  Clock, Copy, Eye
+  AlertTriangle, CheckCircle, RefreshCw, X, ChevronRight,
+  Filter, Zap, ShieldCheck, AlertCircle, Eye, Sparkles
 } from "lucide-react";
 import FlagDetailModal from "@/components/dataquality/FlagDetailModal";
+import CockpitShell from "@/components/shell/CockpitShell";
+import ZoneHeader from "@/components/shell/ZoneHeader";
+import QualityStatStrip from "@/components/dataquality/QualityStatStrip";
 
 const FLAG_TYPE_LABELS = {
   missing_value: "Missing Value",
@@ -85,175 +87,242 @@ export default function DataQuality() {
     return true;
   }), [flags, filterStatus, filterSeverity, filterType]);
 
-  const stats = useMemo(() => ({
-    open: flags.filter(f => f.status === "open").length,
-    critical: flags.filter(f => f.severity === "critical" && f.status === "open").length,
-    in_review: flags.filter(f => f.status === "in_review").length,
-    resolved: flags.filter(f => f.status === "resolved").length,
-  }), [flags]);
+  // Flag type breakdown
+  const typeBreakdown = useMemo(() => {
+    const counts = {};
+    flags.filter(f => f.status === "open").forEach(f => {
+      counts[f.flag_type] = (counts[f.flag_type] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [flags]);
 
-  const STAT_CARDS = [
-    { label: "Open Flags", value: stats.open, icon: AlertTriangle, color: "var(--color-error)" },
-    { label: "Critical", value: stats.critical, icon: AlertCircle, color: "#f97316" },
-    { label: "In Review", value: stats.in_review, icon: Eye, color: "var(--color-warning)" },
-    { label: "Resolved", value: stats.resolved, icon: CheckCircle, color: "var(--color-success)" },
-  ];
+  // Top affected metrics
+  const topAffected = useMemo(() => {
+    const counts = {};
+    flags.filter(f => f.status === "open").forEach(f => {
+      if (f.metric_name) counts[f.metric_name] = (counts[f.metric_name] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [flags]);
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b shrink-0 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
-          borderColor: "var(--border-default)",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
-        }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #ff4757 0%, #FEDD00 50%, transparent 100%)" }} />
-        <div>
-          <div className="dashboard-section-label" style={{ marginBottom: 2 }}>Data Quality Monitor</div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {lastScan ? `Last scan: ${new Date(lastScan).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}` : "No scans run yet"}
-          </p>
-        </div>
-        {canEdit && (
-          <button onClick={handleScan} disabled={scanning}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium"
-            style={{ background: "var(--accent-primary)", color: "#000" }}>
-            {scanning ? <RefreshCw size={12} className="animate-spin" /> : <Zap size={12} />}
-            {scanning ? "Scanning..." : "Run Scan"}
-          </button>
-        )}
+    <CockpitShell
+      icon={<ShieldCheck size={16} style={{ color: "var(--mnbc-yellow)" }} />}
+      title="Data Quality Monitor"
+      subtitle={lastScan ? `Last scan: ${new Date(lastScan).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}` : "No scans run yet"}
+      actions={canEdit && (
+        <button onClick={handleScan} disabled={scanning}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+          style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 4px 14px rgba(254,221,0,0.3)" }}>
+          {scanning ? <RefreshCw size={12} className="animate-spin" /> : <Zap size={12} />}
+          {scanning ? "Scanning..." : "Run Quality Scan"}
+        </button>
+      )}
+    >
+      {/* Stat strip */}
+      <div className="mb-3">
+        <QualityStatStrip flags={flags} />
       </div>
 
-      <div className="flex-1 overflow-auto p-4 space-y-4">
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-          {STAT_CARDS.map(s => (
-            <div key={s.label} className="metric-card flex items-center gap-3 relative overflow-hidden" style={{ borderColor: `${s.color}33` }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color} 0%, transparent 100%)` }} />
-              <div className="p-2.5 rounded-lg shrink-0" style={{ background: `${s.color}12`, border: `1px solid ${s.color}30` }}>
-                <s.icon size={16} style={{ color: s.color }} />
-              </div>
-              <div>
-                <div className="text-2xl font-black leading-tight" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-xs" style={{ color: "var(--text-muted)" }}>{s.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* 2-zone cockpit */}
+      <div className="cockpit-zone-grid">
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg"
-          style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}>
-          <Filter size={12} style={{ color: "var(--text-muted)" }} />
-          {["all", "open", "in_review", "resolved", "dismissed"].map(s => (
-            <button key={s} onClick={() => setFilterStatus(s)}
-              className="px-2.5 py-1 rounded text-xs"
-              style={{
-                background: filterStatus === s ? "var(--accent-primary)" : "var(--bg-overlay)",
-                color: filterStatus === s ? "#000" : "var(--text-secondary)",
-                fontWeight: filterStatus === s ? 600 : 400
-              }}>
-              {s === "all" ? "All Status" : STATUS_CONFIG[s]?.label || s}
-            </button>
-          ))}
-          <div className="w-px h-4 mx-1" style={{ background: "var(--border-subtle)" }} />
-          <select value={filterSeverity} onChange={e => setFilterSeverity(e.target.value)}
-            className="text-xs px-2 py-1 rounded outline-none"
-            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-            <option value="all">All Severity</option>
-            {Object.entries(SEVERITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-          </select>
-          <select value={filterType} onChange={e => setFilterType(e.target.value)}
-            className="text-xs px-2 py-1 rounded outline-none"
-            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-            <option value="all">All Types</option>
-            {Object.entries(FLAG_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          {(filterStatus !== "open" || filterSeverity !== "all" || filterType !== "all") && (
-            <button onClick={() => { setFilterStatus("open"); setFilterSeverity("all"); setFilterType("all"); }}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded"
-              style={{ background: "var(--color-error)", color: "#fff", opacity: 0.8 }}>
-              <X size={10} /> Reset
-            </button>
-          )}
-          <span className="ml-auto text-xs" style={{ color: "var(--text-muted)" }}>{filtered.length} flags</span>
-        </div>
+        {/* Left: Flags */}
+        <div className="cockpit-zone">
+          <ZoneHeader
+            label="Flags"
+            title="Quality Issues"
+            count={`${filtered.length} flags`}
+            hint="filter · triage · resolve"
+          />
 
-        {/* Flags table */}
-        <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
-          {loading ? (
-            <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--text-muted)" }}>
-              <RefreshCw size={16} className="animate-spin" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-16 text-center" style={{ color: "var(--text-muted)" }}>
-              <ShieldCheck size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No flags match the current filters.</p>
-              {flags.length === 0 && canEdit && (
-                <button onClick={handleScan} className="mt-3 text-xs" style={{ color: "var(--accent-primary)" }}>
-                  Run a scan to detect issues →
+          {/* Filters */}
+          <div className="cockpit-widget-card" style={{ padding: 10 }}>
+            <div className="flex flex-wrap items-center gap-2 relative z-10">
+              <Filter size={12} style={{ color: "var(--text-muted)" }} />
+              {["all", "open", "in_review", "resolved", "dismissed"].map(s => (
+                <button key={s} onClick={() => setFilterStatus(s)}
+                  className="px-2.5 py-1 rounded text-xs transition-all"
+                  style={{
+                    background: filterStatus === s ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
+                    color: filterStatus === s ? "var(--accent-primary)" : "var(--text-secondary)",
+                    border: filterStatus === s ? "1px solid rgba(254,221,0,0.4)" : "1px solid var(--border-subtle)",
+                    fontWeight: filterStatus === s ? 600 : 400
+                  }}>
+                  {s === "all" ? "All Status" : STATUS_CONFIG[s]?.label || s}
+                </button>
+              ))}
+              <div className="w-px h-4 mx-1" style={{ background: "var(--border-subtle)" }} />
+              <select value={filterSeverity} onChange={e => setFilterSeverity(e.target.value)}
+                className="text-xs px-2 py-1.5 rounded outline-none"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+                <option value="all">All Severity</option>
+                {Object.entries(SEVERITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+              <select value={filterType} onChange={e => setFilterType(e.target.value)}
+                className="text-xs px-2 py-1.5 rounded outline-none"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+                <option value="all">All Types</option>
+                {Object.entries(FLAG_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+              {(filterStatus !== "open" || filterSeverity !== "all" || filterType !== "all") && (
+                <button onClick={() => { setFilterStatus("open"); setFilterSeverity("all"); setFilterType("all"); }}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded transition-all"
+                  style={{ background: "rgba(255,23,68,0.12)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.3)" }}>
+                  <X size={10} /> Reset
                 </button>
               )}
             </div>
-          ) : (
-            <table className="w-full data-table text-xs">
-              <thead>
-                <tr>
-                  <th className="text-left" style={{ width: 80 }}>Severity</th>
-                  <th className="text-left">Metric</th>
-                  <th className="text-left" style={{ width: 110 }}>Type</th>
-                  <th className="text-left">Description</th>
-                  <th className="text-left" style={{ width: 90 }}>Status</th>
-                  <th className="text-left" style={{ width: 120 }}>Assigned To</th>
-                  <th className="text-left" style={{ width: 60 }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(flag => {
-                  const sev = SEVERITY_CONFIG[flag.severity] || SEVERITY_CONFIG.medium;
-                  const st = STATUS_CONFIG[flag.status] || STATUS_CONFIG.open;
-                  return (
-                    <tr key={flag.id} onClick={() => setSelected(flag)} style={{ cursor: "pointer" }}>
-                      <td>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
-                          style={{ background: sev.bg, color: sev.color, border: `1px solid ${sev.color}` }}>
-                          {sev.label}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ color: "var(--text-primary)", fontWeight: 500 }}>{flag.metric_name || "—"}</div>
-                        {(flag.category || flag.region) && (
-                          <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                            {[flag.category?.replace(/_/g, " "), flag.region, flag.year].filter(Boolean).join(" · ")}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <span className="tag">{FLAG_TYPE_LABELS[flag.flag_type] || flag.flag_type}</span>
-                      </td>
-                      <td style={{ color: "var(--text-secondary)", maxWidth: 320 }}>
-                        <span className="line-clamp-2">{flag.description}</span>
-                      </td>
-                      <td>
-                        <span className="font-medium" style={{ color: st.color }}>{st.label}</span>
-                      </td>
-                      <td style={{ color: "var(--text-muted)" }}>
-                        {flag.assigned_to_name || <span style={{ opacity: 0.4 }}>Unassigned</span>}
-                      </td>
-                      <td>
-                        <button onClick={e => { e.stopPropagation(); setSelected(flag); }}
-                          className="activity-icon" style={{ width: 24, height: 24 }} title="View & manage">
-                          <ChevronRight size={12} />
-                        </button>
-                      </td>
+          </div>
+
+          {/* Flags table */}
+          <div className="cockpit-widget-card" style={{ padding: 0, overflow: "hidden" }}>
+            <div className="relative z-10 overflow-auto" style={{ maxHeight: 620 }}>
+              {loading ? (
+                <div className="flex items-center justify-center py-16 gap-2" style={{ color: "var(--text-muted)" }}>
+                  <RefreshCw size={16} className="animate-spin" />
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="py-16 text-center" style={{ color: "var(--text-muted)" }}>
+                  <ShieldCheck size={32} className="mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No flags match the current filters.</p>
+                  {flags.length === 0 && canEdit && (
+                    <button onClick={handleScan} className="mt-3 text-xs" style={{ color: "var(--accent-primary)" }}>
+                      Run a scan to detect issues →
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <table className="w-full data-table text-xs">
+                  <thead className="sticky top-0 z-10">
+                    <tr>
+                      <th className="text-left" style={{ width: 80 }}>Severity</th>
+                      <th className="text-left">Metric</th>
+                      <th className="text-left" style={{ width: 110 }}>Type</th>
+                      <th className="text-left">Description</th>
+                      <th className="text-left" style={{ width: 90 }}>Status</th>
+                      <th className="text-left" style={{ width: 60 }}></th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+                  </thead>
+                  <tbody>
+                    {filtered.map(flag => {
+                      const sev = SEVERITY_CONFIG[flag.severity] || SEVERITY_CONFIG.medium;
+                      const st = STATUS_CONFIG[flag.status] || STATUS_CONFIG.open;
+                      return (
+                        <tr key={flag.id} onClick={() => setSelected(flag)} style={{ cursor: "pointer" }}>
+                          <td>
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                              style={{ background: sev.bg, color: sev.color, border: `1px solid ${sev.color}` }}>
+                              {sev.label}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ color: "var(--text-primary)", fontWeight: 500 }}>{flag.metric_name || "—"}</div>
+                            {(flag.category || flag.region) && (
+                              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                                {[flag.category?.replace(/_/g, " "), flag.region, flag.year].filter(Boolean).join(" · ")}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <span className="tag">{FLAG_TYPE_LABELS[flag.flag_type] || flag.flag_type}</span>
+                          </td>
+                          <td style={{ color: "var(--text-secondary)", maxWidth: 320 }}>
+                            <span className="line-clamp-2">{flag.description}</span>
+                          </td>
+                          <td>
+                            <span className="font-medium" style={{ color: st.color }}>{st.label}</span>
+                          </td>
+                          <td>
+                            <button onClick={e => { e.stopPropagation(); setSelected(flag); }}
+                              className="activity-icon" style={{ width: 24, height: 24 }} title="View & manage">
+                              <ChevronRight size={12} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* Right: Insights */}
+        <div className="cockpit-zone">
+          <ZoneHeader
+            label="Insights"
+            title="Quality Intelligence"
+            count={`${typeBreakdown.length} flag types`}
+            hint="distribution + tips"
+          />
+
+          {/* Flag type breakdown */}
+          <div className="cockpit-widget-card">
+            <div className="dashboard-section-label relative z-10">Open by Type</div>
+            <div className="space-y-2 relative z-10">
+              {typeBreakdown.length === 0 ? (
+                <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>
+                  No open flags — quality looks good.
+                </p>
+              ) : (
+                typeBreakdown.map(([type, count]) => {
+                  const pct = flags.filter(f => f.status === "open").length ? (count / flags.filter(f => f.status === "open").length) * 100 : 0;
+                  return (
+                    <div key={type}>
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span style={{ color: "var(--text-secondary)" }}>{FLAG_TYPE_LABELS[type] || type}</span>
+                        <span className="font-mono" style={{ color: "var(--color-error)" }}>{count}</span>
+                      </div>
+                      <div style={{ height: 4, background: "var(--bg-overlay)", borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg, #ff1744 0%, #ff4d4f 100%)", borderRadius: 2 }} />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Top affected metrics */}
+          <div className="cockpit-widget-card">
+            <div className="dashboard-section-label relative z-10">Most Affected Metrics</div>
+            <div className="space-y-2 relative z-10">
+              {topAffected.length === 0 ? (
+                <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>
+                  No problematic metrics detected.
+                </p>
+              ) : (
+                topAffected.map(([name, count]) => (
+                  <div key={name} className="flex items-center justify-between gap-2 p-2 rounded-md"
+                    style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                    <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{name}</div>
+                    <span className="text-xs font-mono shrink-0 px-2 py-0.5 rounded-full"
+                      style={{ background: "rgba(255,23,68,0.08)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.3)" }}>
+                      {count} flag{count === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* How to use */}
+          <div className="cockpit-widget-card">
+            <div className="dashboard-section-label flex items-center gap-1.5 relative z-10">
+              <Sparkles size={11} style={{ color: "var(--accent-primary)" }} />
+              How to Use
+            </div>
+            <ul className="space-y-1.5 text-xs relative z-10" style={{ color: "var(--text-secondary)" }}>
+              <li className="flex gap-2"><span style={{ color: "#FEDD00" }}>·</span><span>Click <span style={{ color: "var(--accent-primary)" }}>Run Quality Scan</span> to detect missing values, outliers, duplicates, and stale data automatically.</span></li>
+              <li className="flex gap-2"><span style={{ color: "#FEDD00" }}>·</span><span>Click any flag row to assign, comment, and update its status (Open → In Review → Resolved).</span></li>
+              <li className="flex gap-2"><span style={{ color: "#FEDD00" }}>·</span><span>Filter by severity to focus on critical issues affecting downstream analytics.</span></li>
+              <li className="flex gap-2"><span style={{ color: "#FEDD00" }}>·</span><span>Resolution rates and most-affected metrics surface here to guide remediation effort.</span></li>
+            </ul>
+          </div>
+        </div>
+
       </div>
 
       {/* Detail modal */}
@@ -266,6 +335,6 @@ export default function DataQuality() {
           onClose={() => setSelected(null)}
         />
       )}
-    </div>
+    </CockpitShell>
   );
 }
