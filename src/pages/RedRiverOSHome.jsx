@@ -263,23 +263,28 @@ export default function RedRiverOSHome() {
     <div className="h-full flex flex-col overflow-hidden" style={{ background: "var(--bg-base)" }}>
       <div className="flex-1 min-h-0 flex flex-col px-5 py-4 gap-3">
 
-        {/* ── Row 1: Header + stats inline ──────────────────────────── */}
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="min-w-0 shrink-0">
-            <div className="flex items-center gap-2">
+        {/* ── Row 1: Header (top) + stats (below) ───────────────────── */}
+        <div className="shrink-0">
+          <div className="flex items-baseline justify-between gap-3 mb-2.5">
+            <div className="min-w-0">
               <h1
                 className="mnbc-heading truncate"
                 style={{ fontSize: 20, color: "var(--text-primary)", lineHeight: 1.1 }}
               >
                 {greeting}{user?.full_name ? `, ${user.full_name.split(" ")[0]}` : ""}
               </h1>
-              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>· {dateStr}</span>
+              <div className="section-label" style={{ fontSize: 9, marginTop: 3 }}>
+                MNBC Health &amp; Wellness · Red River OS
+              </div>
             </div>
-            <div className="section-label" style={{ fontSize: 9, marginTop: 2 }}>
-              MNBC Health &amp; Wellness · Red River OS
-            </div>
+            <span
+              className="shrink-0"
+              style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}
+            >
+              {dateStr}
+            </span>
           </div>
-          <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <StatPill label="Active Programs" value="12" trend="up" accent="#40c4ff" />
             <StatPill label="Open Priorities" value="7" trend="up" accent="#FEDD00" />
             <StatPill label="Overdue" value="2" trend="down" accent="#ff4d4f" />
