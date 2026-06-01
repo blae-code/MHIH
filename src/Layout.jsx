@@ -425,66 +425,9 @@ function LayoutInner({ children, currentPageName }) {
                   zIndex: 1,
                 }}
               />
-              {/* App identity strip — opens lightweight app dropdown */}
-              <div className="relative shrink-0" ref={sidebarAppBtnRef} style={{ zIndex: 25 }}>
-                <button
-                  onClick={() => setSidebarAppMenuOpen(v => !v)}
-                  className="flex items-center gap-2 px-3 py-2 transition-colors text-left w-full"
-                  style={{
-                    borderBottom: "1px solid var(--border-subtle)",
-                    background: sidebarAppMenuOpen ? "var(--bg-hover)" : "transparent",
-                  }}
-                  title="Switch app"
-                  onMouseEnter={(e) => {
-                    if (!sidebarAppMenuOpen) e.currentTarget.style.background = "var(--bg-hover)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!sidebarAppMenuOpen) e.currentTarget.style.background = "transparent";
-                  }}
-                >
-                  <div
-                    className="w-5 h-5 rounded flex items-center justify-center shrink-0"
-                    style={{ background: accent + "18" }}
-                  >
-                    <Icon name={activeApp?.icon ?? "Command"} size={11} style={{ color: accent }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div
-                      style={{
-                        fontSize: 11.5,
-                        fontWeight: 600,
-                        color: "var(--text-primary)",
-                        lineHeight: 1.2,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {activeApp?.shortName ?? "Red River OS"}
-                    </div>
-                  </div>
-                  <ChevronDown
-                    size={11}
-                    style={{
-                      color: "var(--text-muted)",
-                      opacity: 0.6,
-                      transform: sidebarAppMenuOpen ? "rotate(180deg)" : "none",
-                      transition: "transform 0.15s",
-                    }}
-                  />
-                </button>
-                {sidebarAppMenuOpen && (
-                  <AppMenu
-                    anchorRef={sidebarAppBtnRef}
-                    align="left"
-                    onClose={() => setSidebarAppMenuOpen(false)}
-                  />
-                )}
-              </div>
-
               {/* Nav scroll area */}
               <nav className="flex-1 overflow-y-auto py-2 px-2 relative" style={{ scrollbarWidth: "thin", zIndex: 2 }}>
-                {/* OS-level nav items */}
+                {/* OS-level nav items — Home & Ministry Overview, independent of active app */}
                 {osNavItems.map((item, i) => {
                   if (Array.isArray(item.items)) {
                     return item.items.map((sub) => {
@@ -526,9 +469,76 @@ function LayoutInner({ children, currentPageName }) {
                   );
                 })}
 
-                {/* Separator between OS nav and app nav */}
-                {osNavItems.length > 0 && navSections.length > 0 && (
-                  <div style={{ height: 1, background: "var(--border-subtle)", margin: "10px 4px 10px" }} />
+                {/* App switcher — sits below OS nav so Home & Ministry Overview
+                    visually remain outside any specific application context. */}
+                {navSections.length > 0 && (
+                  <>
+                    <div style={{ height: 1, background: "var(--border-subtle)", margin: "10px 4px 8px" }} />
+                    <div
+                      className="px-3 mb-1"
+                      style={{
+                        fontSize: 9.5, fontWeight: 600, letterSpacing: "0.09em",
+                        textTransform: "uppercase", color: "var(--text-muted)", opacity: 0.7,
+                      }}
+                    >
+                      Application
+                    </div>
+                    <div className="relative shrink-0 px-1 mb-2" ref={sidebarAppBtnRef} style={{ zIndex: 25 }}>
+                      <button
+                        onClick={() => setSidebarAppMenuOpen(v => !v)}
+                        className="flex items-center gap-2 px-2 py-1.5 transition-colors text-left w-full rounded-md"
+                        style={{
+                          background: sidebarAppMenuOpen ? "var(--bg-hover)" : "transparent",
+                          border: `1px solid ${sidebarAppMenuOpen ? accent + "44" : "var(--border-subtle)"}`,
+                        }}
+                        title="Switch app"
+                        onMouseEnter={(e) => {
+                          if (!sidebarAppMenuOpen) e.currentTarget.style.background = "var(--bg-hover)";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!sidebarAppMenuOpen) e.currentTarget.style.background = "transparent";
+                        }}
+                      >
+                        <div
+                          className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                          style={{ background: accent + "18", border: `1px solid ${accent}33` }}
+                        >
+                          <Icon name={activeApp?.icon ?? "Command"} size={11} style={{ color: accent }} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div
+                            style={{
+                              fontSize: 11.5,
+                              fontWeight: 600,
+                              color: "var(--text-primary)",
+                              lineHeight: 1.2,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {activeApp?.shortName ?? "Red River OS"}
+                          </div>
+                        </div>
+                        <ChevronDown
+                          size={11}
+                          style={{
+                            color: "var(--text-muted)",
+                            opacity: 0.6,
+                            transform: sidebarAppMenuOpen ? "rotate(180deg)" : "none",
+                            transition: "transform 0.15s",
+                          }}
+                        />
+                      </button>
+                      {sidebarAppMenuOpen && (
+                        <AppMenu
+                          anchorRef={sidebarAppBtnRef}
+                          align="left"
+                          onClose={() => setSidebarAppMenuOpen(false)}
+                        />
+                      )}
+                    </div>
+                  </>
                 )}
 
                 {/* Active app nav sections */}
