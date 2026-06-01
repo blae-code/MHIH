@@ -50,15 +50,17 @@ export default function SourcesStatStrip({ sources, failedSyncCount = 0 }) {
     },
     {
       id: "errors",
-      label: "Errors",
-      value: stats.errors + failedSyncCount,
+      label: "Sources In Error",
+      value: stats.errors,
       icon: AlertCircle,
-      color: stats.errors + failedSyncCount > 0 ? "#ff1744" : "#4a6a8a",
-      bgColor: stats.errors + failedSyncCount > 0 ? "rgba(255,23,68,0.08)" : "rgba(74,106,138,0.08)",
-      desc: stats.errors > 0 || failedSyncCount > 0
-        ? `${stats.errors} bad config · ${failedSyncCount} failed jobs`
-        : "All clear — no failures",
-      tooltip: "Sources in error state plus recent failed sync jobs. Click 'Sync Logs' in the header to review and re-run failures.",
+      color: stats.errors > 0 ? "#ff1744" : "#4a6a8a",
+      bgColor: stats.errors > 0 ? "rgba(255,23,68,0.08)" : "rgba(74,106,138,0.08)",
+      desc: stats.errors > 0
+        ? `${failedSyncCount} failed job${failedSyncCount === 1 ? "" : "s"} in last 24h`
+        : failedSyncCount > 0
+          ? `${failedSyncCount} recent failed job${failedSyncCount === 1 ? "" : "s"}`
+          : "All clear — no failures",
+      tooltip: "Sources whose status is currently 'error'. The sub-line shows failed sync jobs in the last 24 hours — open Sync Logs to inspect and re-run.",
     },
     {
       id: "scheduled",

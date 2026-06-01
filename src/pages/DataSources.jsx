@@ -77,17 +77,31 @@ export default function DataSources() {
   const [filterRegion, setFilterRegion] = useState("all");
   const [sortBy, setSortBy] = useState("updated_desc");
 
+  const loadFailedCount = () => {
+    // Count failed sync jobs in the last 24h — recent failure pressure, not lifetime noise.
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 200)
+      .then(jobs => {
+        const recent = jobs.filter(j => {
+          const t = j.started_at ? new Date(j.started_at).getTime() : new Date(j.created_date).getTime();
+          return t >= cutoff;
+        });
+        setFailedCount(recent.length);
+      })
+      .catch(() => {});
+  };
+
   const load = () => {
+    setLoading(true);
     base44.entities.DataSource.list("-updated_date", 200)
       .then(data => { setSources(data); addLog("success", `${data.length} data sources loaded`); })
       .catch(e => addLog("error", e.message))
       .finally(() => setLoading(false));
+    loadFailedCount();
   };
 
   useEffect(() => {
     load();
-    base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 50)
-      .then(jobs => setFailedCount(jobs.length)).catch(() => {});
   }, []);
 
   // Close browse menu on outside click
