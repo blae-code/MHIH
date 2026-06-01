@@ -41,6 +41,7 @@ import FloatingFeedbackButton from "./components/feedback/FloatingFeedbackButton
 import PWAStatus from "./components/pwa/PWAStatus";
 import AppMenu from "./components/shell/AppMenu";
 import OSHeader from "./components/shell/OSHeader";
+import UserPreferencesPanel from "./components/shell/UserPreferencesPanel";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
 import { isAdmin as checkAdmin, getRoleLabel } from "./platform/permissions";
@@ -265,6 +266,7 @@ function LayoutInner({ children, currentPageName }) {
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [patchNotesOpen, setPatchNotesOpen] = useState(false);
+  const [userPanelOpen, setUserPanelOpen] = useState(false);
   const [contextPanel, setContextPanel] = useState(null);
 
   // ── Sidebar collapsed sections ───────────────────────────────────────
@@ -383,9 +385,8 @@ function LayoutInner({ children, currentPageName }) {
           unreadCount={unreadCount}
           notifCenterOpen={notifCenterOpen}
           onToggleNotifications={() => setNotifCenterOpen(v => !v)}
-          onOpenSettings={() => navigate(createPageUrl("Settings"))}
-          onOpenFeedback={() => setFeedbackOpen(true)}
-          onLogout={() => base44.auth.logout(window.location.href)}
+          onOpenUserPanel={() => setUserPanelOpen(true)}
+          showBreadcrumb={platform.showBreadcrumbInHeader}
         />
 
         {/* ── Body: sidebar + main ─────────────────────────────────────── */}
@@ -683,6 +684,17 @@ function LayoutInner({ children, currentPageName }) {
         <NotificationPreferences
           user={user}
           onClose={() => setNotifPrefsOpen(false)}
+        />
+      )}
+
+      {/* ── User preferences panel ─────────────────────────────────────── */}
+      {userPanelOpen && (
+        <UserPreferencesPanel
+          user={user}
+          onClose={() => setUserPanelOpen(false)}
+          onOpenFeedback={() => setFeedbackOpen(true)}
+          onOpenNotificationPrefs={() => setNotifPrefsOpen(true)}
+          onLogout={() => base44.auth.logout(window.location.href)}
         />
       )}
 

@@ -12,12 +12,11 @@
  * All app navigation logic stays in Layout — this is presentation + plumbing only.
  */
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
   Search, Bell, ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen,
-  User, Settings, MessageSquare, LogOut,
   LayoutDashboard, Database, Brain, Users, FileDown, BookOpen, Shield,
   BarChart3, SlidersHorizontal, ShieldCheck, Bot, MapPin, TrendingUp,
   Wrench, BellRing, Workflow, Sparkles, Activity, FlaskConical,
@@ -26,14 +25,13 @@ import {
   HeartPulse, Scale, HeartHandshake, Leaf, FileSignature, Camera, Layers3,
 } from "lucide-react";
 import AppMenu from "./AppMenu";
-import { getRoleLabel } from "@/platform/permissions";
 
 const ICON_MAP = {
-  LayoutDashboard, Database, Brain, Settings, Users, Search, Bell,
+  LayoutDashboard, Database, Brain, Users, Search, Bell,
   FileDown, BookOpen, Shield, BarChart3, SlidersHorizontal, ShieldCheck, Bot,
-  MapPin, TrendingUp, Wrench, BellRing, Workflow, Sparkles, LogOut, User,
+  MapPin, TrendingUp, Wrench, BellRing, Workflow, Sparkles,
   Activity, FlaskConical, ClipboardCheck, BrainCircuit, MapPinned, Siren,
-  BookMarked, Link2, ListOrdered, GitCompare, FileText, MessageSquare,
+  BookMarked, Link2, ListOrdered, GitCompare, FileText,
   Command, Building2, Target, HeartPulse, Scale, HeartHandshake, Leaf,
   FileSignature, Camera, Layers3,
 };
@@ -65,32 +63,17 @@ export default function OSHeader({
   unreadCount,
   notifCenterOpen,
   onToggleNotifications,
-  onOpenSettings,
-  onOpenFeedback,
-  onLogout,
+  onOpenUserPanel,
+  showBreadcrumb = true,
 }) {
   // ── Local UI state ─────────────────────────────────────────────────
   const [appMenuOpen, setAppMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const appBtnRef = useRef(null);
-  const userMenuRef = useRef(null);
-
-  // Close user menu on outside click
-  useEffect(() => {
-    if (!userMenuOpen) return;
-    const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [userMenuOpen]);
 
   // ── Breadcrumb data ────────────────────────────────────────────────
   const pageLabel = humanizePageName(currentPageName);
   const isAtAppLanding = activeApp && currentPageName === activeApp.landingPage;
-  const showBreadcrumbPage = pageLabel && !isAtAppLanding;
+  const showBreadcrumbPage = showBreadcrumb && pageLabel && !isAtAppLanding;
 
   return (
     <header
@@ -390,119 +373,46 @@ export default function OSHeader({
 
         <div className="os-divider" style={{ margin: "0 4px" }} />
 
-        {/* User menu */}
-        <div className="relative" ref={userMenuRef}>
-          <button
-            className={`os-header-btn ${userMenuOpen ? "active" : ""}`}
-            onClick={() => setUserMenuOpen(v => !v)}
-            title={user?.full_name ?? user?.email ?? "Account"}
-            style={{ paddingLeft: 4, paddingRight: 8, gap: 8 }}
-          >
-            {user?.avatar_url ? (
-              <img
-                src={user.avatar_url}
-                alt=""
-                style={{
-                  width: 22, height: 22,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "1px solid var(--border-subtle)",
-                }}
-              />
-            ) : (
-              <span
-                className="inline-flex items-center justify-center rounded-full"
-                style={{
-                  width: 22, height: 22,
-                  background: "linear-gradient(135deg, #2a456a 0%, #1a2e48 100%)",
-                  color: "#FEDD00",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  border: "1px solid var(--border-default)",
-                }}
-              >
-                {(user?.full_name?.[0] ?? user?.email?.[0] ?? "?").toUpperCase()}
-              </span>
-            )}
-            <span
-              className="hidden lg:inline truncate"
-              style={{ fontSize: 12, fontWeight: 600, maxWidth: 120 }}
-            >
-              {user?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "Account"}
-            </span>
-            <ChevronDown
-              size={10}
+        {/* User panel trigger — opens slide-in preferences */}
+        <button
+          className="os-header-btn"
+          onClick={onOpenUserPanel}
+          title="Workspace & preferences"
+          style={{ paddingLeft: 4, paddingRight: 10, gap: 8 }}
+        >
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt=""
               style={{
-                opacity: 0.6,
-                transform: userMenuOpen ? "rotate(180deg)" : "none",
-                transition: "transform 0.15s",
+                width: 22, height: 22,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "1px solid var(--border-subtle)",
               }}
             />
-          </button>
-
-          {userMenuOpen && (
-            <div
-              className="absolute right-0 top-full mt-1 rounded-xl py-1 w-60 z-50"
+          ) : (
+            <span
+              className="inline-flex items-center justify-center rounded-full"
               style={{
-                background: "var(--bg-elevated)",
+                width: 22, height: 22,
+                background: "linear-gradient(135deg, #2a456a 0%, #1a2e48 100%)",
+                color: "#FEDD00",
+                fontSize: 10,
+                fontWeight: 700,
                 border: "1px solid var(--border-default)",
-                boxShadow: "0 12px 36px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35)",
               }}
             >
-              {user && (
-                <div
-                  className="px-3 py-2.5 border-b"
-                  style={{ borderColor: "var(--border-subtle)" }}
-                >
-                  <div style={{ color: "var(--text-primary)", fontSize: 12.5, fontWeight: 600 }}>
-                    {user.full_name || user.email}
-                  </div>
-                  <div
-                    className="flex items-center gap-1.5 mt-0.5"
-                    style={{ color: "var(--text-muted)", fontSize: 11 }}
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ background: "#00e676", boxShadow: "0 0 6px rgba(0,230,118,0.6)" }}
-                    />
-                    {getRoleLabel(user.role)}
-                  </div>
-                </div>
-              )}
-              <button
-                className="w-full flex items-center gap-2 px-3 py-2 transition-colors text-left"
-                style={{ color: "var(--text-secondary)", fontSize: 12 }}
-                onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                onClick={() => { setUserMenuOpen(false); onOpenSettings?.(); }}
-              >
-                <Settings size={13} />
-                Settings
-              </button>
-              <button
-                className="w-full flex items-center gap-2 px-3 py-2 transition-colors text-left"
-                style={{ color: "var(--text-secondary)", fontSize: 12 }}
-                onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                onClick={() => { setUserMenuOpen(false); onOpenFeedback?.(); }}
-              >
-                <MessageSquare size={13} />
-                Feedback
-              </button>
-              <div style={{ height: 1, background: "var(--border-subtle)", margin: "4px 0" }} />
-              <button
-                className="w-full flex items-center gap-2 px-3 py-2 transition-colors text-left"
-                style={{ color: "#ff6b6b", fontSize: 12 }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,107,0.08)"}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                onClick={() => { setUserMenuOpen(false); onLogout?.(); }}
-              >
-                <LogOut size={13} />
-                Sign out
-              </button>
-            </div>
+              {(user?.full_name?.[0] ?? user?.email?.[0] ?? "?").toUpperCase()}
+            </span>
           )}
-        </div>
+          <span
+            className="hidden lg:inline truncate"
+            style={{ fontSize: 12, fontWeight: 600, maxWidth: 120 }}
+          >
+            {user?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "Account"}
+          </span>
+        </button>
       </div>
     </header>
   );

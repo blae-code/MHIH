@@ -66,6 +66,54 @@ export function PlatformProvider({ children }) {
     } catch {}
   }, []);
 
+  // ── User preferences (persisted) ─────────────────────────────────────
+  const [uiDensity, setUiDensity] = useState(() => {
+    const stored = localStorage.getItem("rros_ui_density");
+    return stored === "compact" || stored === "comfortable" ? stored : "comfortable";
+  });
+  const [accentIntensity, setAccentIntensity] = useState(() => {
+    const stored = localStorage.getItem("rros_accent_intensity");
+    return stored === "muted" || stored === "vivid" ? stored : "vivid";
+  });
+  const [showBreadcrumbInHeader, setShowBreadcrumbInHeader] = useState(() => {
+    const stored = localStorage.getItem("rros_show_breadcrumb");
+    return stored === null ? true : stored === "true";
+  });
+  const [recentPages, setRecentPages] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("rros_recent_pages") || "[]");
+      return Array.isArray(stored) ? stored.slice(0, 8) : [];
+    } catch { return []; }
+  });
+
+  // Persist preferences + apply density to document root
+  useEffect(() => {
+    localStorage.setItem("rros_ui_density", uiDensity);
+    document.documentElement.setAttribute("data-density", uiDensity);
+  }, [uiDensity]);
+  useEffect(() => {
+    localStorage.setItem("rros_accent_intensity", accentIntensity);
+    document.documentElement.setAttribute("data-accent-intensity", accentIntensity);
+  }, [accentIntensity]);
+  useEffect(() => {
+    localStorage.setItem("rros_show_breadcrumb", String(showBreadcrumbInHeader));
+  }, [showBreadcrumbInHeader]);
+  useEffect(() => {
+    localStorage.setItem("rros_recent_pages", JSON.stringify(recentPages));
+  }, [recentPages]);
+
+  // Track recent pages as user navigates
+  useEffect(() => {
+    const pageName = resolvePageName(location.pathname);
+    if (!pageName || pageName === "RedRiverOSHome") return;
+    setRecentPages((prev) => {
+      const filtered = prev.filter((p) => p.page !== pageName);
+      return [{ page: pageName, path: location.pathname, ts: Date.now() }, ...filtered].slice(0, 8);
+    });
+  }, [location.pathname]);
+
+  const clearRecentPages = useCallback(() => setRecentPages([]), []);
+
   // Derive active app from current route when it changes
   useEffect(() => {
     const pageName = resolvePageName(location.pathname);
@@ -145,6 +193,16 @@ export function PlatformProvider({ children }) {
     setLatestForgeQuery,
     evidenceProjectionMode,
     updateEvidenceProjectionMode,
+
+    // User preferences
+    uiDensity,
+    setUiDensity,
+    accentIntensity,
+    setAccentIntensity,
+    showBreadcrumbInHeader,
+    setShowBreadcrumbInHeader,
+    recentPages,
+    clearRecentPages,
   };
 
   return (
