@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { RefreshCw, Database, Filter, UploadCloud } from "lucide-react";
+import { RefreshCw, Database, Filter, UploadCloud, StickyNote } from "lucide-react";
 import { listDatasets, listMetrics, syncCatalog } from "@/api/redriverModuleApi";
+import { base44 } from "@/api/base44Client";
 import { useApp } from "@/Layout";
+import MetricNotesPanel from "./MetricNotesPanel";
 
 export default function MetricCatalogPanel() {
   const { addLog, user } = /** @type {any} */ (useApp());
@@ -12,6 +14,8 @@ export default function MetricCatalogPanel() {
   const [datasetFilter, setDatasetFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [error, setError] = useState("");
+  const [notesMetric, setNotesMetric] = useState(null);
+  const [noteCounts, setNoteCounts] = useState({});
 
   const load = async () => {
     setLoading(true);
@@ -35,6 +39,23 @@ export default function MetricCatalogPanel() {
   useEffect(() => {
     load();
   }, []);
+
+  // Load note counts for displayed metrics so users see at a glance which ones have team context
+  const loadNoteCounts = async () => {
+    try {
+      const annotations = await base44.entities.Annotation.filter({ target_type: "metric" }, "-created_date", 500);
+      const counts = {};
+      (annotations || []).forEach((a) => {
+        if (!a.target_id) return;
+        counts[a.target_id] = (counts[a.target_id] || 0) + 1;
+      });
+      setNoteCounts(counts);
+    } catch (e) {
+      // silent — notes are non-critical
+    }
+  };
+
+  useEffect(() => { loadNoteCounts(); }, []);
 
   const categories = useMemo(() => {
     return [...new Set(metrics.map((m) => m.category).filter(Boolean))].sort();
@@ -133,29 +154,59 @@ export default function MetricCatalogPanel() {
                 <th className="text-left">Datasets</th>
                 <th className="text-left">Direction</th>
                 <th className="text-right">Version</th>
+                <th className="text-right">Notes</th>
               </tr>
             </thead>
             <tbody>
-              {filteredMetrics.map((m) => (
-                <tr key={m.metric_id}>
-                  <td>
-                    <div style={{ color: "var(--text-primary)", fontWeight: 600 }}>{m.name}</div>
-                    <div style={{ color: "var(--text-muted)" }}>{m.metric_id}</div>
-                  </td>
-                  <td>{m.category?.replace(/_/g, " ")}</td>
-                  <td>{(m.dataset_ids || []).join(", ") || "—"}</td>
-                  <td>{String(m.direction || "neutral").replace(/_/g, " ")}</td>
-                  <td className="text-right">{m.version || 1}</td>
-                </tr>
-              ))}
+              {filteredMetrics.map((m) => {
+                const count = noteCounts[m.metric_id] || 0;
+                return (
+                  <tr key={m.metric_id}>
+                    <td>
+                      <div style={{ color: "var(--text-primary)", fontWeight: 600 }}>{m.name}</div>
+                      <div style={{ color: "var(--text-muted)" }}>{m.metric_id}</div>
+                    </td>
+                    <td>{m.category?.replace(/_/g, " ")}</td>
+                    <td>{(m.dataset_ids || []).join(", ") || "—"}</td>
+                    <td>{String(m.direction || "neutral").replace(/_/g, " ")}</td>
+                    <td className="text-right">{m.version || 1}</td>
+                    <td className="text-right">
+                      <button
+                        onClick={() => setNotesMetric(m)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                        style={{
+                          background: count > 0 ? "rgba(254,221,0,0.10)" : "var(--bg-overlay)",
+                          border: `1px solid ${count > 0 ? "rgba(254,221,0,0.35)" : "var(--border-subtle)"}`,
+                          color: count > 0 ? "#FEDD00" : "var(--text-secondary)",
+                        }}
+                        title={count > 0 ? `${count} team note${count === 1 ? "" : "s"}` : "Add a note"}
+                      >
+                        <StickyNote size={11} />
+                        {count > 0 ? count : "Add"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
               {!filteredMetrics.length && (
                 <tr>
-                  <td colSpan={5} className="text-center" style={{ color: "var(--text-muted)" }}>No metrics found for selected filters.</td>
+                  <td colSpan={6} className="text-center" style={{ color: "var(--text-muted)" }}>No metrics found for selected filters.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+      )}
+
+      {notesMetric && (
+        <MetricNotesPanel
+          metric={notesMetric}
+          currentUser={user}
+          onClose={() => {
+            setNotesMetric(null);
+            loadNoteCounts();
+          }}
+        />
       )}
     </div>
   );
