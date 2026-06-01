@@ -528,7 +528,7 @@ export default function CommandPalette({ isOpen = true, onClose, currentPageName
         {/* ── Footer ── */}
         <div className="px-4 py-2.5 flex items-center gap-4 shrink-0"
           style={{ borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.25)" }}>
-          {[["↑↓", "navigate"], ["↵", "open"], ["Esc", "close"]].map(([key, label]) => (
+          {[["Up/Down", "navigate"], ["Enter", "open"], ["Esc", "close"]].map(([key, label]) => (
             <span key={key} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
               <kbd style={{ background: "rgba(254,221,0,0.07)", color: "rgba(254,221,0,0.7)", fontSize: 9, padding: "2px 6px", borderRadius: 4, border: "1px solid rgba(254,221,0,0.18)", fontFamily: "monospace" }}>{key}</kbd>
               {label}
@@ -543,7 +543,7 @@ export default function CommandPalette({ isOpen = true, onClose, currentPageName
             )}
             <div className="flex items-center gap-1.5 px-2 py-1 rounded"
               style={{ background: "rgba(254,221,0,0.06)", border: "1px solid rgba(254,221,0,0.12)" }}>
-              <kbd style={{ fontSize: 9, color: "rgba(254,221,0,0.6)", fontFamily: "monospace" }}>⌘K</kbd>
+              <kbd style={{ fontSize: 9, color: "rgba(254,221,0,0.6)", fontFamily: "monospace" }}>Ctrl+K</kbd>
             </div>
           </div>
         </div>

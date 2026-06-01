@@ -438,7 +438,7 @@ function LayoutInner({ children, currentPageName }) {
               color: accent,
               fontWeight: 600,
             }}
-            title="Switch app — ⌘K"
+            title="Switch app — Ctrl+K"
           >
             <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
             <span className="hidden sm:inline">{activeApp?.shortName ?? "Apps"}</span>
@@ -468,7 +468,7 @@ function LayoutInner({ children, currentPageName }) {
                 border: "1px solid var(--border-subtle)",
               }}
             >
-              ⌘K
+              Ctrl+K
             </kbd>
           </button>
 
@@ -621,7 +621,7 @@ function LayoutInner({ children, currentPageName }) {
                   borderBottom: "1px solid var(--border-subtle)",
                   background: "transparent",
                 }}
-                title="Switch app — ⌘K"
+                title="Switch app — Ctrl+K"
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
