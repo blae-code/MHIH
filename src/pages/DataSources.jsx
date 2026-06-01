@@ -27,6 +27,7 @@ import TopCategoriesTile from "@/components/datasources/TopCategoriesTile";
 import HowToUseTile from "@/components/datasources/HowToUseTile";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
+import { getSourceVisuals } from "@/components/datasources/sourceVisuals";
 
 const CATEGORIES = ["all","chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const CATEGORY_OPTIONS = CATEGORIES.filter(c => c !== "all");
@@ -517,41 +518,71 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
   const isDisabled = src.status === "inactive";
   const statusColor = STATUS_COLORS[src.status] || "var(--text-muted)";
   const isAuto = src.sync_frequency && src.sync_frequency !== "manual";
+  const visuals = getSourceVisuals(src);
+  const ProviderIcon = visuals.icon;
+  const [g1, g2] = visuals.gradient;
 
   return (
     <div
-      className="metric-card flex flex-col gap-2.5 relative"
-      style={{ opacity: isDisabled ? 0.65 : 1, overflow: "hidden" }}
+      className="flex flex-col gap-2.5 relative rounded-xl overflow-hidden transition-all"
+      style={{
+        opacity: isDisabled ? 0.7 : 1,
+        background: `linear-gradient(180deg, ${visuals.color}0e 0%, var(--bg-elevated) 50%)`,
+        border: `1px solid ${visuals.color}33`,
+        boxShadow: `0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 ${visuals.color}22`,
+        padding: 14,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = `${visuals.color}77`;
+        e.currentTarget.style.boxShadow = `0 8px 28px rgba(0,0,0,0.5), 0 0 24px ${visuals.color}33, inset 0 1px 0 ${visuals.color}44`;
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = `${visuals.color}33`;
+        e.currentTarget.style.boxShadow = `0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 ${visuals.color}22`;
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
     >
-      {/* Status accent bar — top edge, color-coded by status */}
-      <span
-        aria-hidden
-        style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: 2,
-          background: `linear-gradient(90deg, ${statusColor} 0%, ${statusColor}33 100%)`,
-          boxShadow: `0 0 8px ${statusColor}44`,
-        }}
-      />
+      {/* Top provider gradient band */}
+      <span aria-hidden style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 3,
+        background: `linear-gradient(90deg, ${g1} 0%, ${g2} 50%, ${g1}66 100%)`,
+        boxShadow: `0 0 12px ${visuals.color}88`,
+      }} />
+      {/* Ambient corner glow */}
+      <div aria-hidden style={{
+        position: "absolute", top: -50, right: -50, width: 160, height: 160,
+        background: `radial-gradient(circle, ${visuals.color}22 0%, transparent 70%)`,
+        pointerEvents: "none",
+      }} />
 
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-2 relative">
         <div className="flex items-center gap-2.5 min-w-0">
           <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 relative"
             style={{
-              background: `linear-gradient(135deg, ${statusColor}1f 0%, ${statusColor}08 100%)`,
-              border: `1px solid ${statusColor}33`,
-              boxShadow: `0 0 12px ${statusColor}1a`,
+              background: `linear-gradient(135deg, ${g1} 0%, ${g2} 100%)`,
+              border: `1px solid ${visuals.color}88`,
+              boxShadow: `0 4px 14px ${visuals.color}55, inset 0 1px 0 rgba(255,255,255,0.25)`,
             }}
           >
-            <Database size={14} style={{ color: statusColor, strokeWidth: 2.25 }} />
+            <ProviderIcon size={16} style={{ color: "#fff", strokeWidth: 2.25, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))" }} />
           </div>
           <div className="min-w-0">
             <div className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
               {src.name}
             </div>
             <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-              <span className="tag" style={{ fontSize: 9.5, padding: "1px 6px" }}>
-                {src.type?.replace(/_/g, " ")}
+              <span
+                className="capitalize px-1.5 py-0.5 rounded font-semibold"
+                style={{
+                  fontSize: 9.5,
+                  background: `linear-gradient(135deg, ${visuals.color}33 0%, ${visuals.color}11 100%)`,
+                  color: visuals.color,
+                  border: `1px solid ${visuals.color}55`,
+                }}
+              >
+                {visuals.label}
               </span>
               {src.category && src.category !== "other" && (
                 <span
@@ -572,17 +603,18 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
         <div
           className="flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full"
           style={{
-            background: `${statusColor}14`,
-            border: `1px solid ${statusColor}40`,
+            background: `linear-gradient(135deg, ${statusColor}22 0%, ${statusColor}08 100%)`,
+            border: `1px solid ${statusColor}55`,
+            boxShadow: `0 0 8px ${statusColor}33`,
           }}
         >
           <span
             className="w-1.5 h-1.5 rounded-full"
-            style={{ background: statusColor, boxShadow: `0 0 6px ${statusColor}` }}
+            style={{ background: statusColor, boxShadow: `0 0 8px ${statusColor}, 0 0 2px ${statusColor}` }}
           />
           <span
             className="text-xs capitalize font-semibold"
-            style={{ color: statusColor, fontSize: 9.5, letterSpacing: "0.02em" }}
+            style={{ color: statusColor, fontSize: 9.5, letterSpacing: "0.03em" }}
           >
             {src.status}
           </span>
@@ -673,17 +705,31 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
 function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelete }) {
   const isActive = src.status === "active";
   const isDisabled = src.status === "inactive";
+  const visuals = getSourceVisuals(src);
+  const ProviderIcon = visuals.icon;
+  const [g1, g2] = visuals.gradient;
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 rounded-lg group"
+    <div className="flex items-center gap-3 px-3 py-2 rounded-lg group relative overflow-hidden"
       style={{
-        background: "var(--bg-elevated)",
-        border: "1px solid var(--border-subtle)",
-        opacity: isDisabled ? 0.65 : 1,
+        background: `linear-gradient(90deg, ${visuals.color}0c 0%, var(--bg-elevated) 30%)`,
+        border: `1px solid ${visuals.color}22`,
+        opacity: isDisabled ? 0.7 : 1,
       }}>
-      <div className="w-6 h-6 rounded flex items-center justify-center shrink-0"
-        style={{ background: "var(--bg-overlay)" }}>
-        <Database size={12} style={{ color: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+      {/* Left accent bar */}
+      <span aria-hidden style={{
+        position: "absolute", left: 0, top: 4, bottom: 4, width: 2.5,
+        borderRadius: "0 2px 2px 0",
+        background: `linear-gradient(180deg, ${g1} 0%, ${g2} 100%)`,
+        boxShadow: `0 0 8px ${visuals.color}`,
+      }} />
+      <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+        style={{
+          background: `linear-gradient(135deg, ${g1} 0%, ${g2} 100%)`,
+          border: `1px solid ${visuals.color}88`,
+          boxShadow: `0 2px 6px ${visuals.color}44`,
+        }}>
+        <ProviderIcon size={13} style={{ color: "#fff", strokeWidth: 2.25, filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))" }} />
       </div>
 
       <div className="flex-1 min-w-0 grid grid-cols-4 gap-3 items-center">

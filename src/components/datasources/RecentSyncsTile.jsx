@@ -1,10 +1,11 @@
 /**
- * RecentSyncsTile — polished recent-activity feed for the Data Sources page.
- * Shows the most recently synced sources with status pulse, relative time,
- * and a subtle cadence badge.
+ * RecentSyncsTile — recent-activity feed with a themed cyan header strip,
+ * ambient glow, and status-tinted rows showing relative time + cadence.
  */
 import React from "react";
-import { CheckCircle, AlertCircle, Pause, Clock, Activity } from "lucide-react";
+import { CheckCircle, AlertCircle, Pause, Clock, Activity, Zap } from "lucide-react";
+
+const ACCENT = "#40c4ff";
 
 const STATUS_META = {
   active:   { color: "#00e676", icon: CheckCircle, label: "Active" },
@@ -30,31 +31,64 @@ function relativeTime(iso) {
 
 export default function RecentSyncsTile({ recentSyncs }) {
   return (
-    <div className="src-widget-card">
-      <div className="relative z-10">
+    <div
+      className="rounded-xl relative overflow-hidden"
+      style={{
+        background: `linear-gradient(180deg, rgba(64,196,255,0.06) 0%, var(--bg-elevated) 60%)`,
+        border: "1px solid var(--border-subtle)",
+        boxShadow: `0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(64,196,255,0.12)`,
+      }}
+    >
+      {/* Gradient top edge */}
+      <span aria-hidden style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 2,
+        background: `linear-gradient(90deg, ${ACCENT} 0%, #00e676 60%, transparent 100%)`,
+      }} />
+      {/* Ambient corner glow */}
+      <div aria-hidden style={{
+        position: "absolute", top: -40, right: -40, width: 140, height: 140,
+        background: `radial-gradient(circle, ${ACCENT}33 0%, transparent 70%)`,
+        pointerEvents: "none",
+      }} />
+
+      <div className="relative p-3.5">
+        {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <div className="dashboard-section-label flex items-center gap-1.5" style={{ margin: 0 }}>
-            <Activity size={11} style={{ color: "#40c4ff" }} />
-            Recent Syncs
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}33 0%, ${ACCENT}11 100%)`,
+                border: `1px solid ${ACCENT}55`,
+                boxShadow: `0 0 10px ${ACCENT}22`,
+              }}>
+              <Activity size={11} style={{ color: ACCENT, strokeWidth: 2.5 }} />
+            </div>
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wider" style={{ color: ACCENT, fontSize: 10, letterSpacing: "0.1em" }}>
+                Recent Syncs
+              </div>
+              <div className="text-xs" style={{ color: "var(--text-muted)", fontSize: 9.5 }}>
+                Latest ingest activity
+              </div>
+            </div>
           </div>
           {recentSyncs.length > 0 && (
-            <span
-              className="px-1.5 py-0.5 rounded-full font-bold font-mono"
+            <span className="px-2 py-0.5 rounded-full font-bold font-mono tabular-nums"
               style={{
-                fontSize: 9,
-                background: "rgba(64,196,255,0.12)",
-                color: "#40c4ff",
-                border: "1px solid rgba(64,196,255,0.3)",
-              }}
-            >
+                fontSize: 10,
+                background: `linear-gradient(135deg, ${ACCENT}28 0%, ${ACCENT}10 100%)`,
+                color: ACCENT,
+                border: `1px solid ${ACCENT}55`,
+                boxShadow: `0 0 8px ${ACCENT}22`,
+              }}>
               {recentSyncs.length}
             </span>
           )}
         </div>
 
         {recentSyncs.length === 0 ? (
-          <div className="text-center py-5" style={{ color: "var(--text-muted)" }}>
-            <Activity size={18} className="mx-auto mb-1.5 opacity-30" />
+          <div className="text-center py-6" style={{ color: "var(--text-muted)" }}>
+            <Activity size={20} className="mx-auto mb-2 opacity-30" />
             <p className="text-xs">No sync activity yet.</p>
           </div>
         ) : (
@@ -68,73 +102,49 @@ export default function RecentSyncsTile({ recentSyncs }) {
                   key={src.id}
                   className="relative pl-3 pr-2.5 py-2 rounded-md transition-all group"
                   style={{
-                    background: "var(--bg-overlay)",
+                    background: `linear-gradient(90deg, ${meta.color}0a 0%, var(--bg-overlay) 30%)`,
                     border: "1px solid var(--border-subtle)",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = `${meta.color}55`;
-                    e.currentTarget.style.background = "var(--bg-hover)";
+                    e.currentTarget.style.borderColor = `${meta.color}66`;
+                    e.currentTarget.style.boxShadow = `0 0 12px ${meta.color}22`;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = "var(--border-subtle)";
-                    e.currentTarget.style.background = "var(--bg-overlay)";
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
-                  {/* Status bar (left accent) */}
-                  <span
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: 6,
-                      bottom: 6,
-                      width: 2,
-                      borderRadius: "0 2px 2px 0",
-                      background: meta.color,
-                      boxShadow: `0 0 6px ${meta.color}88`,
-                    }}
-                  />
+                  <span aria-hidden style={{
+                    position: "absolute", left: 0, top: 6, bottom: 6, width: 2.5,
+                    borderRadius: "0 2px 2px 0",
+                    background: `linear-gradient(180deg, ${meta.color} 0%, ${meta.color}66 100%)`,
+                    boxShadow: `0 0 8px ${meta.color}`,
+                  }} />
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Icon size={10} style={{ color: meta.color, flexShrink: 0 }} />
-                        <span
-                          className="text-xs font-semibold truncate"
-                          style={{ color: "var(--text-primary)" }}
-                        >
+                        <span className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
                           {src.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5 ml-[14px]">
-                        <span
-                          className="text-xs"
-                          style={{ color: meta.color, fontSize: 9.5, fontWeight: 600 }}
-                        >
+                        <span style={{ color: meta.color, fontSize: 9.5, fontWeight: 600 }}>
                           {meta.label}
                         </span>
                         <span style={{ color: "var(--text-muted)", fontSize: 9 }}>·</span>
-                        <span
-                          className="text-xs capitalize"
-                          style={{ color: "var(--text-muted)", fontSize: 9.5 }}
-                        >
-                          {isAuto ? (
-                            <span style={{ color: "var(--accent-primary)" }}>
-                              {src.sync_frequency}
-                            </span>
-                          ) : (
-                            "manual"
-                          )}
-                        </span>
+                        {isAuto ? (
+                          <span className="flex items-center gap-0.5" style={{ color: "var(--accent-primary)", fontSize: 9.5, fontWeight: 600 }}>
+                            <Zap size={8} fill="currentColor" />{src.sync_frequency}
+                          </span>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)", fontSize: 9.5 }}>manual</span>
+                        )}
                       </div>
                     </div>
-                    <span
-                      className="shrink-0 font-mono tabular-nums"
-                      style={{
-                        color: "var(--text-muted)",
-                        fontSize: 9.5,
-                      }}
-                      title={new Date(src.last_synced).toLocaleString("en-CA")}
-                    >
+                    <span className="shrink-0 font-mono tabular-nums"
+                      style={{ color: "var(--text-muted)", fontSize: 9.5 }}
+                      title={new Date(src.last_synced).toLocaleString("en-CA")}>
                       {relativeTime(src.last_synced)}
                     </span>
                   </div>

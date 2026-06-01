@@ -1,12 +1,12 @@
 /**
- * TopCategoriesTile — polished distribution bars showing the most-represented
- * source categories. Each bar uses a semantic category accent color and shows
- * count + percentage with smooth fill animation.
+ * TopCategoriesTile — coloured distribution bars with a themed violet header,
+ * ambient glow, and per-row coloured background tints.
  */
 import React from "react";
-import { Layers3 } from "lucide-react";
+import { Layers3, PieChart } from "lucide-react";
 
-// Semantic category colors — distinct hues so bars are immediately scannable.
+const ACCENT = "#a78bfa";
+
 const CATEGORY_COLOR = {
   chronic_disease:      "#ff5f6d",
   mental_health:        "#a78bfa",
@@ -23,83 +23,116 @@ const formatLabel = (cat) =>
   cat.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function TopCategoriesTile({ topCategories, totalSources }) {
+  const max = topCategories.length ? Math.max(...topCategories.map(([, c]) => c)) : 0;
+
   return (
-    <div className="src-widget-card">
-      <div className="relative z-10">
+    <div
+      className="rounded-xl relative overflow-hidden"
+      style={{
+        background: `linear-gradient(180deg, rgba(167,139,250,0.07) 0%, var(--bg-elevated) 60%)`,
+        border: "1px solid var(--border-subtle)",
+        boxShadow: `0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(167,139,250,0.12)`,
+      }}
+    >
+      <span aria-hidden style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 2,
+        background: `linear-gradient(90deg, ${ACCENT} 0%, #f472b6 60%, transparent 100%)`,
+      }} />
+      <div aria-hidden style={{
+        position: "absolute", top: -40, right: -40, width: 140, height: 140,
+        background: `radial-gradient(circle, ${ACCENT}33 0%, transparent 70%)`,
+        pointerEvents: "none",
+      }} />
+
+      <div className="relative p-3.5">
         <div className="flex items-center justify-between mb-3">
-          <div className="dashboard-section-label flex items-center gap-1.5" style={{ margin: 0 }}>
-            <Layers3 size={11} style={{ color: "#a78bfa" }} />
-            Top Categories
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}33 0%, ${ACCENT}11 100%)`,
+                border: `1px solid ${ACCENT}55`,
+                boxShadow: `0 0 10px ${ACCENT}22`,
+              }}>
+              <PieChart size={11} style={{ color: ACCENT, strokeWidth: 2.5 }} />
+            </div>
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wider" style={{ color: ACCENT, fontSize: 10, letterSpacing: "0.1em" }}>
+                Top Categories
+              </div>
+              <div className="text-xs" style={{ color: "var(--text-muted)", fontSize: 9.5 }}>
+                Distribution by domain
+              </div>
+            </div>
           </div>
           {totalSources > 0 && (
-            <span
-              className="font-mono tabular-nums"
-              style={{ fontSize: 9.5, color: "var(--text-muted)" }}
-            >
-              of {totalSources}
+            <span className="px-2 py-0.5 rounded-full font-mono tabular-nums font-semibold"
+              style={{
+                fontSize: 10,
+                background: `linear-gradient(135deg, ${ACCENT}28 0%, ${ACCENT}10 100%)`,
+                color: ACCENT,
+                border: `1px solid ${ACCENT}55`,
+              }}>
+              {totalSources} total
             </span>
           )}
         </div>
 
         {topCategories.length === 0 ? (
-          <div className="text-center py-5" style={{ color: "var(--text-muted)" }}>
-            <Layers3 size={18} className="mx-auto mb-1.5 opacity-30" />
+          <div className="text-center py-6" style={{ color: "var(--text-muted)" }}>
+            <Layers3 size={20} className="mx-auto mb-2 opacity-30" />
             <p className="text-xs">No categorized sources yet.</p>
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {topCategories.map(([cat, count]) => {
               const pct = totalSources ? (count / totalSources) * 100 : 0;
-              const color = CATEGORY_COLOR[cat] || "#40c4ff";
+              const widthPct = max ? (count / max) * 100 : 0;
+              const color = CATEGORY_COLOR[cat] || ACCENT;
               return (
-                <div key={cat} className="group">
+                <div key={cat}
+                  className="px-2 py-1.5 rounded-md transition-all"
+                  style={{
+                    background: `linear-gradient(90deg, ${color}10 0%, var(--bg-overlay) 80%)`,
+                    border: `1px solid ${color}22`,
+                  }}>
                   <div className="flex items-center justify-between text-xs mb-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{ background: color, boxShadow: `0 0 6px ${color}88` }}
-                      />
-                      <span
-                        className="truncate font-medium"
-                        style={{ color: "var(--text-secondary)", fontSize: 11 }}
-                      >
+                      <span className="w-2 h-2 rounded-sm shrink-0"
+                        style={{
+                          background: color,
+                          boxShadow: `0 0 8px ${color}aa, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                        }} />
+                      <span className="truncate font-semibold"
+                        style={{ color: "var(--text-primary)", fontSize: 11 }}>
                         {formatLabel(cat)}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-1 shrink-0 ml-2">
-                      <span
-                        className="font-mono font-bold tabular-nums"
-                        style={{ color, fontSize: 11.5 }}
-                      >
+                      <span className="font-mono font-bold tabular-nums"
+                        style={{ color, fontSize: 12, textShadow: `0 0 8px ${color}66` }}>
                         {count}
                       </span>
-                      <span
-                        className="font-mono tabular-nums"
-                        style={{ color: "var(--text-muted)", fontSize: 9.5 }}
-                      >
+                      <span className="font-mono tabular-nums"
+                        style={{ color: "var(--text-muted)", fontSize: 9.5 }}>
                         {pct.toFixed(0)}%
                       </span>
                     </div>
                   </div>
-                  <div
-                    className="relative overflow-hidden"
+                  <div className="relative overflow-hidden"
                     style={{
                       height: 5,
-                      background: "var(--bg-overlay)",
+                      background: "rgba(0,0,0,0.3)",
                       borderRadius: 3,
-                      border: "1px solid var(--border-subtle)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${pct}%`,
-                        height: "100%",
-                        background: `linear-gradient(90deg, ${color}cc 0%, ${color} 100%)`,
-                        borderRadius: 2,
-                        boxShadow: `0 0 8px ${color}66, inset 0 1px 0 rgba(255,255,255,0.15)`,
-                        transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
-                      }}
-                    />
+                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
+                    }}>
+                    <div style={{
+                      width: `${widthPct}%`,
+                      height: "100%",
+                      background: `linear-gradient(90deg, ${color}88 0%, ${color} 60%, ${color}ee 100%)`,
+                      borderRadius: 3,
+                      boxShadow: `0 0 10px ${color}88, inset 0 1px 0 rgba(255,255,255,0.25)`,
+                      transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
+                    }} />
                   </div>
                 </div>
               );
