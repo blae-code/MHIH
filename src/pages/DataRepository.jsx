@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Search, Upload, Plus, Download, Trash2, Edit2, RefreshCw, Table2, BarChart2, Database, X, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Upload, Plus, Download, Trash2, Edit2, RefreshCw, Table2, BarChart2, Database, Sparkles } from "lucide-react";
 import ImportMetricModal from "@/components/data/ImportMetricModal";
 import MetricForm from "@/components/data/MetricForm";
 import MetricsChartExplorer from "@/components/analyst/MetricsChartExplorer";
 import RepositoryStatStrip from "@/components/data/RepositoryStatStrip";
 import ZoneHeader from "@/components/shell/ZoneHeader";
+import ListFilterBar from "@/components/shell/ListFilterBar";
 import { invalidateHealthMetricCache, listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
+const CONFIDENCE_LEVELS = ["high","medium","low"];
 
 const CONFIDENCE_STYLE = {
   high: { color: "var(--color-success)", bg: "rgba(0,230,118,0.08)", border: "rgba(0,230,118,0.3)" },
@@ -25,6 +27,7 @@ export default function DataRepository() {
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
+  const [confidenceFilter, setConfidenceFilter] = useState("all");
   const [showImport, setShowImport] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -45,7 +48,8 @@ export default function DataRepository() {
     const matchSearch = !search || m.name?.toLowerCase().includes(search.toLowerCase()) || m.description?.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === "all" || m.category === catFilter;
     const matchRegion = regionFilter === "all" || m.region === regionFilter;
-    return matchSearch && matchCat && matchRegion;
+    const matchConfidence = confidenceFilter === "all" || m.confidence_level === confidenceFilter;
+    return matchSearch && matchCat && matchRegion && matchConfidence;
   });
 
   // Top categories (for Insights zone)
@@ -107,8 +111,8 @@ export default function DataRepository() {
     addLog("success", "CSV exported");
   };
 
-  const hasActiveFilters = search || catFilter !== "all" || regionFilter !== "all";
-  const clearFilters = () => { setSearch(""); setCatFilter("all"); setRegionFilter("all"); };
+  const hasActiveFilters = search || catFilter !== "all" || regionFilter !== "all" || confidenceFilter !== "all";
+  const clearFilters = () => { setSearch(""); setCatFilter("all"); setRegionFilter("all"); setConfidenceFilter("all"); };
 
   return (
     <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
@@ -212,58 +216,29 @@ export default function DataRepository() {
               hint={viewMode === "chart" ? "interactive visualization" : "browse · edit · delete"}
             />
 
-            {/* Filters card */}
-            <div className="repo-widget-card" style={{ padding: 10 }}>
-              <div className="flex items-center gap-2 flex-wrap relative z-10">
-                <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-                  <SlidersHorizontal size={12} />
-                  <span>Filters</span>
-                </div>
-                <div className="relative" style={{ minWidth: 200 }}>
-                  <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
-                  <input
-                    className="w-full text-xs pl-8 pr-8 py-1.5 rounded-lg outline-none transition-all"
-                    style={{ background: "var(--bg-overlay)", border: `1px solid ${search ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: "var(--text-primary)" }}
-                    placeholder="Search metrics..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                  />
-                  {search && (
-                    <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }}>
-                      <X size={11} />
-                    </button>
-                  )}
-                </div>
-                <select
-                  className="text-xs px-3 py-1.5 rounded-lg outline-none transition-all"
-                  style={{ background: "var(--bg-overlay)", border: `1px solid ${catFilter !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: catFilter !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 140 }}
-                  value={catFilter} onChange={e => setCatFilter(e.target.value)}>
-                  <option value="all">All Categories</option>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c.replace(/_/g," ")}</option>)}
-                </select>
-                <select
-                  className="text-xs px-3 py-1.5 rounded-lg outline-none transition-all"
-                  style={{ background: "var(--bg-overlay)", border: `1px solid ${regionFilter !== "all" ? "rgba(254,221,0,0.4)" : "var(--border-subtle)"}`, color: regionFilter !== "all" ? "var(--accent-primary)" : "var(--text-secondary)", minWidth: 130 }}
-                  value={regionFilter} onChange={e => setRegionFilter(e.target.value)}>
-                  <option value="all">All Regions</option>
-                  {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
-                {hasActiveFilters && (
-                  <button onClick={clearFilters}
-                    className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all"
-                    style={{ background: "rgba(255,23,68,0.08)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.2)" }}>
-                    <X size={10} /> Clear
-                  </button>
-                )}
-                {selected.size > 0 && (
-                  <button onClick={handleBulkDelete}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ml-auto"
-                    style={{ background: "rgba(255,23,68,0.12)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.3)" }}>
-                    <Trash2 size={12} /> Delete {selected.size}
-                  </button>
-                )}
-              </div>
-            </div>
+            {/* Filters */}
+            <ListFilterBar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search metrics..."
+              region={regionFilter}
+              onRegionChange={setRegionFilter}
+              regionOptions={REGIONS}
+              category={catFilter}
+              onCategoryChange={setCatFilter}
+              categoryOptions={CATEGORIES}
+              status={confidenceFilter}
+              onStatusChange={setConfidenceFilter}
+              statusOptions={CONFIDENCE_LEVELS}
+              onClear={clearFilters}
+              extra={selected.size > 0 && (
+                <button onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: "rgba(255,23,68,0.12)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.3)" }}>
+                  <Trash2 size={12} /> Delete {selected.size}
+                </button>
+              )}
+            />
 
             {/* Data surface — table or chart */}
             <div className="repo-widget-card" style={{ padding: 0, overflow: "hidden" }}>

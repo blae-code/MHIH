@@ -11,9 +11,11 @@ import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
 import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
 import ZoneHeader from "@/components/shell/ZoneHeader";
+import ListFilterBar from "@/components/shell/ListFilterBar";
 
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const STATUSES = ["active","inactive","error","pending"];
+const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
 const SORT_OPTIONS = [
   { value: "updated_desc", label: "Recently Updated" },
@@ -33,6 +35,7 @@ export default function MyDataSources() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterRegion, setFilterRegion] = useState("all");
   const [filterSync, setFilterSync] = useState("all");
   const [sortBy, setSortBy] = useState("updated_desc");
   const [viewMode, setViewMode] = useState("grid");
@@ -93,6 +96,7 @@ export default function MyDataSources() {
     }
     if (filterStatus !== "all") list = list.filter(s => s.status === filterStatus);
     if (filterCategory !== "all") list = list.filter(s => s.category === filterCategory);
+    if (filterRegion !== "all") list = list.filter(s => (s.metadata?.region || s.region) === filterRegion);
     if (filterSync !== "all") list = list.filter(s => (s.sync_frequency || "manual") === filterSync);
 
     list.sort((a, b) => {
@@ -104,7 +108,7 @@ export default function MyDataSources() {
       return new Date(b.updated_date || 0) - new Date(a.updated_date || 0);
     });
     return list;
-  }, [sources, search, filterStatus, filterCategory, filterSync, sortBy]);
+  }, [sources, search, filterStatus, filterCategory, filterRegion, filterSync, sortBy]);
 
   // Top categories breakdown for the Insights zone
   const topCategories = useMemo(() => {
@@ -212,41 +216,38 @@ export default function MyDataSources() {
               hint="search · filter · sync"
             />
 
-            {/* Filters card */}
-            <div className="sources-widget-card" style={{ padding: 10 }}>
-              <div className="flex items-center gap-2 flex-wrap relative z-10">
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md flex-1 min-w-48"
-                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                  <Search size={12} style={{ color: "var(--text-muted)" }} />
-                  <input
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder="Search name, description, notes..."
-                    className="bg-transparent outline-none text-xs flex-1"
-                    style={{ color: "var(--text-primary)" }}
-                  />
-                </div>
-
-                <FilterSelect value={filterStatus} onChange={setFilterStatus}
-                  options={[{ value: "all", label: "All Statuses" }, ...STATUSES.map(s => ({ value: s, label: capitalize(s) }))]} />
-                <FilterSelect value={filterCategory} onChange={setFilterCategory}
-                  options={[{ value: "all", label: "All Categories" }, ...CATEGORIES.map(c => ({ value: c, label: c.replace(/_/g, " ") }))]} />
-                <FilterSelect value={filterSync} onChange={setFilterSync}
-                  options={[{ value: "all", label: "All Sync" }, ...SYNC_FREQS.map(f => ({ value: f, label: capitalize(f) }))]} />
-                <FilterSelect value={sortBy} onChange={setSortBy} icon={<ArrowUpDown size={11} />}
-                  options={SORT_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
-
-                <div className="flex rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
-                  {["grid", "list"].map(m => (
-                    <button key={m} onClick={() => setViewMode(m)}
-                      className="px-2 py-1.5"
-                      style={{ background: viewMode === m ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", color: viewMode === m ? "var(--accent-primary)" : "var(--text-muted)" }}>
-                      {m === "grid" ? <LayoutGrid size={13} /> : <List size={13} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {/* Filters */}
+            <ListFilterBar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search name, description, notes..."
+              region={filterRegion}
+              onRegionChange={setFilterRegion}
+              regionOptions={REGIONS}
+              category={filterCategory}
+              onCategoryChange={setFilterCategory}
+              categoryOptions={CATEGORIES}
+              status={filterStatus}
+              onStatusChange={setFilterStatus}
+              statusOptions={STATUSES}
+              extra={
+                <>
+                  <FilterSelect value={filterSync} onChange={setFilterSync}
+                    options={[{ value: "all", label: "All Sync" }, ...SYNC_FREQS.map(f => ({ value: f, label: capitalize(f) }))]} />
+                  <FilterSelect value={sortBy} onChange={setSortBy} icon={<ArrowUpDown size={11} />}
+                    options={SORT_OPTIONS.map(o => ({ value: o.value, label: o.label }))} />
+                  <div className="flex rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+                    {["grid", "list"].map(m => (
+                      <button key={m} onClick={() => setViewMode(m)}
+                        className="px-2 py-1.5"
+                        style={{ background: viewMode === m ? "rgba(254,221,0,0.12)" : "var(--bg-overlay)", color: viewMode === m ? "var(--accent-primary)" : "var(--text-muted)" }}>
+                        {m === "grid" ? <LayoutGrid size={13} /> : <List size={13} />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              }
+            />
 
             {/* Source list */}
             <div className="sources-widget-card">

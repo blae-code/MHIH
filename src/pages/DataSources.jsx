@@ -21,9 +21,13 @@ import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
 import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
 import ZoneHeader from "@/components/shell/ZoneHeader";
+import ListFilterBar from "@/components/shell/ListFilterBar";
 
 const CATEGORIES = ["all","chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
+const CATEGORY_OPTIONS = CATEGORIES.filter(c => c !== "all");
 const STATUSES = ["all","active","inactive","pending","error"];
+const STATUS_OPTIONS = STATUSES.filter(s => s !== "all");
+const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
 const SORT_OPTIONS = [
   { value: "updated_desc", label: "Recently Updated" },
   { value: "name_asc", label: "Name A–Z" },
@@ -70,6 +74,7 @@ export default function DataSources() {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterRegion, setFilterRegion] = useState("all");
   const [sortBy, setSortBy] = useState("updated_desc");
 
   const load = () => {
@@ -162,6 +167,7 @@ export default function DataSources() {
     }
     if (filterCategory !== "all") list = list.filter(s => s.category === filterCategory);
     if (filterStatus !== "all") list = list.filter(s => s.status === filterStatus);
+    if (filterRegion !== "all") list = list.filter(s => (s.metadata?.region || s.region) === filterRegion);
     list.sort((a, b) => {
       if (sortBy === "name_asc") return (a.name || "").localeCompare(b.name || "");
       if (sortBy === "name_desc") return (b.name || "").localeCompare(a.name || "");
@@ -171,7 +177,7 @@ export default function DataSources() {
       return new Date(b.updated_date) - new Date(a.updated_date);
     });
     return list;
-  }, [sources, search, filterCategory, filterStatus, sortBy]);
+  }, [sources, search, filterCategory, filterStatus, filterRegion, sortBy]);
 
   // Recent syncs (insights zone)
   const recentSyncs = useMemo(() => {
@@ -327,51 +333,43 @@ export default function DataSources() {
             />
 
             {/* Filters */}
-            <div className="src-widget-card" style={{ padding: 10 }}>
-              <div className="flex items-center gap-2 flex-wrap relative z-10">
-                <div className="flex items-center gap-1.5 rounded-md px-2 py-1 flex-1 min-w-[180px]"
-                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-                  <Search size={11} style={{ color: "var(--text-muted)" }} />
-                  <input
-                    value={search} onChange={e => setSearch(e.target.value)}
-                    placeholder="Search sources, notes, categories..."
-                    className="bg-transparent outline-none text-xs flex-1"
-                    style={{ color: "var(--text-primary)" }}
-                  />
-                </div>
-                <div className="flex items-center gap-1">
-                  <Tag size={11} style={{ color: "var(--text-muted)" }} />
-                  <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={selectStyle}>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c.replace(/_/g, " ")}</option>)}
-                  </select>
-                </div>
-                <div className="flex items-center gap-1">
-                  <SlidersHorizontal size={11} style={{ color: "var(--text-muted)" }} />
-                  <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selectStyle}>
-                    {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
-                  </select>
-                </div>
-                <div className="flex items-center gap-1">
-                  <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
-                  <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
-                    {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div className="flex items-center rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
-                  {[["grid", Grid3x3], ["list", List]].map(([mode, Icon]) => (
-                    <button key={mode} onClick={() => setViewMode(mode)}
-                      className="flex items-center justify-center"
-                      style={{
-                        width: 28, height: 28,
-                        background: viewMode === mode ? "var(--bg-hover)" : "var(--bg-overlay)",
-                        color: viewMode === mode ? "var(--text-primary)" : "var(--text-muted)",
-                      }}>
-                      <Icon size={13} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <ListFilterBar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search sources, notes, categories..."
+              region={filterRegion}
+              onRegionChange={setFilterRegion}
+              regionOptions={REGIONS}
+              category={filterCategory}
+              onCategoryChange={setFilterCategory}
+              categoryOptions={CATEGORY_OPTIONS}
+              status={filterStatus}
+              onStatusChange={setFilterStatus}
+              statusOptions={STATUS_OPTIONS}
+              extra={
+                <>
+                  <div className="flex items-center gap-1">
+                    <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
+                    <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
+                      {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex items-center rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+                    {[["grid", Grid3x3], ["list", List]].map(([mode, Icon]) => (
+                      <button key={mode} onClick={() => setViewMode(mode)}
+                        className="flex items-center justify-center"
+                        style={{
+                          width: 28, height: 28,
+                          background: viewMode === mode ? "var(--bg-hover)" : "var(--bg-overlay)",
+                          color: viewMode === mode ? "var(--text-primary)" : "var(--text-muted)",
+                        }}>
+                        <Icon size={13} />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              }
+            />
 
             {/* Sources grid / list */}
             <div className="src-widget-card">

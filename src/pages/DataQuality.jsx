@@ -2,13 +2,18 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import {
-  AlertTriangle, CheckCircle, RefreshCw, X, ChevronRight,
-  Filter, Zap, ShieldCheck, AlertCircle, Eye, Sparkles
+  RefreshCw, ChevronRight,
+  Zap, ShieldCheck, Sparkles
 } from "lucide-react";
 import FlagDetailModal from "@/components/dataquality/FlagDetailModal";
 import CockpitShell from "@/components/shell/CockpitShell";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import QualityStatStrip from "@/components/dataquality/QualityStatStrip";
+import ListFilterBar from "@/components/shell/ListFilterBar";
+
+const FLAG_CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
+const FLAG_REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
+const FLAG_STATUSES = ["open","in_review","resolved","dismissed"];
 
 const FLAG_TYPE_LABELS = {
   missing_value: "Missing Value",
@@ -42,6 +47,8 @@ export default function DataQuality() {
   const [filterStatus, setFilterStatus] = useState("open");
   const [filterSeverity, setFilterSeverity] = useState("all");
   const [filterType, setFilterType] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterRegion, setFilterRegion] = useState("all");
   const [selected, setSelected] = useState(null);
   const [lastScan, setLastScan] = useState(null);
 
@@ -84,8 +91,10 @@ export default function DataQuality() {
     if (filterStatus !== "all" && f.status !== filterStatus) return false;
     if (filterSeverity !== "all" && f.severity !== filterSeverity) return false;
     if (filterType !== "all" && f.flag_type !== filterType) return false;
+    if (filterCategory !== "all" && f.category !== filterCategory) return false;
+    if (filterRegion !== "all" && f.region !== filterRegion) return false;
     return true;
-  }), [flags, filterStatus, filterSeverity, filterType]);
+  }), [flags, filterStatus, filterSeverity, filterType, filterCategory, filterRegion]);
 
   // Flag type breakdown
   const typeBreakdown = useMemo(() => {
@@ -137,43 +146,35 @@ export default function DataQuality() {
           />
 
           {/* Filters */}
-          <div className="cockpit-widget-card" style={{ padding: 10 }}>
-            <div className="flex flex-wrap items-center gap-2 relative z-10">
-              <Filter size={12} style={{ color: "var(--text-muted)" }} />
-              {["all", "open", "in_review", "resolved", "dismissed"].map(s => (
-                <button key={s} onClick={() => setFilterStatus(s)}
-                  className="px-2.5 py-1 rounded text-xs transition-all"
-                  style={{
-                    background: filterStatus === s ? "rgba(254,221,0,0.15)" : "var(--bg-overlay)",
-                    color: filterStatus === s ? "var(--accent-primary)" : "var(--text-secondary)",
-                    border: filterStatus === s ? "1px solid rgba(254,221,0,0.4)" : "1px solid var(--border-subtle)",
-                    fontWeight: filterStatus === s ? 600 : 400
-                  }}>
-                  {s === "all" ? "All Status" : STATUS_CONFIG[s]?.label || s}
-                </button>
-              ))}
-              <div className="w-px h-4 mx-1" style={{ background: "var(--border-subtle)" }} />
-              <select value={filterSeverity} onChange={e => setFilterSeverity(e.target.value)}
-                className="text-xs px-2 py-1.5 rounded outline-none"
-                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-                <option value="all">All Severity</option>
-                {Object.entries(SEVERITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-              </select>
-              <select value={filterType} onChange={e => setFilterType(e.target.value)}
-                className="text-xs px-2 py-1.5 rounded outline-none"
-                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-                <option value="all">All Types</option>
-                {Object.entries(FLAG_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-              {(filterStatus !== "open" || filterSeverity !== "all" || filterType !== "all") && (
-                <button onClick={() => { setFilterStatus("open"); setFilterSeverity("all"); setFilterType("all"); }}
-                  className="flex items-center gap-1 text-xs px-2 py-1 rounded transition-all"
-                  style={{ background: "rgba(255,23,68,0.12)", color: "var(--color-error)", border: "1px solid rgba(255,23,68,0.3)" }}>
-                  <X size={10} /> Reset
-                </button>
-              )}
-            </div>
-          </div>
+          <ListFilterBar
+            showSearch={false}
+            region={filterRegion}
+            onRegionChange={setFilterRegion}
+            regionOptions={FLAG_REGIONS}
+            category={filterCategory}
+            onCategoryChange={setFilterCategory}
+            categoryOptions={FLAG_CATEGORIES}
+            status={filterStatus}
+            onStatusChange={setFilterStatus}
+            statusOptions={FLAG_STATUSES}
+            onClear={() => { setFilterStatus("open"); setFilterSeverity("all"); setFilterType("all"); setFilterCategory("all"); setFilterRegion("all"); }}
+            extra={
+              <>
+                <select value={filterSeverity} onChange={e => setFilterSeverity(e.target.value)}
+                  className="text-xs px-2 py-1.5 rounded outline-none"
+                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+                  <option value="all">All Severity</option>
+                  {Object.entries(SEVERITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+                <select value={filterType} onChange={e => setFilterType(e.target.value)}
+                  className="text-xs px-2 py-1.5 rounded outline-none"
+                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+                  <option value="all">All Types</option>
+                  {Object.entries(FLAG_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </select>
+              </>
+            }
+          />
 
           {/* Flags table */}
           <div className="cockpit-widget-card" style={{ padding: 0, overflow: "hidden" }}>
