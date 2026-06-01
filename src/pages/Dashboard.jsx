@@ -581,6 +581,17 @@ export default function Dashboard() {
           background: rgba(255,255,255,0.03);
           color: var(--text-primary);
         }
+        .dashboard-cell {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          min-height: 0;
+        }
+        .dashboard-cell > * {
+          flex: 1 1 auto;
+          min-height: 0;
+          height: 100%;
+        }
         .dashboard-widget-card {
           border-radius: 10px;
           border: 1.5px solid;
@@ -591,6 +602,27 @@ export default function Dashboard() {
           position: relative;
           overflow: hidden;
           box-shadow: inset 0 1px 0 rgba(254,221,0,0.08), 0 0 20px rgba(254,221,0,0.05);
+          /* Flex column so internal content can fill + scroll within fixed cell */
+          display: flex;
+          flex-direction: column;
+          min-height: 0;
+        }
+        /* Direct children of widget cards: the first non-header block becomes the
+           scroll container, so headers stay fixed and content scrolls internally. */
+        .dashboard-widget-card > *:not(:first-child):not(style):not(::before) {
+          min-height: 0;
+        }
+        .dashboard-widget-card > :last-child {
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
+          overflow-x: hidden;
+          margin-right: -4px;
+          padding-right: 4px;
+        }
+        /* When the last child is a chart/empty-state, don't let it scroll itself */
+        .dashboard-widget-card > .recharts-responsive-container:last-child {
+          overflow: visible;
         }
         .dashboard-widget-card:hover {
           border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
@@ -675,14 +707,12 @@ export default function Dashboard() {
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`${fullSpan ? "md:col-span-2 xl:col-span-3" : ""} h-full flex flex-col min-w-0`}
+                    className={`${fullSpan ? "md:col-span-2 xl:col-span-3" : ""} min-w-0 dashboard-cell`}
                     style={{
                       ...provided.draggableProps.style,
                       opacity: snapshot.isDragging ? 0.5 : 1
                     }}>
-                            <div className="h-full flex flex-col [&>*]:flex-1 [&>*]:min-h-0 [&>*]:h-full">
-                              {WIDGET_RENDER[w.id]}
-                            </div>
+                            {WIDGET_RENDER[w.id]}
                           </div>
                   }
                       </Draggable>);
