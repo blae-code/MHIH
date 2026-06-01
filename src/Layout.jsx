@@ -39,6 +39,7 @@ import CommandPalette from "./components/search/CommandPalette";
 import PatchNotesModal from "./components/changelog/PatchNotesModal";
 import FloatingFeedbackButton from "./components/feedback/FloatingFeedbackButton";
 import PWAStatus from "./components/pwa/PWAStatus";
+import AppMenu from "./components/shell/AppMenu";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
 import { isAdmin as checkAdmin, getRoleLabel } from "./platform/permissions";
@@ -270,6 +271,12 @@ function LayoutInner({ children, currentPageName }) {
   const [collapsedSections, setCollapsedSections] = useState({});
   const userMenuRef = useRef(null);
 
+  // ── App menu (header + sidebar dropdown) ─────────────────────────────
+  const [headerAppMenuOpen, setHeaderAppMenuOpen] = useState(false);
+  const [sidebarAppMenuOpen, setSidebarAppMenuOpen] = useState(false);
+  const headerAppBtnRef = useRef(null);
+  const sidebarAppBtnRef = useRef(null);
+
   useEffect(() => {
     base44.auth.me().then(setUser).catch((err) => {
       console.warn("Layout: failed to load current user", err?.message ?? err);
@@ -427,23 +434,39 @@ function LayoutInner({ children, currentPageName }) {
           {/* Separator */}
           <div style={{ width: 1, height: 16, background: "var(--border-subtle)" }} />
 
-          {/* App badge — opens command palette (primary switch path) */}
-          <button
-            onClick={() => platform.setCommandPaletteOpen(true)}
-            className="flex items-center gap-2 px-2.5 py-1 rounded-md transition-all"
-            style={{
-              background: "var(--bg-elevated)",
-              border: `1px solid ${accent}33`,
-              fontSize: 12,
-              color: accent,
-              fontWeight: 600,
-            }}
-            title="Switch app — Ctrl+K"
-          >
-            <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
-            <span className="hidden sm:inline">{activeApp?.shortName ?? "Apps"}</span>
-            <ChevronDown size={10} style={{ color: "var(--text-muted)" }} />
-          </button>
+          {/* App badge — opens lightweight app dropdown */}
+          <div className="relative" ref={headerAppBtnRef}>
+            <button
+              onClick={() => setHeaderAppMenuOpen(v => !v)}
+              className="flex items-center gap-2 px-2.5 py-1 rounded-md transition-all"
+              style={{
+                background: headerAppMenuOpen ? `${accent}12` : "var(--bg-elevated)",
+                border: `1px solid ${accent}33`,
+                fontSize: 12,
+                color: accent,
+                fontWeight: 600,
+              }}
+              title="Switch app"
+            >
+              <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
+              <span className="hidden sm:inline">{activeApp?.shortName ?? "Apps"}</span>
+              <ChevronDown
+                size={10}
+                style={{
+                  color: "var(--text-muted)",
+                  transform: headerAppMenuOpen ? "rotate(180deg)" : "none",
+                  transition: "transform 0.15s",
+                }}
+              />
+            </button>
+            {headerAppMenuOpen && (
+              <AppMenu
+                anchorRef={headerAppBtnRef}
+                align="left"
+                onClose={() => setHeaderAppMenuOpen(false)}
+              />
+            )}
+          </div>
 
           {/* Global search */}
           <button
@@ -613,41 +636,62 @@ function LayoutInner({ children, currentPageName }) {
                   zIndex: 1,
                 }}
               />
-              {/* App identity strip — opens command palette (primary switch path) */}
-              <button
-                onClick={() => platform.setCommandPaletteOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 shrink-0 transition-colors text-left w-full group"
-                style={{
-                  borderBottom: "1px solid var(--border-subtle)",
-                  background: "transparent",
-                }}
-                title="Switch app — Ctrl+K"
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-              >
-                <div
-                  className="w-5 h-5 rounded flex items-center justify-center shrink-0"
-                  style={{ background: accent + "18" }}
+              {/* App identity strip — opens lightweight app dropdown */}
+              <div className="relative shrink-0" ref={sidebarAppBtnRef} style={{ zIndex: 25 }}>
+                <button
+                  onClick={() => setSidebarAppMenuOpen(v => !v)}
+                  className="flex items-center gap-2 px-3 py-2 transition-colors text-left w-full"
+                  style={{
+                    borderBottom: "1px solid var(--border-subtle)",
+                    background: sidebarAppMenuOpen ? "var(--bg-hover)" : "transparent",
+                  }}
+                  title="Switch app"
+                  onMouseEnter={(e) => {
+                    if (!sidebarAppMenuOpen) e.currentTarget.style.background = "var(--bg-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!sidebarAppMenuOpen) e.currentTarget.style.background = "transparent";
+                  }}
                 >
-                  <Icon name={activeApp?.icon ?? "Command"} size={11} style={{ color: accent }} />
-                </div>
-                <div className="min-w-0 flex-1">
                   <div
-                    style={{
-                      fontSize: 11.5,
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
-                      lineHeight: 1.2,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
+                    className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                    style={{ background: accent + "18" }}
                   >
-                    {activeApp?.shortName ?? "Red River OS"}
+                    <Icon name={activeApp?.icon ?? "Command"} size={11} style={{ color: accent }} />
                   </div>
-                </div>
-                <Grid3x3 size={11} style={{ color: "var(--text-muted)", opacity: 0.6 }} />
-              </button>
+                  <div className="min-w-0 flex-1">
+                    <div
+                      style={{
+                        fontSize: 11.5,
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                        lineHeight: 1.2,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {activeApp?.shortName ?? "Red River OS"}
+                    </div>
+                  </div>
+                  <ChevronDown
+                    size={11}
+                    style={{
+                      color: "var(--text-muted)",
+                      opacity: 0.6,
+                      transform: sidebarAppMenuOpen ? "rotate(180deg)" : "none",
+                      transition: "transform 0.15s",
+                    }}
+                  />
+                </button>
+                {sidebarAppMenuOpen && (
+                  <AppMenu
+                    anchorRef={sidebarAppBtnRef}
+                    align="left"
+                    onClose={() => setSidebarAppMenuOpen(false)}
+                  />
+                )}
+              </div>
 
               {/* Nav scroll area */}
               <nav className="flex-1 overflow-y-auto py-2 px-2 relative" style={{ scrollbarWidth: "thin", zIndex: 2 }}>
