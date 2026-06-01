@@ -207,9 +207,8 @@ function NavSection({ section, items, collapsed, onToggle, currentPage, accent }
             <Link
               key={`${item.page}-${item.label}`}
               to={createPageUrl(item.page)}
-              className="sidebar-nav-item"
+              className={`sidebar-nav-item ${isActive ? "sidebar-nav-item-active" : ""}`}
               style={isActive ? {
-                background: `rgba(${hexToRgb(accent)},0.08)`,
                 color: "var(--text-primary)",
                 fontWeight: 600,
               } : {}}
@@ -357,12 +356,22 @@ function LayoutInner({ children, currentPageName }) {
         .sidebar-nav-item {
           display: flex; align-items: center; gap: 10px;
           padding: 5px 10px 5px 14px; border-radius: 6px; margin: 1px 0;
-          cursor: pointer; transition: background 0.12s ease, color 0.12s ease;
+          cursor: pointer; transition: background 0.12s ease, color 0.12s ease, box-shadow 0.15s ease;
           font-size: 12.5px; font-weight: 500;
           color: var(--text-secondary); position: relative; overflow: hidden;
           text-decoration: none; line-height: 1.3;
         }
-        .sidebar-nav-item:hover { background: rgba(255,255,255,0.035); color: var(--text-primary); }
+        .sidebar-nav-item:hover {
+          background: rgba(255,255,255,0.035);
+          color: var(--text-primary);
+        }
+        .sidebar-nav-item-active {
+          background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%) !important;
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.04),
+            inset 0 -1px 0 rgba(0,0,0,0.25),
+            0 1px 2px rgba(0,0,0,0.2);
+        }
       `}</style>
 
       <div
@@ -371,14 +380,25 @@ function LayoutInner({ children, currentPageName }) {
       >
         {/* ── OS Header Bar ─────────────────────────────────────────────── */}
         <header
-          className="flex items-center gap-3 px-3 shrink-0"
+          className="flex items-center gap-3 px-3 shrink-0 relative"
           style={{
             height: "var(--header-height)",
-            background: "var(--bg-surface)",
+            background: "linear-gradient(180deg, #101c30 0%, var(--bg-surface) 100%)",
             borderBottom: "1px solid var(--border-subtle)",
+            boxShadow: "var(--shadow-header)",
             zIndex: 30,
           }}
         >
+          {/* Specular top-edge highlight */}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0, height: 1,
+              background: "var(--highlight-edge-strong)",
+              pointerEvents: "none",
+            }}
+          />
           {/* Logo / OS identity */}
           <div className="flex items-center gap-2 shrink-0">
             <div
@@ -560,14 +580,37 @@ function LayoutInner({ children, currentPageName }) {
           {/* ── Left Sidebar ─────────────────────────────────────────── */}
           {platform.sidebarOpen && (
             <aside
-              className="flex flex-col shrink-0 overflow-hidden"
+              className="flex flex-col shrink-0 overflow-hidden relative"
               style={{
                 width: "var(--panel-left)",
                 background: "var(--bg-surface)",
                 borderRight: "1px solid var(--border-subtle)",
+                boxShadow: "inset -1px 0 0 rgba(0,0,0,0.4), 2px 0 8px rgba(0,0,0,0.25)",
                 zIndex: 20,
               }}
             >
+              {/* Ambient accent glow — faint app-color radial bleed from top */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: 0, left: 0, right: 0, height: 160,
+                  background: `radial-gradient(ellipse 80% 100% at 50% 0%, ${accent}14 0%, transparent 70%)`,
+                  pointerEvents: "none",
+                  zIndex: 0,
+                }}
+              />
+              {/* Specular top-edge highlight */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: 0, left: 0, right: 0, height: 1,
+                  background: "var(--highlight-edge)",
+                  pointerEvents: "none",
+                  zIndex: 1,
+                }}
+              />
               {/* App identity strip — slim, current-app context only */}
               <button
                 onClick={() => platform.setAppSwitcherOpen(true)}
@@ -605,7 +648,7 @@ function LayoutInner({ children, currentPageName }) {
               </button>
 
               {/* Nav scroll area */}
-              <nav className="flex-1 overflow-y-auto py-2 px-2" style={{ scrollbarWidth: "thin" }}>
+              <nav className="flex-1 overflow-y-auto py-2 px-2 relative" style={{ scrollbarWidth: "thin", zIndex: 2 }}>
                 {/* OS-level nav items */}
                 {osNavItems.map((item, i) => {
                   if (Array.isArray(item.items)) {
@@ -615,9 +658,8 @@ function LayoutInner({ children, currentPageName }) {
                         <Link
                           key={sub.page}
                           to={createPageUrl(sub.page)}
-                          className="sidebar-nav-item"
+                          className={`sidebar-nav-item ${isActive ? "sidebar-nav-item-active" : ""}`}
                           style={isActive ? {
-                            background: "rgba(254,221,0,0.07)",
                             color: "var(--text-primary)",
                             fontWeight: 600,
                           } : {}}
@@ -640,8 +682,8 @@ function LayoutInner({ children, currentPageName }) {
                     <Link
                       key={item.page ?? i}
                       to={createPageUrl(item.page)}
-                      className="sidebar-nav-item"
-                      style={isActive ? { background: "rgba(254,221,0,0.07)", color: "var(--text-primary)", fontWeight: 600 } : {}}
+                      className={`sidebar-nav-item ${isActive ? "sidebar-nav-item-active" : ""}`}
+                      style={isActive ? { color: "var(--text-primary)", fontWeight: 600 } : {}}
                     >
                       <Icon name={item.icon} size={13} style={{ color: isActive ? "#FEDD00" : "var(--text-muted)", flexShrink: 0 }} />
                       <span>{item.label}</span>
@@ -678,8 +720,8 @@ function LayoutInner({ children, currentPageName }) {
                       <Link
                         key={section.page}
                         to={createPageUrl(section.page)}
-                        className="sidebar-nav-item"
-                        style={isActive ? { background: `rgba(${hexToRgb(accent)},0.08)`, color: "var(--text-primary)", fontWeight: 600 } : {}}
+                        className={`sidebar-nav-item ${isActive ? "sidebar-nav-item-active" : ""}`}
+                        style={isActive ? { color: "var(--text-primary)", fontWeight: 600 } : {}}
                       >
                         <Icon name={section.icon} size={13} style={{ color: isActive ? accent : "var(--text-muted)", flexShrink: 0 }} />
                         <span>{section.label}</span>
@@ -704,30 +746,47 @@ function LayoutInner({ children, currentPageName }) {
                 )}
               </nav>
 
-              {/* Sidebar footer */}
-              <div
-                className="px-3 py-2 shrink-0 flex items-center gap-2"
-                style={{
-                  borderTop: "1px solid var(--border-subtle)",
-                  background: "var(--bg-surface)",
-                }}
-              >
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: logColor, boxShadow: `0 0 4px ${logColor}` }} />
-                <span style={{ fontSize: 10, color: "var(--text-muted)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {platform.statusLogs[0]?.msg ?? "Ready"}
-                </span>
-              </div>
             </aside>
           )}
 
           {/* ── Main content area ─────────────────────────────────────── */}
           <main
-            className="flex-1 min-w-0 overflow-hidden flex flex-col"
-            style={{ background: "var(--bg-base)" }}
+            className="flex-1 min-w-0 overflow-hidden flex flex-col relative"
+            style={{
+              background: "var(--bg-base)",
+              boxShadow: "var(--shadow-inset-canvas)",
+            }}
           >
             {/* Content */}
             <div className="flex-1 overflow-auto">
               {children}
+            </div>
+            {/* Status footer — third horizontal band */}
+            <div
+              className="shrink-0 flex items-center gap-2 px-3"
+              style={{
+                height: "var(--footer-height)",
+                background: "var(--bg-surface)",
+                borderTop: "1px solid var(--border-subtle)",
+                fontSize: 10,
+                color: "var(--text-muted)",
+                zIndex: 5,
+              }}
+            >
+              <div
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: logColor, boxShadow: `0 0 6px ${logColor}` }}
+              />
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {lastLog?.msg ?? "Ready"}
+              </span>
+              <span style={{ opacity: 0.7 }}>
+                {activeApp?.shortName ?? "Red River OS"}
+              </span>
+              <span style={{ opacity: 0.5 }}>·</span>
+              <span style={{ opacity: 0.7 }}>
+                {user?.full_name ?? user?.email ?? "—"}
+              </span>
             </div>
           </main>
 

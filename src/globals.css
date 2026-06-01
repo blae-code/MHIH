@@ -17,16 +17,28 @@
   --mnbc-brush: #F2E3D1;
   --mnbc-cedar: #CD7236;
 
-  /* ── Core background palette (high-contrast dark) ── */
-  --bg-base: #0a1220;          /* brighter base for contrast */
-  --bg-surface: #0f1829;       /* very dark blue-black */
-  --bg-elevated: #141f2e;      /* dark surface */
-  --bg-overlay: #1a2839;       /* raised overlay */
-  --bg-hover: #1d3047;         /* hover state */
+  /* ── Core background palette — 4-plane depth ramp ── */
+  --bg-base: #060d18;          /* deepest plane — main canvas backdrop */
+  --bg-surface: #0c1626;       /* sidebar / header plane */
+  --bg-elevated: #131f33;      /* cards, panels */
+  --bg-overlay: #1a2a42;       /* raised overlay (popovers, modals) */
+  --bg-hover: #213553;         /* hover state — distinctly brighter */
+  --bg-card: #16243a;          /* metric cards — slightly brighter than elevated */
+
+  /* Specular highlights — subtle top-edge lighting */
+  --highlight-edge: rgba(255,255,255,0.04);
+  --highlight-edge-strong: rgba(255,255,255,0.06);
+
+  /* Ambient shadows for elevation */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.35);
+  --shadow-header: 0 4px 16px rgba(0,0,0,0.5), 0 1px 0 rgba(0,0,0,0.6);
+  --shadow-inset-canvas: inset 4px 0 8px -4px rgba(0,0,0,0.5);
 
   /* Borders — crisper for high contrast */
-  --border-subtle: #1a2e48;
-  --border-default: #243f60;
+  --border-subtle: #1c2e48;
+  --border-default: #2a456a;
   --border-emphasis: #FEDD00;
 
   /* Text — maximum contrast */
