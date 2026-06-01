@@ -1,24 +1,27 @@
 import React, { useMemo } from "react";
-import { Database, CheckCircle, AlertCircle, RefreshCw, HelpCircle } from "lucide-react";
+import { Database, CheckCircle, AlertCircle, Clock, HelpCircle } from "lucide-react";
 
 /**
- * SourcesStatStrip — top-of-page summary for My Data Sources.
- * Cards: Total Sources · Active · Errors · Auto-Synced
+ * SourcesStatStrip — top-of-page summary for the Data Sources catalog.
+ * Cards: Total · Active · Errors · Scheduled
  */
-export default function SourcesStatStrip({ sources }) {
+export default function SourcesStatStrip({ sources, failedSyncCount = 0 }) {
   const stats = useMemo(() => {
     const total = sources.length;
     const active = sources.filter(s => s.status === "active").length;
-    const error = sources.filter(s => s.status === "error").length;
+    const errors = sources.filter(s => s.status === "error").length;
+    const scheduled = sources.filter(s => s.sync_frequency && s.sync_frequency !== "manual").length;
     const inactive = sources.filter(s => s.status === "inactive").length;
     const pending = sources.filter(s => s.status === "pending").length;
-    const autoSynced = sources.filter(s => s.sync_frequency && s.sync_frequency !== "manual").length;
-    const recentlySynced = sources.filter(s => {
-      if (!s.last_synced) return false;
-      return Date.now() - new Date(s.last_synced).getTime() < 7 * 24 * 60 * 60 * 1000;
-    }).length;
-    return { total, active, error, inactive, pending, autoSynced, recentlySynced };
+    const lastSyncedRecord = sources
+      .filter(s => s.last_synced)
+      .sort((a, b) => new Date(b.last_synced) - new Date(a.last_synced))[0];
+    return { total, active, errors, scheduled, inactive, pending, lastSyncedRecord };
   }, [sources]);
+
+  const lastSyncRel = stats.lastSyncedRecord
+    ? new Date(stats.lastSyncedRecord.last_synced).toLocaleDateString("en-CA")
+    : null;
 
   const CARDS = [
     {
@@ -29,9 +32,9 @@ export default function SourcesStatStrip({ sources }) {
       color: "#FEDD00",
       bgColor: "rgba(254,221,0,0.08)",
       desc: stats.total > 0
-        ? `${stats.inactive} disabled · ${stats.pending} pending`
-        : "No sources imported yet",
-      tooltip: "All data sources you've imported. Includes active, pending, disabled, and errored sources.",
+        ? `${stats.inactive} inactive · ${stats.pending} pending`
+        : "No sources connected",
+      tooltip: "Total registered data sources, including active, inactive, pending, and errored. Each can be synced manually or on a schedule.",
     },
     {
       id: "active",
@@ -41,39 +44,41 @@ export default function SourcesStatStrip({ sources }) {
       color: "#00e676",
       bgColor: "rgba(0,230,118,0.08)",
       desc: stats.total > 0
-        ? `${Math.round((stats.active / stats.total) * 100)}% operational`
+        ? `${Math.round((stats.active / stats.total) * 100)}% of sources running`
         : "No active sources",
-      tooltip: "Data sources currently in the active state and available for syncing or querying.",
+      tooltip: "Sources currently set to active and eligible to pull data. Inactive sources are paused and won't auto-sync.",
     },
     {
       id: "errors",
       label: "Errors",
-      value: stats.error,
+      value: stats.errors + failedSyncCount,
       icon: AlertCircle,
-      color: "#ff1744",
-      bgColor: "rgba(255,23,68,0.08)",
-      desc: stats.error > 0
-        ? `Need attention`
-        : "No issues detected",
-      tooltip: "Sources that failed their last sync or have configuration problems. Open the source to view details and retry.",
+      color: stats.errors + failedSyncCount > 0 ? "#ff1744" : "#4a6a8a",
+      bgColor: stats.errors + failedSyncCount > 0 ? "rgba(255,23,68,0.08)" : "rgba(74,106,138,0.08)",
+      desc: stats.errors > 0 || failedSyncCount > 0
+        ? `${stats.errors} bad config · ${failedSyncCount} failed jobs`
+        : "All clear — no failures",
+      tooltip: "Sources in error state plus recent failed sync jobs. Click 'Sync Logs' in the header to review and re-run failures.",
     },
     {
-      id: "autosync",
-      label: "Auto-Synced",
-      value: stats.autoSynced,
-      icon: RefreshCw,
+      id: "scheduled",
+      label: "Scheduled",
+      value: stats.scheduled,
+      icon: Clock,
       color: "#40c4ff",
       bgColor: "rgba(64,196,255,0.08)",
-      desc: stats.recentlySynced > 0
-        ? `${stats.recentlySynced} synced in last 7d`
-        : "No recent syncs",
-      tooltip: "Sources configured with a daily, weekly, or monthly automatic sync schedule. Manual-only sources are excluded.",
+      desc: lastSyncRel
+        ? `Last sync: ${lastSyncRel}`
+        : stats.scheduled > 0
+          ? "Awaiting first scheduled run"
+          : "No schedules configured",
+      tooltip: "Sources with an automated sync cadence (daily, weekly, monthly). Manual sources only refresh when triggered.",
     },
   ];
 
   return (
     <div>
-      <div className="dashboard-section-label mb-2">Sources Overview</div>
+      <div className="dashboard-section-label mb-2">Data Sources Overview</div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         {CARDS.map((card) => (
           <div

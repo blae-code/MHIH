@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import {
   Plus, RefreshCw, Trash2, Database, Globe, CheckCircle, AlertCircle,
   Clock, ScrollText, BookOpen, Search, SlidersHorizontal, Grid3x3,
   List, ToggleLeft, ToggleRight, ChevronDown, StickyNote, Tag,
-  CalendarClock, ArrowUpDown
+  CalendarClock, ArrowUpDown, Sparkles
 } from "lucide-react";
 import SyncScheduleModal from "@/components/datasources/SyncScheduleModal";
 import SyncLogsPanel from "@/components/datasources/SyncLogsPanel";
@@ -19,6 +19,8 @@ import HealthCanadaCNFBrowser from "@/components/datasources/HealthCanadaCNFBrow
 import BCWMSWFSBrowser from "@/components/datasources/BCWMSWFSBrowser";
 import ArcGISHubBCBrowser from "@/components/datasources/ArcGISHubBCBrowser";
 import DataBCToolsBrowser from "@/components/datasources/DataBCToolsBrowser";
+import SourcesStatStrip from "@/components/datasources/SourcesStatStrip";
+import ZoneHeader from "@/components/shell/ZoneHeader";
 
 const CATEGORIES = ["all","chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const STATUSES = ["all","active","inactive","pending","error"];
@@ -48,7 +50,7 @@ export default function DataSources() {
   const [scheduleFor, setScheduleFor] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [failedCount, setFailedCount] = useState(0);
-  const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
+  const [viewMode, setViewMode] = useState("grid");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   // Browsers
@@ -61,6 +63,8 @@ export default function DataSources() {
   const [showWMSWFS, setShowWMSWFS] = useState(false);
   const [showArcGISHub, setShowArcGISHub] = useState(false);
   const [showDataBCTools, setShowDataBCTools] = useState(false);
+  const [browseMenuOpen, setBrowseMenuOpen] = useState(false);
+  const browseRef = useRef(null);
 
   // Filters / sorting
   const [search, setSearch] = useState("");
@@ -80,6 +84,16 @@ export default function DataSources() {
     base44.entities.SyncJob.filter({ status: "failed" }, "-created_date", 50)
       .then(jobs => setFailedCount(jobs.length)).catch(() => {});
   }, []);
+
+  // Close browse menu on outside click
+  useEffect(() => {
+    if (!browseMenuOpen) return;
+    const handler = (e) => {
+      if (browseRef.current && !browseRef.current.contains(e.target)) setBrowseMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [browseMenuOpen]);
 
   const handleSave = async (form) => {
     if (editingSource) {
@@ -154,10 +168,25 @@ export default function DataSources() {
       if (sortBy === "created_desc") return new Date(b.created_date) - new Date(a.created_date);
       if (sortBy === "status") return (a.status || "").localeCompare(b.status || "");
       if (sortBy === "category") return (a.category || "").localeCompare(b.category || "");
-      return new Date(b.updated_date) - new Date(a.updated_date); // updated_desc
+      return new Date(b.updated_date) - new Date(a.updated_date);
     });
     return list;
   }, [sources, search, filterCategory, filterStatus, sortBy]);
+
+  // Recent syncs (insights zone)
+  const recentSyncs = useMemo(() => {
+    return [...sources]
+      .filter(s => s.last_synced)
+      .sort((a, b) => new Date(b.last_synced) - new Date(a.last_synced))
+      .slice(0, 4);
+  }, [sources]);
+
+  // Top categories
+  const topCategories = useMemo(() => {
+    const counts = {};
+    sources.forEach(s => { if (s.category) counts[s.category] = (counts[s.category] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [sources]);
 
   const importSource = async (sourceData, logMsg) => {
     await base44.entities.DataSource.create(sourceData);
@@ -167,145 +196,319 @@ export default function DataSources() {
 
   const selectStyle = { background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)", padding: "5px 8px", borderRadius: 6, fontSize: 11, outline: "none" };
 
+  const browsers = [
+    ["DataBC Tools", () => setShowDataBCTools(true)],
+    ["ArcGIS Hub BC", () => setShowArcGISHub(true)],
+    ["BC WMS/WFS", () => setShowWMSWFS(true)],
+    ["Health Canada CNF", () => setShowCNF(true)],
+    ["Health Canada DPD", () => setShowDPD(true)],
+    ["Health Infobase", () => setShowHealthInfobase(true)],
+    ["StatsCan WDS", () => setShowStatsCanWDS(true)],
+    ["Open Gov Canada", () => setShowOpenGov(true)],
+    ["BC Data Catalogue", () => setShowCatalogue(true)],
+  ];
+
   return (
-    <div className="flex flex-col h-full">
-      {/* ── HEADER ── */}
-      <div className="shrink-0 border-b relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)", borderColor: "var(--border-default)", boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(64,196,255,0.08)" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, #40c4ff 0%, #00e676 50%, transparent 100%)" }} />
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <div className="dashboard-section-label" style={{ marginBottom: 2 }}>Data Sources</div>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {sources.length} sources · {sources.filter(s => s.status === "active").length} active
-            </p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <button onClick={() => setShowLogs(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: failedCount > 0 ? "var(--color-error)" : "var(--text-secondary)" }}>
-              <ScrollText size={12} />
-              Sync Logs
-              {failedCount > 0 && (
-                <span className="px-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-error)", color: "#fff" }}>{failedCount}</span>
-              )}
-            </button>
-            {/* Browser buttons */}
-            {[
-              ["DataBC Tools", () => setShowDataBCTools(true)],
-              ["ArcGIS Hub BC", () => setShowArcGISHub(true)],
-              ["BC WMS/WFS", () => setShowWMSWFS(true)],
-              ["CNF", () => setShowCNF(true)],
-              ["DPD", () => setShowDPD(true)],
-              ["Health Infobase", () => setShowHealthInfobase(true)],
-              ["StatsCan WDS", () => setShowStatsCanWDS(true)],
-              ["Open Gov", () => setShowOpenGov(true)],
-              ["BC Catalogue", () => setShowCatalogue(true)],
-            ].map(([label, fn]) => (
-              <button key={label} onClick={fn}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium"
-                style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-                <BookOpen size={11} style={{ color: "var(--accent-primary)" }} /> {label}
+    <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
+      {/* Ambient page glow */}
+      <div aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, height: 260, background: "radial-gradient(ellipse 60% 100% at 50% 0%, rgba(64,196,255,0.06) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, background: "radial-gradient(ellipse 50% 100% at 50% 100%, rgba(0,230,118,0.04) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+
+      <style>{`
+        .src-widget-card {
+          border-radius: 10px;
+          border: 1.5px solid;
+          border-image: linear-gradient(135deg, rgba(64,196,255,0.4) 0%, rgba(0,230,118,0.3) 50%, rgba(64,196,255,0.2) 100%) 1;
+          background: #0a1220;
+          padding: 14px;
+          transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+          position: relative;
+          overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(64,196,255,0.08), 0 0 20px rgba(64,196,255,0.05);
+        }
+        .src-widget-card:hover {
+          border-image: linear-gradient(135deg, rgba(64,196,255,0.6) 0%, rgba(0,230,118,0.5) 50%, rgba(64,196,255,0.4) 100%) 1;
+          box-shadow: inset 0 1px 0 rgba(64,196,255,0.15), 0 0 32px rgba(64,196,255,0.15), 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .src-widget-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(64,196,255,0.02) 0%, transparent 100%);
+          pointer-events: none;
+        }
+      `}</style>
+
+      <div className="flex flex-col p-3 relative" style={{ zIndex: 1 }}>
+
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="rounded-xl px-5 py-3 mb-3 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, var(--bg-surface) 0%, #0d1f2a 50%, var(--bg-elevated) 100%)",
+            border: "1px solid var(--border-default)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(64,196,255,0.1)"
+          }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg, #40c4ff 0%, #00e676 60%, transparent 100%)" }} />
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: "linear-gradient(135deg, rgba(64,196,255,0.15) 0%, rgba(64,196,255,0.05) 100%)", border: "1px solid rgba(64,196,255,0.25)", boxShadow: "0 0 16px rgba(64,196,255,0.1)" }}>
+                <Database size={16} style={{ color: "var(--color-info)" }} />
+              </div>
+              <div>
+                <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Data Sources</div>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  Connect, sync, and manage external data providers
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <button onClick={() => setShowLogs(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: failedCount > 0 ? "var(--color-error)" : "var(--text-secondary)" }}>
+                <ScrollText size={12} />
+                Sync Logs
+                {failedCount > 0 && (
+                  <span className="px-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-error)", color: "#fff" }}>{failedCount}</span>
+                )}
               </button>
-            ))}
-            <button onClick={() => { setEditingSource(null); setShowEditModal(true); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold"
-              style={{ background: "var(--accent-primary)", color: "#000" }}>
-              <Plus size={12} /> Add Source
-            </button>
+
+              {/* Connect Source dropdown */}
+              <div className="relative" ref={browseRef}>
+                <button onClick={() => setBrowseMenuOpen(v => !v)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: "var(--bg-overlay)", border: `1px solid ${browseMenuOpen ? "rgba(64,196,255,0.4)" : "var(--border-default)"}`, color: "var(--text-secondary)" }}>
+                  <BookOpen size={12} style={{ color: "var(--color-info)" }} /> Connect Source
+                  <ChevronDown size={11} style={{ transform: browseMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+                </button>
+                {browseMenuOpen && (
+                  <div className="absolute right-0 mt-1 rounded-lg overflow-hidden shadow-2xl"
+                    style={{ minWidth: 200, background: "var(--bg-elevated)", border: "1px solid var(--border-default)", zIndex: 30 }}>
+                    <div className="px-3 py-1.5 text-xs" style={{ color: "var(--text-muted)", background: "var(--bg-overlay)", borderBottom: "1px solid var(--border-subtle)" }}>
+                      Browse data catalogs
+                    </div>
+                    {browsers.map(([label, fn]) => (
+                      <button key={label} onClick={() => { fn(); setBrowseMenuOpen(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-all"
+                        style={{ color: "var(--text-secondary)" }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+                        <BookOpen size={11} style={{ color: "var(--accent-primary)" }} /> {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button onClick={() => { setEditingSource(null); setShowEditModal(true); }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                style={{ background: "linear-gradient(135deg, #FEDD00 0%, #ffed4e 100%)", color: "#04245a", boxShadow: "0 4px 14px rgba(254,221,0,0.3)" }}>
+                <Plus size={12} /> Add Source
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* ── FILTER BAR ── */}
-        <div className="flex items-center gap-2 px-4 py-2 border-t flex-wrap" style={{ borderColor: "var(--border-subtle)" }}>
-          {/* Search */}
-          <div className="flex items-center gap-1.5 rounded-md px-2 py-1 flex-1 min-w-[180px]"
-            style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-            <Search size={11} style={{ color: "var(--text-muted)" }} />
-            <input
-              value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search sources, notes, categories..."
-              className="bg-transparent outline-none text-xs flex-1"
-              style={{ color: "var(--text-primary)" }}
+        {/* ── Stat strip ─────────────────────────────────────────── */}
+        <div className="mb-3">
+          <SourcesStatStrip sources={sources} failedSyncCount={failedCount} />
+        </div>
+
+        {/* ── 2-zone cockpit ─────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
+
+          {/* ── Left zone: Catalog ─────────────────────────────── */}
+          <div className="flex flex-col gap-2.5">
+            <ZoneHeader
+              label="Catalog"
+              title="Connected Sources"
+              count={`${filtered.length} / ${sources.length}`}
+              hint="browse · sync · schedule"
             />
-          </div>
-          {/* Category */}
-          <div className="flex items-center gap-1">
-            <Tag size={11} style={{ color: "var(--text-muted)" }} />
-            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={selectStyle}>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c.replace(/_/g, " ")}</option>)}
-            </select>
-          </div>
-          {/* Status */}
-          <div className="flex items-center gap-1">
-            <SlidersHorizontal size={11} style={{ color: "var(--text-muted)" }} />
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selectStyle}>
-              {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
-            </select>
-          </div>
-          {/* Sort */}
-          <div className="flex items-center gap-1">
-            <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          {/* View toggle */}
-          <div className="flex items-center rounded-md overflow-hidden ml-auto" style={{ border: "1px solid var(--border-subtle)" }}>
-            {[["grid", Grid3x3], ["list", List]].map(([mode, Icon]) => (
-              <button key={mode} onClick={() => setViewMode(mode)}
-                className="flex items-center justify-center"
-                style={{
-                  width: 28, height: 28,
-                  background: viewMode === mode ? "var(--bg-hover)" : "var(--bg-overlay)",
-                  color: viewMode === mode ? "var(--text-primary)" : "var(--text-muted)",
-                }}>
-                <Icon size={13} />
-              </button>
-            ))}
-          </div>
-          {/* Results count */}
-          <span className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
-            {filtered.length} of {sources.length}
-          </span>
-        </div>
-      </div>
 
-      {/* ── CONTENT ── */}
-      <div className="flex-1 overflow-auto p-4">
-        {loading ? (
-          <div className="flex items-center justify-center h-40 gap-2" style={{ color: "var(--text-muted)" }}>
-            <RefreshCw size={16} className="animate-spin" />
+            {/* Filters */}
+            <div className="src-widget-card" style={{ padding: 10 }}>
+              <div className="flex items-center gap-2 flex-wrap relative z-10">
+                <div className="flex items-center gap-1.5 rounded-md px-2 py-1 flex-1 min-w-[180px]"
+                  style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                  <Search size={11} style={{ color: "var(--text-muted)" }} />
+                  <input
+                    value={search} onChange={e => setSearch(e.target.value)}
+                    placeholder="Search sources, notes, categories..."
+                    className="bg-transparent outline-none text-xs flex-1"
+                    style={{ color: "var(--text-primary)" }}
+                  />
+                </div>
+                <div className="flex items-center gap-1">
+                  <Tag size={11} style={{ color: "var(--text-muted)" }} />
+                  <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={selectStyle}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c.replace(/_/g, " ")}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <SlidersHorizontal size={11} style={{ color: "var(--text-muted)" }} />
+                  <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={selectStyle}>
+                    {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
+                  <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
+                    {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center rounded-md overflow-hidden" style={{ border: "1px solid var(--border-subtle)" }}>
+                  {[["grid", Grid3x3], ["list", List]].map(([mode, Icon]) => (
+                    <button key={mode} onClick={() => setViewMode(mode)}
+                      className="flex items-center justify-center"
+                      style={{
+                        width: 28, height: 28,
+                        background: viewMode === mode ? "var(--bg-hover)" : "var(--bg-overlay)",
+                        color: viewMode === mode ? "var(--text-primary)" : "var(--text-muted)",
+                      }}>
+                      <Icon size={13} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sources grid / list */}
+            <div className="src-widget-card">
+              <div className="relative z-10">
+                {loading ? (
+                  <div className="flex items-center justify-center h-40 gap-2" style={{ color: "var(--text-muted)" }}>
+                    <RefreshCw size={16} className="animate-spin" />
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-40" style={{ color: "var(--text-muted)" }}>
+                    <Database size={28} className="mb-3 opacity-30" />
+                    <p className="text-sm">{sources.length === 0 ? "No data sources yet — click Connect Source to add one." : "No sources match your filters."}</p>
+                  </div>
+                ) : viewMode === "grid" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {filtered.map(src => (
+                      <SourceCard key={src.id} src={src} syncing={syncing}
+                        onEdit={() => { setEditingSource(src); setShowEditModal(true); }}
+                        onSync={() => handleSync(src)}
+                        onToggle={() => handleToggleStatus(src)}
+                        onSchedule={() => setScheduleFor(src)}
+                        onDelete={() => setDeleteConfirm(src)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {filtered.map(src => (
+                      <SourceRow key={src.id} src={src} syncing={syncing}
+                        onEdit={() => { setEditingSource(src); setShowEditModal(true); }}
+                        onSync={() => handleSync(src)}
+                        onToggle={() => handleToggleStatus(src)}
+                        onSchedule={() => setScheduleFor(src)}
+                        onDelete={() => setDeleteConfirm(src)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40" style={{ color: "var(--text-muted)" }}>
-            <Database size={28} className="mb-3 opacity-30" />
-            <p className="text-sm">{sources.length === 0 ? "No data sources yet." : "No sources match your filters."}</p>
+
+          {/* ── Right zone: Insights ─────────────────────────────── */}
+          <div className="flex flex-col gap-2.5">
+            <ZoneHeader
+              label="Insights"
+              title="Sync Intelligence"
+              count={`${recentSyncs.length} recent`}
+              hint="activity + tips"
+            />
+
+            {/* Recent syncs */}
+            <div className="src-widget-card">
+              <div className="dashboard-section-label relative z-10">Recent Syncs</div>
+              <div className="space-y-2 relative z-10">
+                {recentSyncs.length === 0 ? (
+                  <p className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
+                    No sync activity yet.
+                  </p>
+                ) : (
+                  recentSyncs.map(src => (
+                    <div key={src.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-semibold truncate" style={{ color: "var(--color-info)" }}>{src.name}</div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_COLORS[src.status] || "var(--text-muted)" }} />
+                            <span className="text-xs capitalize" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                              {src.status} · {src.sync_frequency || "manual"}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs shrink-0" style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                          {new Date(src.last_synced).toLocaleDateString("en-CA")}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Top categories */}
+            <div className="src-widget-card">
+              <div className="dashboard-section-label relative z-10">Top Categories</div>
+              <div className="space-y-2 relative z-10">
+                {topCategories.length === 0 ? (
+                  <p className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
+                    No categorized sources yet.
+                  </p>
+                ) : (
+                  topCategories.map(([cat, count]) => {
+                    const pct = sources.length ? (count / sources.length) * 100 : 0;
+                    return (
+                      <div key={cat}>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="capitalize" style={{ color: "var(--text-secondary)" }}>{cat.replace(/_/g, " ")}</span>
+                          <span className="font-mono" style={{ color: "var(--color-info)" }}>{count}</span>
+                        </div>
+                        <div style={{ height: 4, background: "var(--bg-overlay)", borderRadius: 2, overflow: "hidden" }}>
+                          <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg, #40c4ff 0%, #00e676 100%)", borderRadius: 2 }} />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* How to use */}
+            <div className="src-widget-card">
+              <div className="dashboard-section-label flex items-center gap-1.5 relative z-10">
+                <Sparkles size={11} style={{ color: "var(--color-info)" }} />
+                How to Use
+              </div>
+              <ul className="space-y-1.5 text-xs relative z-10" style={{ color: "var(--text-secondary)" }}>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Click <span style={{ color: "var(--color-info)" }}>Connect Source</span> to browse external catalogs (BC, StatsCan, Health Canada, ArcGIS, etc.).</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Use <span style={{ color: "var(--accent-primary)" }}>Add Source</span> for a manual entry (e.g. API endpoint or custom upload).</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Each source can be synced now, paused, or set to a recurring cadence with the schedule icon.</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: "#40c4ff" }}>·</span>
+                  <span>Check <span style={{ color: "var(--color-error)" }}>Sync Logs</span> to inspect failures and re-run errored jobs.</span>
+                </li>
+              </ul>
+            </div>
           </div>
-        ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filtered.map(src => (
-              <SourceCard key={src.id} src={src} syncing={syncing}
-                onEdit={() => { setEditingSource(src); setShowEditModal(true); }}
-                onSync={() => handleSync(src)}
-                onToggle={() => handleToggleStatus(src)}
-                onSchedule={() => setScheduleFor(src)}
-                onDelete={() => setDeleteConfirm(src)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-1">
-            {filtered.map(src => (
-              <SourceRow key={src.id} src={src} syncing={syncing}
-                onEdit={() => { setEditingSource(src); setShowEditModal(true); }}
-                onSync={() => handleSync(src)}
-                onToggle={() => handleToggleStatus(src)}
-                onSchedule={() => setScheduleFor(src)}
-                onDelete={() => setDeleteConfirm(src)}
-              />
-            ))}
-          </div>
-        )}
+
+        </div>
       </div>
 
       {/* ── MODALS ── */}
@@ -323,7 +526,6 @@ export default function DataSources() {
 
       {showLogs && <SyncLogsPanel onClose={() => setShowLogs(false)} />}
 
-      {/* Delete confirm */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.65)" }}>
           <div className="w-80 rounded-xl p-5 shadow-2xl"
@@ -368,7 +570,6 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
 
   return (
     <div className="metric-card flex flex-col gap-2.5" style={{ opacity: isDisabled ? 0.65 : 1 }}>
-      {/* Top row */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded flex items-center justify-center shrink-0"
@@ -393,12 +594,10 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
         </div>
       </div>
 
-      {/* Description */}
       {src.description && (
         <p className="text-xs line-clamp-2" style={{ color: "var(--text-secondary)" }}>{src.description}</p>
       )}
 
-      {/* Notes */}
       {src.notes && (
         <div className="flex items-start gap-1.5 rounded px-2 py-1.5"
           style={{ background: "var(--accent-muted)", border: "1px solid var(--border-default)" }}>
@@ -407,7 +606,6 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
         </div>
       )}
 
-      {/* URL */}
       {src.url && (
         <a href={src.url} target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-1 text-xs truncate"
@@ -416,7 +614,6 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
         </a>
       )}
 
-      {/* Footer */}
       <div className="flex items-center justify-between pt-1.5 border-t mt-auto" style={{ borderColor: "var(--border-subtle)" }}>
         <div className="text-xs space-y-0.5">
           <div style={{ color: "var(--text-muted)" }}>
