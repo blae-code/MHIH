@@ -40,6 +40,7 @@ import PatchNotesModal from "./components/changelog/PatchNotesModal";
 import FloatingFeedbackButton from "./components/feedback/FloatingFeedbackButton";
 import PWAStatus from "./components/pwa/PWAStatus";
 import AppMenu from "./components/shell/AppMenu";
+import OSHeader from "./components/shell/OSHeader";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
 import { isAdmin as checkAdmin, getRoleLabel } from "./platform/permissions";
@@ -263,18 +264,14 @@ function LayoutInner({ children, currentPageName }) {
   const [notifCenterOpen, setNotifCenterOpen] = useState(false);
   const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [patchNotesOpen, setPatchNotesOpen] = useState(false);
   const [contextPanel, setContextPanel] = useState(null);
 
   // ── Sidebar collapsed sections ───────────────────────────────────────
   const [collapsedSections, setCollapsedSections] = useState({});
-  const userMenuRef = useRef(null);
 
-  // ── App menu (header + sidebar dropdown) ─────────────────────────────
-  const [headerAppMenuOpen, setHeaderAppMenuOpen] = useState(false);
+  // ── Sidebar app dropdown ─────────────────────────────────────────────
   const [sidebarAppMenuOpen, setSidebarAppMenuOpen] = useState(false);
-  const headerAppBtnRef = useRef(null);
   const sidebarAppBtnRef = useRef(null);
 
   useEffect(() => {
@@ -298,18 +295,6 @@ function LayoutInner({ children, currentPageName }) {
     const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, [user]);
-
-  // Close user menu on outside click
-  useEffect(() => {
-    if (!userMenuOpen) return;
-    const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [userMenuOpen]);
 
   // ── Backward-compat addLog ────────────────────────────────────────────
   const addLog = useCallback((type, msg) => {
@@ -387,218 +372,21 @@ function LayoutInner({ children, currentPageName }) {
         style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
       >
         {/* ── OS Header Bar ─────────────────────────────────────────────── */}
-        <header
-          className="flex items-center gap-3 px-3 shrink-0 relative"
-          style={{
-            height: "var(--header-height)",
-            background: "linear-gradient(180deg, #101c30 0%, var(--bg-surface) 100%)",
-            borderBottom: "1px solid var(--border-subtle)",
-            boxShadow: "var(--shadow-header)",
-            zIndex: 30,
-          }}
-        >
-          {/* Specular top-edge highlight */}
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: 0, left: 0, right: 0, height: 1,
-              background: "var(--highlight-edge-strong)",
-              pointerEvents: "none",
-            }}
-          />
-          {/* Logo / OS identity */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div
-              className="w-6 h-6 rounded flex items-center justify-center"
-              style={{ background: "#FEDD00", flexShrink: 0 }}
-            >
-              <span style={{ fontSize: 10, fontWeight: 900, color: "#043673", lineHeight: 1 }}>RR</span>
-            </div>
-            <div className="hidden sm:flex items-center gap-1.5">
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "var(--text-primary)",
-                  fontFamily: "'Sofia Sans Extra Condensed', sans-serif",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Red River OS
-              </span>
-            </div>
-          </div>
-
-          {/* Separator */}
-          <div style={{ width: 1, height: 16, background: "var(--border-subtle)" }} />
-
-          {/* App badge — opens lightweight app dropdown */}
-          <div className="relative" ref={headerAppBtnRef}>
-            <button
-              onClick={() => setHeaderAppMenuOpen(v => !v)}
-              className="flex items-center gap-2 px-2.5 py-1 rounded-md transition-all"
-              style={{
-                background: headerAppMenuOpen ? `${accent}12` : "var(--bg-elevated)",
-                border: `1px solid ${accent}33`,
-                fontSize: 12,
-                color: accent,
-                fontWeight: 600,
-              }}
-              title="Switch app"
-            >
-              <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
-              <span className="hidden sm:inline">{activeApp?.shortName ?? "Apps"}</span>
-              <ChevronDown
-                size={10}
-                style={{
-                  color: "var(--text-muted)",
-                  transform: headerAppMenuOpen ? "rotate(180deg)" : "none",
-                  transition: "transform 0.15s",
-                }}
-              />
-            </button>
-            {headerAppMenuOpen && (
-              <AppMenu
-                anchorRef={headerAppBtnRef}
-                align="left"
-                onClose={() => setHeaderAppMenuOpen(false)}
-              />
-            )}
-          </div>
-
-          {/* Global search */}
-          <button
-            className="flex items-center gap-2 flex-1 max-w-xs px-3 py-1.5 rounded-md transition-all"
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-muted)",
-              fontSize: 12,
-            }}
-            onClick={() => platform.setCommandPaletteOpen(true)}
-          >
-            <Search size={12} />
-            <span className="hidden sm:inline flex-1 text-left">Search or jump to…</span>
-            <kbd
-              style={{
-                fontSize: 10,
-                color: "var(--text-muted)",
-                background: "var(--bg-overlay)",
-                padding: "1px 5px",
-                borderRadius: 3,
-                border: "1px solid var(--border-subtle)",
-              }}
-            >
-              Ctrl+K
-            </kbd>
-          </button>
-
-          <div className="ml-auto flex items-center gap-1">
-            {/* Sidebar toggle */}
-            <button
-              onClick={platform.toggleSidebar}
-              className="activity-icon"
-              title={platform.sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            >
-              {platform.sidebarOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
-            </button>
-
-            {/* Notifications */}
-            <button
-              className="activity-icon"
-              style={notifCenterOpen ? { color: "#FEDD00", background: "rgba(254,221,0,0.08)" } : {}}
-              onClick={() => setNotifCenterOpen(v => !v)}
-              title="Notifications"
-            >
-              <Bell size={14} />
-              {unreadCount > 0 && (
-                <span
-                  className="absolute rounded-full text-center"
-                  style={{
-                    top: 4, right: 4,
-                    width: 14, height: 14,
-                    background: "#ff4d4f",
-                    fontSize: 8, fontWeight: 700,
-                    color: "#fff",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* User menu */}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                className="activity-icon"
-                onClick={() => setUserMenuOpen(v => !v)}
-                title={user?.full_name ?? user?.email ?? "User"}
-              >
-                {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover" />
-                ) : (
-                  <User size={14} />
-                )}
-              </button>
-
-              {userMenuOpen && (
-                <div
-                  className="absolute right-0 top-full mt-1 rounded-xl py-1 w-56 z-50"
-                  style={{
-                    background: "var(--bg-elevated)",
-                    border: "1px solid var(--border-default)",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  {user && (
-                    <div className="px-3 py-2 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-                      <div style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 600 }}>
-                        {user.full_name || user.email}
-                      </div>
-                      <div style={{ color: "var(--text-muted)", fontSize: 11 }}>
-                        {getRoleLabel(user.role)}
-                      </div>
-                    </div>
-                  )}
-                  <Link
-                    to={createPageUrl("Settings")}
-                    className="flex items-center gap-2 px-3 py-2 transition-colors"
-                    style={{ color: "var(--text-secondary)", fontSize: 12 }}
-                    onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <Settings size={13} />
-                    Settings
-                  </Link>
-                  <button
-                    className="w-full flex items-center gap-2 px-3 py-2 transition-colors"
-                    style={{ color: "var(--text-secondary)", fontSize: 12 }}
-                    onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                    onClick={() => { setFeedbackOpen(true); setUserMenuOpen(false); }}
-                  >
-                    <MessageSquare size={13} />
-                    Feedback
-                  </button>
-                  <button
-                    className="w-full flex items-center gap-2 px-3 py-2 transition-colors"
-                    style={{ color: "#ff4d4f", fontSize: 12 }}
-                    onMouseEnter={e => e.currentTarget.style.background = "var(--bg-hover)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                    onClick={() => base44.auth.logout(window.location.href)}
-                  >
-                    <LogOut size={13} />
-                    Sign out
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        <OSHeader
+          user={user}
+          activeApp={activeApp}
+          accent={accent}
+          currentPageName={currentPageName}
+          sidebarOpen={platform.sidebarOpen}
+          onToggleSidebar={platform.toggleSidebar}
+          onOpenSearch={() => platform.setCommandPaletteOpen(true)}
+          unreadCount={unreadCount}
+          notifCenterOpen={notifCenterOpen}
+          onToggleNotifications={() => setNotifCenterOpen(v => !v)}
+          onOpenSettings={() => navigate(createPageUrl("Settings"))}
+          onOpenFeedback={() => setFeedbackOpen(true)}
+          onLogout={() => base44.auth.logout(window.location.href)}
+        />
 
         {/* ── Body: sidebar + main ─────────────────────────────────────── */}
         <div className="flex flex-1 min-h-0">
