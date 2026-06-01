@@ -1,0 +1,75 @@
+{
+  "name": "DataSource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "statcan",
+        "bc_health",
+        "fnha",
+        "manual_upload",
+        "api",
+        "other"
+      ],
+      "description": "Type of data source"
+    },
+    "url": {
+      "type": "string",
+      "description": "API or dataset URL"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "chronic_disease",
+        "mental_health",
+        "substance_use",
+        "maternal_child",
+        "social_determinants",
+        "demographics",
+        "mortality",
+        "access_to_care",
+        "other"
+      ]
+    },
+    "last_synced": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sync_frequency": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "daily",
+        "weekly",
+        "monthly"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "error",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "record_count": {
+      "type": "number"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}

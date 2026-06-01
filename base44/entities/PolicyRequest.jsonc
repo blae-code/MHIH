@@ -78,15 +78,25 @@
       "type": "string",
       "enum": [
         "submitted",
+        "received",
         "in_review",
         "assigned",
+        "started",
         "in_progress",
+        "proofing",
+        "sent_for_approval",
         "completed",
         "rejected",
         "closed"
       ],
       "default": "submitted",
       "description": "Current status of the policy request"
+    },
+    "progress_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percent complete when status is in_progress (10, 25, 33, 50, 75, 90)"
     },
     "relevant_documents_urls": {
       "type": "array",
@@ -98,6 +108,11 @@
     "preferred_communication_method": {
       "type": "string",
       "description": "How the requester prefers to be contacted"
+    },
+    "subscribe_to_updates": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, email the contact person whenever the request status changes"
     },
     "assigned_to_user_id": {
       "type": "string",

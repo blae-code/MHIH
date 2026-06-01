@@ -1,0 +1,47 @@
+{
+  "name": "AIInsight",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "trend_analysis",
+        "anomaly",
+        "comparison",
+        "recommendation",
+        "summary",
+        "query_response"
+      ],
+      "default": "summary"
+    },
+    "related_metrics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false
+    },
+    "category": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "content"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "WorkflowRun",
+  "type": "object",
+  "properties": {
+    "workflow_id": {
+      "type": "string"
+    },
+    "workflow_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "success",
+        "failed"
+      ],
+      "default": "running"
+    },
+    "log": {
+      "type": "string"
+    },
+    "triggered_by": {
+      "type": "string"
+    },
+    "duration_ms": {
+      "type": "number"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "workflow_id",
+    "workflow_name"
+  ]
+}

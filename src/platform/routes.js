@@ -5,16 +5,15 @@
  * URL paths within the Red River OS route structure.
  *
  * URL conventions:
- *   /os                          OS home
- *   /os/ministry                 Ministry Overview
- *   /os/settings                 Settings
- *   /os/apps/:appId              App landing page
- *   /os/apps/:appId/:pageSlug    App inner page
+ *   /os                              OS home
+ *   /os/ministry                     Ministry Overview
+ *   /os/settings                     Settings
+ *   /os/apps/:appId                  App landing page
+ *   /os/apps/:appId/:pageSlug        App inner page
  *
  * Usage:
  *   import { createPageUrl } from "@/utils";
  *   <Link to={createPageUrl("Dashboard")}>Dashboard</Link>
- *   // → /os/apps/mhih
  *
  * When you add a new page:
  *   1. Create the page component in src/pages/
@@ -31,63 +30,63 @@ export const PAGE_ROUTE_MAP = {
   Changelog: "/os/changelog",
   Onboarding: "/os/onboarding",
 
-  // ── MHIH app — workspace ──────────────────────────────────────────────
-  Dashboard: "/os/apps/mhih",
-  DataRepository: "/os/apps/mhih/data-repository",
-  Visualizations: "/os/apps/mhih/visualizations",
-  AIInsights: "/os/apps/mhih/ai-insights",
-  DataAnalyst: "/os/apps/mhih/ai-analyst",
+  // ── Data & Evidence app ───────────────────────────────────────────────
+  Dashboard: "/os/apps/data-evidence",
+  Visualizations: "/os/apps/data-evidence/visualizations",
+  Reports: "/os/apps/data-evidence/reports",
+  DataRepository: "/os/apps/data-evidence/repository",
+  DataSources: "/os/apps/data-evidence/sources",
+  MyDataSources: "/os/apps/data-evidence/my-sources",
+  DataQuality: "/os/apps/data-evidence/quality",
+  DataPrep: "/os/apps/data-evidence/prep",
+  DataGovernance: "/os/apps/data-evidence/governance",
+  Export: "/os/apps/data-evidence/export",
+  MetricCatalog: "/os/apps/data-evidence/metric-catalog",
+  MetricForge: "/os/apps/data-evidence/metric-forge",
+  EvidenceSnapshots: "/os/apps/data-evidence/evidence-snapshots",
+  RedRiverOS: "/os/apps/data-evidence/redriver-module",
 
-  // ── MHIH app — Red River module ───────────────────────────────────────
-  RedRiverOS: "/os/apps/mhih/redriver-module",
-  MetricCatalog: "/os/apps/mhih/metric-catalog",
-  MetricForge: "/os/apps/mhih/metric-forge",
-  EvidenceSnapshots: "/os/apps/mhih/evidence-snapshots",
+  // ── Intelligence app ──────────────────────────────────────────────────
+  AIInsights: "/os/apps/intelligence",
+  DataAnalyst: "/os/apps/intelligence/analyst",
+  PredictiveAnalytics: "/os/apps/intelligence/predictive",
+  AgentCenter: "/os/apps/intelligence/agents",
+  KnowledgeAdmin: "/os/apps/intelligence/knowledge",
+  HansardIntel: "/os/apps/intelligence/hansard",
 
-  // ── MHIH app — policy ─────────────────────────────────────────────────
-  PolicyLab: "/os/apps/mhih/policy-lab",
-  Recommendations: "/os/apps/mhih/recommendations",
-  Watchlists: "/os/apps/mhih/watchlists",
-  Interventions: "/os/apps/mhih/interventions",
-  ApprovalsInbox: "/os/apps/mhih/approvals",
-  Backtesting: "/os/apps/mhih/backtesting",
-  ConflictWorkbench: "/os/apps/mhih/conflict-workbench",
-  EvidenceExplorer: "/os/apps/mhih/evidence-explorer",
-  AlertsCenter: "/os/apps/mhih/alerts-center",
-  GeoEquityMap: "/os/apps/mhih/geo-equity",
-  KnowledgeAdmin: "/os/apps/mhih/knowledge-admin",
-  HansardIntel: "/os/apps/mhih/hansard",
+  // ── Policy Workbench app ──────────────────────────────────────────────
+  PolicyLab: "/os/apps/policy-workbench",
+  Recommendations: "/os/apps/policy-workbench/recommendations",
+  Interventions: "/os/apps/policy-workbench/interventions",
+  Backtesting: "/os/apps/policy-workbench/backtesting",
+  EvidenceExplorer: "/os/apps/policy-workbench/evidence-explorer",
+  ConflictWorkbench: "/os/apps/policy-workbench/conflict-workbench",
+  GeoEquityMap: "/os/apps/policy-workbench/geo-equity",
+  Watchlists: "/os/apps/policy-workbench/watchlists",
+  AlertsCenter: "/os/apps/policy-workbench/alerts",
+  ApprovalsInbox: "/os/apps/policy-workbench/approvals",
+  Workflows: "/os/apps/policy-workbench/workflows",
 
-  // ── MHIH app — data ───────────────────────────────────────────────────
-  DataSources: "/os/apps/mhih/data-sources",
-  MyDataSources: "/os/apps/mhih/my-sources",
-  DataQuality: "/os/apps/mhih/data-quality",
-  AgentCenter: "/os/apps/mhih/ai-agents",
-  Export: "/os/apps/mhih/export",
-
-  // ── MHIH app — analytics ─────────────────────────────────────────────
-  PredictiveAnalytics: "/os/apps/mhih/predictive",
-  DataPrep: "/os/apps/mhih/data-prep",
-  Workflows: "/os/apps/mhih/workflows",
-  DataGovernance: "/os/apps/mhih/data-governance",
-  Reports: "/os/apps/mhih/reports",
-
-  // ── MHIH app — admin ─────────────────────────────────────────────────
-  Team: "/os/apps/mhih/team",
-  Admin: "/os/apps/mhih/admin",
-
-  // ── Policy Intake and Management ──────────────────────────────────────
+  // ── Policy Intake ─────────────────────────────────────────────────────
   PolicyRequestTable: "/os/apps/policy-intake",
   PolicyRequestForm: "/os/apps/policy-intake/new",
   PolicyRequestCardView: "/os/apps/policy-intake/cards",
 
-  // ── Platform app modules ──────────────────────────────────────────────
-  PolicyStudio: "/os/apps/policy-studio",
+  // ── Scaffold apps (single landing page) ──────────────────────────────
+  PlanningKPI: "/os/apps/planning-kpi",
   HealthEquity: "/os/apps/health-equity",
   ResearchEvaluation: "/os/apps/research-evaluation",
   ProvincialWellness: "/os/apps/provincial-wellness",
   ContractsReporting: "/os/apps/contracts-reporting",
-  PlanningKPI: "/os/apps/planning-kpi",
+
+  // ── Legacy / dropped from primary nav but still routable ─────────────
+  // PolicyStudio was folded into Policy Workbench; keep the route so any
+  // remaining links don't 404.
+  PolicyStudio: "/os/apps/policy-workbench",
+
+  // ── Shared admin (appears under any app for admins) ──────────────────
+  Team: "/os/admin/team",
+  Admin: "/os/admin",
 };
 
 /**

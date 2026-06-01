@@ -1,0 +1,34 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "analyst",
+        "viewer"
+      ],
+      "default": "viewer",
+      "description": "User role in the system"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department or team the user belongs to"
+    },
+    "last_active": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last activity timestamp"
+    },
+    "preferences": {
+      "type": "object",
+      "description": "User UI preferences (theme, layout, etc.)"
+    }
+  },
+  "required": [
+    "department",
+    "last_active",
+    "preferences"
+  ]
+}

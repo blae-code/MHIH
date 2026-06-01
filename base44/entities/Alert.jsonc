@@ -1,0 +1,68 @@
+{
+  "name": "Alert",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "metric_category": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "above",
+        "below",
+        "equals",
+        "change_pct"
+      ]
+    },
+    "threshold": {
+      "type": "number"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "triggered"
+      ],
+      "default": "active"
+    },
+    "last_triggered": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trigger_count": {
+      "type": "number",
+      "default": 0
+    },
+    "notify_email": {
+      "type": "string"
+    },
+    "created_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "condition",
+    "threshold"
+  ]
+}

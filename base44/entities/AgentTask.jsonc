@@ -1,0 +1,58 @@
+{
+  "name": "AgentTask",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Which agent ran this task"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "insight_generation",
+        "quality_triage",
+        "anomaly_report",
+        "consistency_check",
+        "gap_prioritization",
+        "trend_forecast"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed"
+      ],
+      "default": "running"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short summary of what the agent did"
+    },
+    "output": {
+      "type": "string",
+      "description": "Full agent output / narrative"
+    },
+    "items_processed": {
+      "type": "number"
+    },
+    "items_actioned": {
+      "type": "number"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "manual | scheduled | sync_complete | scan_complete"
+    },
+    "duration_ms": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "agent_name",
+    "task_type"
+  ]
+}

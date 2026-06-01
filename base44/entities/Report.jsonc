@@ -1,0 +1,104 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Report title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Report description"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "custom",
+        "scheduled"
+      ],
+      "default": "custom",
+      "description": "Type of report"
+    },
+    "metric_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Selected metric IDs"
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Selected regions"
+    },
+    "date_range": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "description": "Date range for report"
+    },
+    "chart_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "bar",
+          "line",
+          "area",
+          "scatter",
+          "pie",
+          "heatmap"
+        ]
+      },
+      "description": "Chart types to include"
+    },
+    "content": {
+      "type": "string",
+      "description": "Generated report HTML content"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "generated",
+        "exported"
+      ],
+      "default": "draft",
+      "description": "Report status"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of generation"
+    },
+    "file_urls": {
+      "type": "object",
+      "properties": {
+        "pdf": {
+          "type": "string"
+        },
+        "csv": {
+          "type": "string"
+        }
+      },
+      "description": "Export file URLs"
+    },
+    "config_id": {
+      "type": "string",
+      "description": "Reference to ReportConfig if scheduled"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

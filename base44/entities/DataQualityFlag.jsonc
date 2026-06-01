@@ -1,0 +1,96 @@
+{
+  "name": "DataQualityFlag",
+  "type": "object",
+  "properties": {
+    "metric_id": {
+      "type": "string"
+    },
+    "metric_name": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "flag_type": {
+      "type": "string",
+      "enum": [
+        "missing_value",
+        "outlier",
+        "duplicate",
+        "stale_data",
+        "inconsistency",
+        "invalid_range"
+      ],
+      "description": "Type of data quality issue"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "description": {
+      "type": "string"
+    },
+    "affected_field": {
+      "type": "string"
+    },
+    "affected_value": {
+      "type": "string"
+    },
+    "expected_range_min": {
+      "type": "number"
+    },
+    "expected_range_max": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_review",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "open"
+    },
+    "assigned_to_email": {
+      "type": "string"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "resolution_notes": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "auto_detected": {
+      "type": "boolean",
+      "default": true
+    },
+    "category": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "year": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "flag_type",
+    "severity",
+    "description"
+  ]
+}

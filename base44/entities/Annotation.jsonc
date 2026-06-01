@@ -1,0 +1,41 @@
+{
+  "name": "Annotation",
+  "type": "object",
+  "properties": {
+    "target_id": {
+      "type": "string",
+      "description": "ID of the metric, dashboard, or widget being annotated"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "metric",
+        "dashboard",
+        "widget",
+        "data_source"
+      ]
+    },
+    "content": {
+      "type": "string"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "For threaded replies"
+    }
+  },
+  "required": [
+    "target_id",
+    "target_type",
+    "content"
+  ]
+}

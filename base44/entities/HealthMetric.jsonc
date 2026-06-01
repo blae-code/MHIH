@@ -1,0 +1,90 @@
+{
+  "name": "HealthMetric",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "chronic_disease",
+        "mental_health",
+        "substance_use",
+        "maternal_child",
+        "social_determinants",
+        "demographics",
+        "mortality",
+        "access_to_care",
+        "other"
+      ]
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "string",
+      "description": "e.g. %, per 100k, count, rate"
+    },
+    "data_source_id": {
+      "type": "string"
+    },
+    "data_source_name": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "BC",
+        "Northern BC",
+        "Interior BC",
+        "Fraser",
+        "Vancouver Island",
+        "Vancouver Coastal",
+        "Provincial"
+      ],
+      "default": "BC"
+    },
+    "year": {
+      "type": "number"
+    },
+    "value": {
+      "type": "number"
+    },
+    "comparison_value": {
+      "type": "number",
+      "description": "BC general population comparison"
+    },
+    "metis_specific": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "year",
+    "value"
+  ]
+}

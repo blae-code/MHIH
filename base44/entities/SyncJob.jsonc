@@ -1,0 +1,64 @@
+{
+  "name": "SyncJob",
+  "type": "object",
+  "properties": {
+    "source_id": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "source_type": {
+      "type": "string"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "scheduled"
+      ],
+      "default": "manual"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "success",
+        "failed",
+        "skipped"
+      ],
+      "default": "running"
+    },
+    "records_fetched": {
+      "type": "number"
+    },
+    "records_inserted": {
+      "type": "number"
+    },
+    "duration_ms": {
+      "type": "number"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "log_output": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "source_id",
+    "source_name",
+    "status"
+  ]
+}

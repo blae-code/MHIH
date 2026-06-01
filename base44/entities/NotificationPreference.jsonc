@@ -1,0 +1,124 @@
+{
+  "name": "NotificationPreference",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User email"
+    },
+    "data_source_failure": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "in_app",
+            "email"
+          ]
+        }
+      }
+    },
+    "data_source_success": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "in_app"
+          ]
+        }
+      }
+    },
+    "ai_insight": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "in_app",
+            "email"
+          ]
+        }
+      }
+    },
+    "health_alert": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "in_app",
+            "email"
+          ]
+        }
+      }
+    },
+    "quality_flag": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "in_app"
+          ]
+        }
+      }
+    },
+    "system_info": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "in_app"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

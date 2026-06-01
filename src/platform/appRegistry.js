@@ -10,6 +10,14 @@
  *
  * Adding a new app: add an entry here, create the page file(s), and register
  * the pages in pages.config.js. The shell wires up everything else.
+ *
+ * ── Organization principles ──
+ *   1. Each app has a single, focused purpose (one user job-to-be-done).
+ *   2. Sidebar nav for an app should fit comfortably without scrolling
+ *      (target: ≤ 12 items, including section labels).
+ *   3. Scaffold apps show only their landing page until built out — no
+ *      anchor-only ghost links.
+ *   4. Pages appear in exactly ONE app (no cross-listing).
  */
 
 // ── App status constants ───────────────────────────────────────────────────
@@ -45,6 +53,14 @@ export const GOVERNANCE_ROLES = [
   ROLES.SENIOR_MANAGER,
 ];
 
+// ── Shared admin nav (appears in any app for admins) ───────────────────────
+const SHARED_ADMIN_NAV = [
+  { label: "Team", page: "Team", icon: "Users" },
+  { label: "Admin Panel", page: "Admin", icon: "Shield" },
+  { label: "Settings", page: "Settings", icon: "Settings" },
+  { label: "Changelog", page: "Changelog", icon: "BookOpen" },
+];
+
 // ── App Registry ───────────────────────────────────────────────────────────
 export const APP_REGISTRY = [
   // ── OS-level entries (always visible, not "apps" per se) ──────────────
@@ -62,101 +78,141 @@ export const APP_REGISTRY = [
     navItems: [
       { label: "Home", page: "RedRiverOSHome", icon: "LayoutDashboard" },
       { label: "Ministry Overview", page: "MinistryOverview", icon: "Building2" },
-      { label: "Planning & KPIs", page: "PlanningKPI", icon: "Target" },
     ],
   },
 
-  // ── MHIH — Métis Health Implementation Hub ────────────────────────────
+  // ── Data & Evidence ───────────────────────────────────────────────────
+  // The data foundation: ingest, govern, model, and surface evidence.
   {
-    id: "mhih",
-    name: "Métis Health Implementation Hub",
-    shortName: "MHIH",
+    id: "data-evidence",
+    name: "Data & Evidence",
+    shortName: "Data & Evidence",
     description:
-      "Health metrics, data governance, analytics, and evidence platform for MNBC health implementation.",
-    icon: "HeartPulse",
+      "Ingest, govern, model, and surface health data — the evidence backbone of the ministry.",
+    icon: "Database",
     accent: "#40c4ff",
     landingPage: "Dashboard",
     status: APP_STATUS.ACTIVE,
     roles: ALL_ROLES,
     navItems: [
       {
-        section: "Workspace",
+        section: "Overview",
         items: [
           { label: "Dashboard", page: "Dashboard", icon: "LayoutDashboard" },
-          { label: "Data Repository", page: "DataRepository", icon: "Database" },
           { label: "Visualizations", page: "Visualizations", icon: "BarChart3" },
-          { label: "AI Insights", page: "AIInsights", icon: "Brain" },
-          { label: "AI Analyst", page: "DataAnalyst", icon: "Sparkles" },
+          { label: "Reports", page: "Reports", icon: "FileDown" },
         ],
       },
       {
-        section: "Red River Module",
+        section: "Data Foundation",
         items: [
-          { label: "Red River OS", page: "RedRiverOS", icon: "Layers3" },
-          { label: "Metric Catalog", page: "MetricCatalog", icon: "Database" },
-          { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
-          { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
-        ],
-      },
-      {
-        section: "Policy Intake and Management",
-        items: [
-          { label: "New Policy Request", page: "PolicyRequestForm", icon: "FileSignature" },
-          { label: "All Requests (Table)", page: "PolicyRequestTable", icon: "ClipboardCheck" },
-          { label: "All Requests (Cards)", page: "PolicyRequestCardView", icon: "Layers3" },
-        ],
-      },
-      {
-        section: "Policy",
-        items: [
-          { label: "Policy Lab", page: "PolicyLab", icon: "FlaskConical" },
-          { label: "Recommendations", page: "Recommendations", icon: "ListOrdered" },
-          { label: "Watchlists", page: "Watchlists", icon: "BellRing" },
-          { label: "Interventions", page: "Interventions", icon: "Activity" },
-          { label: "Approvals Inbox", page: "ApprovalsInbox", icon: "ClipboardCheck" },
-          { label: "Backtesting", page: "Backtesting", icon: "BrainCircuit" },
-          { label: "Conflict Workbench", page: "ConflictWorkbench", icon: "GitCompare" },
-          { label: "Evidence Explorer", page: "EvidenceExplorer", icon: "Link2" },
-          { label: "Alerts Center", page: "AlertsCenter", icon: "Siren" },
-          { label: "Geo Equity Map", page: "GeoEquityMap", icon: "MapPinned" },
-          { label: "Knowledge Admin", page: "KnowledgeAdmin", icon: "BookMarked" },
-          { label: "Hansard Intel", page: "HansardIntel", icon: "FileText" },
-        ],
-      },
-      {
-        section: "Data",
-        items: [
+          { label: "Data Repository", page: "DataRepository", icon: "Database" },
           { label: "Data Sources", page: "DataSources", icon: "BookOpen" },
           { label: "My Sources", page: "MyDataSources", icon: "Database" },
           { label: "Data Quality", page: "DataQuality", icon: "ShieldCheck" },
-          { label: "AI Agents", page: "AgentCenter", icon: "Bot" },
+          { label: "Data Prep", page: "DataPrep", icon: "Wrench" },
+          { label: "Governance", page: "DataGovernance", icon: "Shield" },
           { label: "Export", page: "Export", icon: "FileDown" },
         ],
       },
       {
-        section: "Analytics",
+        section: "Metrics & Evidence",
         items: [
-          { label: "Predictive", page: "PredictiveAnalytics", icon: "TrendingUp" },
-          { label: "Data Prep", page: "DataPrep", icon: "Wrench" },
-          { label: "Workflows", page: "Workflows", icon: "Workflow" },
-          { label: "Governance", page: "DataGovernance", icon: "Shield" },
-          { label: "Reports", page: "Reports", icon: "FileDown" },
+          { label: "Metric Catalog", page: "MetricCatalog", icon: "Database" },
+          { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
+          { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
+          { label: "Red River Module", page: "RedRiverOS", icon: "Layers3" },
         ],
       },
     ],
-    adminNavItems: [
-      { label: "Team", page: "Team", icon: "Users" },
-      { label: "Admin", page: "Admin", icon: "Shield" },
-      { label: "Settings", page: "Settings", icon: "Settings" },
-      { label: "Changelog", page: "Changelog", icon: "BookOpen" },
-    ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 
-  // ── Policy Intake and Management ──────────────────────────────────────
+  // ── Intelligence ──────────────────────────────────────────────────────
+  // AI-driven analysis, agents, and predictive work.
+  {
+    id: "intelligence",
+    name: "Intelligence",
+    shortName: "Intelligence",
+    description:
+      "AI insights, autonomous agents, predictive analytics, and knowledge intelligence.",
+    icon: "Brain",
+    accent: "#a78bfa",
+    landingPage: "AIInsights",
+    status: APP_STATUS.ACTIVE,
+    roles: ALL_ROLES,
+    navItems: [
+      {
+        section: "Analysis",
+        items: [
+          { label: "AI Insights", page: "AIInsights", icon: "Brain" },
+          { label: "AI Analyst", page: "DataAnalyst", icon: "Sparkles" },
+          { label: "Predictive Analytics", page: "PredictiveAnalytics", icon: "TrendingUp" },
+        ],
+      },
+      {
+        section: "Knowledge & Agents",
+        items: [
+          { label: "AI Agents", page: "AgentCenter", icon: "Bot" },
+          { label: "Knowledge Admin", page: "KnowledgeAdmin", icon: "BookMarked" },
+          { label: "Hansard Intel", page: "HansardIntel", icon: "FileText" },
+        ],
+      },
+    ],
+    adminNavItems: SHARED_ADMIN_NAV,
+  },
+
+  // ── Policy Workbench ──────────────────────────────────────────────────
+  // Active policy operations — develop, evaluate, approve, monitor.
+  // (Distinct from "Policy Studio" scaffold which is folded in here.)
+  {
+    id: "policy-workbench",
+    name: "Policy Workbench",
+    shortName: "Policy",
+    description:
+      "Develop, evaluate, approve, and monitor policy work — labs, recommendations, watchlists, and approvals.",
+    icon: "Scale",
+    accent: "#f472b6",
+    landingPage: "PolicyLab",
+    status: APP_STATUS.ACTIVE,
+    roles: ALL_ROLES,
+    navItems: [
+      {
+        section: "Develop",
+        items: [
+          { label: "Policy Lab", page: "PolicyLab", icon: "FlaskConical" },
+          { label: "Recommendations", page: "Recommendations", icon: "ListOrdered" },
+          { label: "Interventions", page: "Interventions", icon: "Activity" },
+          { label: "Backtesting", page: "Backtesting", icon: "BrainCircuit" },
+        ],
+      },
+      {
+        section: "Evidence",
+        items: [
+          { label: "Evidence Explorer", page: "EvidenceExplorer", icon: "Link2" },
+          { label: "Conflict Workbench", page: "ConflictWorkbench", icon: "GitCompare" },
+          { label: "Geo Equity Map", page: "GeoEquityMap", icon: "MapPinned" },
+        ],
+      },
+      {
+        section: "Monitor",
+        items: [
+          { label: "Watchlists", page: "Watchlists", icon: "BellRing" },
+          { label: "Alerts Center", page: "AlertsCenter", icon: "Siren" },
+          { label: "Approvals Inbox", page: "ApprovalsInbox", icon: "ClipboardCheck" },
+          { label: "Workflows", page: "Workflows", icon: "Workflow" },
+        ],
+      },
+    ],
+    adminNavItems: SHARED_ADMIN_NAV,
+  },
+
+  // ── Policy Intake ─────────────────────────────────────────────────────
+  // Lightweight request intake — distinct from the workbench.
   {
     id: "policy-intake",
-    name: "Policy Intake and Management",
-    shortName: "Policy Intake",
+    name: "Policy Intake",
+    shortName: "Intake",
     description:
       "Submit, triage, assign, and track policy assistance requests across the ministry.",
     icon: "FileSignature",
@@ -165,41 +221,30 @@ export const APP_REGISTRY = [
     status: APP_STATUS.ACTIVE,
     roles: ALL_ROLES,
     navItems: [
-      {
-        section: "Policy Intake and Management",
-        items: [
-          { label: "New Policy Request", page: "PolicyRequestForm", icon: "FileSignature" },
-          { label: "All Requests (Table)", page: "PolicyRequestTable", icon: "ClipboardCheck" },
-          { label: "All Requests (Cards)", page: "PolicyRequestCardView", icon: "Layers3" },
-        ],
-      },
+      { label: "New Request", page: "PolicyRequestForm", icon: "FileSignature" },
+      { label: "Requests — Table", page: "PolicyRequestTable", icon: "ClipboardCheck" },
+      { label: "Requests — Cards", page: "PolicyRequestCardView", icon: "Layers3" },
     ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 
-  // ── Policy Studio ─────────────────────────────────────────────────────
+  // ── Planning & KPIs ───────────────────────────────────────────────────
+  // Strategic planning, goals, and KPI tracking.
   {
-    id: "policy-studio",
-    name: "Policy Studio",
-    shortName: "Policy",
+    id: "planning-kpi",
+    name: "Planning & KPIs",
+    shortName: "Planning",
     description:
-      "Policy development lifecycle — from rechèrche to implementation. Registry, stages, evidence, and approval workflows.",
-    icon: "Scale",
-    accent: "#f472b6",
-    landingPage: "PolicyStudio",
+      "Ministry and department goals, action items, milestones, and KPI dashboards.",
+    icon: "Target",
+    accent: "#f59e0b",
+    landingPage: "PlanningKPI",
     status: APP_STATUS.SCAFFOLD,
     roles: ALL_ROLES,
     navItems: [
-      {
-        section: "Policy Studio",
-        items: [
-          { label: "Overview", page: "PolicyStudio", icon: "LayoutDashboard" },
-          { label: "Policy Registry", page: "PolicyStudio", icon: "ScrollText", anchor: "registry" },
-          { label: "Lifecycle Stages", page: "PolicyStudio", icon: "GitBranch", anchor: "lifecycle" },
-          { label: "Evidence Library", page: "PolicyStudio", icon: "Library", anchor: "evidence" },
-          { label: "Review & Approval", page: "PolicyStudio", icon: "ClipboardCheck", anchor: "approvals" },
-        ],
-      },
+      { label: "Overview", page: "PlanningKPI", icon: "LayoutDashboard" },
     ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 
   // ── Health Equity ─────────────────────────────────────────────────────
@@ -215,17 +260,9 @@ export const APP_REGISTRY = [
     status: APP_STATUS.SCAFFOLD,
     roles: ALL_ROLES,
     navItems: [
-      {
-        section: "Health Equity",
-        items: [
-          { label: "Overview", page: "HealthEquity", icon: "LayoutDashboard" },
-          { label: "Anti-Racism Work", page: "HealthEquity", icon: "Shield", anchor: "anti-racism" },
-          { label: "Complaints & Feedback", page: "HealthEquity", icon: "MessageSquare", anchor: "complaints" },
-          { label: "Systems Barriers", page: "HealthEquity", icon: "AlertTriangle", anchor: "barriers" },
-          { label: "LOU / HA Workplans", page: "HealthEquity", icon: "FileText", anchor: "lous" },
-        ],
-      },
+      { label: "Overview", page: "HealthEquity", icon: "LayoutDashboard" },
     ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 
   // ── Research & Evaluation ─────────────────────────────────────────────
@@ -236,22 +273,14 @@ export const APP_REGISTRY = [
     description:
       "Research projects, evaluation plans, metrics frameworks, data governance, and ROI methodology.",
     icon: "FlaskConical",
-    accent: "#a78bfa",
+    accent: "#c084fc",
     landingPage: "ResearchEvaluation",
     status: APP_STATUS.SCAFFOLD,
     roles: ALL_ROLES,
     navItems: [
-      {
-        section: "Research & Evaluation",
-        items: [
-          { label: "Overview", page: "ResearchEvaluation", icon: "LayoutDashboard" },
-          { label: "Research Projects", page: "ResearchEvaluation", icon: "BookOpen", anchor: "projects" },
-          { label: "Evaluation Plans", page: "ResearchEvaluation", icon: "ClipboardList", anchor: "evaluations" },
-          { label: "Data Governance", page: "ResearchEvaluation", icon: "Shield", anchor: "governance" },
-          { label: "ROI & Methodology", page: "ResearchEvaluation", icon: "TrendingUp", anchor: "roi" },
-        ],
-      },
+      { label: "Overview", page: "ResearchEvaluation", icon: "LayoutDashboard" },
     ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 
   // ── Provincial Wellness ───────────────────────────────────────────────
@@ -267,17 +296,9 @@ export const APP_REGISTRY = [
     status: APP_STATUS.SCAFFOLD,
     roles: ALL_ROLES,
     navItems: [
-      {
-        section: "Provincial Wellness",
-        items: [
-          { label: "Overview", page: "ProvincialWellness", icon: "LayoutDashboard" },
-          { label: "Initiatives", page: "ProvincialWellness", icon: "Activity", anchor: "initiatives" },
-          { label: "Workshops", page: "ProvincialWellness", icon: "Users", anchor: "workshops" },
-          { label: "Regional Coordination", page: "ProvincialWellness", icon: "MapPin", anchor: "regional" },
-          { label: "Community Engagement", page: "ProvincialWellness", icon: "Heart", anchor: "engagement" },
-        ],
-      },
+      { label: "Overview", page: "ProvincialWellness", icon: "LayoutDashboard" },
     ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 
   // ── Contracts & Reporting ─────────────────────────────────────────────
@@ -293,43 +314,9 @@ export const APP_REGISTRY = [
     status: APP_STATUS.SCAFFOLD,
     roles: ALL_ROLES,
     navItems: [
-      {
-        section: "Contracts & Reporting",
-        items: [
-          { label: "Overview", page: "ContractsReporting", icon: "LayoutDashboard" },
-          { label: "Agreements", page: "ContractsReporting", icon: "FileSignature", anchor: "agreements" },
-          { label: "Deliverables", page: "ContractsReporting", icon: "CheckSquare", anchor: "deliverables" },
-          { label: "Reporting Calendar", page: "ContractsReporting", icon: "Calendar", anchor: "calendar" },
-          { label: "Budget & Cashflow", page: "ContractsReporting", icon: "DollarSign", anchor: "budget" },
-        ],
-      },
+      { label: "Overview", page: "ContractsReporting", icon: "LayoutDashboard" },
     ],
-  },
-
-  // ── Planning & KPIs ───────────────────────────────────────────────────
-  {
-    id: "planning-kpi",
-    name: "Planning & KPIs",
-    shortName: "Planning",
-    description:
-      "Ministry and department goals, action items, milestones, KPI dashboards, and reporting cadence.",
-    icon: "Target",
-    accent: "#f59e0b",
-    landingPage: "PlanningKPI",
-    status: APP_STATUS.SCAFFOLD,
-    roles: ALL_ROLES,
-    navItems: [
-      {
-        section: "Planning & KPIs",
-        items: [
-          { label: "Overview", page: "PlanningKPI", icon: "LayoutDashboard" },
-          { label: "Ministry Goals", page: "PlanningKPI", icon: "Flag", anchor: "goals" },
-          { label: "Action Items", page: "PlanningKPI", icon: "CheckSquare", anchor: "actions" },
-          { label: "Milestones", page: "PlanningKPI", icon: "Milestone", anchor: "milestones" },
-          { label: "KPI Dashboard", page: "PlanningKPI", icon: "BarChart3", anchor: "kpis" },
-        ],
-      },
-    ],
+    adminNavItems: SHARED_ADMIN_NAV,
   },
 ];
 
@@ -354,7 +341,7 @@ export function getAccessibleApps(role) {
 
 /**
  * Given a page name, return the app that owns it.
- * Falls back to the MHIH app for legacy pages not explicitly claimed.
+ * Falls back to the Data & Evidence app for legacy pages not explicitly claimed.
  */
 export function getAppForPage(pageName) {
   for (const app of APP_REGISTRY) {
@@ -365,6 +352,6 @@ export function getAppForPage(pageName) {
     if (flatItems.some((i) => i.page === pageName)) return app;
     if ((app.adminNavItems ?? []).some((i) => i.page === pageName)) return app;
   }
-  // Default: MHIH owns unclaimed pages
-  return getApp("mhih");
+  // Default: Data & Evidence owns unclaimed pages
+  return getApp("data-evidence");
 }

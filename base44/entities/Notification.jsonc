@@ -1,0 +1,89 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "data_source_failure",
+        "data_source_success",
+        "ai_insight",
+        "health_alert",
+        "quality_flag",
+        "system_info"
+      ],
+      "description": "Type of notification"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info"
+      ],
+      "default": "info",
+      "description": "Severity level"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of recipient"
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "in_app",
+          "email"
+        ]
+      },
+      "default": [
+        "in_app"
+      ],
+      "description": "Where to send the notification"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has read the notification"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the notification was read"
+    },
+    "related_entity_id": {
+      "type": "string",
+      "description": "ID of related entity (e.g., DataSource, HealthMetric)"
+    },
+    "related_entity_type": {
+      "type": "string",
+      "description": "Type of related entity"
+    },
+    "action_url": {
+      "type": "string",
+      "description": "URL to navigate to for this notification"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When notification should auto-delete (30 days from creation)"
+    }
+  },
+  "required": [
+    "title",
+    "message",
+    "type",
+    "recipient_email"
+  ]
+}

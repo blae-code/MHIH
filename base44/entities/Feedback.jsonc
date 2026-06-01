@@ -1,0 +1,59 @@
+{
+  "name": "Feedback",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "bug",
+        "suggestion",
+        "experience"
+      ],
+      "description": "Type of feedback"
+    },
+    "title": {
+      "type": "string",
+      "description": "Brief title or summary"
+    },
+    "message": {
+      "type": "string",
+      "description": "Detailed feedback message"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Experience rating (1-5 stars)"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user submitting feedback"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user submitting feedback"
+    },
+    "page": {
+      "type": "string",
+      "description": "Current page when feedback was submitted"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "resolved"
+      ],
+      "default": "new",
+      "description": "Review status of the feedback"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Admin notes or response to feedback"
+    }
+  },
+  "required": [
+    "type",
+    "message"
+  ]
+}

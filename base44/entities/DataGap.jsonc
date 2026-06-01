@@ -1,0 +1,42 @@
+{
+  "name": "DataGap",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "year": {
+      "type": "number"
+    },
+    "missing_indicator": {
+      "type": "string"
+    },
+    "priority_score": {
+      "type": "number",
+      "description": "0-100, higher = more critical to fill"
+    },
+    "priority_reason": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "filled"
+      ],
+      "default": "open"
+    },
+    "suggested_source": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "category",
+    "missing_indicator",
+    "priority_score"
+  ]
+}

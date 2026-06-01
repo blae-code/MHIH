@@ -20,7 +20,10 @@ export function PlatformProvider({ children }) {
 
   // ── Active app state ─────────────────────────────────────────────────
   const [activeAppId, setActiveAppId] = useState(() => {
-    return localStorage.getItem("rros_active_app") ?? "mhih";
+    const stored = localStorage.getItem("rros_active_app");
+    // Migrate legacy id "mhih" → "data-evidence" after the 2026-06 restructure
+    if (stored === "mhih") return "data-evidence";
+    return stored ?? "data-evidence";
   });
 
   // ── Command palette ──────────────────────────────────────────────────
@@ -108,7 +111,7 @@ export function PlatformProvider({ children }) {
     setAppSwitcherOpen(false);
   }, []);
 
-  const activeApp = getApp(activeAppId) ?? getApp("mhih");
+  const activeApp = getApp(activeAppId) ?? getApp("data-evidence");
 
   const value = {
     // App state
