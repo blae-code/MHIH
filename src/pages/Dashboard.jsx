@@ -655,10 +655,12 @@ export default function Dashboard() {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="h-full gap-2.5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 auto-rows-max"
+                className="h-full gap-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
                 style={{
                   overflowY: "auto",
                   paddingRight: "4px",
+                  gridAutoRows: "minmax(280px, auto)",
+                  alignItems: "stretch",
                   background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent"
                 }}>
                   {widgets.
@@ -673,12 +675,14 @@ export default function Dashboard() {
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={fullSpan ? "md:col-span-2 xl:col-span-3" : ""}
+                    className={`${fullSpan ? "md:col-span-2 xl:col-span-3" : ""} h-full flex flex-col min-w-0`}
                     style={{
                       ...provided.draggableProps.style,
                       opacity: snapshot.isDragging ? 0.5 : 1
                     }}>
-                            {WIDGET_RENDER[w.id]}
+                            <div className="h-full flex flex-col [&>*]:flex-1 [&>*]:min-h-0 [&>*]:h-full">
+                              {WIDGET_RENDER[w.id]}
+                            </div>
                           </div>
                   }
                       </Draggable>);
