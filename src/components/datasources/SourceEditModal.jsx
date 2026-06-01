@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { X, Globe, Database, FileText, Clock, Tag, StickyNote } from "lucide-react";
+import { X, Globe, Database, FileText, Clock, Tag, StickyNote, Layers } from "lucide-react";
+import { MEDIUM_OPTIONS, inferMedium } from "@/components/datasources/mediumVisuals";
 
 const SOURCE_TYPES = ["statcan","bc_health","fnha","manual_upload","api","other"];
 const SYNC_FREQS = ["manual","daily","weekly","monthly"];
@@ -14,6 +15,7 @@ export default function SourceEditModal({ source, onSave, onClose }) {
     url: source?.url || "",
     description: source?.description || "",
     category: source?.category || "demographics",
+    medium: source?.medium || inferMedium(source) || "dataset",
     sync_frequency: source?.sync_frequency || "manual",
     status: source?.status || "pending",
     notes: source?.notes || "",
@@ -67,6 +69,19 @@ export default function SourceEditModal({ source, onSave, onClose }) {
                 {CATEGORIES.map(o => <option key={o} value={o}>{o.replace(/_/g, " ")}</option>)}
               </select>
             </div>
+          </div>
+
+          {/* Medium */}
+          <div>
+            <label className="block text-xs mb-1 font-medium" style={{ color: "var(--text-muted)" }}>
+              <Layers size={10} className="inline mr-1" />Medium
+              <span className="ml-1" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                — what kind of artefact this is
+              </span>
+            </label>
+            <select value={form.medium} onChange={e => set("medium", e.target.value)} style={iStyle}>
+              {MEDIUM_OPTIONS.map(o => <option key={o} value={o}>{o.replace(/_/g, " ")}</option>)}
+            </select>
           </div>
 
           {/* Sync + Status */}

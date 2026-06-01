@@ -29,6 +29,7 @@ import HowToUseTile from "@/components/datasources/HowToUseTile";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
 import { getSourceVisuals } from "@/components/datasources/sourceVisuals";
+import { getMediumVisuals, inferMedium } from "@/components/datasources/mediumVisuals";
 
 const CATEGORIES = ["all","chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
 const CATEGORY_OPTIONS = CATEGORIES.filter(c => c !== "all");
@@ -225,6 +226,21 @@ export default function DataSources() {
 
   const selectStyle = { background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)", padding: "5px 8px", borderRadius: 6, fontSize: 11, outline: "none" };
 
+  const handleSeedRSS = async () => {
+    addLog("info", "Seeding government RSS feeds...");
+    try {
+      const res = await base44.functions.invoke("seedGovernmentRSSFeeds", {});
+      if (res.data?.success) {
+        addLog("success", `Seeded ${res.data.created} RSS feeds (${res.data.skipped} already existed)`);
+        load();
+      } else {
+        addLog("error", res.data?.error || "Seed failed");
+      }
+    } catch (e) {
+      addLog("error", `Seed error: ${e.message}`);
+    }
+  };
+
   const browsers = [
     ["Google BigQuery", () => setShowBigQuery(true)],
     ["DataBC Tools", () => setShowDataBCTools(true)],
@@ -326,6 +342,17 @@ export default function DataSources() {
                         <BookOpen size={11} style={{ color: "var(--accent-primary)" }} /> {label}
                       </button>
                     ))}
+                    <div style={{ height: 1, background: "var(--border-subtle)", margin: "4px 0" }} />
+                    <button
+                      onClick={() => { handleSeedRSS(); setBrowseMenuOpen(false); }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-all"
+                      style={{ color: "#ffab40" }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      title="Seed curated government RSS feeds (admin only)"
+                    >
+                      <span style={{ fontSize: 11, fontWeight: 600 }}>📡 Seed Government RSS Feeds</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -530,6 +557,9 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
   const ProviderIcon = visuals.icon;
   const [g1, g2] = visuals.gradient;
   const approval = src.metadata?.approval;
+  const medium = inferMedium(src);
+  const mediumVis = getMediumVisuals(medium);
+  const MediumIcon = mediumVis.icon;
 
   return (
     <div
@@ -592,6 +622,19 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
                 }}
               >
                 {visuals.label}
+              </span>
+              <span
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold"
+                title={mediumVis.hint}
+                style={{
+                  fontSize: 9.5,
+                  background: `linear-gradient(135deg, ${mediumVis.color}33 0%, ${mediumVis.color}11 100%)`,
+                  color: mediumVis.color,
+                  border: `1px solid ${mediumVis.color}55`,
+                }}
+              >
+                <MediumIcon size={9} style={{ strokeWidth: 2.5 }} />
+                {mediumVis.label}
               </span>
               {src.category && src.category !== "other" && (
                 <span
@@ -712,12 +755,24 @@ function SourceCard({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDele
           </div>
         </div>
         <div className="flex items-center gap-0.5 shrink-0">
-          <button onClick={onSync} disabled={!!syncing} title="Sync now" className="activity-icon" style={{ width: 24, height: 24 }}>
-            <RefreshCw size={11} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
-          </button>
-          <button onClick={onSchedule} title="Set schedule" className="activity-icon" style={{ width: 24, height: 24 }}>
-            <CalendarClock size={11} style={{ color: "var(--accent-primary)" }} />
-          </button>
+          {mediumVis.resyncable ? (
+            <>
+              <button onClick={onSync} disabled={!!syncing} title="Sync now" className="activity-icon" style={{ width: 24, height: 24 }}>
+                <RefreshCw size={11} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
+              </button>
+              <button onClick={onSchedule} title="Set schedule" className="activity-icon" style={{ width: 24, height: 24 }}>
+                <CalendarClock size={11} style={{ color: "var(--accent-primary)" }} />
+              </button>
+            </>
+          ) : (
+            <span
+              title={`${mediumVis.label}s are static — re-import only if accidentally removed`}
+              className="flex items-center justify-center"
+              style={{ width: 24, height: 24, color: mediumVis.color, opacity: 0.7 }}
+            >
+              <MediumIcon size={11} />
+            </span>
+          )}
           <button onClick={onToggle} title={isActive ? "Disable" : "Enable"} className="activity-icon" style={{ width: 24, height: 24 }}>
             {isActive
               ? <ToggleRight size={13} style={{ color: "var(--color-success)" }} />
@@ -742,6 +797,9 @@ function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelet
   const ProviderIcon = visuals.icon;
   const [g1, g2] = visuals.gradient;
   const approval = src.metadata?.approval;
+  const medium = inferMedium(src);
+  const mediumVis = getMediumVisuals(medium);
+  const MediumIcon = mediumVis.icon;
 
   return (
     <div className="flex items-center gap-3 px-3 py-2 rounded-lg group relative overflow-hidden"
@@ -788,7 +846,20 @@ function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelet
             </div>
           ) : null}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold"
+            title={mediumVis.hint}
+            style={{
+              fontSize: 9.5,
+              background: `${mediumVis.color}22`,
+              color: mediumVis.color,
+              border: `1px solid ${mediumVis.color}55`,
+            }}
+          >
+            <MediumIcon size={9} style={{ strokeWidth: 2.5 }} />
+            {mediumVis.label}
+          </span>
           <span className="tag" style={{ fontSize: 10 }}>{src.category?.replace(/_/g, " ") || "—"}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -799,12 +870,16 @@ function SourceRow({ src, syncing, onEdit, onSync, onToggle, onSchedule, onDelet
       </div>
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={onSync} disabled={!!syncing} className="activity-icon" style={{ width: 24, height: 24 }}>
-          <RefreshCw size={11} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
-        </button>
-        <button onClick={onSchedule} className="activity-icon" style={{ width: 24, height: 24 }}>
-          <CalendarClock size={11} style={{ color: "var(--accent-primary)" }} />
-        </button>
+        {mediumVis.resyncable ? (
+          <>
+            <button onClick={onSync} disabled={!!syncing} className="activity-icon" style={{ width: 24, height: 24 }}>
+              <RefreshCw size={11} className={syncing === src.id ? "animate-spin" : ""} style={{ color: "var(--color-info)" }} />
+            </button>
+            <button onClick={onSchedule} className="activity-icon" style={{ width: 24, height: 24 }}>
+              <CalendarClock size={11} style={{ color: "var(--accent-primary)" }} />
+            </button>
+          </>
+        ) : null}
         <button onClick={onToggle} className="activity-icon" style={{ width: 24, height: 24 }}>
           {isActive
             ? <ToggleRight size={13} style={{ color: "var(--color-success)" }} />

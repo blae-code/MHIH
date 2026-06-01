@@ -17,6 +17,21 @@
       ],
       "description": "Type of data source"
     },
+    "medium": {
+      "type": "string",
+      "enum": [
+        "table",
+        "report",
+        "rss_feed",
+        "api",
+        "dataset",
+        "document",
+        "map_layer",
+        "other"
+      ],
+      "default": "dataset",
+      "description": "The kind of artefact this source represents. Reports are static and not resynced; rss_feed and api are pollable; tables/datasets are structured records."
+    },
     "url": {
       "type": "string",
       "description": "API or dataset URL"
