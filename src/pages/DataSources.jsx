@@ -363,6 +363,25 @@ export default function DataSources() {
                       </button>
                     ))}
                     <div style={{ height: 1, background: "var(--border-subtle)", margin: "4px 0" }} />
+                    <div className="px-3 py-1 text-xs" style={{ color: "var(--text-muted)", fontSize: 9.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                      Bulk Discovery
+                    </div>
+                    <button
+                      onClick={() => { handleDiscoverBigQuery(); setBrowseMenuOpen(false); }}
+                      disabled={discoveringBQ}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-all"
+                      style={{ color: "#4285F4", opacity: discoveringBQ ? 0.6 : 1 }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                      title="Scan your connected BigQuery account for health datasets and map them to the catalogue"
+                    >
+                      {discoveringBQ
+                        ? <RefreshCw size={11} className="animate-spin" />
+                        : <Database size={11} />}
+                      <span style={{ fontSize: 11, fontWeight: 600 }}>
+                        {discoveringBQ ? "Scanning BigQuery..." : "Discover BigQuery Health Datasets"}
+                      </span>
+                    </button>
                     <button
                       onClick={() => { handleSeedRSS(); setBrowseMenuOpen(false); }}
                       className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-all"
