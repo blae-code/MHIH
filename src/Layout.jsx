@@ -168,19 +168,21 @@ function hexToRgb(hex) {
 // ── Sidebar nav section ────────────────────────────────────────────────────
 function NavSection({ section, items, collapsed, onToggle, currentPage, accent }) {
   return (
-    <div className="mb-1">
+    <div className="mb-2">
       {section && (
         <button
-          className="w-full flex items-center gap-1.5 px-3 py-1.5 mb-0.5 rounded"
+          className="w-full flex items-center gap-1.5 px-3 py-1 mb-1 rounded transition-opacity"
           onClick={onToggle}
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", opacity: 0.7 }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}
         >
           <span
             className="flex-1 text-left"
             style={{
               fontSize: 9.5,
-              fontWeight: 700,
-              letterSpacing: "0.1em",
+              fontWeight: 600,
+              letterSpacing: "0.09em",
               textTransform: "uppercase",
               color: "var(--text-muted)",
             }}
@@ -188,11 +190,12 @@ function NavSection({ section, items, collapsed, onToggle, currentPage, accent }
             {section}
           </span>
           <ChevronDown
-            size={10}
+            size={9}
             style={{
               color: "var(--text-muted)",
               transform: collapsed ? "rotate(-90deg)" : "none",
               transition: "transform 0.15s",
+              opacity: 0.6,
             }}
           />
         </button>
@@ -352,14 +355,14 @@ function LayoutInner({ children, currentPageName }) {
         }
         body { background-color: #03080f !important; color: #f0f6ff !important; }
         .sidebar-nav-item {
-          display: flex; align-items: center; gap: 9px;
-          padding: 5px 10px 5px 12px; border-radius: 6px;
-          cursor: pointer; transition: all 0.15s ease;
+          display: flex; align-items: center; gap: 10px;
+          padding: 5px 10px 5px 14px; border-radius: 6px; margin: 1px 0;
+          cursor: pointer; transition: background 0.12s ease, color 0.12s ease;
           font-size: 12.5px; font-weight: 500;
           color: var(--text-secondary); position: relative; overflow: hidden;
-          text-decoration: none;
+          text-decoration: none; line-height: 1.3;
         }
-        .sidebar-nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+        .sidebar-nav-item:hover { background: rgba(255,255,255,0.035); color: var(--text-primary); }
       `}</style>
 
       <div
@@ -565,39 +568,41 @@ function LayoutInner({ children, currentPageName }) {
                 zIndex: 20,
               }}
             >
-              {/* App identity strip */}
-              <div
-                className="px-3 py-2.5 shrink-0"
+              {/* App identity strip — slim, current-app context only */}
+              <button
+                onClick={() => platform.setAppSwitcherOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 shrink-0 transition-colors text-left w-full group"
                 style={{
-                  borderBottom: `1px solid ${accent}22`,
-                  background: `linear-gradient(135deg, var(--bg-surface) 0%, ${accent}08 100%)`,
+                  borderBottom: "1px solid var(--border-subtle)",
+                  background: "transparent",
                 }}
+                title="Switch app"
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-6 h-6 rounded flex items-center justify-center shrink-0"
-                    style={{ background: accent + "18", border: `1px solid ${accent}33` }}
-                  >
-                    <Icon name={activeApp?.icon ?? "Command"} size={12} style={{ color: accent }} />
-                  </div>
-                  <div className="min-w-0">
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.2 }}>
-                      {activeApp?.shortName ?? "Red River OS"}
-                    </div>
-                    {activeApp?.status === APP_STATUS.SCAFFOLD && (
-                      <span style={{ fontSize: 9, color: "var(--text-muted)" }}>beta module</span>
-                    )}
-                  </div>
-                  <button
-                    className="ml-auto activity-icon"
-                    style={{ width: 24, height: 24 }}
-                    onClick={() => platform.setAppSwitcherOpen(true)}
-                    title="Switch app"
-                  >
-                    <Grid3x3 size={11} />
-                  </button>
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                  style={{ background: accent + "18" }}
+                >
+                  <Icon name={activeApp?.icon ?? "Command"} size={11} style={{ color: accent }} />
                 </div>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <div
+                    style={{
+                      fontSize: 11.5,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      lineHeight: 1.2,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {activeApp?.shortName ?? "Red River OS"}
+                  </div>
+                </div>
+                <Grid3x3 size={11} style={{ color: "var(--text-muted)", opacity: 0.6 }} />
+              </button>
 
               {/* Nav scroll area */}
               <nav className="flex-1 overflow-y-auto py-2 px-2" style={{ scrollbarWidth: "thin" }}>
@@ -646,7 +651,7 @@ function LayoutInner({ children, currentPageName }) {
 
                 {/* Separator between OS nav and app nav */}
                 {osNavItems.length > 0 && navSections.length > 0 && (
-                  <div style={{ height: 1, background: "var(--border-subtle)", margin: "6px 4px 8px" }} />
+                  <div style={{ height: 1, background: "var(--border-subtle)", margin: "10px 4px 10px" }} />
                 )}
 
                 {/* Active app nav sections */}
@@ -683,17 +688,17 @@ function LayoutInner({ children, currentPageName }) {
                   }
                 })}
 
-                {/* Admin section */}
+                {/* Admin section — muted accent so it doesn't compete with app color */}
                 {adminUser && adminNavItems.length > 0 && (
                   <>
-                    <div style={{ height: 1, background: "var(--border-subtle)", margin: "6px 4px 8px" }} />
+                    <div style={{ height: 1, background: "var(--border-subtle)", margin: "10px 4px 10px" }} />
                     <NavSection
                       section="Administration"
                       items={adminNavItems}
                       collapsed={collapsedSections["admin"]}
                       onToggle={() => setCollapsedSections(p => ({ ...p, admin: !p.admin }))}
                       currentPage={currentPageName}
-                      accent="#ffab40"
+                      accent="#8bafd4"
                     />
                   </>
                 )}
