@@ -1,22 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
-import { Database, Brain, AlertCircle, RefreshCw, BarChart3, Activity, SlidersHorizontal, RotateCcw, Save, Layout, Pencil, Edit3, TrendingUp, Pin, PinOff, HelpCircle } from "lucide-react";
+import { AlertCircle, RefreshCw, BarChart3, Activity, TrendingUp, Pin, PinOff, HelpCircle, Brain, Plus } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import WeeklyReports from "../components/dashboard/WeeklyReports";
-import PinnedMetrics from "../components/dashboard/PinnedMetrics";
 import DashboardCustomizer, { DEFAULT_WIDGETS } from "../components/dashboard/DashboardCustomizer";
 import DashboardLayoutManager, { PRESET_LAYOUTS } from "../components/dashboard/DashboardLayoutManager";
-import WidgetLibrary from "../components/dashboard/WidgetLibrary";
-import DashboardExportMenu from "../components/dashboard/DashboardExportMenu";
+import DashboardHeader from "../components/dashboard/DashboardHeader";
 import DisparityExplorer from "../components/dashboard/DisparityExplorer.jsx";
 import RegionalPerformance from "../components/dashboard/RegionalPerformance";
 import CategoryLeaders from "../components/dashboard/CategoryLeaders";
 import TrendingMetrics from "../components/dashboard/TrendingMetrics";
 import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
-import { Plus } from "lucide-react";
 import { getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
 import { listAllHealthMetrics } from "@/lib/healthMetrics";
 
@@ -65,14 +61,23 @@ export default function Dashboard() {
   const [dashboardTitle, setDashboardTitle] = useState(prefs.title || "Dashboard");
   const [tempTitle, setTempTitle] = useState(dashboardTitle);
 
-  // Initialize widgets
+  // Initialize widgets — priority order:
+  //  1. Trend tracker + Disparity explorer ("what's improving")
+  //  2. Platform stats + AI insights        ("what changed")
+  //  3. Regional performance + Category     ("where are gaps")
   const [widgets, setWidgets] = useState(() => {
     if (prefs?.widgets) return prefs.widgets;
-    return [
-    ...DEFAULT_WIDGETS.map((w) => ({ ...w, visible: true, span: 2 })),
-    { id: "regional_performance", visible: true, span: 2 },
-    { id: "category_pie", visible: true, span: 2 }];
-
+    const order = [
+      "stat_cards",
+      "year_trend",
+      "disparity_explorer",
+      "ai_insights",
+      "regional_performance",
+      "category_pie",
+      "trending_metrics",
+      "weekly_reports",
+    ];
+    return order.map((id) => ({ id, visible: true, span: 1 }));
   });
   const [pinnedIds, setPinnedIds] = useState(() => prefs?.pinnedIds || []);
   const [visibleStatCards, setVisibleStatCards] = useState(() => prefs?.visibleStatCards || ["total_metrics", "data_sources", "active_sources", "ai_insights"]);
@@ -343,10 +348,10 @@ export default function Dashboard() {
   // Ordered widget render map
   const WIDGET_RENDER = {
     stat_cards: isVisible("stat_cards") &&
-    <div key="stat_cards" className="space-y-3 group col-span-full">
+    <div key="stat_cards" className="space-y-2 group col-span-full">
        <div>
-         <div className="dashboard-section-label mb-3">Platform Metrics</div>
-         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+         <div className="dashboard-section-label mb-2">Platform Metrics</div>
+         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
            {STAT_CARDS.map((card, idx) => {
             const cardId = Object.keys(ALL_STAT_CARDS).find((k) => ALL_STAT_CARDS[k].label === card.label);
             const tooltips = {
@@ -360,53 +365,53 @@ export default function Dashboard() {
               style={{
                 background: `linear-gradient(135deg, ${card.bgColor || "rgba(254,221,0,0.03)"} 0%, var(--bg-elevated) 100%)`,
                 border: `1.5px solid ${card.color}33`,
-                cursor: "help"
+                cursor: "help",
+                padding: 12
               }}>
                  {/* Accent line */}
                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${card.color} 0%, transparent 100%)` }} />
 
-                 <div className="flex items-start justify-between mb-3 relative z-10">
-                   <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{card.label}</span>
+                 <div className="flex items-start justify-between mb-2 relative z-10">
+                   <span className="font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{card.label}</span>
                    <div className="flex items-center gap-1">
-                     <div className="p-2 rounded-lg shrink-0 transition-all group-hover:scale-110" style={{ background: card.bgColor, boxShadow: `0 0 12px ${card.color}22` }}>
-                       <card.icon size={14} style={{ color: card.color, strokeWidth: 2.5 }} />
+                     <div className="p-1.5 rounded-md shrink-0 transition-all group-hover:scale-110" style={{ background: card.bgColor, boxShadow: `0 0 8px ${card.color}22` }}>
+                       <card.icon size={12} style={{ color: card.color, strokeWidth: 2.5 }} />
                      </div>
-                     <HelpCircle size={11} style={{ color: card.color, opacity: 0.5, marginTop: "2px" }} />
+                     <HelpCircle size={10} style={{ color: card.color, opacity: 0.5 }} />
                    </div>
                  </div>
-                 <div className="text-4xl font-black mb-2 relative z-10 leading-tight" style={{ color: card.color, textShadow: `0 2px 8px ${card.color}18` }}>{card.value}</div>
-                 <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "11px" }}>{card.desc}</div>
+                 <div className="font-black mb-1 relative z-10 leading-none" style={{ color: card.color, textShadow: `0 2px 8px ${card.color}18`, fontSize: 26 }}>{card.value}</div>
+                 <div className="leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "10.5px" }}>{card.desc}</div>
                </div>);
 
           })}
            {customStats.map((stat) =>
-          <div key={stat.id} className="dashboard-widget-card relative overflow-hidden group"
-          style={{
+           <div key={stat.id} className="dashboard-widget-card relative overflow-hidden group"
+           style={{
             background: `linear-gradient(135deg, ${stat.color}08 0%, var(--bg-elevated) 100%)`,
-            border: `1.5px solid ${stat.color}33`
-          }}>
-               {/* Accent line */}
+            border: `1.5px solid ${stat.color}33`,
+            padding: 12
+           }}>
                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${stat.color} 0%, transparent 100%)` }} />
-
-               <div className="flex items-start justify-between mb-3 relative z-10">
-                 <span className="text-xs font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{stat.label}</span>
+               <div className="flex items-start justify-between mb-2 relative z-10">
+                 <span className="font-semibold uppercase tracking-wider leading-tight" style={{ color: "var(--text-secondary)", fontSize: "9px", letterSpacing: "0.05em" }}>{stat.label}</span>
                  <button
-                onClick={() => handleRemoveCustomStat(stat.id)}
-                className="p-1 rounded hover:bg-red-500/20 transition-colors"
-                title="Remove stat">
+                 onClick={() => handleRemoveCustomStat(stat.id)}
+                 className="p-1 rounded hover:bg-red-500/20 transition-colors"
+                 title="Remove stat">
                    ×
                  </button>
                </div>
-               <div className="text-2xl font-black mb-2 relative z-10 leading-tight" style={{ color: stat.color }}>Custom</div>
-               <div className="text-xs leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "11px" }}>{stat.description}</div>
+               <div className="font-black mb-1 relative z-10 leading-none" style={{ color: stat.color, fontSize: 20 }}>Custom</div>
+               <div className="leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "10.5px" }}>{stat.description}</div>
              </div>
-          )}
+           )}
            <button
             onClick={() => setStatBuilderOpen(true)}
             className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed transition-all hover:border-solid hover:border-[#FEDD00]33"
-            style={{ borderColor: "var(--border-default)", color: "var(--text-muted)" }}
+            style={{ borderColor: "var(--border-default)", color: "var(--text-muted)", padding: 12, fontSize: 12 }}
             title="Add a custom stat">
-             <Plus size={16} />
+             <Plus size={14} />
              <span>Custom Stat</span>
            </button>
          </div>
@@ -592,84 +597,25 @@ export default function Dashboard() {
       `}</style>
       
       {/* Main container — no scroll */}
-      <div className="flex-1 overflow-hidden flex flex-col p-4">
+      <div className="flex-1 overflow-hidden flex flex-col p-3">
 
-        {/* Hero header with gradient — nav-panel styled */}
-        <div className="mb-4 rounded-lg overflow-hidden shrink-0" style={{
-          background: "linear-gradient(to bottom, var(--bg-surface) 0%, var(--bg-elevated) 100%)",
-          border: "1px solid var(--border-default)",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(254,221,0,0.08)"
-        }}>
-          <div className="p-4 flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 rounded-full" style={{ background: "var(--color-success)", boxShadow: "0 0 8px rgba(0,230,118,0.5)" }} />
-                {editingTitle ?
-                <input
-                  type="text"
-                  value={tempTitle}
-                  onChange={(e) => setTempTitle(e.target.value)}
-                  onBlur={handleUpdateTitle}
-                  onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
-                  autoFocus
-                  className="text-sm font-bold tracking-wider outline-none px-2 py-0.5 rounded-md"
-                  style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em", background: "var(--bg-overlay)", border: "1px solid var(--border-default)" }} /> :
+        <DashboardHeader
+          title={dashboardTitle}
+          editingTitle={editingTitle}
+          tempTitle={tempTitle}
+          onTempTitleChange={setTempTitle}
+          onStartEdit={() => { setTempTitle(dashboardTitle); setEditingTitle(true); }}
+          onCommitEdit={handleUpdateTitle}
+          metrics={metrics}
+          hasChanges={hasChanges}
+          onOpenLayoutManager={() => setLayoutManagerOpen(true)}
+          onOpenCustomizer={() => setCustomizerOpen(true)}
+          onResetLayout={handleResetLayout}
+        />
 
-
-                <h1 className="text-sm font-bold tracking-wider cursor-pointer" style={{ color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.04em" }} onClick={() => setEditingTitle(true)}>
-                    {dashboardTitle}
-                  </h1>
-                }
-              </div>
-              <p className="text-xs mt-1" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
-                Real-time overview of Métis-specific health metrics across British Columbia
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0 ml-4">
-              {editingTitle &&
-              <button
-                onClick={handleUpdateTitle}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
-                style={{ background: "var(--accent-primary)", color: "#000" }}
-                title="Save title">
-                  <Save size={13} />
-                </button>
-              }
-              {hasChanges &&
-              <button
-                onClick={handleResetLayout}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
-                style={{ background: "rgba(255,171,64,0.08)", border: "1px solid rgba(255,171,64,0.2)", color: "var(--text-secondary)" }}
-                onMouseOver={(e) => {e.currentTarget.style.background = "rgba(255,171,64,0.14)";e.currentTarget.style.color = "var(--text-primary)";}}
-                onMouseOut={(e) => {e.currentTarget.style.background = "rgba(255,171,64,0.08)";e.currentTarget.style.color = "var(--text-secondary)";}}
-                title="Reset to default layout">
-                  <RotateCcw size={13} />
-                </button>
-              }
-              <button
-                onClick={() => setLayoutManagerOpen(true)}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
-                style={{ background: "rgba(64,196,255,0.08)", border: "1px solid rgba(64,196,255,0.2)", color: "var(--text-secondary)" }}
-                onMouseOver={(e) => {e.currentTarget.style.background = "rgba(64,196,255,0.14)";e.currentTarget.style.color = "var(--text-primary)";}}
-                onMouseOut={(e) => {e.currentTarget.style.background = "rgba(64,196,255,0.08)";e.currentTarget.style.color = "var(--text-secondary)";}}
-                title="Save, load, and manage layouts">
-                <Layout size={13} />
-              </button>
-              <DashboardExportMenu metrics={metrics} />
-              <button
-                onClick={() => setCustomizerOpen(true)}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-all"
-                style={{ background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.2)", color: "var(--text-secondary)" }}
-                onMouseOver={(e) => {e.currentTarget.style.background = "rgba(254,221,0,0.14)";e.currentTarget.style.color = "var(--text-primary)";}}
-                onMouseOut={(e) => {e.currentTarget.style.background = "rgba(254,221,0,0.08)";e.currentTarget.style.color = "var(--text-secondary)";}}
-                title="Rearrange and show/hide dashboard widgets">
-                <SlidersHorizontal size={13} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Widgets grid — drag-and-drop enabled */}
+        {/* Widgets grid — 3-column priority layout, drag-and-drop enabled.
+            stat_cards & ai_insights span their natural width; other widgets
+            each occupy a single column for higher density. */}
         <div className="flex-1 overflow-hidden">
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="dashboard-widgets" type="WIDGET">
@@ -677,7 +623,7 @@ export default function Dashboard() {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="h-full gap-3 grid grid-cols-2 auto-rows-max"
+                className="h-full gap-2.5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 auto-rows-max"
                 style={{
                   overflowY: "auto",
                   paddingRight: "4px",
@@ -685,13 +631,17 @@ export default function Dashboard() {
                 }}>
                   {widgets.
                 filter((w) => w.visible !== false).
-                map((w, index) =>
+                map((w, index) => {
+                  // stat_cards always spans full width; AI insights spans 1 col on xl
+                  const fullSpan = w.id === "stat_cards";
+                  return (
                 <Draggable key={w.id} draggableId={w.id} index={index}>
                         {(provided, snapshot) =>
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
+                    className={fullSpan ? "md:col-span-2 xl:col-span-3" : ""}
                     style={{
                       ...provided.draggableProps.style,
                       opacity: snapshot.isDragging ? 0.5 : 1
@@ -699,8 +649,8 @@ export default function Dashboard() {
                             {WIDGET_RENDER[w.id]}
                           </div>
                   }
-                      </Draggable>
-                )}
+                      </Draggable>);
+                })}
                   {provided.placeholder}
                 </div>
               }
