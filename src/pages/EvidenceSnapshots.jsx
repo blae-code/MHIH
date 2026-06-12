@@ -1,16 +1,9 @@
 import React from "react";
 import { Camera } from "lucide-react";
 import CockpitShell from "@/components/shell/CockpitShell";
-import EvidenceSnapshotsPanel from "@/components/redriver/EvidenceSnapshotsPanel";
-import { usePlatform } from "@/platform/platformContext";
+import InDevelopmentNotice from "@/components/shell/InDevelopmentNotice";
 
 export default function EvidenceSnapshots() {
-  const {
-    latestForgeQuery,
-    evidenceProjectionMode,
-    updateEvidenceProjectionMode,
-  } = usePlatform();
-
   return (
     <CockpitShell
       icon={<Camera size={16} style={{ color: "var(--color-info)" }} />}
@@ -18,32 +11,25 @@ export default function EvidenceSnapshots() {
       subtitle="Deterministic snapshot, version, and export workspace for analytic outputs"
       topGlow="rgba(64,196,255,0.06)"
       bottomGlow="rgba(254,221,0,0.04)"
-      actions={
-        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-          {["projected", "internal"].map((mode) => (
-            <button
-              key={mode}
-              onClick={() => updateEvidenceProjectionMode(mode)}
-              className="px-3 py-1.5 rounded text-xs font-medium capitalize transition-all"
-              style={{
-                background: evidenceProjectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
-                color: evidenceProjectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
-                border: evidenceProjectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
-              }}>
-              {mode}
-            </button>
-          ))}
-        </div>
-      }
     >
-      <div className="cockpit-widget-card" style={{ padding: 16 }}>
-        <div className="relative z-10">
-          <EvidenceSnapshotsPanel
-            projectionMode={evidenceProjectionMode}
-            latestQuery={latestForgeQuery}
-          />
-        </div>
-      </div>
+      <InDevelopmentNotice
+        icon={Camera}
+        accent="#40c4ff"
+        title="Evidence Snapshots"
+        summary="Freeze a Metric Forge query as a versioned, exportable artifact (JSON, CSV, PDF). Used for evidence chains in policy memos and ministerial briefings. Awaits the rebuilt query layer to capture from."
+        phase="Phase 1 · Data Foundation"
+        blockers={[
+          "Depends on Metric Forge to produce a query to capture",
+          "EvidenceSnapshot entity not yet provisioned",
+          "api_createEvidenceSnapshot / api_getEvidenceSnapshot / api_exportEvidenceSnapshot return 404",
+        ]}
+        roadmap={[
+          { label: "Hide broken UI behind in-development notice", status: "done" },
+          { label: "Provision EvidenceSnapshot entity", status: "planned" },
+          { label: "Rebuild create/get/export on direct SDK (no backend functions)", status: "planned" },
+          { label: "Re-enable with live capture from Metric Forge", status: "planned" },
+        ]}
+      />
     </CockpitShell>
   );
 }

@@ -118,9 +118,12 @@ export const APP_REGISTRY = [
       {
         section: "Metrics & Evidence",
         items: [
-          { label: "Metric Catalog", page: "MetricCatalog", icon: "Database" },
-          { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
-          { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
+          // The three items below are awaiting Phase 1 — they render an
+          // in-development notice instead of their broken UI. The `inDevelopment`
+          // flag surfaces a "DEV" badge in the sidebar so users know what to expect.
+          { label: "Metric Catalog", page: "MetricCatalog", icon: "Database", inDevelopment: true },
+          { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal", inDevelopment: true },
+          { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera", inDevelopment: true },
           { label: "Red River Module", page: "RedRiverOS", icon: "Layers3" },
         ],
       },

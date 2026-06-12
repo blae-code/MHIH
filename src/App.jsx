@@ -17,12 +17,21 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { PAGE_ROUTE_MAP, resolvePageName } from '@/platform/routes';
+import RouteErrorBoundary from '@/components/shell/RouteErrorBoundary';
 
 const { Pages, Layout } = pagesConfig;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout
   ? <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
+
+// Wraps a page in a route-scoped error boundary so a single page crash
+// never blanks the OS shell. The boundary resets on route change.
+const SafePage = ({ Page, pageName }) => (
+  <RouteErrorBoundary pageKey={pageName} pageName={pageName}>
+    <Page />
+  </RouteErrorBoundary>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,7 +73,7 @@ const AuthenticatedApp = () => {
             path={routePath}
             element={
               <LayoutWrapper currentPageName={pageName}>
-                <Page />
+                <SafePage Page={Page} pageName={pageName} />
               </LayoutWrapper>
             }
           />
@@ -89,7 +98,7 @@ const AuthenticatedApp = () => {
             path={`/${pageName}`}
             element={
               <LayoutWrapper currentPageName={pageName}>
-                <Page />
+                <SafePage Page={Page} pageName={pageName} />
               </LayoutWrapper>
             }
           />

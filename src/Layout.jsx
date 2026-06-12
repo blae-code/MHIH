@@ -217,6 +217,7 @@ function NavSection({ section, items, collapsed, onToggle, currentPage, accent }
                 color: "var(--text-primary)",
                 fontWeight: 600,
               } : {}}
+              title={item.inDevelopment ? `${item.label} — in development (Phase 1)` : undefined}
             >
               {isActive && (
                 <span
@@ -232,10 +233,42 @@ function NavSection({ section, items, collapsed, onToggle, currentPage, accent }
                   }}
                 />
               )}
-              <Icon name={item.icon} size={13} style={{ color: isActive ? accent : "var(--text-muted)", flexShrink: 0 }} />
-              <span style={{ color: isActive ? "var(--text-primary)" : undefined }}>
+              <Icon name={item.icon} size={13} style={{
+                color: isActive ? accent : "var(--text-muted)",
+                flexShrink: 0,
+                opacity: item.inDevelopment ? 0.55 : 1,
+              }} />
+              <span style={{
+                color: isActive ? "var(--text-primary)" : undefined,
+                opacity: item.inDevelopment ? 0.6 : 1,
+                flex: 1,
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>
                 {item.label}
               </span>
+              {item.inDevelopment && (
+                <span
+                  className="shrink-0"
+                  style={{
+                    fontSize: 8,
+                    fontWeight: 800,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "#FEDD00",
+                    background: "rgba(254,221,0,0.10)",
+                    border: "1px solid rgba(254,221,0,0.28)",
+                    borderRadius: 3,
+                    padding: "1px 4px",
+                    lineHeight: 1.2,
+                  }}
+                  aria-label="In development"
+                >
+                  DEV
+                </span>
+              )}
             </Link>
           );
         })}

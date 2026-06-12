@@ -1,56 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { SlidersHorizontal } from "lucide-react";
 import CockpitShell from "@/components/shell/CockpitShell";
-import MetricForgePanel from "@/components/redriver/MetricForgePanel";
-
-function loadProjectionMode() {
-  try {
-    const stored = localStorage.getItem("rr_projection_mode");
-    if (stored === "internal" || stored === "projected") return stored;
-  } catch {}
-  return "projected";
-}
+import InDevelopmentNotice from "@/components/shell/InDevelopmentNotice";
 
 export default function MetricForge() {
-  const [projectionMode, setProjectionMode] = useState(loadProjectionMode);
-
-  const updateMode = (mode) => {
-    setProjectionMode(mode);
-    try {
-      localStorage.setItem("rr_projection_mode", mode);
-    } catch {}
-  };
-
   return (
     <CockpitShell
-      icon={<SlidersHorizontal size={16} style={{ color: "var(--color-info)" }} />}
+      icon={<SlidersHorizontal size={16} style={{ color: "var(--accent-primary)" }} />}
       title="Metric Forge"
-      subtitle="Projection-safe series query builder for time-aligned, comparable evidence"
-      topGlow="rgba(64,196,255,0.06)"
-      bottomGlow="rgba(254,221,0,0.04)"
-      actions={
-        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-          {["projected", "internal"].map((mode) => (
-            <button
-              key={mode}
-              onClick={() => updateMode(mode)}
-              className="px-3 py-1.5 rounded text-xs font-medium capitalize transition-all"
-              style={{
-                background: projectionMode === mode ? "rgba(64,196,255,0.12)" : "transparent",
-                color: projectionMode === mode ? "var(--color-info)" : "var(--text-muted)",
-                border: projectionMode === mode ? "1px solid rgba(64,196,255,0.3)" : "1px solid transparent",
-              }}>
-              {mode}
-            </button>
-          ))}
-        </div>
-      }
+      subtitle="Projection-safe metric series query workbench with deterministic guardrails"
+      topGlow="rgba(254,221,0,0.06)"
+      bottomGlow="rgba(64,196,255,0.04)"
     >
-      <div className="cockpit-widget-card" style={{ padding: 16 }}>
-        <div className="relative z-10">
-          <MetricForgePanel projectionMode={projectionMode} />
-        </div>
-      </div>
+      <InDevelopmentNotice
+        icon={SlidersHorizontal}
+        accent="#FEDD00"
+        title="Metric Forge"
+        summary="An interactive series-query workbench with projection guardrails, filter composition, and snapshot handoff. The query engine depends on the same catalog layer being rebuilt in Phase 1."
+        phase="Phase 1 · Data Foundation"
+        blockers={[
+          "Depends on api_queryMetricSeries (currently 404)",
+          "Requires Metric Catalog to be live for metric picker",
+          "Projection policy engine (_shared/projection) is not deployable as-is",
+        ]}
+        roadmap={[
+          { label: "Hide broken UI behind in-development notice", status: "done" },
+          { label: "Build query layer directly on HealthMetric entity", status: "in_progress" },
+          { label: "Migrate projection rules to entity-level policy", status: "planned" },
+          { label: "Re-enable with live data", status: "planned" },
+        ]}
+      />
     </CockpitShell>
   );
 }

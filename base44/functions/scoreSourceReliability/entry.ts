@@ -1,12 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
 
-function daysAgo(ts?: string) {
+function daysAgo(ts) {
   if (!ts) return 999;
   const ms = Date.now() - new Date(ts).getTime();
   return Math.max(0, ms / (1000 * 60 * 60 * 24));
 }
 
-function clamp(value: number, min = 0, max = 100) {
+function clamp(value, min = 0, max = 100) {
   return Math.max(min, Math.min(max, value));
 }
 
@@ -25,14 +25,20 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.DataQualityFlag.filter({ status: 'open' }, '-created_date', 2000),
     ]);
 
-    const profiles: any[] = [];
+    // SourceReliabilityProfile entity may not be provisioned in this app. If the
+    // first persistence call fails we fall back to a transient (in-memory) mode:
+    // profiles are still computed and returned, just not persisted.
+    let persistenceMode = 'persisted';
+    let persistenceError = null;
+
+    const profiles = [];
     for (const src of sources) {
-      const srcJobs = jobs.filter((j: any) => j.source_id === src.id);
-      const srcMetrics = metrics.filter((m: any) => m.data_source_name === src.name || m.data_source_id === src.id);
-      const srcFlags = flags.filter((f: any) => f.data_source_name === src.name || f.source_id === src.id);
+      const srcJobs = jobs.filter((j) => j.source_id === src.id);
+      const srcMetrics = metrics.filter((m) => m.data_source_name === src.name || m.data_source_id === src.id);
+      const srcFlags = flags.filter((f) => f.data_source_name === src.name || f.source_id === src.id);
 
       const syncSuccessRate = srcJobs.length
-        ? srcJobs.filter((j: any) => j.status === 'success').length / srcJobs.length
+        ? srcJobs.filter((j) => j.status === 'success').length / srcJobs.length
         : 0.8;
 
       const freshnessDays = daysAgo(src.last_synced || src.updated_date);
@@ -64,13 +70,26 @@ Deno.serve(async (req) => {
         updated_date: new Date().toISOString(),
       };
 
-      const existing = await base44.asServiceRole.entities.SourceReliabilityProfile.filter({ source_id: src.id }, '-created_date', 1);
-      if (existing.length) {
-        await base44.asServiceRole.entities.SourceReliabilityProfile.update(existing[0].id, payload);
-        profiles.push({ ...payload, id: existing[0].id });
+      if (persistenceMode === 'persisted') {
+        try {
+          const existing = await base44.asServiceRole.entities.SourceReliabilityProfile
+            .filter({ source_id: src.id }, '-created_date', 1);
+          if (existing.length) {
+            await base44.asServiceRole.entities.SourceReliabilityProfile.update(existing[0].id, payload);
+            profiles.push({ ...payload, id: existing[0].id });
+          } else {
+            const created = await base44.asServiceRole.entities.SourceReliabilityProfile.create(payload);
+            profiles.push(created);
+          }
+        } catch (err) {
+          // Entity likely not provisioned in this app — switch to transient mode
+          // and return computed profiles without persistence.
+          persistenceMode = 'transient';
+          persistenceError = String(err?.message || err);
+          profiles.push(payload);
+        }
       } else {
-        const created = await base44.asServiceRole.entities.SourceReliabilityProfile.create(payload);
-        profiles.push(created);
+        profiles.push(payload);
       }
     }
 
@@ -79,6 +98,8 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       scored_sources: profiles.length,
+      persistence_mode: persistenceMode,
+      ...(persistenceError ? { persistence_warning: persistenceError } : {}),
       profiles,
     });
   } catch (error) {
