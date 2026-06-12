@@ -160,7 +160,9 @@ export default function Recommendations() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <DevButton icon={SlidersHorizontal} label="Re-score" reason="Recommendation ranking depends on the Recommendation + ScenarioRun pipeline (Phase 2)." />
+          <button onClick={runRanking} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--accent-muted)", border: "1px solid var(--accent-primary)", color: "var(--accent-text)" }}>
+            <SlidersHorizontal size={11} /> {working ? "Re-scoring..." : "Re-score"}
+          </button>
           <button onClick={load} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <RefreshCw size={11} /> Refresh
           </button>
