@@ -1,0 +1,85 @@
+{
+  "name": "EvidenceSnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "Stable human-readable identifier (e.g. snap_2026_06_12_abc123)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title for the snapshot"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional analyst notes captured at snapshot time"
+    },
+    "query": {
+      "type": "object",
+      "description": "The frozen query that produced this snapshot (metric_ids, filters, time range, projection_mode)"
+    },
+    "projection_mode": {
+      "type": "string",
+      "enum": [
+        "projected",
+        "raw"
+      ],
+      "default": "projected"
+    },
+    "series_manifest": {
+      "type": "object",
+      "description": "Summary counts: total_series, total_points, metric_ids, regions"
+    },
+    "data": {
+      "type": "array",
+      "description": "Frozen series rows at capture time",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric_id": {
+            "type": "string"
+          },
+          "metric_name": {
+            "type": "string"
+          },
+          "series_key": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "year": {
+                  "type": "number"
+                },
+                "value": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "captured_by_email": {
+      "type": "string"
+    },
+    "captured_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "title"
+  ]
+}

@@ -1,5 +1,27 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-import { isImprovement, metricDirection } from './_shared/metricSemantics.ts';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
+
+// ── Inlined from formerly-shared metricSemantics (Phase 1 dead-code cleanup) ──
+const LOWER_BETTER_HINTS = ['mortality', 'death', 'overdose', 'hospitalization', 'admission', 'er visit', 'emergency', 'incidence', 'prevalence', 'wait time', 'risk', 'rate', 'injury', 'smoking', 'obesity'];
+const HIGHER_BETTER_HINTS = ['life expectancy', 'screening', 'vaccination', 'immunization', 'coverage', 'access', 'attendance', 'completion', 'employment', 'income', 'service uptake', 'primary care attachment'];
+function metricDirection(metric: any): 'higher_is_better' | 'lower_is_better' | 'neutral' {
+  if (!metric) return 'neutral';
+  if (typeof metric.higher_is_better === 'boolean') return metric.higher_is_better ? 'higher_is_better' : 'lower_is_better';
+  if (typeof metric.lower_is_better === 'boolean') return metric.lower_is_better ? 'lower_is_better' : 'higher_is_better';
+  const explicit = String(metric.better_direction || metric.directionality || metric.interpretation || '').trim().toLowerCase();
+  if (['higher_is_better', 'increase_is_better', 'up_is_better'].includes(explicit)) return 'higher_is_better';
+  if (['lower_is_better', 'decrease_is_better', 'down_is_better'].includes(explicit)) return 'lower_is_better';
+  if (['neutral', 'contextual'].includes(explicit)) return 'neutral';
+  const name = String(metric.name || metric.metric_name || '').toLowerCase();
+  if (LOWER_BETTER_HINTS.some((h) => name.includes(h))) return 'lower_is_better';
+  if (HIGHER_BETTER_HINTS.some((h) => name.includes(h))) return 'higher_is_better';
+  return 'neutral';
+}
+function isImprovement(delta: number, direction: string): boolean {
+  if (!Number.isFinite(delta) || Math.abs(delta) < 1e-12) return false;
+  if (direction === 'higher_is_better') return delta > 0;
+  if (direction === 'lower_is_better') return delta < 0;
+  return false;
+}
 
 type Metric = {
   id: string;
