@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
 
 function divergence(values: number[]) {
   if (!values.length) return 0;
@@ -102,26 +102,29 @@ Deno.serve(async (req) => {
       }
     }
 
-    for (const [source, stats] of sourceStats.entries()) {
-      const score = Math.max(0, 100 - stats.count * 1.5 - stats.severe * 3);
-      const existing = await base44.asServiceRole.entities.SourceReliabilityProfile.filter({ source_name: source }, '-created_date', 1);
-      if (existing.length) {
-        await base44.asServiceRole.entities.SourceReliabilityProfile.update(existing[0].id, {
+    // Source reliability profiling — skipped gracefully if SourceReliabilityProfile
+    // entity isn't provisioned yet. Conflict detection itself remains fully functional.
+    let reliability_updates = 0;
+    try {
+      for (const [source, stats] of sourceStats.entries()) {
+        const score = Math.max(0, 100 - stats.count * 1.5 - stats.severe * 3);
+        const existing = await base44.asServiceRole.entities.SourceReliabilityProfile.filter({ source_name: source }, '-created_date', 1);
+        const payload = {
           source_name: source,
           reliability_score: Number(score.toFixed(1)),
           conflict_rate: Number((stats.count / Math.max(1, metrics.length)).toFixed(4)),
           severe_conflicts: stats.severe,
           updated_date: new Date().toISOString(),
-        });
-      } else {
-        await base44.asServiceRole.entities.SourceReliabilityProfile.create({
-          source_name: source,
-          reliability_score: Number(score.toFixed(1)),
-          conflict_rate: Number((stats.count / Math.max(1, metrics.length)).toFixed(4)),
-          severe_conflicts: stats.severe,
-          updated_date: new Date().toISOString(),
-        });
+        };
+        if (existing.length) {
+          await base44.asServiceRole.entities.SourceReliabilityProfile.update(existing[0].id, payload);
+        } else {
+          await base44.asServiceRole.entities.SourceReliabilityProfile.create(payload);
+        }
+        reliability_updates += 1;
       }
+    } catch {
+      // SourceReliabilityProfile not yet provisioned — alerts + flags still written
     }
 
     return Response.json({

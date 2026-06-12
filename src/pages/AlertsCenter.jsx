@@ -90,7 +90,9 @@ export default function AlertsCenter() {
           <button onClick={runSentinel} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--accent-primary)", color: "#000" }}>
             {working ? <RefreshCw size={11} className="animate-spin" /> : <Bell size={11} />} Run Sentinel
           </button>
-          <DevButton icon={ShieldAlert} label="Reconcile Conflicts" reason="Source conflict reconciliation depends on the SourceConflict entity pipeline (next Phase 4 cluster)." />
+          <button onClick={runConflict} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
+            <ShieldAlert size={11} /> Reconcile Conflicts
+          </button>
           <button onClick={load} className="flex items-center gap-1.5 px-2 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <RefreshCw size={11} />
           </button>
