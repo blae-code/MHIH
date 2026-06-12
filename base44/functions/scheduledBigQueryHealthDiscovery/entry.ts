@@ -10,7 +10,7 @@
  * Designed for the platform's scheduled automation runner; safe to invoke manually.
  */
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
 
 const BQ = 'https://bigquery.googleapis.com/bigquery/v2';
 

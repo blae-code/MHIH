@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));

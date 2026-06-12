@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { CheckCircle2, Clock, MessageSquare, RefreshCw, ShieldAlert, XCircle } from "lucide-react";
+import DevButton from "@/components/shell/DevButton";
 
 export default function ApprovalsInbox() {
   const { user, addLog } = useApp();
@@ -148,9 +149,7 @@ export default function ApprovalsInbox() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={runSlaEscalation} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--accent-primary)", color: "#000" }}>
-            {working ? <RefreshCw size={12} className="animate-spin" /> : <Clock size={12} />} Run SLA Check
-          </button>
+          <DevButton icon={Clock} label="Run SLA Check" reason="SLA escalation depends on the ApprovalTask entity pipeline (Phase 2)." />
           <button onClick={load} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <RefreshCw size={12} /> Refresh
           </button>

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
 
 function hoursUntil(dueDate?: string) {
   if (!dueDate) return Number.POSITIVE_INFINITY;

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.32';
 
 function isRecent(ts: string | undefined, hours: number) {
   if (!ts || hours <= 0) return false;

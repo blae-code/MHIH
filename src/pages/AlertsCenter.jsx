@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { AlertTriangle, Bell, CheckCircle2, RefreshCw, ShieldAlert, Siren } from "lucide-react";
+import DevButton from "@/components/shell/DevButton";
 
 const SEVERITIES = ["all", "critical", "high", "medium", "low"];
 const STATUSES = ["all", "open", "acknowledged", "resolved"];
@@ -86,12 +87,8 @@ export default function AlertsCenter() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={runSentinel} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--accent-primary)", color: "#000" }}>
-            {working ? <RefreshCw size={11} className="animate-spin" /> : <Bell size={11} />} Run Sentinel
-          </button>
-          <button onClick={runConflict} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-            <ShieldAlert size={11} /> Reconcile Conflicts
-          </button>
+          <DevButton icon={Bell} label="Run Sentinel" reason="Sentinel scan depends on the AlertEvent entity pipeline (Phase 2)." />
+          <DevButton icon={ShieldAlert} label="Reconcile Conflicts" reason="Source conflict reconciliation depends on the SourceConflict entity pipeline (Phase 2)." />
           <button onClick={load} className="flex items-center gap-1.5 px-2 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <RefreshCw size={11} />
           </button>

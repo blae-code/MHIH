@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { FileText, RefreshCw, ShieldCheck, SlidersHorizontal, ListOrdered, CircleOff } from "lucide-react";
+import DevButton from "@/components/shell/DevButton";
 
 const STATUS_FILTERS = ["all", "pending", "suppressed", "approved", "rejected"];
 
@@ -159,9 +160,7 @@ export default function Recommendations() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={runRanking} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium" style={{ background: "var(--accent-primary)", color: "#000" }}>
-            {working ? <RefreshCw size={11} className="animate-spin" /> : <SlidersHorizontal size={11} />} Re-score
-          </button>
+          <DevButton icon={SlidersHorizontal} label="Re-score" reason="Recommendation ranking depends on the Recommendation + ScenarioRun pipeline (Phase 2)." />
           <button onClick={load} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
             <RefreshCw size={11} /> Refresh
           </button>
@@ -227,9 +226,8 @@ export default function Recommendations() {
               <input type="number" min={1} max={10} value={memoTopN}
                 onChange={(e) => setMemoTopN(Number(e.target.value || 5))}
                 style={{ ...inputStyle, width: 72 }} />
-              <button onClick={queueMemoFromTop} disabled={working} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>
-                <FileText size={11} /> Memo from Top N
-              </button>
+              <DevButton icon={FileText} label="Memo from Top N" reason="Decision memo generation depends on the DecisionMemo + ApprovalTask pipeline (Phase 2)." />
+              {/* original handler retained for Phase 2: queueMemoFromTop */}
             </div>
           </div>
 
