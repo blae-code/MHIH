@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Upload, Plus, Download, Trash2, RefreshCw, Table2, BarChart2, Database, Sparkles, Link2 } from "lucide-react";
+import { Upload, Plus, Download, Trash2, RefreshCw, Table2, BarChart2, Database, Sparkles, Link2, ChevronDown, ChevronRight, LineChart } from "lucide-react";
 import ImportMetricModal from "@/components/data/ImportMetricModal";
 import MetricForm from "@/components/data/MetricForm";
 import MetricsChartExplorer from "@/components/analyst/MetricsChartExplorer";
@@ -9,6 +9,7 @@ import RepositoryStatStrip from "@/components/data/RepositoryStatStrip";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
 import RowQuickActions from "@/components/data-evidence/RowQuickActions";
+import MetricSparkline from "@/components/data-evidence/MetricSparkline";
 import useUrlFilters from "@/hooks/useUrlFilters";
 import { invalidateHealthMetricCache, listAllHealthMetrics } from "@/lib/healthMetrics";
 
@@ -44,6 +45,16 @@ export default function DataRepository() {
   const [pinnedIds, setPinnedIds] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem(PIN_KEY) || "[]")); } catch { return new Set(); }
   });
+  const [expandedIds, setExpandedIds] = useState(new Set());
+  const [showAllCharts, setShowAllCharts] = useState(false);
+
+  const toggleExpand = (id) => {
+    setExpandedIds((prev) => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  };
 
   const togglePin = (id) => {
     setPinnedIds((prev) => {
@@ -199,6 +210,16 @@ export default function DataRepository() {
                   <BarChart2 size={12} /> Charts
                 </button>
               </div>
+              <button onClick={() => setShowAllCharts(v => !v)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                style={{
+                  background: showAllCharts ? "rgba(64,196,255,0.12)" : "var(--bg-overlay)",
+                  border: `1px solid ${showAllCharts ? "rgba(64,196,255,0.4)" : "var(--border-default)"}`,
+                  color: showAllCharts ? "#40c4ff" : "var(--text-secondary)"
+                }}
+                title={showAllCharts ? "Hide all inline charts" : "Show inline trend chart on every row"}>
+                <LineChart size={12} /> {showAllCharts ? "Hide Charts" : "Show Charts"}
+              </button>
               <button onClick={handleExportCSV}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
                 style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
@@ -278,6 +299,7 @@ export default function DataRepository() {
                     <table className="w-full data-table">
                       <thead className="sticky top-0 z-10">
                         <tr>
+                          <th className="w-8 text-center"></th>
                           <th className="w-10 text-center">
                             <input type="checkbox"
                               onChange={e => setSelected(e.target.checked ? new Set(filtered.map(m => m.id)) : new Set())}
@@ -302,7 +324,7 @@ export default function DataRepository() {
                       <tbody>
                         {filtered.length === 0 ? (
                           <tr>
-                            <td colSpan={10}>
+                            <td colSpan={11}>
                               <div className="flex flex-col items-center justify-center py-16 gap-3">
                                 <Database size={32} style={{ color: "var(--text-muted)", opacity: 0.4 }} />
                                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>No metrics found matching your filters.</p>
@@ -317,8 +339,17 @@ export default function DataRepository() {
                           </tr>
                         ) : filtered.map(m => {
                           const conf = CONFIDENCE_STYLE[m.confidence_level] || CONFIDENCE_STYLE.medium;
+                          const isExpanded = showAllCharts || expandedIds.has(m.id);
                           return (
-                            <tr key={m.id} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                            <React.Fragment key={m.id}>
+                            <tr style={{ borderBottom: isExpanded ? "none" : "1px solid var(--border-subtle)" }}>
+                              <td className="text-center">
+                                <button onClick={() => toggleExpand(m.id)}
+                                  className="activity-icon" style={{ width: 22, height: 22 }}
+                                  title={isExpanded ? "Hide trend chart" : "Show trend chart"}>
+                                  {isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                                </button>
+                              </td>
                               <td className="text-center">
                                 <input type="checkbox" checked={selected.has(m.id)} onChange={() => toggleSelect(m.id)}
                                   style={{ accentColor: "var(--accent-primary)" }} />
@@ -369,6 +400,14 @@ export default function DataRepository() {
                                 />
                               </td>
                             </tr>
+                            {isExpanded && (
+                              <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                                <td colSpan={11} style={{ padding: "8px 12px 12px 38px", background: "rgba(64,196,255,0.02)" }}>
+                                  <MetricSparkline metric={m} allMetrics={metrics} />
+                                </td>
+                              </tr>
+                            )}
+                            </React.Fragment>
                           );
                         })}
                       </tbody>
