@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
-import { Upload, Plus, Download, Trash2, Edit2, RefreshCw, Table2, BarChart2, Database, Sparkles } from "lucide-react";
+import { Upload, Plus, Download, Trash2, RefreshCw, Table2, BarChart2, Database, Sparkles, Link2 } from "lucide-react";
 import ImportMetricModal from "@/components/data/ImportMetricModal";
 import MetricForm from "@/components/data/MetricForm";
 import MetricsChartExplorer from "@/components/analyst/MetricsChartExplorer";
 import RepositoryStatStrip from "@/components/data/RepositoryStatStrip";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
+import RowQuickActions from "@/components/data-evidence/RowQuickActions";
+import useUrlFilters from "@/hooks/useUrlFilters";
 import { invalidateHealthMetricCache, listAllHealthMetrics } from "@/lib/healthMetrics";
 
 const CATEGORIES = ["chronic_disease","mental_health","substance_use","maternal_child","social_determinants","demographics","mortality","access_to_care","other"];
@@ -20,19 +22,37 @@ const CONFIDENCE_STYLE = {
   low: { color: "var(--color-error)", bg: "rgba(255,23,68,0.08)", border: "rgba(255,23,68,0.3)" },
 };
 
+const FILTER_DEFAULTS = { search: "", category: "all", region: "all", confidence: "all", view: "table" };
+const PIN_KEY = "de_repo_pinned_metrics";
+
 export default function DataRepository() {
   const { addLog } = useApp();
   const [metrics, setMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [catFilter, setCatFilter] = useState("all");
-  const [regionFilter, setRegionFilter] = useState("all");
-  const [confidenceFilter, setConfidenceFilter] = useState("all");
+  const [filters, setFilters, clearFilters] = useUrlFilters(FILTER_DEFAULTS);
+  const { search, category: catFilter, region: regionFilter, confidence: confidenceFilter, view: viewMode } = filters;
+  const setSearch = (v) => setFilters((p) => ({ ...p, search: v }));
+  const setCatFilter = (v) => setFilters((p) => ({ ...p, category: v }));
+  const setRegionFilter = (v) => setFilters((p) => ({ ...p, region: v }));
+  const setConfidenceFilter = (v) => setFilters((p) => ({ ...p, confidence: v }));
+  const setViewMode = (v) => setFilters((p) => ({ ...p, view: v }));
+
   const [showImport, setShowImport] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [selected, setSelected] = useState(new Set());
-  const [viewMode, setViewMode] = useState("table");
+  const [pinnedIds, setPinnedIds] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem(PIN_KEY) || "[]")); } catch { return new Set(); }
+  });
+
+  const togglePin = (id) => {
+    setPinnedIds((prev) => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      localStorage.setItem(PIN_KEY, JSON.stringify([...n]));
+      return n;
+    });
+  };
 
   const load = (forceRefresh = false) => {
     setLoading(true);
@@ -112,7 +132,6 @@ export default function DataRepository() {
   };
 
   const hasActiveFilters = search || catFilter !== "all" || regionFilter !== "all" || confidenceFilter !== "all";
-  const clearFilters = () => { setSearch(""); setCatFilter("all"); setRegionFilter("all"); setConfidenceFilter("all"); };
 
   return (
     <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
@@ -273,7 +292,11 @@ export default function DataRepository() {
                           <th className="text-left">Unit</th>
                           <th className="text-left">Source</th>
                           <th className="text-center">Confidence</th>
-                          <th className="w-16 text-center">Actions</th>
+                          <th className="text-center" style={{ minWidth: 220 }}>
+                            <span className="inline-flex items-center gap-1 justify-center" title="Quick actions + cross-jumps to source, quality & visualizations">
+                              <Link2 size={10} /> Actions
+                            </span>
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -336,16 +359,14 @@ export default function DataRepository() {
                                 )}
                               </td>
                               <td>
-                                <div className="flex items-center gap-1 justify-center">
-                                  <button onClick={() => { setEditing(m); setShowForm(true); }}
-                                    className="activity-icon" style={{ width: 26, height: 26 }} title="Edit">
-                                    <Edit2 size={11} />
-                                  </button>
-                                  <button onClick={() => handleDelete(m.id)}
-                                    className="activity-icon" style={{ width: 26, height: 26, color: "var(--color-error)" }} title="Delete">
-                                    <Trash2 size={11} />
-                                  </button>
-                                </div>
+                                <RowQuickActions
+                                  metric={m}
+                                  pinned={pinnedIds.has(m.id)}
+                                  onPin={() => togglePin(m.id)}
+                                  onEdit={() => { setEditing(m); setShowForm(true); }}
+                                  onDelete={() => handleDelete(m.id)}
+                                  compact
+                                />
                               </td>
                             </tr>
                           );
