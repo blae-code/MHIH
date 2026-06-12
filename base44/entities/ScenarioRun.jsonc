@@ -1,0 +1,73 @@
+{
+  "name": "ScenarioRun",
+  "type": "object",
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "description": "PolicyScenario.id this run was executed against (optional)"
+    },
+    "scenario_name": {
+      "type": "string",
+      "description": "Display name of the scenario at run time"
+    },
+    "run_type": {
+      "type": "string",
+      "enum": [
+        "policy_simulation",
+        "forecast_backtest",
+        "causal_analysis",
+        "sensitivity_analysis",
+        "other"
+      ],
+      "default": "policy_simulation",
+      "description": "Class of analytical run"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "completed",
+      "description": "Lifecycle status of the run"
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Model/version identifier (e.g. scenario-linear-v2)"
+    },
+    "assumptions": {
+      "type": "object",
+      "description": "Frozen assumption set (method, seed, intervention type, magnitude, coverage, region, category, hash)"
+    },
+    "inputs_count": {
+      "type": "number",
+      "description": "Number of input observations considered"
+    },
+    "outputs_count": {
+      "type": "number",
+      "description": "Number of projections / outputs produced"
+    },
+    "output": {
+      "type": "object",
+      "description": "Run output payload: projections array + method metadata"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Failure detail (if status=failed)"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Email of the analyst who initiated the run"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "Wall-clock run duration in milliseconds"
+    }
+  },
+  "required": [
+    "run_type"
+  ]
+}

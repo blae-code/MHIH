@@ -14,6 +14,7 @@ import TrendingMetrics from "../components/dashboard/TrendingMetrics";
 import HealthTrendTracker from "../components/dashboard/HealthTrendTracker";
 import CustomStatBuilder from "../components/dashboard/CustomStatBuilder";
 import RegionalGapsWidget from "../components/dashboard/RegionalGapsWidget";
+import QuickAccessSidebar from "../components/dashboard/QuickAccessSidebar";
 import ZoneHeader from "../components/shell/ZoneHeader";
 import { getMetricDirection, isHarmfulGap, isImprovement } from "@/lib/metricSemantics";
 import { listAllHealthMetrics } from "@/lib/healthMetrics";
@@ -678,9 +679,15 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 2-zone cockpit grid — Analytics (wider) + Intelligence (narrower) */}
+          {/* Quick-access rail + 2-zone cockpit grid */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-3 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-[220px_1.4fr_1fr] gap-3 items-start">
+
+              {/* ── Quick-access rail (regional datasets + active gaps) ─ */}
+              <div className="lg:sticky lg:top-2">
+                <QuickAccessSidebar metrics={metrics} sources={sources} />
+              </div>
+
 
               {/* ── Left zone: Analytics ─────────────────────────── */}
               <Droppable droppableId="zone-analytics" type="WIDGET">

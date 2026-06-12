@@ -1,0 +1,108 @@
+{
+  "name": "Recommendation",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Short headline for the recommendation"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Detailed narrative description of the suggested action"
+    },
+    "recommendation_type": {
+      "type": "string",
+      "enum": [
+        "scenario",
+        "policy",
+        "intervention",
+        "data_collection",
+        "monitoring",
+        "research",
+        "other"
+      ],
+      "default": "scenario",
+      "description": "Category of recommendation"
+    },
+    "category": {
+      "type": "string",
+      "description": "Health-domain category the recommendation relates to"
+    },
+    "region": {
+      "type": "string",
+      "description": "BC region the recommendation applies to"
+    },
+    "priority_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Composite priority (1-100) used for ranking"
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence in the recommendation (0-1)"
+    },
+    "rank": {
+      "type": "number",
+      "description": "Active-queue rank assigned by the recommendation ranker (9999 = suppressed)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "suppressed",
+        "implemented",
+        "archived"
+      ],
+      "default": "pending",
+      "description": "Workflow status of the recommendation"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "deferred"
+      ],
+      "default": "pending",
+      "description": "Human-gate approval status"
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this recommendation must pass through ApprovalTask before action"
+    },
+    "scenario_run_id": {
+      "type": "string",
+      "description": "ScenarioRun.id this recommendation was derived from"
+    },
+    "evidence_metric_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "HealthMetric IDs supporting this recommendation"
+    },
+    "metric_name": {
+      "type": "string",
+      "description": "Primary metric the recommendation targets"
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Analyst rationale or explanation"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
