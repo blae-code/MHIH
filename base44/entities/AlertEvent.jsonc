@@ -1,0 +1,94 @@
+{
+  "name": "AlertEvent",
+  "type": "object",
+  "properties": {
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "trend_shift",
+        "widening_disparity",
+        "source_conflict",
+        "threshold_breach",
+        "data_quality",
+        "other"
+      ],
+      "description": "Category of alert detected by the sentinel scan or reconciliation pipeline"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "acknowledged",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "open"
+    },
+    "category": {
+      "type": "string",
+      "description": "Health-metric category the alert relates to (mirrors HealthMetric.category)"
+    },
+    "region": {
+      "type": "string",
+      "description": "BC region the alert applies to"
+    },
+    "metric_name": {
+      "type": "string",
+      "description": "Display name of the metric that triggered the alert"
+    },
+    "metric_id": {
+      "type": "string",
+      "description": "HealthMetric.id reference for the latest observation"
+    },
+    "lead_time_score": {
+      "type": "number",
+      "description": "0-100 \u2014 how early the signal was detected relative to magnitude"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "0-1 confidence in the alert signal"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short human-readable summary"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed explanation including statistical context"
+    },
+    "detected_by": {
+      "type": "string",
+      "description": "Function or agent that raised the alert (e.g. runSentinelScan)"
+    },
+    "detected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "acknowledged_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assigned_to_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "alert_type",
+    "severity",
+    "summary"
+  ]
+}
