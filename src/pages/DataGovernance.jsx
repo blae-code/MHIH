@@ -70,8 +70,8 @@ export default function DataGovernance() {
   return (
     <CockpitShell
       icon={<Shield size={16} style={{ color: "var(--mnbc-yellow)" }} />}
-      title="Data Governance & Privacy"
-      subtitle="Classification · retention · anonymization · audit trail"
+      title="Data Governance"
+      subtitle="Data stewardship — classification · retention · anonymization · audit trail"
       actions={
         <button onClick={handleExportPolicy}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
@@ -261,7 +261,7 @@ export default function DataGovernance() {
         <div className="cockpit-zone">
           <ZoneHeader
             label="Insights"
-            title="Privacy Posture"
+            title="Data Governance Posture"
             count={`${anonymizedCount} anonymized`}
             hint="risk + tips"
           />

@@ -120,7 +120,7 @@ export const APP_REGISTRY = [
           { label: "Data Sources", page: "DataSources", icon: "Link2" },
           { label: "My Sources", page: "MyDataSources", icon: "Database" },
           { label: "Data Quality", page: "DataQuality", icon: "ShieldCheck" },
-          { label: "Governance", page: "DataGovernance", icon: "Shield" },
+          { label: "Data Governance", page: "DataGovernance", icon: "Shield" },
           { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
           { label: "Export", page: "Export", icon: "FileDown" },
           { label: "Red River Module", page: "RedRiverOS", icon: "Layers3" },
