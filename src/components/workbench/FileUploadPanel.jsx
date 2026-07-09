@@ -30,10 +30,21 @@ export default function FileUploadPanel({ onData, compact = false }) {
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
         const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
           file_url,
-          json_schema: { type: "array", items: { type: "object", additionalProperties: true } },
+          json_schema: {
+            type: "object",
+            properties: {
+              rows: {
+                type: "array",
+                description: "Every data row from the spreadsheet, one object per row, keyed by column header",
+                items: { type: "object", additionalProperties: true },
+              },
+            },
+            required: ["rows"],
+          },
         });
         if (result.status !== "success") throw new Error(result.details || "Could not extract data from the Excel file.");
-        const rows = Array.isArray(result.output) ? result.output : [result.output];
+        const out = result.output || {};
+        const rows = Array.isArray(out.rows) ? out.rows : Array.isArray(out) ? out : [];
         if (!rows.length) throw new Error("No rows found in the Excel file.");
         const columns = [...new Set(rows.flatMap((r) => Object.keys(r || {})))];
         onData({ fileName: file.name, columns, rows });
