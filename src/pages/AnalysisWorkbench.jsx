@@ -12,6 +12,7 @@ import DataTablePanel from "@/components/workbench/DataTablePanel";
 import StatsSummaryPanel from "@/components/workbench/StatsSummaryPanel";
 import ChartsPanel from "@/components/workbench/ChartsPanel";
 import MethodologyNotice from "@/components/workbench/MethodologyNotice";
+import CommentAnchor from "@/components/comments/CommentAnchor";
 import { inferColumns } from "@/lib/quantStats";
 
 const TABS = [
@@ -63,6 +64,10 @@ export default function AnalysisWorkbench() {
               {columnTypes.filter((c) => c.type === "numeric").length} numeric
             </span>
             <div className="flex-1" />
+            <CommentAnchor
+              targetKey={`workbench:${dataset.fileName}`}
+              targetLabel={`Workbench session — ${dataset.fileName}`}
+            />
             <FileUploadPanelInline onData={(d) => { setDataset(d); setTab("table"); }} />
             <button onClick={() => setDataset(null)}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs transition-colors"

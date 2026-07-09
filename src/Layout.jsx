@@ -44,6 +44,9 @@ import OSHeader from "./components/shell/OSHeader";
 import UserPreferencesPanel from "./components/shell/UserPreferencesPanel";
 import StatusLogDrawer from "./components/shell/StatusLogDrawer";
 import TerminalConsole from "./components/terminal/TerminalConsole";
+import usePresence from "./components/presence/usePresence";
+import PresenceStack from "./components/presence/PresenceStack";
+import CommentsPanel from "./components/comments/CommentsPanel";
 import { ChevronUp, Terminal } from "lucide-react";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
@@ -314,6 +317,21 @@ function LayoutInner({ children, currentPageName }) {
 
   // ── Status log drawer ────────────────────────────────────────────────
   const [logDrawerOpen, setLogDrawerOpen] = useState(false);
+
+  // ── Presence + team comments ─────────────────────────────────────────
+  const presenceOthers = usePresence(user, currentPageName);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsTarget, setCommentsTarget] = useState(null);
+
+  // Open comments panel from anywhere via CommentAnchor buttons
+  useEffect(() => {
+    const onOpen = (e) => {
+      setCommentsTarget(e.detail ?? null);
+      setCommentsOpen(true);
+    };
+    window.addEventListener("rr-open-comments", onOpen);
+    return () => window.removeEventListener("rr-open-comments", onOpen);
+  }, []);
 
   // ── Terminal-lite ────────────────────────────────────────────────────
   const [terminalOpen, setTerminalOpen] = useState(false);
@@ -671,6 +689,9 @@ function LayoutInner({ children, currentPageName }) {
               boxShadow: "var(--shadow-inset-canvas)",
             }}
           >
+            {/* Presence — who else is viewing this page */}
+            <PresenceStack others={presenceOthers} />
+
             {/* Content */}
             <div className="flex-1 overflow-auto">
               {children}
@@ -733,6 +754,23 @@ function LayoutInner({ children, currentPageName }) {
                   transition: "transform 0.15s",
                 }}
               />
+            </button>
+            <button
+              type="button"
+              onClick={() => { setCommentsTarget(null); setCommentsOpen(o => !o); }}
+              title="Team comments for this page"
+              className="shrink-0 flex items-center gap-1.5 px-2.5 transition-colors"
+              style={{
+                background: commentsOpen ? "rgba(254,221,0,0.08)" : "var(--bg-surface)",
+                borderLeft: "1px solid var(--border-subtle)",
+                color: commentsOpen ? "var(--mnbc-yellow)" : "var(--text-muted)",
+                fontSize: 9.5,
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--mnbc-yellow)"; }}
+              onMouseLeave={(e) => { if (!commentsOpen) e.currentTarget.style.color = "var(--text-muted)"; }}
+            >
+              <MessageSquare size={10} />
             </button>
             <button
               type="button"
@@ -844,6 +882,16 @@ function LayoutInner({ children, currentPageName }) {
       {/* ── Terminal-lite console ──────────────────────────────────────── */}
       {terminalOpen && (
         <TerminalConsole user={user} onClose={() => setTerminalOpen(false)} />
+      )}
+
+      {/* ── Team comments side-panel ───────────────────────────────────── */}
+      {commentsOpen && (
+        <CommentsPanel
+          page={currentPageName}
+          user={user}
+          focusTarget={commentsTarget}
+          onClose={() => { setCommentsOpen(false); setCommentsTarget(null); }}
+        />
       )}
 
       {/* ── PWA install prompt, update toast, offline banner ───────────── */}

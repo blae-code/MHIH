@@ -13,6 +13,7 @@ import { BarChart3, LineChart as LineChartIcon, ScatterChart as ScatterIcon, Bar
 import { toNumber, histogram } from "@/lib/quantStats";
 import { TOOLTIP_PROPS, AXIS_TICK, GRID_STROKE, CURSOR_FILL } from "@/components/workbench/chartTheme";
 import WorkbenchSelect from "@/components/workbench/WorkbenchSelect";
+import CommentAnchor from "@/components/comments/CommentAnchor";
 
 const CHART_TYPES = [
   { id: "bar", label: "Bar", icon: BarChart3 },
@@ -109,6 +110,11 @@ export default function ChartsPanel({ columns, rows, columnTypes }) {
           <span className="ml-auto tabular-nums" style={{ fontSize: 10, color: "var(--text-muted)" }}>
             {chartData.length.toLocaleString()} points
           </span>
+          <CommentAnchor
+            targetKey={`chart:${chartType}:${xCol}:${yCol}`}
+            targetLabel={`Chart — ${chartTitle}`}
+          />
+
         </div>
         <div className="p-3" style={{ width: "100%", height: 360 }}>
           <ResponsiveContainer width="100%" height="100%">

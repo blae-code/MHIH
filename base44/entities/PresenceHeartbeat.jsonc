@@ -1,0 +1,21 @@
+{
+  "name": "PresenceHeartbeat",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user this heartbeat belongs to (one record per user)"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name of the user"
+    },
+    "page": {
+      "type": "string",
+      "description": "Page name the user is currently viewing"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}
