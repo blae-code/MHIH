@@ -118,7 +118,9 @@ export default function AppMenu({ anchorRef, align = "left", onClose }) {
           top: "calc(100% + 4px)",
           [align]: 0,
           width: 280,
-          background: "var(--bg-elevated)",
+          background: "#131f33",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           border: "1px solid var(--border-default)",
           boxShadow: "0 12px 36px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
         }}
@@ -128,7 +130,7 @@ export default function AppMenu({ anchorRef, align = "left", onClose }) {
           className="px-3 py-2"
           style={{
             borderBottom: "1px solid var(--border-subtle)",
-            background: "var(--bg-surface)",
+            background: "#0c1626",
           }}
         >
           <div
