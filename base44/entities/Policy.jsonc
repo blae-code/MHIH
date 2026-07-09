@@ -1,0 +1,94 @@
+{
+  "name": "Policy",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Policy title"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "recherche",
+        "kashkihtamowin",
+        "kiinaymaakinan",
+        "li-liain",
+        "apoorbaa",
+        "apihtowachik",
+        "nispaahtoon"
+      ],
+      "default": "recherche",
+      "description": "M\u00e9tis policy lifecycle stage"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in-progress",
+        "review",
+        "active",
+        "monitoring",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "portfolio": {
+      "type": "string",
+      "description": "Owning portfolio (e.g. Health Equity, Provincial Health & Wellness)"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Owning team or person"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "chronic_disease",
+        "mental_health",
+        "substance_use",
+        "maternal_child",
+        "social_determinants",
+        "demographics",
+        "mortality",
+        "access_to_care",
+        "other"
+      ],
+      "description": "Health-domain category \u2014 used to link Data app alerts and metrics"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_metric_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "HealthMetric names from the Data & Evidence app supporting this policy"
+    },
+    "linked_request_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "PolicyRequest IDs that led to or relate to this policy"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
