@@ -117,8 +117,8 @@ export default function DataQuality() {
   return (
     <CockpitShell
       icon={<ShieldCheck size={16} style={{ color: "var(--mnbc-yellow)" }} />}
-      title="Data Quality Monitor"
-      subtitle={lastScan ? `Last scan: ${new Date(lastScan).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}` : "No scans run yet"}
+      title="Data Management"
+      subtitle={`Quality monitoring · flag triage · remediation — ${lastScan ? `last scan: ${new Date(lastScan).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}` : "no scans run yet"}`}
       actions={canEdit && (
         <button onClick={handleScan} disabled={scanning}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
@@ -254,7 +254,7 @@ export default function DataQuality() {
         <div className="cockpit-zone">
           <ZoneHeader
             label="Insights"
-            title="Quality Intelligence"
+            title="Data Health Intelligence"
             count={`${typeBreakdown.length} flag types`}
             hint="distribution + tips"
           />
