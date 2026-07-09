@@ -100,27 +100,30 @@ export const APP_REGISTRY = [
         items: [
           { label: "Dashboard", page: "Dashboard", icon: "LayoutDashboard" },
           { label: "Reporting", page: "Reporting", icon: "FileDown" },
-          { label: "Analysis Workbench", page: "AnalysisWorkbench", icon: "FlaskConical" },
         ],
       },
       {
+        // Hands-on analytical tooling — exploratory analysis + metric authoring
+        section: "Analysis Tools",
+        items: [
+          { label: "Analysis Workbench", page: "AnalysisWorkbench", icon: "FlaskConical" },
+          { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
+        ],
+      },
+      {
+        // Full data lifecycle: browse (repository/catalog) → connect (sources)
+        // → refine (quality/prep) → govern → preserve & export (snapshots/export)
         section: "Data Foundation",
         items: [
           { label: "Data Repository", page: "DataRepository", icon: "Database" },
-          { label: "Data Sources", page: "DataSources", icon: "BookOpen" },
+          { label: "Metric Catalog", page: "MetricCatalog", icon: "BookOpen" },
+          { label: "Data Sources", page: "DataSources", icon: "Link2" },
           { label: "My Sources", page: "MyDataSources", icon: "Database" },
           { label: "Data Quality", page: "DataQuality", icon: "ShieldCheck" },
           { label: "Data Prep", page: "DataPrep", icon: "Wrench" },
           { label: "Governance", page: "DataGovernance", icon: "Shield" },
-          { label: "Export", page: "Export", icon: "FileDown" },
-        ],
-      },
-      {
-        section: "Metrics & Evidence",
-        items: [
-          { label: "Metric Catalog", page: "MetricCatalog", icon: "Database" },
-          { label: "Metric Forge", page: "MetricForge", icon: "SlidersHorizontal" },
           { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
+          { label: "Export", page: "Export", icon: "FileDown" },
           { label: "Red River Module", page: "RedRiverOS", icon: "Layers3" },
         ],
       },
