@@ -99,8 +99,7 @@ export const APP_REGISTRY = [
         section: "Overview",
         items: [
           { label: "Dashboard", page: "Dashboard", icon: "LayoutDashboard" },
-          { label: "Visualizations", page: "Visualizations", icon: "BarChart3" },
-          { label: "Reports", page: "Reports", icon: "FileDown" },
+          { label: "Reporting", page: "Reporting", icon: "FileDown" },
           { label: "Analysis Workbench", page: "AnalysisWorkbench", icon: "FlaskConical" },
         ],
       },

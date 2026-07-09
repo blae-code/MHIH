@@ -49,10 +49,9 @@ import RedRiverOS from './pages/RedRiverOS';
 import PolicyRequestForm from './pages/PolicyRequestForm';
 import PolicyRequestTable from './pages/PolicyRequestTable';
 import PolicyRequestCardView from './pages/PolicyRequestCardView';
-import Reports from './pages/Reports';
+import Reporting from './pages/Reporting';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
-import Visualizations from './pages/Visualizations';
 import Watchlists from './pages/Watchlists';
 import Workflows from './pages/Workflows';
 
@@ -108,10 +107,9 @@ export const PAGES = {
     "PolicyRequestForm": PolicyRequestForm,
     "PolicyRequestTable": PolicyRequestTable,
     "PolicyRequestCardView": PolicyRequestCardView,
-    "Reports": Reports,
+    "Reporting": Reporting,
     "Settings": Settings,
     "Team": Team,
-    "Visualizations": Visualizations,
     "Watchlists": Watchlists,
     "Workflows": Workflows,
 

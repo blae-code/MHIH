@@ -32,8 +32,12 @@ export const PAGE_ROUTE_MAP = {
 
   // ── Data & Evidence app ───────────────────────────────────────────────
   Dashboard: "/os/apps/data-evidence",
-  Visualizations: "/os/apps/data-evidence/visualizations",
-  Reports: "/os/apps/data-evidence/reports",
+  // Visualizations + Reports merged into the Reporting suite — legacy names
+  // kept as aliases so existing links keep working. Reporting is listed last
+  // so the reverse map resolves the path to the live page.
+  Visualizations: "/os/apps/data-evidence/reporting",
+  Reports: "/os/apps/data-evidence/reporting",
+  Reporting: "/os/apps/data-evidence/reporting",
   DataRepository: "/os/apps/data-evidence/repository",
   DataSources: "/os/apps/data-evidence/sources",
   MyDataSources: "/os/apps/data-evidence/my-sources",
