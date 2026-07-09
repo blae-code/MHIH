@@ -9,14 +9,22 @@ export default function MetricForm({ metric, onSave, onClose }) {
   const [form, setForm] = useState(metric || {
     name: "", category: "demographics", region: "BC", year: new Date().getFullYear(),
     value: "", unit: "", comparison_value: "", notes: "", confidence_level: "medium",
-    data_source_name: "", tags: [], metis_specific: true
+    data_source_name: "", tags: [], metis_specific: true,
+    collection_date: "", methodology: "", policy_frameworks: []
   });
+  const [frameworksText, setFrameworksText] = useState((metric?.policy_frameworks || []).join(", "));
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ ...form, year: Number(form.year), value: Number(form.value), comparison_value: form.comparison_value ? Number(form.comparison_value) : undefined });
+    onSave({
+      ...form,
+      year: Number(form.year),
+      value: Number(form.value),
+      comparison_value: form.comparison_value ? Number(form.comparison_value) : undefined,
+      policy_frameworks: frameworksText.split(",").map(s => s.trim()).filter(Boolean),
+    });
   };
 
   const input = "w-full text-xs px-3 py-2 rounded-md outline-none";
@@ -83,6 +91,20 @@ export default function MetricForm({ metric, onSave, onClose }) {
           <div>
             <label className="text-xs block mb-1" style={{ color: "var(--text-muted)" }}>Data Source</label>
             <input className={input} style={inputStyle} value={form.data_source_name} onChange={e => set("data_source_name", e.target.value)} placeholder="e.g. Statistics Canada Table 13-10-0096-01" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs block mb-1" style={{ color: "var(--text-muted)" }}>Collection Date</label>
+              <input type="date" className={input} style={inputStyle} value={form.collection_date || ""} onChange={e => set("collection_date", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs block mb-1" style={{ color: "var(--text-muted)" }}>Policy Frameworks</label>
+              <input className={input} style={inputStyle} value={frameworksText} onChange={e => setFrameworksText(e.target.value)} placeholder="Comma-separated, e.g. MNBC Health Plan, In Plain Sight" />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs block mb-1" style={{ color: "var(--text-muted)" }}>Methodology</label>
+            <textarea rows={2} className={input} style={inputStyle} value={form.methodology || ""} onChange={e => set("methodology", e.target.value)} placeholder="How this metric was collected or derived, e.g. survey instrument, linkage method, estimation approach" />
           </div>
           <div>
             <label className="text-xs block mb-1" style={{ color: "var(--text-muted)" }}>Notes</label>

@@ -79,6 +79,22 @@
         "low"
       ],
       "default": "medium"
+    },
+    "collection_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the underlying data was collected (falls back to reference year if unset)"
+    },
+    "methodology": {
+      "type": "string",
+      "description": "How the metric was collected/derived, e.g. survey instrument, linkage method, estimation approach"
+    },
+    "policy_frameworks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Relevant policy frameworks this metric supports, e.g. MNBC Health Plan, In Plain Sight, TRC Calls to Action"
     }
   },
   "required": [

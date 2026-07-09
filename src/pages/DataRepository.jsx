@@ -10,6 +10,7 @@ import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
 import RowQuickActions from "@/components/data-evidence/RowQuickActions";
 import MetricSparkline from "@/components/data-evidence/MetricSparkline";
+import MetricMethodologyPanel from "@/components/data-evidence/MetricMethodologyPanel";
 import useUrlFilters from "@/hooks/useUrlFilters";
 import { invalidateHealthMetricCache, listAllHealthMetrics } from "@/lib/healthMetrics";
 
@@ -346,7 +347,7 @@ export default function DataRepository() {
                               <td className="text-center">
                                 <button onClick={() => toggleExpand(m.id)}
                                   className="activity-icon" style={{ width: 22, height: 22 }}
-                                  title={isExpanded ? "Hide trend chart" : "Show trend chart"}>
+                                  title={isExpanded ? "Hide trend & methodology" : "Show trend & methodology"}>
                                   {isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
                                 </button>
                               </td>
@@ -403,7 +404,10 @@ export default function DataRepository() {
                             {isExpanded && (
                               <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                                 <td colSpan={11} style={{ padding: "8px 12px 12px 38px", background: "rgba(64,196,255,0.02)" }}>
-                                  <MetricSparkline metric={m} allMetrics={metrics} />
+                                  <div className="space-y-2.5">
+                                    <MetricSparkline metric={m} allMetrics={metrics} />
+                                    <MetricMethodologyPanel metric={m} />
+                                  </div>
                                 </td>
                               </tr>
                             )}
