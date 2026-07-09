@@ -166,8 +166,9 @@ export default function QuickAccessSidebar({ metrics = [], sources = [] }) {
                     <span
                       className="shrink-0 tabular-nums"
                       style={{ color: "var(--text-muted)", fontSize: 10 }}
+                      title={`${r.metricCount} metrics · ${r.sourceCount} sources`}
                     >
-                      {r.metricCount}m · {r.sourceCount}s
+                      {r.metricCount} · {r.sourceCount}
                     </span>
                     <ChevronRight size={10} style={{ color: "var(--text-muted)", opacity: 0.6 }} />
                   </Link>

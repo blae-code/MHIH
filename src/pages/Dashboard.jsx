@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useApp } from "../Layout";
 import { AlertCircle, RefreshCw, BarChart3, Activity, TrendingUp, Pin, PinOff, HelpCircle, Brain, Plus } from "lucide-react";
@@ -373,7 +375,23 @@ export default function Dashboard() {
     stat_cards: isVisible("stat_cards") &&
     <div key="stat_cards" className="space-y-2 group col-span-full">
        <div>
-         <div className="dashboard-section-label mb-2">Platform Metrics</div>
+         <div className="flex items-center justify-between mb-2">
+           <div className="dashboard-section-label" style={{ marginBottom: 0 }}>Platform Metrics</div>
+           <button
+             onClick={() => setStatBuilderOpen(true)}
+             className="flex items-center gap-1 px-2 py-0.5 rounded-full transition-colors"
+             style={{
+               fontSize: 10, fontWeight: 600,
+               color: "var(--text-muted)",
+               border: "1px dashed var(--border-default)",
+               background: "transparent",
+             }}
+             onMouseEnter={(e) => { e.currentTarget.style.color = "#FEDD00"; e.currentTarget.style.borderColor = "rgba(254,221,0,0.4)"; }}
+             onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.borderColor = "var(--border-default)"; }}
+             title="Build a custom stat with AI">
+             <Plus size={10} /> Custom Stat
+           </button>
+         </div>
          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
            {STAT_CARDS.map((card, idx) => {
             const cardId = Object.keys(ALL_STAT_CARDS).find((k) => ALL_STAT_CARDS[k].label === card.label);
@@ -425,18 +443,10 @@ export default function Dashboard() {
                    ×
                  </button>
                </div>
-               <div className="font-black mb-1 relative z-10 leading-none" style={{ color: stat.color, fontSize: 20 }}>Custom</div>
+               <div className="font-mono mb-1 relative z-10 leading-snug truncate" style={{ color: stat.color, fontSize: 11, fontWeight: 700 }} title={stat.formula}>{stat.formula || "Custom"}</div>
                <div className="leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "10.5px" }}>{stat.description}</div>
              </div>
            )}
-           <button
-            onClick={() => setStatBuilderOpen(true)}
-            className="dashboard-widget-card flex items-center justify-center gap-2 border-dashed transition-all hover:border-solid hover:border-[#FEDD00]33"
-            style={{ borderColor: "var(--border-default)", color: "var(--text-muted)", padding: 12, fontSize: 12 }}
-            title="Add a custom stat">
-             <Plus size={14} />
-             <span>Custom Stat</span>
-           </button>
          </div>
        </div>
 
@@ -534,9 +544,15 @@ export default function Dashboard() {
         </div>
         <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
         {insights.length === 0 ?
-      <div className="text-xs py-6 text-center" style={{ color: "var(--text-muted)" }}>
-            No insights generated yet.<br />
-            <span style={{ opacity: 0.6 }}>Visit AI Insights to generate your first analysis.</span>
+      <div className="flex flex-col items-center gap-2 py-6 text-center">
+            <Brain size={18} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>No insights generated yet.</span>
+            <Link
+              to={createPageUrl("AIInsights")}
+              className="text-xs font-semibold px-2.5 py-1 rounded-md"
+              style={{ color: "#FEDD00", background: "rgba(254,221,0,0.08)", border: "1px solid rgba(254,221,0,0.3)" }}>
+              Generate your first analysis →
+            </Link>
           </div> :
 
       <div className="space-y-2">
@@ -608,14 +624,16 @@ export default function Dashboard() {
         }
         .dashboard-widget-card {
           border-radius: 10px;
-          border: 1.5px solid;
-          border-image: linear-gradient(135deg, rgba(254,221,0,0.4) 0%, rgba(64,196,255,0.3) 50%, rgba(254,221,0,0.2) 100%) 1;
-          background: #0a1220;
+          border: 1px solid var(--border-subtle);
+          background: var(--bg-card, var(--bg-elevated));
           padding: 14px;
-          transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+          transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
           position: relative;
           overflow: hidden;
-          box-shadow: inset 0 1px 0 rgba(254,221,0,0.08), 0 0 20px rgba(254,221,0,0.05);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.04),
+            0 1px 2px rgba(0,0,0,0.3),
+            0 4px 12px rgba(0,0,0,0.35);
         }
         /* Zone column wrapper */
         .dashboard-zone {
@@ -624,8 +642,11 @@ export default function Dashboard() {
           gap: 10px;
         }
         .dashboard-widget-card:hover {
-          border-image: linear-gradient(135deg, rgba(254,221,0,0.6) 0%, rgba(64,196,255,0.5) 50%, rgba(254,221,0,0.4) 100%) 1;
-          box-shadow: inset 0 1px 0 rgba(254,221,0,0.15), 0 0 32px rgba(254,221,0,0.15), 0 8px 24px rgba(0,0,0,0.4);
+          border-color: rgba(254,221,0,0.28);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.05),
+            0 0 20px rgba(254,221,0,0.06),
+            0 6px 20px rgba(0,0,0,0.45);
           transform: translateY(-1px);
         }
         .dashboard-widget-card::before {
@@ -681,7 +702,7 @@ export default function Dashboard() {
 
           {/* Quick-access rail + 2-zone cockpit grid */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="grid grid-cols-1 lg:grid-cols-[220px_1.4fr_1fr] gap-3 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1.4fr)_minmax(0,1fr)] gap-3 items-start">
 
               {/* ── Quick-access rail (regional datasets + active gaps) ─ */}
               <div className="lg:sticky lg:top-2">
