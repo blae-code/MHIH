@@ -309,7 +309,8 @@ function LayoutInner({ children, currentPageName }) {
   const [contextPanel, setContextPanel] = useState(null);
 
   // ── Sidebar collapsed sections ───────────────────────────────────────
-  const [collapsedSections, setCollapsedSections] = useState({});
+  // "Analysis Tools" (Policy app specialist tools) starts collapsed to keep the nav lean.
+  const [collapsedSections, setCollapsedSections] = useState({ "Analysis Tools": true });
 
   // ── Sidebar app dropdown ─────────────────────────────────────────────
   const [sidebarAppMenuOpen, setSidebarAppMenuOpen] = useState(false);

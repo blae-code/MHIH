@@ -189,37 +189,40 @@ export const APP_REGISTRY = [
         section: "Intake",
         items: [
           { label: "New Request", page: "PolicyRequestForm", icon: "FileSignature" },
-          { label: "Requests — Table", page: "PolicyRequestTable", icon: "ClipboardCheck" },
-          { label: "Requests — Cards", page: "PolicyRequestCardView", icon: "Layers3" },
+          // Table/Cards views share an in-page toggle — one nav entry covers both
+          { label: "Requests", page: "PolicyRequestTable", icon: "ClipboardCheck" },
         ],
       },
       {
-        section: "Develop",
+        section: "Development",
         items: [
           { label: "Policy Lab", page: "PolicyLab", icon: "FlaskConical" },
           { label: "Recommendations", page: "Recommendations", icon: "ListOrdered" },
-          { label: "Interventions", page: "Interventions", icon: "Activity" },
-          { label: "Backtesting", page: "Backtesting", icon: "BrainCircuit" },
+          { label: "Approvals Inbox", page: "ApprovalsInbox", icon: "ClipboardCheck" },
         ],
       },
       {
-        section: "Evidence",
+        section: "Monitoring",
+        items: [
+          { label: "Watchlists", page: "Watchlists", icon: "BellRing" },
+          { label: "Alerts Center", page: "AlertsCenter", icon: "Siren" },
+          { label: "Workflows", page: "Workflows", icon: "Workflow" },
+        ],
+      },
+      {
+        // Specialist analysis tools — collapsed by default to keep the nav lean
+        section: "Analysis Tools",
         items: [
           { label: "Evidence Explorer", page: "EvidenceExplorer", icon: "Link2" },
           { label: "Conflict Workbench", page: "ConflictWorkbench", icon: "GitCompare" },
           { label: "Geo Equity Map", page: "GeoEquityMap", icon: "MapPinned" },
-        ],
-      },
-      {
-        section: "Monitor",
-        items: [
-          { label: "Watchlists", page: "Watchlists", icon: "BellRing" },
-          { label: "Alerts Center", page: "AlertsCenter", icon: "Siren" },
-          { label: "Approvals Inbox", page: "ApprovalsInbox", icon: "ClipboardCheck" },
-          { label: "Workflows", page: "Workflows", icon: "Workflow" },
+          { label: "Interventions", page: "Interventions", icon: "Activity" },
+          { label: "Backtesting", page: "Backtesting", icon: "BrainCircuit" },
         ],
       },
     ],
+    // Pages owned by this app but reached via in-page navigation, not the sidebar
+    ownedPages: ["PolicyRequestCardView"],
     adminNavItems: SHARED_ADMIN_NAV,
   },
 
@@ -345,6 +348,7 @@ export function getAppForPage(pageName) {
       Array.isArray(s.items) ? s.items : [s]
     );
     if (flatItems.some((i) => i.page === pageName)) return app;
+    if ((app.ownedPages ?? []).includes(pageName)) return app;
     if ((app.adminNavItems ?? []).some((i) => i.page === pageName)) return app;
   }
   // Default: Data & Evidence owns unclaimed pages
