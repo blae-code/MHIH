@@ -11,6 +11,7 @@ import FileUploadPanel from "@/components/workbench/FileUploadPanel";
 import DataTablePanel from "@/components/workbench/DataTablePanel";
 import StatsSummaryPanel from "@/components/workbench/StatsSummaryPanel";
 import ChartsPanel from "@/components/workbench/ChartsPanel";
+import MethodologyNotice from "@/components/workbench/MethodologyNotice";
 import { inferColumns } from "@/lib/quantStats";
 
 const TABS = [
@@ -125,7 +126,8 @@ export default function AnalysisWorkbench() {
             </div>
 
             {/* Panels */}
-            <div className="p-4">
+            <div className="p-4 space-y-4">
+              {tab !== "themes" && <MethodologyNotice toolKey={tab} showGlobal={tab === "table"} />}
               {tab === "table" && <DataTablePanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
               {tab === "stats" && <StatsSummaryPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
               {tab === "charts" && <ChartsPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}

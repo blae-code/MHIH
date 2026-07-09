@@ -13,6 +13,7 @@ import WorkbenchSelect from "@/components/workbench/WorkbenchSelect";
 import ExcerptExplorer from "@/components/workbench/qualitative/ExcerptExplorer";
 import SentimentPanel from "@/components/workbench/qualitative/SentimentPanel";
 import CooccurrencePanel from "@/components/workbench/qualitative/CooccurrencePanel";
+import MethodologyNotice from "@/components/workbench/MethodologyNotice";
 
 const QUAL_TOOLS = [
   { id: "themes", label: "Themes", icon: Layers3 },
@@ -153,6 +154,9 @@ ${sample.map((v, i) => `${i + 1}. ${v}`).join("\n")}`,
           );
         })}
       </div>
+
+      {/* Methodology disclosure for the selected qualitative tool */}
+      <MethodologyNotice toolKey={tool} />
 
       {error && tool === "themes" && (
         <div className="text-xs px-3 py-2 rounded-md"
