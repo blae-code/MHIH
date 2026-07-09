@@ -6,6 +6,7 @@
 import React from "react";
 import { Quote, Hash } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { TOOLTIP_PROPS, AXIS_TICK, GRID_STROKE, CURSOR_FILL } from "@/components/workbench/chartTheme";
 
 const THEME_COLORS = ["#40c4ff", "#00e676", "#FEDD00", "#ff9e40", "#e040fb", "#ff5252", "#69f0ae", "#7c9eff"];
 
@@ -27,18 +28,20 @@ export default function ThemeResults({ result }) {
       )}
 
       {/* Theme prevalence chart */}
-      <ResponsiveContainer width="100%" height={Math.max(160, chartData.length * 34)}>
-        <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-          <YAxis type="category" dataKey="name" width={160} tick={{ fontSize: 11 }} />
-          <Tooltip
-            formatter={(v) => [`${v} responses`, "Mentions"]}
-            contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-default)", borderRadius: 8, fontSize: 11 }}
-          />
-          <Bar dataKey="mentions" radius={[0, 4, 4, 0]} barSize={18} />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="depth-card p-3">
+        <div className="mb-1.5" style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+          Theme Prevalence
+        </div>
+        <ResponsiveContainer width="100%" height={Math.max(160, chartData.length * 34)}>
+          <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} horizontal={false} />
+            <XAxis type="number" tick={AXIS_TICK} allowDecimals={false} axisLine={{ stroke: GRID_STROKE }} tickLine={false} />
+            <YAxis type="category" dataKey="name" width={160} tick={{ ...AXIS_TICK, fontSize: 11, fill: "#8bafd4" }} axisLine={false} tickLine={false} />
+            <Tooltip {...TOOLTIP_PROPS} cursor={CURSOR_FILL} formatter={(v) => [`${v} responses`, "Mentions"]} />
+            <Bar dataKey="mentions" radius={[0, 4, 4, 0]} barSize={18} fillOpacity={0.85} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Theme cards */}
       <div className="grid gap-3 md:grid-cols-2">

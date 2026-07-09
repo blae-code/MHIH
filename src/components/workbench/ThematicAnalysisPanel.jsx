@@ -9,6 +9,7 @@ import { base44 } from "@/api/base44Client";
 import { keywordFrequencies, textColumnStats, countMentions } from "@/lib/textStats";
 import KeywordFrequencyChart from "@/components/workbench/KeywordFrequencyChart";
 import ThemeResults from "@/components/workbench/ThemeResults";
+import WorkbenchSelect from "@/components/workbench/WorkbenchSelect";
 
 export default function ThematicAnalysisPanel({ columns, rows, columnTypes }) {
   const textColumns = useMemo(
@@ -89,20 +90,15 @@ ${sample.map((v, i) => `${i + 1}. ${v}`).join("\n")}`,
   return (
     <div className="space-y-4">
       {/* Column picker + stats */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <label className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-          Text column
-        </label>
-        <select
+      <div className="flex items-end gap-3 flex-wrap">
+        <WorkbenchSelect
+          label="Text column"
           value={column ?? ""}
-          onChange={(e) => { setColumn(e.target.value); setAiResult(null); setError(null); }}
-          className="text-xs rounded-md px-2.5 py-1.5"
-          style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }}
-        >
-          {textColumns.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+          onChange={(v) => { setColumn(v); setAiResult(null); setError(null); }}
+          options={textColumns}
+        />
         {stats && (
-          <span className="tag">
+          <span className="tag mb-1">
             {stats.responses.toLocaleString()} responses · {stats.unique.toLocaleString()} unique ·{" "}
             {stats.avgWords.toFixed(1)} avg words
           </span>
