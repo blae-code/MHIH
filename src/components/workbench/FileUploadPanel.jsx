@@ -27,32 +27,23 @@ export default function FileUploadPanel({ onData, compact = false }) {
         if (!columns.length || !rows.length) throw new Error("No tabular data found in this CSV.");
         onData({ fileName: file.name, columns, rows });
       } else if (ext === "xlsx" || ext === "xls") {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-          file_url,
-          json_schema: {
-            type: "object",
-            properties: {
-              rows: {
-                type: "array",
-                description: "Every data row from the spreadsheet, one object per row, keyed by column header",
-                items: { type: "object", additionalProperties: true },
-              },
-            },
-            required: ["rows"],
-          },
+        if (file.size > 8 * 1024 * 1024) throw new Error("Excel file is too large (max 8 MB). Export it as CSV and try again.");
+        const file_b64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(",")[1]);
+          reader.onerror = () => reject(new Error("Could not read the file."));
+          reader.readAsDataURL(file);
         });
-        if (result.status !== "success") throw new Error(result.details || "Could not extract data from the Excel file.");
-        const out = result.output || {};
-        const rows = Array.isArray(out.rows) ? out.rows : Array.isArray(out) ? out : [];
-        if (!rows.length) throw new Error("No rows found in the Excel file.");
-        const columns = [...new Set(rows.flatMap((r) => Object.keys(r || {})))];
+        const res = await base44.functions.invoke("parseSpreadsheet", { file_b64, file_name: file.name });
+        const { columns, rows, error: parseError } = res.data || {};
+        if (parseError) throw new Error(parseError);
+        if (!rows?.length) throw new Error("No rows found in the Excel file.");
         onData({ fileName: file.name, columns, rows });
       } else {
         throw new Error("Unsupported file type — please upload a .csv, .xlsx, or .xls file.");
       }
     } catch (e) {
-      setError(e.message);
+      setError(e?.response?.data?.error || e.message);
     } finally {
       setLoading(false);
     }
