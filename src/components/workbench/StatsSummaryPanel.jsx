@@ -4,13 +4,14 @@
  * categorical with distribution bars), and correlation analysis.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Sigma, Type, GitCompare } from "lucide-react";
 import { describeNumeric, describeCategorical, correlationMatrix } from "@/lib/quantStats";
 import StatsOverviewStrip from "@/components/workbench/stats/StatsOverviewStrip";
 import NumericStatCard from "@/components/workbench/stats/NumericStatCard";
 import CategoricalStatCard from "@/components/workbench/stats/CategoricalStatCard";
 import CorrelationSection from "@/components/workbench/stats/CorrelationSection";
+import CorrelationVariablePicker from "@/components/workbench/stats/CorrelationVariablePicker";
 
 function SectionHeader({ icon: IconComp, color, title, count }) {
   return (
@@ -39,9 +40,14 @@ export default function StatsSummaryPanel({ columns, rows, columnTypes }) {
     () => catCols.map((c) => ({ name: c, stats: describeCategorical(rows.map((r) => r[c])) })),
     [rows, catCols] // eslint-disable-line react-hooks/exhaustive-deps
   );
+  // Correlation variable selection — defaults to all numeric columns,
+  // resets whenever a new dataset (different column set) is loaded.
+  const [corrCols, setCorrCols] = useState(numericCols);
+  useEffect(() => { setCorrCols(numericCols); }, [numericCols.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const corr = useMemo(
-    () => (numericCols.length >= 2 ? correlationMatrix(rows, numericCols) : null),
-    [rows, numericCols] // eslint-disable-line react-hooks/exhaustive-deps
+    () => (corrCols.length >= 2 ? correlationMatrix(rows, corrCols) : null),
+    [rows, corrCols] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const completeness = useMemo(() => {
@@ -95,10 +101,18 @@ export default function StatsSummaryPanel({ columns, rows, columnTypes }) {
       )}
 
       {/* Correlation analysis */}
-      {corr && (
+      {numericCols.length >= 2 && (
         <div>
-          <SectionHeader icon={GitCompare} color="#00e676" title="Correlation Analysis" count={`${numericCols.length} variables`} />
-          <CorrelationSection corr={corr} numericCols={numericCols} />
+          <SectionHeader icon={GitCompare} color="#00e676" title="Correlation Analysis" count={`${corrCols.length} variables`} />
+          <CorrelationVariablePicker allCols={numericCols} selected={corrCols} onChange={setCorrCols} />
+          {corr ? (
+            <CorrelationSection corr={corr} numericCols={corrCols} />
+          ) : (
+            <div className="text-xs px-3 py-4 rounded-lg text-center"
+              style={{ background: "var(--bg-overlay)", border: "1px dashed var(--border-default)", color: "var(--text-muted)" }}>
+              Select at least 2 variables above to compute the correlation matrix.
+            </div>
+          )}
         </div>
       )}
     </div>
