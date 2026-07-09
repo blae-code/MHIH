@@ -3,8 +3,31 @@
  * strongest correlated variable pairs with strength indicators.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
+
+const MIN_R_OPTIONS = [
+  { value: 0, label: "All strengths" },
+  { value: 0.4, label: "Moderate+ (|r| ≥ 0.4)" },
+  { value: 0.7, label: "Strong only (|r| ≥ 0.7)" },
+];
+
+const selectStyle = {
+  appearance: "none",
+  WebkitAppearance: "none",
+  background: "var(--bg-overlay)",
+  border: "1px solid var(--border-default)",
+  color: "var(--text-primary)",
+  fontSize: 10.5,
+  fontWeight: 500,
+  borderRadius: 6,
+  padding: "3px 18px 3px 8px",
+  width: "100%",
+  cursor: "pointer",
+  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234a6a8a' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 6px center",
+};
 
 function corrColor(v) {
   if (v === null) return "var(--bg-overlay)";
@@ -19,13 +42,24 @@ function strengthLabel(a) {
 }
 
 export default function CorrelationSection({ corr, numericCols }) {
+  // List filters — focus variable + minimum strength. Focus resets if the
+  // focused column is deselected in the correlation variable picker.
+  const [focusCol, setFocusCol] = useState("");
+  const [minR, setMinR] = useState(0);
+  useEffect(() => {
+    if (focusCol && !numericCols.includes(focusCol)) setFocusCol("");
+  }, [numericCols, focusCol]);
+
   const topPairs = useMemo(() => {
     const pairs = [];
     for (let i = 0; i < numericCols.length; i++)
       for (let j = i + 1; j < numericCols.length; j++)
         if (corr[i][j] !== null) pairs.push({ a: numericCols[i], b: numericCols[j], r: corr[i][j] });
-    return pairs.sort((x, y) => Math.abs(y.r) - Math.abs(x.r)).slice(0, 6);
-  }, [corr, numericCols]);
+    return pairs
+      .filter((p) => (!focusCol || p.a === focusCol || p.b === focusCol) && Math.abs(p.r) >= minR)
+      .sort((x, y) => Math.abs(y.r) - Math.abs(x.r))
+      .slice(0, focusCol ? 10 : 6);
+  }, [corr, numericCols, focusCol, minR]);
 
   return (
     <div className="grid gap-3 lg:grid-cols-[1fr_320px]">
@@ -70,7 +104,24 @@ export default function CorrelationSection({ corr, numericCols }) {
         <div style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)" }} className="mb-2">
           Strongest Relationships
         </div>
-        {topPairs.length === 0 && <div className="text-xs" style={{ color: "var(--text-muted)" }}>No computable pairs.</div>}
+        <div className="grid grid-cols-2 gap-1.5 mb-2.5">
+          <select value={focusCol} onChange={(e) => setFocusCol(e.target.value)} style={selectStyle} title="Show only pairs involving this variable">
+            <option value="" style={{ background: "#131f33" }}>All variables</option>
+            {numericCols.map((c) => (
+              <option key={c} value={c} style={{ background: "#131f33" }}>{c}</option>
+            ))}
+          </select>
+          <select value={minR} onChange={(e) => setMinR(Number(e.target.value))} style={selectStyle} title="Minimum correlation strength">
+            {MIN_R_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value} style={{ background: "#131f33" }}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+        {topPairs.length === 0 && (
+          <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+            {focusCol || minR > 0 ? "No pairs match the current filters." : "No computable pairs."}
+          </div>
+        )}
         <div className="space-y-2">
           {topPairs.map((p, i) => {
             const s = strengthLabel(Math.abs(p.r));
