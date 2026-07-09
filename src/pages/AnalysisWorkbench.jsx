@@ -5,7 +5,8 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { FlaskConical, Table2, Sigma, BarChart3, X, FileSpreadsheet } from "lucide-react";
+import { FlaskConical, Table2, Sigma, BarChart3, X, FileSpreadsheet, MessageSquareText } from "lucide-react";
+import ThematicAnalysisPanel from "@/components/workbench/ThematicAnalysisPanel";
 import FileUploadPanel from "@/components/workbench/FileUploadPanel";
 import DataTablePanel from "@/components/workbench/DataTablePanel";
 import StatsSummaryPanel from "@/components/workbench/StatsSummaryPanel";
@@ -16,6 +17,7 @@ const TABS = [
   { id: "table", label: "Data Table", icon: Table2 },
   { id: "stats", label: "Statistics", icon: Sigma },
   { id: "charts", label: "Charts", icon: BarChart3 },
+  { id: "themes", label: "Thematic", icon: MessageSquareText },
 ];
 
 export default function AnalysisWorkbench() {
@@ -127,6 +129,7 @@ export default function AnalysisWorkbench() {
               {tab === "table" && <DataTablePanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
               {tab === "stats" && <StatsSummaryPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
               {tab === "charts" && <ChartsPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
+              {tab === "themes" && <ThematicAnalysisPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
             </div>
           </div>
         </div>
