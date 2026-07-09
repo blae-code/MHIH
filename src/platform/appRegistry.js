@@ -118,7 +118,6 @@ export const APP_REGISTRY = [
           { label: "Data Repository", page: "DataRepository", icon: "Database" },
           { label: "Metric Catalog", page: "MetricCatalog", icon: "BookOpen" },
           { label: "Data Sources", page: "DataSources", icon: "Link2" },
-          { label: "My Sources", page: "MyDataSources", icon: "Database" },
           { label: "Data Management", page: "DataQuality", icon: "ShieldCheck" },
           { label: "Data Governance", page: "DataGovernance", icon: "Shield" },
           { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },

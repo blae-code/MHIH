@@ -40,7 +40,8 @@ export const PAGE_ROUTE_MAP = {
   Reporting: "/os/apps/data-evidence/reporting",
   DataRepository: "/os/apps/data-evidence/repository",
   DataSources: "/os/apps/data-evidence/sources",
-  MyDataSources: "/os/apps/data-evidence/my-sources",
+  // My Sources merged into Data Sources — alias keeps old links working
+  MyDataSources: "/os/apps/data-evidence/sources",
   DataQuality: "/os/apps/data-evidence/quality",
   // Data Prep merged into the Analysis Workbench — alias keeps old links working
   DataPrep: "/os/apps/data-evidence/workbench",

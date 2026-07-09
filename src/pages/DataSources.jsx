@@ -26,6 +26,7 @@ import DiscoveryPanel from "@/components/datasources/DiscoveryPanel";
 import RecentSyncsTile from "@/components/datasources/RecentSyncsTile";
 import TopCategoriesTile from "@/components/datasources/TopCategoriesTile";
 import HowToUseTile from "@/components/datasources/HowToUseTile";
+import NeedsAttentionTile from "@/components/datasources/NeedsAttentionTile";
 import ZoneHeader from "@/components/shell/ZoneHeader";
 import ListFilterBar from "@/components/shell/ListFilterBar";
 import { getSourceVisuals } from "@/components/datasources/sourceVisuals";
@@ -36,6 +37,7 @@ const CATEGORY_OPTIONS = CATEGORIES.filter(c => c !== "all");
 const STATUSES = ["all","active","inactive","pending","error"];
 const STATUS_OPTIONS = STATUSES.filter(s => s !== "all");
 const REGIONS = ["BC","Northern BC","Interior BC","Fraser","Vancouver Island","Vancouver Coastal","Provincial"];
+const SYNC_FREQS = ["manual","daily","weekly","monthly"];
 const SORT_OPTIONS = [
   { value: "updated_desc", label: "Recently Updated" },
   { value: "name_asc", label: "Name A–Z" },
@@ -85,6 +87,7 @@ export default function DataSources() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterRegion, setFilterRegion] = useState("all");
+  const [filterSync, setFilterSync] = useState("all");
   const [sortBy, setSortBy] = useState("updated_desc");
 
   const loadFailedCount = () => {
@@ -194,6 +197,7 @@ export default function DataSources() {
     if (filterCategory !== "all") list = list.filter(s => s.category === filterCategory);
     if (filterStatus !== "all") list = list.filter(s => s.status === filterStatus);
     if (filterRegion !== "all") list = list.filter(s => (s.metadata?.region || s.region) === filterRegion);
+    if (filterSync !== "all") list = list.filter(s => (s.sync_frequency || "manual") === filterSync);
     list.sort((a, b) => {
       if (sortBy === "name_asc") return (a.name || "").localeCompare(b.name || "");
       if (sortBy === "name_desc") return (b.name || "").localeCompare(a.name || "");
@@ -203,7 +207,7 @@ export default function DataSources() {
       return new Date(b.updated_date) - new Date(a.updated_date);
     });
     return list;
-  }, [sources, search, filterCategory, filterStatus, filterRegion, sortBy]);
+  }, [sources, search, filterCategory, filterStatus, filterRegion, filterSync, sortBy]);
 
   // Recent syncs (insights zone)
   const recentSyncs = useMemo(() => {
@@ -440,6 +444,10 @@ export default function DataSources() {
               statusOptions={STATUS_OPTIONS}
               extra={
                 <>
+                  <select value={filterSync} onChange={e => setFilterSync(e.target.value)} style={selectStyle}>
+                    <option value="all">All Sync</option>
+                    {SYNC_FREQS.map(f => <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>)}
+                  </select>
                   <div className="flex items-center gap-1">
                     <ArrowUpDown size={11} style={{ color: "var(--text-muted)" }} />
                     <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
@@ -514,6 +522,9 @@ export default function DataSources() {
               count={`${recentSyncs.length} recent`}
               hint="discovery · activity · tips"
             />
+
+            {/* Needs attention (merged from My Sources) */}
+            <NeedsAttentionTile sources={sources} onSelect={(s) => { setEditingSource(s); setShowEditModal(true); }} />
 
             {/* AI discovery queue */}
             <DiscoveryPanel onApproved={load} />

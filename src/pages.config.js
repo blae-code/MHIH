@@ -37,7 +37,6 @@ import Interventions from './pages/Interventions';
 import KnowledgeAdmin from './pages/KnowledgeAdmin';
 import MetricCatalog from './pages/MetricCatalog';
 import MetricForge from './pages/MetricForge';
-import MyDataSources from './pages/MyDataSources';
 import Onboarding from './pages/Onboarding';
 import PolicyHome from './pages/PolicyHome';
 import PolicyLab from './pages/PolicyLab';
@@ -93,7 +92,6 @@ export const PAGES = {
     "KnowledgeAdmin": KnowledgeAdmin,
     "MetricCatalog": MetricCatalog,
     "MetricForge": MetricForge,
-    "MyDataSources": MyDataSources,
     "Onboarding": Onboarding,
     "PolicyHome": PolicyHome,
     "PolicyLab": PolicyLab,
