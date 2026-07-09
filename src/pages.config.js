@@ -31,7 +31,6 @@ import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
 import EvidenceExplorer from './pages/EvidenceExplorer';
 import EvidenceSnapshots from './pages/EvidenceSnapshots';
-import Export from './pages/Export';
 import GeoEquityMap from './pages/GeoEquityMap';
 import HansardIntel from './pages/HansardIntel';
 import Interventions from './pages/Interventions';
@@ -88,7 +87,6 @@ export const PAGES = {
     "DataSources": DataSources,
     "EvidenceExplorer": EvidenceExplorer,
     "EvidenceSnapshots": EvidenceSnapshots,
-    "Export": Export,
     "GeoEquityMap": GeoEquityMap,
     "HansardIntel": HansardIntel,
     "Interventions": Interventions,

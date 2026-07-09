@@ -7,13 +7,14 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { FlaskConical, Table2, Sigma, BarChart3, X, FileSpreadsheet, MessageSquareText, Wrench } from "lucide-react";
+import { FlaskConical, Table2, Sigma, BarChart3, X, FileSpreadsheet, MessageSquareText, Wrench, Download } from "lucide-react";
 import ThematicAnalysisPanel from "@/components/workbench/ThematicAnalysisPanel";
 import FileUploadPanel from "@/components/workbench/FileUploadPanel";
 import DataTablePanel from "@/components/workbench/DataTablePanel";
 import StatsSummaryPanel from "@/components/workbench/StatsSummaryPanel";
 import ChartsPanel from "@/components/workbench/ChartsPanel";
 import DataPrepPanel from "@/components/workbench/DataPrepPanel";
+import ExportPanel from "@/components/workbench/ExportPanel";
 import MethodologyNotice from "@/components/workbench/MethodologyNotice";
 import CommentAnchor from "@/components/comments/CommentAnchor";
 import { inferColumns } from "@/lib/quantStats";
@@ -26,6 +27,7 @@ const TABS = [
   { id: "charts", label: "Charts", icon: BarChart3, needsDataset: true },
   { id: "themes", label: "Thematic", icon: MessageSquareText, needsDataset: true },
   { id: "prep", label: "Data Prep", icon: Wrench, needsDataset: false },
+  { id: "export", label: "Export", icon: Download, needsDataset: false },
 ];
 
 export default function AnalysisWorkbench() {
@@ -37,8 +39,8 @@ export default function AnalysisWorkbench() {
     [dataset]
   );
 
-  // Without a dataset only the prep tab is usable
-  const activeTab = dataset ? tab : "prep";
+  // Without a dataset only the dataset-independent tabs are usable
+  const activeTab = dataset || !TABS.find((t) => t.id === tab)?.needsDataset ? tab : "prep";
 
   return (
     <div className="p-5 max-w-6xl mx-auto">
@@ -51,7 +53,7 @@ export default function AnalysisWorkbench() {
         <div>
           <h1 className="text-lg" style={{ color: "var(--text-primary)" }}>Analysis Workbench</h1>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Upload Excel or CSV files for quantitative analysis — tables, statistics, visualizations, and data prep pipelines
+            Upload Excel or CSV files for quantitative analysis — tables, statistics, visualizations, data prep, and export & publish
           </p>
         </div>
       </div>
@@ -150,7 +152,7 @@ export default function AnalysisWorkbench() {
 
           {/* Panels */}
           <div className="p-4 space-y-4">
-            {dataset && activeTab !== "themes" && activeTab !== "prep" && (
+            {dataset && activeTab !== "themes" && activeTab !== "prep" && activeTab !== "export" && (
               <MethodologyNotice toolKey={activeTab} showGlobal={activeTab === "table"} />
             )}
             {activeTab === "table" && dataset && <DataTablePanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
@@ -158,6 +160,7 @@ export default function AnalysisWorkbench() {
             {activeTab === "charts" && dataset && <ChartsPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
             {activeTab === "themes" && dataset && <ThematicAnalysisPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
             {activeTab === "prep" && <DataPrepPanel dataset={dataset} />}
+            {activeTab === "export" && <ExportPanel />}
           </div>
         </div>
       </div>

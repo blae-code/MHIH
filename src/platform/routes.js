@@ -45,7 +45,8 @@ export const PAGE_ROUTE_MAP = {
   // Data Prep merged into the Analysis Workbench — alias keeps old links working
   DataPrep: "/os/apps/data-evidence/workbench",
   DataGovernance: "/os/apps/data-evidence/governance",
-  Export: "/os/apps/data-evidence/export",
+  // Export merged into the Analysis Workbench — alias keeps old links working
+  Export: "/os/apps/data-evidence/workbench",
   MetricCatalog: "/os/apps/data-evidence/metric-catalog",
   MetricForge: "/os/apps/data-evidence/metric-forge",
   EvidenceSnapshots: "/os/apps/data-evidence/evidence-snapshots",
