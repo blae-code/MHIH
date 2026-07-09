@@ -52,6 +52,31 @@ export function textColumnStats(values) {
   };
 }
 
+/**
+ * Top keyword pair co-occurrences: which of the top keywords appear together
+ * in the same response. Returns [{a, b, count}] sorted by count.
+ */
+export function cooccurrencePairs(values, topN = 15) {
+  const topWords = keywordFrequencies(values, 30).map((k) => k.word);
+  const topSet = new Set(topWords);
+  const pairCounts = {};
+  values.forEach((v) => {
+    const present = [...new Set(tokenize(v))].filter((w) => topSet.has(w)).sort();
+    for (let i = 0; i < present.length; i++)
+      for (let j = i + 1; j < present.length; j++) {
+        const key = `${present[i]}||${present[j]}`;
+        pairCounts[key] = (pairCounts[key] || 0) + 1;
+      }
+  });
+  return Object.entries(pairCounts)
+    .sort((x, y) => y[1] - x[1])
+    .slice(0, topN)
+    .map(([key, count]) => {
+      const [a, b] = key.split("||");
+      return { a, b, count };
+    });
+}
+
 /** Count how many responses mention any of the given keywords (case-insensitive). */
 export function countMentions(values, keywords) {
   const kws = (keywords || []).map((k) => String(k).toLowerCase()).filter(Boolean);
