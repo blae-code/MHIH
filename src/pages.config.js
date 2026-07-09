@@ -26,7 +26,6 @@ import ConflictWorkbench from './pages/ConflictWorkbench';
 import Dashboard from './pages/Dashboard';
 import DataAnalyst from './pages/DataAnalyst';
 import DataGovernance from './pages/DataGovernance';
-import DataPrep from './pages/DataPrep';
 import DataQuality from './pages/DataQuality';
 import DataRepository from './pages/DataRepository';
 import DataSources from './pages/DataSources';
@@ -84,7 +83,6 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "DataAnalyst": DataAnalyst,
     "DataGovernance": DataGovernance,
-    "DataPrep": DataPrep,
     "DataQuality": DataQuality,
     "DataRepository": DataRepository,
     "DataSources": DataSources,

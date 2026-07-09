@@ -42,7 +42,8 @@ export const PAGE_ROUTE_MAP = {
   DataSources: "/os/apps/data-evidence/sources",
   MyDataSources: "/os/apps/data-evidence/my-sources",
   DataQuality: "/os/apps/data-evidence/quality",
-  DataPrep: "/os/apps/data-evidence/prep",
+  // Data Prep merged into the Analysis Workbench — alias keeps old links working
+  DataPrep: "/os/apps/data-evidence/workbench",
   DataGovernance: "/os/apps/data-evidence/governance",
   Export: "/os/apps/data-evidence/export",
   MetricCatalog: "/os/apps/data-evidence/metric-catalog",

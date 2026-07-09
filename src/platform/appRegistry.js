@@ -120,7 +120,6 @@ export const APP_REGISTRY = [
           { label: "Data Sources", page: "DataSources", icon: "Link2" },
           { label: "My Sources", page: "MyDataSources", icon: "Database" },
           { label: "Data Quality", page: "DataQuality", icon: "ShieldCheck" },
-          { label: "Data Prep", page: "DataPrep", icon: "Wrench" },
           { label: "Governance", page: "DataGovernance", icon: "Shield" },
           { label: "Evidence Snapshots", page: "EvidenceSnapshots", icon: "Camera" },
           { label: "Export", page: "Export", icon: "FileDown" },
