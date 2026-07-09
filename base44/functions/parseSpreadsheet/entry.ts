@@ -22,6 +22,21 @@ Deno.serve(async (req) => {
     if (!sheetName) return Response.json({ error: 'No sheets found in the file' }, { status: 400 });
 
     const sheet = workbook.Sheets[sheetName];
+
+    // Some Excel files carry a stale/truncated "!ref" dimension record, which
+    // makes sheet_to_json silently drop rows/columns. Recompute the true
+    // extent from the actual cell addresses present in the sheet.
+    let maxR = -1, maxC = -1;
+    for (const addr of Object.keys(sheet)) {
+      if (addr.startsWith('!')) continue;
+      const cell = XLSX.utils.decode_cell(addr);
+      if (cell.r > maxR) maxR = cell.r;
+      if (cell.c > maxC) maxC = cell.c;
+    }
+    if (maxR >= 0) {
+      sheet['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxR, c: maxC } });
+    }
+
     // defval: "" keeps empty cells so all rows share the same keys
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
     if (!rawRows.length) return Response.json({ error: 'No data rows found in the first sheet' }, { status: 400 });

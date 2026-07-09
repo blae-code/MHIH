@@ -69,26 +69,65 @@ export default function AnalysisWorkbench() {
             </button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 rounded-lg p-1 w-fit" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
-            {TABS.map((t) => (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all"
-                style={{
-                  background: tab === t.id ? "rgba(64,196,255,0.14)" : "transparent",
-                  color: tab === t.id ? "#40c4ff" : "var(--text-secondary)",
-                  border: `1px solid ${tab === t.id ? "rgba(64,196,255,0.35)" : "transparent"}`,
-                }}>
-                <t.icon size={12} /> {t.label}
-              </button>
-            ))}
-          </div>
+          {/* Tabs + attached panel */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              border: "1px solid var(--border-subtle)",
+              background: "var(--bg-card, var(--bg-elevated))",
+              boxShadow:
+                "0 1px 0 rgba(255,255,255,0.04) inset, 0 2px 4px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div
+              className="flex items-end px-3 pt-2"
+              style={{
+                background: "linear-gradient(180deg, var(--bg-overlay) 0%, var(--bg-elevated) 100%)",
+                borderBottom: "1px solid var(--border-subtle)",
+              }}
+            >
+              {TABS.map((t) => {
+                const active = tab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className="relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all"
+                    style={{
+                      color: active ? "#40c4ff" : "var(--text-secondary)",
+                      background: active
+                        ? "linear-gradient(180deg, rgba(64,196,255,0.10) 0%, rgba(64,196,255,0.02) 100%)"
+                        : "transparent",
+                      borderRadius: "8px 8px 0 0",
+                      border: active ? "1px solid var(--border-default)" : "1px solid transparent",
+                      borderBottom: "none",
+                      marginBottom: -1,
+                    }}
+                  >
+                    <t.icon size={13} style={{ opacity: active ? 1 : 0.65 }} />
+                    {t.label}
+                    {active && (
+                      <span
+                        aria-hidden
+                        style={{
+                          position: "absolute", left: 10, right: 10, top: 0, height: 2,
+                          borderRadius: "0 0 2px 2px",
+                          background: "#40c4ff",
+                          boxShadow: "0 0 8px rgba(64,196,255,0.7)",
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Panels */}
-          <div className="depth-card-lg p-4">
-            {tab === "table" && <DataTablePanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
-            {tab === "stats" && <StatsSummaryPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
-            {tab === "charts" && <ChartsPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
+            {/* Panels */}
+            <div className="p-4">
+              {tab === "table" && <DataTablePanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
+              {tab === "stats" && <StatsSummaryPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
+              {tab === "charts" && <ChartsPanel columns={dataset.columns} rows={dataset.rows} columnTypes={columnTypes} />}
+            </div>
           </div>
         </div>
       )}

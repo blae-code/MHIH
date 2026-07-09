@@ -8,6 +8,26 @@ import { toNumber } from "@/lib/quantStats";
 
 const PAGE_SIZE = 25;
 
+const thStyle = {
+  background: "var(--bg-overlay)",
+  color: "var(--text-secondary)",
+  fontSize: 10.5,
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  padding: "9px 12px",
+  borderBottom: "1px solid var(--border-default)",
+  boxShadow: "0 1px 0 rgba(255,255,255,0.03) inset",
+  textAlign: "left",
+};
+
+const tdStyle = {
+  padding: "7px 12px",
+  borderBottom: "1px solid var(--border-subtle)",
+  color: "var(--text-primary)",
+  fontSize: 12,
+};
+
 export default function DataTablePanel({ columns, rows, columnTypes }) {
   const [sortCol, setSortCol] = useState(null);
   const [sortDir, setSortDir] = useState(1);
@@ -39,34 +59,63 @@ export default function DataTablePanel({ columns, rows, columnTypes }) {
 
   return (
     <div>
-      <div className="overflow-auto rounded-lg" style={{ border: "1px solid var(--border-subtle)", maxHeight: 480 }}>
-        <table className="data-table w-full" style={{ borderCollapse: "collapse" }}>
+      <div
+        className="overflow-auto rounded-lg"
+        style={{
+          border: "1px solid var(--border-default)",
+          maxHeight: 480,
+          boxShadow: "inset 0 1px 4px rgba(0,0,0,0.35)",
+        }}
+      >
+        <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
           <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
             <tr>
-              <th style={{ width: 44 }}>#</th>
-              {columns.map((c) => (
-                <th key={c} className="cursor-pointer select-none" onClick={() => toggleSort(c)} title="Click to sort">
-                  <span className="inline-flex items-center gap-1">
-                    {c}
-                    <span className="tag" style={{ fontSize: 8, padding: "0 4px", textTransform: "uppercase" }}>
-                      {typeOf(c) === "numeric" ? "num" : "cat"}
+              <th style={{ ...thStyle, width: 44 }}>#</th>
+              {columns.map((c) => {
+                const numeric = typeOf(c) === "numeric";
+                return (
+                  <th key={c} className="cursor-pointer select-none" onClick={() => toggleSort(c)} title="Click to sort"
+                    style={{ ...thStyle, background: sortCol === c ? "var(--bg-hover)" : thStyle.background }}>
+                    <span className="inline-flex items-center gap-1.5" style={{ whiteSpace: "nowrap" }}>
+                      {c}
+                      <span
+                        style={{
+                          fontSize: 8, fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+                          textTransform: "uppercase", letterSpacing: "0.06em",
+                          color: numeric ? "#40c4ff" : "var(--text-muted)",
+                          background: numeric ? "rgba(64,196,255,0.10)" : "var(--bg-overlay)",
+                          border: `1px solid ${numeric ? "rgba(64,196,255,0.30)" : "var(--border-subtle)"}`,
+                        }}
+                      >
+                        {numeric ? "num" : "cat"}
+                      </span>
+                      {sortCol === c && (sortDir === 1
+                        ? <ArrowUp size={10} style={{ color: "#40c4ff" }} />
+                        : <ArrowDown size={10} style={{ color: "#40c4ff" }} />)}
                     </span>
-                    {sortCol === c && (sortDir === 1 ? <ArrowUp size={10} /> : <ArrowDown size={10} />)}
-                  </span>
-                </th>
-              ))}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
             {pageRows.map((r, i) => (
-              <tr key={i}>
-                <td style={{ color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+              <tr
+                key={i}
+                style={{ background: i % 2 === 1 ? "rgba(255,255,255,0.02)" : "transparent" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 1 ? "rgba(255,255,255,0.02)" : "transparent")}
+              >
+                <td style={{ ...tdStyle, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
                   {page * PAGE_SIZE + i + 1}
                 </td>
                 {columns.map((c) => (
-                  <td key={c} style={typeOf(c) === "numeric" ? { fontVariantNumeric: "tabular-nums", textAlign: "right" } : {}}>
+                  <td key={c} style={{
+                    ...tdStyle,
+                    ...(typeOf(c) === "numeric" ? { fontVariantNumeric: "tabular-nums", textAlign: "right" } : {}),
+                  }}>
                     {r[c] === "" || r[c] === null || r[c] === undefined
-                      ? <span style={{ color: "var(--text-muted)" }}>—</span>
+                      ? <span style={{ color: "var(--text-muted)", opacity: 0.6 }}>—</span>
                       : String(r[c])}
                   </td>
                 ))}
