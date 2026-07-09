@@ -55,8 +55,10 @@ export const PAGE_ROUTE_MAP = {
   KnowledgeAdmin: "/os/apps/intelligence/knowledge",
   HansardIntel: "/os/apps/intelligence/hansard",
 
-  // ── Policy Workbench app ──────────────────────────────────────────────
-  PolicyLab: "/os/apps/policy-workbench",
+  // ── Policy app (merged Workbench + Intake) ────────────────────────────
+  PolicyHome: "/os/apps/policy-workbench",
+  PolicyStudio: "/os/apps/policy-workbench/studio",
+  PolicyLab: "/os/apps/policy-workbench/lab",
   Recommendations: "/os/apps/policy-workbench/recommendations",
   Interventions: "/os/apps/policy-workbench/interventions",
   Backtesting: "/os/apps/policy-workbench/backtesting",
@@ -68,7 +70,7 @@ export const PAGE_ROUTE_MAP = {
   ApprovalsInbox: "/os/apps/policy-workbench/approvals",
   Workflows: "/os/apps/policy-workbench/workflows",
 
-  // ── Policy Intake ─────────────────────────────────────────────────────
+  // ── Policy app — Intake section (legacy /os/apps/policy-intake paths kept) ─
   PolicyRequestTable: "/os/apps/policy-intake",
   PolicyRequestForm: "/os/apps/policy-intake/new",
   PolicyRequestCardView: "/os/apps/policy-intake/cards",
@@ -79,11 +81,6 @@ export const PAGE_ROUTE_MAP = {
   ResearchEvaluation: "/os/apps/research-evaluation",
   ProvincialWellness: "/os/apps/provincial-wellness",
   ContractsReporting: "/os/apps/contracts-reporting",
-
-  // ── Legacy / dropped from primary nav but still routable ─────────────
-  // PolicyStudio was folded into Policy Workbench; keep the route so any
-  // remaining links don't 404.
-  PolicyStudio: "/os/apps/policy-workbench",
 
   // ── Shared admin (appears under any app for admins) ──────────────────
   Team: "/os/admin/team",

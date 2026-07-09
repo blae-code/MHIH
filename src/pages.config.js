@@ -41,6 +41,7 @@ import MetricCatalog from './pages/MetricCatalog';
 import MetricForge from './pages/MetricForge';
 import MyDataSources from './pages/MyDataSources';
 import Onboarding from './pages/Onboarding';
+import PolicyHome from './pages/PolicyHome';
 import PolicyLab from './pages/PolicyLab';
 import PredictiveAnalytics from './pages/PredictiveAnalytics';
 import Recommendations from './pages/Recommendations';
@@ -99,6 +100,7 @@ export const PAGES = {
     "MetricForge": MetricForge,
     "MyDataSources": MyDataSources,
     "Onboarding": Onboarding,
+    "PolicyHome": PolicyHome,
     "PolicyLab": PolicyLab,
     "PredictiveAnalytics": PredictiveAnalytics,
     "Recommendations": Recommendations,

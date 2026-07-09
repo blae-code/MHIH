@@ -163,21 +163,36 @@ export const APP_REGISTRY = [
     adminNavItems: SHARED_ADMIN_NAV,
   },
 
-  // ── Policy Workbench ──────────────────────────────────────────────────
-  // Active policy operations — develop, evaluate, approve, monitor.
-  // (Distinct from "Policy Studio" scaffold which is folded in here.)
+  // ── Policy ────────────────────────────────────────────────────────────
+  // The full policy lifecycle in one app: intake → develop → evidence →
+  // monitor. (Merged from the former Policy Workbench + Policy Intake apps.)
   {
     id: "policy-workbench",
-    name: "Policy Workbench",
+    name: "Policy",
     shortName: "Policy",
     description:
-      "Develop, evaluate, approve, and monitor policy work — labs, recommendations, watchlists, and approvals.",
+      "The full policy lifecycle — request intake, development labs, evidence, recommendations, approvals, and monitoring.",
     icon: "Scale",
     accent: "#f472b6",
-    landingPage: "PolicyLab",
+    landingPage: "PolicyHome",
     status: APP_STATUS.ACTIVE,
     roles: ALL_ROLES,
     navItems: [
+      {
+        section: "Overview",
+        items: [
+          { label: "Policy Home", page: "PolicyHome", icon: "LayoutDashboard" },
+          { label: "Policy Studio", page: "PolicyStudio", icon: "Scale" },
+        ],
+      },
+      {
+        section: "Intake",
+        items: [
+          { label: "New Request", page: "PolicyRequestForm", icon: "FileSignature" },
+          { label: "Requests — Table", page: "PolicyRequestTable", icon: "ClipboardCheck" },
+          { label: "Requests — Cards", page: "PolicyRequestCardView", icon: "Layers3" },
+        ],
+      },
       {
         section: "Develop",
         items: [
@@ -204,27 +219,6 @@ export const APP_REGISTRY = [
           { label: "Workflows", page: "Workflows", icon: "Workflow" },
         ],
       },
-    ],
-    adminNavItems: SHARED_ADMIN_NAV,
-  },
-
-  // ── Policy Intake ─────────────────────────────────────────────────────
-  // Lightweight request intake — distinct from the workbench.
-  {
-    id: "policy-intake",
-    name: "Policy Intake",
-    shortName: "Intake",
-    description:
-      "Submit, triage, assign, and track policy assistance requests across the ministry.",
-    icon: "FileSignature",
-    accent: "#fbbf24",
-    landingPage: "PolicyRequestTable",
-    status: APP_STATUS.ACTIVE,
-    roles: ALL_ROLES,
-    navItems: [
-      { label: "New Request", page: "PolicyRequestForm", icon: "FileSignature" },
-      { label: "Requests — Table", page: "PolicyRequestTable", icon: "ClipboardCheck" },
-      { label: "Requests — Cards", page: "PolicyRequestCardView", icon: "Layers3" },
     ],
     adminNavItems: SHARED_ADMIN_NAV,
   },

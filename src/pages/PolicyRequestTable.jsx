@@ -324,6 +324,15 @@ export function Header({
   view,
 }) {
   const filtersActive = (search && search.length > 0) || statusFilter !== "all";
+  const CLOSED = ["completed", "rejected", "closed"];
+  const today = new Date().toISOString().slice(0, 10);
+  const openRows = rows.filter((r) => !CLOSED.includes(r.current_status));
+  const headerStats = [
+    { label: "open", value: openRows.length, color: "#40c4ff" },
+    { label: "unassigned", value: openRows.filter((r) => !r.assigned_to_user_id).length, color: "#FEDD00" },
+    { label: "overdue", value: openRows.filter((r) => r.required_completion_date && r.required_completion_date < today).length, color: "#ff4d4f" },
+    { label: "critical", value: openRows.filter((r) => r.urgency === "critical").length, color: "#fb923c" },
+  ];
   return (
     <div className="px-6 py-4 border-b shrink-0"
       style={{
@@ -332,13 +341,25 @@ export function Header({
       }}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
-          <div className="dashboard-section-label">Red River Module · Policy Requests</div>
+          <div className="dashboard-section-label">Policy · Intake</div>
           <h1 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
             All Policy Requests
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-            {rows.length} total · grouped by assignee
-          </p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{rows.length} total</span>
+            {headerStats.map((s) => (
+              <span
+                key={s.label}
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full tabular-nums"
+                style={{
+                  fontSize: 10, fontWeight: 700, color: s.color,
+                  background: s.color + "12", border: `1px solid ${s.color}44`,
+                }}
+              >
+                {s.value} {s.label}
+              </span>
+            ))}
+          </div>
           <button
             onClick={onReload}
             disabled={loading}
