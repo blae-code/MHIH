@@ -407,7 +407,7 @@ export default function Dashboard() {
                 background: `linear-gradient(135deg, ${card.bgColor || "rgba(254,221,0,0.03)"} 0%, var(--bg-elevated) 100%)`,
                 border: `1.5px solid ${card.color}33`,
                 cursor: "help",
-                padding: 12
+                padding: 10
               }}>
                  {/* Accent line */}
                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${card.color} 0%, transparent 100%)` }} />
@@ -421,7 +421,7 @@ export default function Dashboard() {
                      <HelpCircle size={10} style={{ color: card.color, opacity: 0.5 }} />
                    </div>
                  </div>
-                 <div className="font-black mb-1 relative z-10 leading-none" style={{ color: card.color, textShadow: `0 2px 8px ${card.color}18`, fontSize: 26 }}>{card.value}</div>
+                 <div className="font-black mb-1 relative z-10 leading-none" style={{ color: card.color, textShadow: `0 2px 8px ${card.color}18`, fontSize: 22 }}>{card.value}</div>
                  <div className="leading-snug relative z-10" style={{ color: "var(--text-secondary)", fontSize: "10.5px" }}>{card.desc}</div>
                </div>);
 
@@ -431,7 +431,7 @@ export default function Dashboard() {
            style={{
             background: `linear-gradient(135deg, ${stat.color}08 0%, var(--bg-elevated) 100%)`,
             border: `1.5px solid ${stat.color}33`,
-            padding: 12
+            padding: 10
            }}>
                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${stat.color} 0%, transparent 100%)` }} />
                <div className="flex items-start justify-between mb-2 relative z-10">
@@ -542,7 +542,6 @@ export default function Dashboard() {
             <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
-        <div className="text-xs mb-3 relative z-10" style={{ color: "var(--text-muted)", opacity: 0.7 }}>AI-generated analysis of your data</div>
         {insights.length === 0 ?
       <div className="flex flex-col items-center gap-2 py-6 text-center">
             <Brain size={18} style={{ color: "var(--text-muted)", opacity: 0.5 }} />
@@ -556,7 +555,7 @@ export default function Dashboard() {
           </div> :
 
       <div className="space-y-2">
-            {insights.slice(0, 4).map((ins) =>
+            {insights.slice(0, 3).map((ins) =>
         <div key={ins.id} className="p-2.5 rounded-md" style={{ background: "var(--bg-overlay)", border: "1px solid var(--border-subtle)" }}>
                 <div className="text-xs font-semibold mb-1 leading-tight" style={{ color: "var(--accent-primary)" }}>{ins.title}</div>
                 <div className="text-xs line-clamp-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{ins.content}</div>
@@ -580,7 +579,7 @@ export default function Dashboard() {
   const visibleCount = widgets.filter((w) => w.visible !== false).length;
 
   return (
-    <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
+    <div className="h-full flex flex-col overflow-hidden relative" style={{ background: "var(--bg-surface)" }}>
       {/* Ambient page glow — matches Home-page depth treatment */}
       <div
         aria-hidden
@@ -626,7 +625,7 @@ export default function Dashboard() {
           border-radius: 10px;
           border: 1px solid var(--border-subtle);
           background: var(--bg-card, var(--bg-elevated));
-          padding: 14px;
+          padding: 12px;
           transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
           position: relative;
           overflow: hidden;
@@ -672,8 +671,8 @@ export default function Dashboard() {
         }
       `}</style>
       
-      {/* Main container — page scrolls naturally; widgets use natural heights */}
-      <div className="flex flex-col p-3 relative" style={{ zIndex: 1 }}>
+      {/* Main container — fixed to viewport on desktop (zones scroll internally); mobile scrolls naturally */}
+      <div className="flex-1 min-h-0 flex flex-col p-3 relative overflow-y-auto lg:overflow-hidden" style={{ zIndex: 1 }}>
 
         <DashboardHeader
           title={dashboardTitle}
@@ -690,8 +689,8 @@ export default function Dashboard() {
         />
 
         {/* Cockpit layout — stat strip on top, 2-zone cockpit below.
-            Widgets use natural content heights; page scrolls vertically as needed. */}
-        <div className="flex flex-col gap-3 mt-3">
+            On desktop the zones fill remaining height and scroll internally. */}
+        <div className="flex-1 min-h-0 flex flex-col gap-2.5 mt-2.5">
 
           {/* Stat strip — always at top, full width, not draggable */}
           {isVisible("stat_cards") && (
@@ -702,10 +701,10 @@ export default function Dashboard() {
 
           {/* Quick-access rail + 2-zone cockpit grid */}
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1.4fr)_minmax(0,1fr)] gap-3 items-start">
+            <div className="lg:flex-1 lg:min-h-0 grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1.4fr)_minmax(0,1fr)] gap-3 items-start lg:items-stretch">
 
               {/* ── Quick-access rail (regional datasets + active gaps) ─ */}
-              <div className="lg:sticky lg:top-2">
+              <div className="lg:h-full lg:min-h-0 lg:overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
                 <QuickAccessSidebar metrics={metrics} sources={sources} />
               </div>
 
@@ -713,7 +712,7 @@ export default function Dashboard() {
               {/* ── Left zone: Analytics ─────────────────────────── */}
               <Droppable droppableId="zone-analytics" type="WIDGET">
                 {(provided, snapshot) => (
-                  <div className="dashboard-zone flex flex-col">
+                  <div className="dashboard-zone flex flex-col lg:h-full lg:min-h-0">
                     <ZoneHeader
                       label="Analytics"
                       title="Health Indicators"
@@ -723,8 +722,8 @@ export default function Dashboard() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="flex flex-col gap-2.5"
-                      style={{ background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
+                      className="flex flex-col gap-2.5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"
+                      style={{ scrollbarWidth: "thin", background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
                     >
                       {widgets
                         .filter((w) => ANALYTICS_IDS.includes(w.id) && w.visible !== false)
@@ -755,7 +754,7 @@ export default function Dashboard() {
               {/* ── Right zone: Intelligence ─────────────────────── */}
               <Droppable droppableId="zone-intelligence" type="WIDGET">
                 {(provided, snapshot) => (
-                  <div className="dashboard-zone flex flex-col">
+                  <div className="dashboard-zone flex flex-col lg:h-full lg:min-h-0">
                     <ZoneHeader
                       label="Intelligence"
                       title="Insights & Activity"
@@ -765,8 +764,8 @@ export default function Dashboard() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="flex flex-col gap-2.5"
-                      style={{ background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
+                      className="flex flex-col gap-2.5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"
+                      style={{ scrollbarWidth: "thin", background: snapshot.isDraggingOver ? "rgba(254,221,0,0.02)" : "transparent" }}
                     >
                       {widgets
                         .filter((w) => INTELLIGENCE_IDS.includes(w.id) && w.visible !== false)

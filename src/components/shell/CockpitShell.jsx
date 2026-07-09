@@ -27,9 +27,15 @@ export default function CockpitShell({
   children,
   topGlow = "rgba(254,221,0,0.05)",
   bottomGlow = "rgba(64,196,255,0.04)",
+  // fitViewport: pin the page to the viewport (no page scrolling on desktop);
+  // zones scroll internally instead. Mobile keeps natural page scrolling.
+  fitViewport = false,
 }) {
   return (
-    <div className="min-h-full relative" style={{ background: "var(--bg-surface)" }}>
+    <div
+      className={fitViewport ? "h-full flex flex-col overflow-hidden relative" : "min-h-full relative"}
+      style={{ background: "var(--bg-surface)" }}
+    >
       {/* Ambient page glows */}
       <div aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, height: 260, background: `radial-gradient(ellipse 60% 100% at 50% 0%, ${topGlow} 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
       <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, background: `radial-gradient(ellipse 50% 100% at 50% 100%, ${bottomGlow} 0%, transparent 70%)`, pointerEvents: "none", zIndex: 0 }} />
@@ -73,11 +79,20 @@ export default function CockpitShell({
           flex-direction: column;
           gap: 10px;
         }
+        /* fitViewport mode — zones fill remaining height & scroll internally (desktop) */
+        @media (min-width: 1024px) {
+          .cockpit-fit { overflow: hidden; }
+          .cockpit-fit .cockpit-zone-grid { flex: 1 1 0; min-height: 0; align-items: stretch; }
+          .cockpit-fit .cockpit-zone { min-height: 0; overflow-y: auto; scrollbar-width: thin; padding-right: 2px; }
+        }
       `}</style>
 
-      <div className="flex flex-col p-3 relative" style={{ zIndex: 1 }}>
+      <div
+        className={`flex flex-col p-3 relative ${fitViewport ? "cockpit-fit flex-1 min-h-0 overflow-y-auto" : ""}`}
+        style={{ zIndex: 1 }}
+      >
         {/* Header */}
-        <div className="rounded-xl px-5 py-3 mb-3 relative overflow-hidden"
+        <div className="shrink-0 rounded-xl px-5 py-3 mb-3 relative overflow-hidden"
           style={{
             background: "linear-gradient(135deg, var(--bg-surface) 0%, #091828 50%, var(--bg-elevated) 100%)",
             border: "1px solid var(--border-default)",

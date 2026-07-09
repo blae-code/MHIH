@@ -48,6 +48,7 @@ export default function PolicyHome() {
       title="Policy · Command Centre"
       subtitle="Intake pipeline, active development, evidence, and monitoring — the full policy lifecycle"
       topGlow="rgba(244,114,182,0.06)"
+      fitViewport
       actions={
         <Link
           to={createPageUrl("PolicyRequestForm")}
@@ -58,7 +59,7 @@ export default function PolicyHome() {
         </Link>
       }
     >
-      <div className="mb-3">
+      <div className="mb-3 shrink-0">
         <PolicyStatStrip requests={requests ?? []} recs={recs ?? []} alerts={alerts ?? []} loading={loading} />
       </div>
 
