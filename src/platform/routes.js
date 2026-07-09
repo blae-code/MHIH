@@ -44,6 +44,7 @@ export const PAGE_ROUTE_MAP = {
   MetricCatalog: "/os/apps/data-evidence/metric-catalog",
   MetricForge: "/os/apps/data-evidence/metric-forge",
   EvidenceSnapshots: "/os/apps/data-evidence/evidence-snapshots",
+  AnalysisWorkbench: "/os/apps/data-evidence/workbench",
   RedRiverOS: "/os/apps/data-evidence/redriver-module",
 
   // ── Intelligence app ──────────────────────────────────────────────────

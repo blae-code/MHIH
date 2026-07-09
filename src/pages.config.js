@@ -18,6 +18,7 @@ import AIInsights from './pages/AIInsights';
 import Admin from './pages/Admin';
 import AgentCenter from './pages/AgentCenter';
 import AlertsCenter from './pages/AlertsCenter';
+import AnalysisWorkbench from './pages/AnalysisWorkbench';
 import ApprovalsInbox from './pages/ApprovalsInbox';
 import Backtesting from './pages/Backtesting';
 import Changelog from './pages/Changelog';
@@ -75,6 +76,7 @@ export const PAGES = {
     "Admin": Admin,
     "AgentCenter": AgentCenter,
     "AlertsCenter": AlertsCenter,
+    "AnalysisWorkbench": AnalysisWorkbench,
     "ApprovalsInbox": ApprovalsInbox,
     "Backtesting": Backtesting,
     "Changelog": Changelog,
