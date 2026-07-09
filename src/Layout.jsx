@@ -43,6 +43,7 @@ import AppMenu from "./components/shell/AppMenu";
 import OSHeader from "./components/shell/OSHeader";
 import UserPreferencesPanel from "./components/shell/UserPreferencesPanel";
 import StatusLogDrawer from "./components/shell/StatusLogDrawer";
+import TerminalConsole from "./components/terminal/TerminalConsole";
 import { ChevronUp, Terminal } from "lucide-react";
 import { PlatformProvider, usePlatform } from "./platform/platformContext";
 import { APP_REGISTRY, APP_STATUS, getApp, getApps, getAppForPage } from "./platform/appRegistry";
@@ -313,6 +314,21 @@ function LayoutInner({ children, currentPageName }) {
 
   // ── Status log drawer ────────────────────────────────────────────────
   const [logDrawerOpen, setLogDrawerOpen] = useState(false);
+
+  // ── Terminal-lite ────────────────────────────────────────────────────
+  const [terminalOpen, setTerminalOpen] = useState(false);
+
+  // Hotkey: Ctrl/Cmd + ` toggles the terminal
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "`") {
+        e.preventDefault();
+        setTerminalOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch((err) => {
@@ -667,21 +683,20 @@ function LayoutInner({ children, currentPageName }) {
               onClear={platform.clearLogs}
             />
 
-            {/* Status footer — clickable strip; toggles the log drawer */}
+            {/* Status footer — log strip + terminal trigger */}
+            <div className="shrink-0 flex items-stretch" style={{ height: "var(--footer-height)", borderTop: "1px solid var(--border-subtle)", zIndex: 5 }}>
             <button
               type="button"
               onClick={() => setLogDrawerOpen(o => !o)}
               className="shrink-0 flex items-center gap-2 px-3 text-left transition-colors"
               title={logDrawerOpen ? "Hide activity log" : "Show activity log"}
               style={{
-                height: "var(--footer-height)",
                 background: logDrawerOpen ? "var(--bg-hover)" : "var(--bg-surface)",
-                borderTop: "1px solid var(--border-subtle)",
                 fontSize: 10,
                 color: "var(--text-muted)",
-                zIndex: 5,
                 cursor: "pointer",
-                width: "100%",
+                flex: 1,
+                minWidth: 0,
               }}
               onMouseEnter={(e) => { if (!logDrawerOpen) e.currentTarget.style.background = "var(--bg-hover)"; }}
               onMouseLeave={(e) => { if (!logDrawerOpen) e.currentTarget.style.background = "var(--bg-surface)"; }}
@@ -719,6 +734,27 @@ function LayoutInner({ children, currentPageName }) {
                 }}
               />
             </button>
+            <button
+              type="button"
+              onClick={() => setTerminalOpen(o => !o)}
+              title="Terminal-lite (Ctrl+`)"
+              className="shrink-0 flex items-center gap-1.5 px-2.5 transition-colors"
+              style={{
+                background: terminalOpen ? "rgba(254,221,0,0.08)" : "var(--bg-surface)",
+                borderLeft: "1px solid var(--border-subtle)",
+                color: terminalOpen ? "var(--mnbc-yellow)" : "var(--text-muted)",
+                fontSize: 9.5,
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--mnbc-yellow)"; }}
+              onMouseLeave={(e) => { if (!terminalOpen) e.currentTarget.style.color = "var(--text-muted)"; }}
+            >
+              <Terminal size={10} />
+              &gt;_
+            </button>
+            </div>
           </main>
 
           {/* ── Context panel (right) ─────────────────────────────────── */}
@@ -803,6 +839,11 @@ function LayoutInner({ children, currentPageName }) {
       {/* ── Patch notes ────────────────────────────────────────────────── */}
       {patchNotesOpen && (
         <PatchNotesModal onClose={() => setPatchNotesOpen(false)} />
+      )}
+
+      {/* ── Terminal-lite console ──────────────────────────────────────── */}
+      {terminalOpen && (
+        <TerminalConsole user={user} onClose={() => setTerminalOpen(false)} />
       )}
 
       {/* ── PWA install prompt, update toast, offline banner ───────────── */}
