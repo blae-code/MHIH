@@ -320,6 +320,17 @@ function LayoutInner({ children, currentPageName }) {
     });
   }, []);
 
+  // Record recent-page trail for the home page "Resume" chips
+  useEffect(() => {
+    if (!currentPageName || currentPageName === "RedRiverOSHome") return;
+    try {
+      const key = "rr_recent_pages";
+      const prev = JSON.parse(localStorage.getItem(key) || "[]").filter((p) => p.page !== currentPageName);
+      prev.unshift({ page: currentPageName, ts: Date.now() });
+      localStorage.setItem(key, JSON.stringify(prev.slice(0, 8)));
+    } catch { /* silent */ }
+  }, [currentPageName]);
+
   // Refresh unread notification count every 30 s
   useEffect(() => {
     if (!user) return;
@@ -329,6 +340,10 @@ function LayoutInner({ children, currentPageName }) {
           { recipient_email: user.email, read: false }
         );
         setUnreadCount(n.length);
+        // PWA icon badge — reflect unread notifications on installed app icon
+        if ("setAppBadge" in navigator) {
+          (n.length > 0 ? navigator.setAppBadge(n.length) : navigator.clearAppBadge()).catch(() => {});
+        }
       } catch { /* silent */ }
     };
     load();
